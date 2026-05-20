@@ -523,6 +523,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Expose repo-owned FlowChain RPC");
     expect(html).toContain("Provision durable state backup storage");
     expect(html).toContain("Configure capped Base 8453 bridge pilot observation");
+    expect(html).toContain("Needed now");
+    expect(html).toContain("blocked by");
     expect(html).toContain("Owner inputs");
     expect(html).toContain("Next commands");
     expect(html).toContain("Do not send");

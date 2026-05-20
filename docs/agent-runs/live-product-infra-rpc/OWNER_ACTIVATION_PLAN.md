@@ -1,6 +1,6 @@
 # FlowChain Owner Activation Plan
 
-Generated: 2026-05-20T02:05:21.3398546+00:00
+Generated: 2026-05-20T09:32:05.4597686+00:00
 Status: passed
 Activation ready: False
 
@@ -23,18 +23,35 @@ This plan is the current launch handoff. It records names, statuses, and command
 - `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`
 - `FLOWCHAIN_PILOT_CONFIRMATIONS`
 
+## Needed Now
+
+- `FLOWCHAIN_RPC_PUBLIC_URL`
+- `FLOWCHAIN_RPC_ALLOWED_ORIGINS`
+- `FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE`
+- `FLOWCHAIN_RPC_TLS_TERMINATED`
+- `FLOWCHAIN_RPC_STATE_BACKUP_PATH`
+- `FLOWCHAIN_PILOT_OPERATOR_ACK`
+- `FLOWCHAIN_BASE8453_RPC_URL`
+- `FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS`
+- `FLOWCHAIN_BASE8453_SUPPORTED_TOKEN`
+- `FLOWCHAIN_BASE8453_ASSET_DECIMALS`
+- `FLOWCHAIN_BASE8453_FROM_BLOCK`
+- `FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI`
+- `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`
+- `FLOWCHAIN_PILOT_CONFIRMATIONS`
+
 ## Activation Stages
 
-| Stage | Status | Missing inputs | Validate with |
-| --- | --- | --- | --- |
-| Keep the chain and private RPC running | ready | none | npm run flowchain:service:status -- -AllowBlocked; npm run flowchain:service:monitor |
-| Fill the ignored local owner env file | ready | none | npm run flowchain:owner-env:template; npm run flowchain:owner-env:readiness:validate; npm run flowchain:owner-env:readiness -- -AllowBlocked |
-| Expose repo-owned FlowChain RPC through a public HTTPS edge | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED | npm run flowchain:public-rpc:check -- -AllowBlocked; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test |
-| Provision durable state backup storage | needs-owner-input | FLOWCHAIN_RPC_STATE_BACKUP_PATH | npm run flowchain:backup:check -- -AllowBlocked; npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run |
-| Enable capped friends-and-family tester writes | needs-validation | none | npm run flowchain:tester:token:setup; npm run flowchain:tester:gateway:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate |
-| Configure capped Base 8453 bridge pilot observation | needs-owner-input | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:bridge:live:check -- -AllowBlocked; npm run flowchain:bridge:infra:check -- -AllowBlocked; npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:loop:validate |
-| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:wallet:live-tester:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
-| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | npm run flowchain:live:cutover:rehearsal -- -AllowBlocked; npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
+| Stage | Status | Blocking inputs | Blocked reports | Validate with |
+| --- | --- | --- | --- | --- |
+| Keep the chain and private RPC running | ready | none | none | npm run flowchain:service:status -- -AllowBlocked; npm run flowchain:service:monitor |
+| Fill the ignored local owner env file | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | ownerEnvReadiness | npm run flowchain:owner-env:template; npm run flowchain:owner-env:readiness:validate; npm run flowchain:owner-env:readiness -- -AllowBlocked |
+| Expose repo-owned FlowChain RPC through a public HTTPS edge | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH | publicRpc, publicDeploymentContract | npm run flowchain:public-rpc:check -- -AllowBlocked; npm run flowchain:public-rpc:validate; npm run flowchain:public-rpc:abuse-test |
+| Provision durable state backup storage | needs-owner-input | FLOWCHAIN_RPC_STATE_BACKUP_PATH | backup | npm run flowchain:backup:check -- -AllowBlocked; npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run |
+| Enable capped friends-and-family tester writes | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | externalTester, externalTesterPacket, publicDeploymentContract | npm run flowchain:tester:token:setup; npm run flowchain:tester:gateway:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate |
+| Configure capped Base 8453 bridge pilot observation | needs-owner-input | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | bridgeLive, bridgeInfra, publicDeploymentContract | npm run flowchain:bridge:live:check -- -AllowBlocked; npm run flowchain:bridge:infra:check -- -AllowBlocked; npm run flowchain:bridge:relayer:guardrail:validate; npm run flowchain:bridge:relayer:loop:validate |
+| Release the external tester packet only after public gates pass | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | externalTester, externalTesterPacket, publicDeploymentContract | npm run flowchain:wallet:live-tester:e2e; npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate; npm run flowchain:dashboard:ui:readiness |
+| Run final no-secret production audit before public use | needs-owner-input | FLOWCHAIN_RPC_PUBLIC_URL, FLOWCHAIN_RPC_ALLOWED_ORIGINS, FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE, FLOWCHAIN_RPC_TLS_TERMINATED, FLOWCHAIN_RPC_STATE_BACKUP_PATH, FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_CONFIRMATIONS | completionAudit, truthTable | npm run flowchain:live:cutover:rehearsal -- -AllowBlocked; npm run flowchain:completion:audit -- -AllowBlocked; npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:no-secret:scan |
 
 ## Owner Actions
 

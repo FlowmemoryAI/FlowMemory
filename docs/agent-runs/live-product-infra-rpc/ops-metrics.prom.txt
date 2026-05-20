@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 99432
+flowchain_latest_height 100743
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 99432
+flowchain_finalized_height 100743
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 3
+flowchain_state_file_age_seconds 5
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 3
@@ -18,16 +18,16 @@ flowchain_height_advanced 1
 flowchain_mempool_depth 0
 # HELP flowchain_transaction_intake_rows_total Signed transaction intake rows recorded in local NDJSON intake.
 # TYPE flowchain_transaction_intake_rows_total gauge
-flowchain_transaction_intake_rows_total 159
+flowchain_transaction_intake_rows_total 169
 # HELP flowchain_transaction_intake_accepted_rows_total Crypto-verified signed transaction intake rows recorded locally.
 # TYPE flowchain_transaction_intake_accepted_rows_total gauge
-flowchain_transaction_intake_accepted_rows_total 159
+flowchain_transaction_intake_accepted_rows_total 169
 # HELP flowchain_transaction_intake_invalid_rows Invalid NDJSON rows in signed transaction intake.
 # TYPE flowchain_transaction_intake_invalid_rows gauge
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 15737.157
+flowchain_transaction_intake_file_age_seconds 4863.567
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -312,7 +312,7 @@ flowchain_owner_activation_ready 0
 flowchain_owner_activation_stages_total 8
 # HELP flowchain_owner_activation_ready_stages Owner activation plan stages currently ready.
 # TYPE flowchain_owner_activation_ready_stages gauge
-flowchain_owner_activation_ready_stages 2
+flowchain_owner_activation_ready_stages 1
 # HELP flowchain_owner_activation_missing_env_total Owner activation input names still missing before live cutover.
 # TYPE flowchain_owner_activation_missing_env_total gauge
 flowchain_owner_activation_missing_env_total 14

@@ -1,10 +1,10 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T05:32:00.4313378Z
+Generated: 2026-05-20T09:57:43.0462175Z
 Status: failed
-Latest height: 98307
-Finalized height: 98307
-Transaction intake rows: 159
+Latest height: 100638
+Finalized height: 100638
+Transaction intake rows: 169
 Runtime inbox files: 0
 
 ## Findings
@@ -14,7 +14,7 @@ Runtime inbox files: 0
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - critical: bridge-relayer-check-contract-failed - Bridge relayer one-shot safety check contract is missing or has failed checks.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
-- blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- blocked: external-tester-not-shareable - External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T05:31:16.2147059Z",
+    "generatedAt":  "2026-05-20T09:52:45.8908238Z",
     "status":  "failed",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  23,
+                       "passed":  25,
                        "blocked":  6,
                        "failed":  0,
-                       "total":  29
+                       "total":  31
                    },
     "items":  [
                   {
@@ -41,6 +41,7 @@
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
+                                       "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:public-rpc:check -- -AllowBlocked",
                                        "npm run flowchain:backup:restore:validate",
@@ -98,7 +99,7 @@
                       "id":  "public-rpc-edge-template",
                       "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
@@ -111,7 +112,7 @@
                       "id":  "public-rpc-deployment-automation",
                       "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -123,7 +124,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=98307, finalizedHeight=98307",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=100616, finalizedHeight=100616",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -135,7 +136,7 @@
                       "id":  "pre-share-monitoring",
                       "requirement":  "The deployment has recent service-monitor evidence that block height advances over multiple samples.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True",
                       "commands":  [
                                        "npm run flowchain:service:monitor"
                                    ],
@@ -205,7 +206,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=21, blockedRules=7, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=22, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
@@ -423,6 +424,18 @@
                                    ]
                   },
                   {
+                      "id":  "base8453-bridge-runtime-credit-proof",
+                      "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
+                      "status":  "passed",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.679, transferSeconds=0.609",
+                      "commands":  [
+                                       "npm run flowchain:bridge:runtime-credit:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "external-tester-sharing",
                       "requirement":  "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
                       "status":  "blocked",
@@ -446,6 +459,18 @@
                                        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                        "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "tester-write-token-setup",
+                      "requirement":  "Friends-and-family tester writes have a no-secret setup proof: the raw bearer token stays in ignored local storage, only its SHA-256 digest and send cap enter the ignored owner env file, and committed evidence prints neither token nor digest.",
+                      "status":  "passed",
+                      "evidence":  "tokenSetupStatus=passed, tokenPath=devnet/local/owner-inputs/tester-write-token.local.txt, ownerEnvFile=devnet/local/owner-inputs/flowchain-owner.local.env, tokenCreated=False, tokenPreserved=True",
+                      "commands":  [
+                                       "npm run flowchain:tester:token:setup"
+                                   ],
+                      "blockers":  [
+
                                    ]
                   },
                   {
@@ -578,6 +603,7 @@
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
+                        "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
@@ -588,6 +614,7 @@
                         "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "architectureAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
@@ -634,6 +661,7 @@
                                                  "npm run flowchain:bridge:live:check",
                                                  "npm run flowchain:bridge:infra:check",
                                                  "npm run flowchain:bridge:relayer:once",
+                                                 "npm run flowchain:bridge:runtime-credit:validate",
                                                  "npm run flowchain:tester:readiness",
                                                  "npm run flowchain:external-tester:packet",
                                                  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",

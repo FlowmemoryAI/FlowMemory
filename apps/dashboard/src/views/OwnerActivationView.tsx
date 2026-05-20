@@ -28,6 +28,10 @@ interface ActivationStage {
   optionalEnvNames: string[];
   missingEnvNames: string[];
   invalidEnvNames: string[];
+  upstreamMissingEnvNames: string[];
+  upstreamInvalidEnvNames: string[];
+  blockingEnvNames: string[];
+  blockedByReportNames: string[];
   externalAccountsOrResources: string[];
   ownerMustDo: string[];
   ownerMustNotSend: string[];
@@ -81,6 +85,10 @@ function parseStage(value: unknown): ActivationStage | null {
     optionalEnvNames: stringList(value.optionalEnvNames),
     missingEnvNames: stringList(value.missingEnvNames),
     invalidEnvNames: stringList(value.invalidEnvNames),
+    upstreamMissingEnvNames: stringList(value.upstreamMissingEnvNames),
+    upstreamInvalidEnvNames: stringList(value.upstreamInvalidEnvNames),
+    blockingEnvNames: stringList(value.blockingEnvNames),
+    blockedByReportNames: stringList(value.blockedByReportNames),
     externalAccountsOrResources: stringList(value.externalAccountsOrResources),
     ownerMustDo: stringList(value.ownerMustDo),
     ownerMustNotSend: stringList(value.ownerMustNotSend),
@@ -105,6 +113,7 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const stages = asArray(activation?.stages).map(parseStage).filter((stage): stage is ActivationStage => stage !== null);
   const missingEnvNames = stringList(activation?.missingEnvNames);
   const invalidEnvNames = stringList(activation?.invalidEnvNames);
+  const nextOwnerInputNames = stringList(activation?.nextOwnerInputNames);
   const requiredOwnerEnvNames = stringList(activation?.requiredOwnerEnvNames);
   const optionalOwnerEnvNames = stringList(activation?.optionalOwnerEnvNames);
   const nextCommands = stringList(activation?.nextCommands);
@@ -113,7 +122,9 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const activationStatus = text(activation?.status ?? metrics.ownerActivationStatus, "not recorded");
   const readyStageCount = text(activation?.readyStageCount ?? metrics.ownerActivationReadyStageCount, "0");
   const stageCount = text(activation?.stageCount ?? metrics.ownerActivationStageCount, String(stages.length));
+  const blockedStageCount = text(activation?.blockedStageCount, "0");
   const needsInputCount = text(activation?.stagesNeedingOwnerInputCount, "0");
+  const needsValidationCount = text(activation?.stagesNeedingValidationCount, "0");
   const noSecrets = activation?.noSecrets === true;
   const envValuesPrinted = activation?.envValuesPrinted === true;
   const broadcasts = activation?.broadcasts === true;
@@ -151,12 +162,12 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
         <div>
           <span>Stages</span>
           <strong>{readyStageCount}/{stageCount}</strong>
-          <small>needs input {needsInputCount}</small>
+          <small>blocked {blockedStageCount} / input stages {needsInputCount} / validation {needsValidationCount}</small>
         </div>
         <div>
-          <span>Missing inputs</span>
-          <strong>{missingEnvNames.length}</strong>
-          <small>invalid {invalidEnvNames.length}</small>
+          <span>Needed now</span>
+          <strong>{nextOwnerInputNames.length}</strong>
+          <small>missing {missingEnvNames.length} / invalid {invalidEnvNames.length}</small>
         </div>
         <div>
           <span>Chain head</span>
@@ -197,22 +208,30 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
                         </div>
                         <div className="activation-stage-facts">
                           <div>
-                            <span>missing</span>
+                            <span>blocking</span>
+                            <strong>{stage.blockingEnvNames.length}</strong>
+                          </div>
+                          <div>
+                            <span>direct</span>
                             <strong>{stage.missingEnvNames.length}</strong>
                           </div>
                           <div>
-                            <span>required</span>
-                            <strong>{stage.requiredEnvNames.length}</strong>
-                          </div>
-                          <div>
-                            <span>resources</span>
-                            <strong>{stage.externalAccountsOrResources.length}</strong>
+                            <span>reports</span>
+                            <strong>{stage.blockedByReportNames.length}</strong>
                           </div>
                         </div>
-                        {stage.missingEnvNames.length > 0 ? (
-                          <div className="activation-chip-list" aria-label={`${stage.title} missing inputs`}>
-                            {stage.missingEnvNames.map((name) => (
-                              <code key={`${stage.id}:missing:${name}`}>{name}</code>
+                        {stage.blockingEnvNames.length > 0 ? (
+                          <div className="activation-chip-list" aria-label={`${stage.title} blocking inputs`}>
+                            {stage.blockingEnvNames.map((name) => (
+                              <code key={`${stage.id}:blocking:${name}`}>{name}</code>
+                            ))}
+                          </div>
+                        ) : null}
+                        {stage.blockedByReportNames.length > 0 ? (
+                          <div className="activation-report-list" aria-label={`${stage.title} blocked reports`}>
+                            <span>blocked by</span>
+                            {stage.blockedByReportNames.map((name) => (
+                              <code key={`${stage.id}:report:${name}`}>{name}</code>
                             ))}
                           </div>
                         ) : null}
@@ -233,6 +252,21 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
         </div>
 
         <aside className="activation-side">
+          <article className="panel activation-needed">
+            <div className="panel-heading">
+              <div>
+                <ListChecks size={18} aria-hidden="true" />
+                <h2>Needed now</h2>
+              </div>
+              <StatusBadge status={nextOwnerInputNames.length === 0 ? "verified" : "pending"} compact />
+            </div>
+            <div className="activation-input-grid" aria-label="Next owner inputs">
+              {nextOwnerInputNames.map((name) => (
+                <code key={`next-owner:${name}`}>{name}</code>
+              ))}
+            </div>
+          </article>
+
           <article className="panel activation-inputs">
             <div className="panel-heading">
               <div>

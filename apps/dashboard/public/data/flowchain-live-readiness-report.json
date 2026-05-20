@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-20T07:48:23.1006854Z",
+  "generatedAt": "2026-05-20T10:07:08.3521672Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "99624",
-    "finalizedHeight": "99624",
+    "latestHeight": "100771",
+    "finalizedHeight": "100771",
     "monitorHeightAdvanced": true,
     "bridgeRelayerStatus": "blocked",
     "bridgeQueuedTransactions": "0",
@@ -42,7 +42,7 @@
     "ownerActivationStatus": "passed",
     "ownerActivationReady": false,
     "ownerActivationStageCount": "8",
-    "ownerActivationReadyStageCount": "2",
+    "ownerActivationReadyStageCount": "1",
     "ownerActivationMissingCount": 14,
     "noSecretStatus": "passed",
     "opsSnapshotStatus": "blocked",
@@ -85,8 +85,8 @@
     "bridgeRuntimeTransferLatencySeconds": "0.609",
     "criticalCount": "0",
     "blockedCount": "6",
-    "latestHeight": "99432",
-    "finalizedHeight": "99432",
+    "latestHeight": "100743",
+    "finalizedHeight": "100743",
     "monitorStatus": "passed",
     "monitorHeightAdvanced": true,
     "findings": [
@@ -381,8 +381,10 @@
     "status": "passed",
     "activationReady": false,
     "stageCount": "8",
-    "readyStageCount": "2",
-    "stagesNeedingOwnerInputCount": "5",
+    "readyStageCount": "1",
+    "blockedStageCount": "7",
+    "stagesNeedingOwnerInputCount": "7",
+    "stagesNeedingValidationCount": "0",
     "missingEnvNames": [
       "FLOWCHAIN_RPC_PUBLIC_URL",
       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -400,6 +402,22 @@
       "FLOWCHAIN_PILOT_CONFIRMATIONS"
     ],
     "invalidEnvNames": [],
+    "nextOwnerInputNames": [
+      "FLOWCHAIN_RPC_PUBLIC_URL",
+      "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+      "FLOWCHAIN_RPC_TLS_TERMINATED",
+      "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "FLOWCHAIN_BASE8453_RPC_URL",
+      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+      "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+      "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+      "FLOWCHAIN_PILOT_CONFIRMATIONS"
+    ],
     "requiredOwnerEnvNames": [
       "FLOWCHAIN_RPC_PUBLIC_URL",
       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -463,6 +481,10 @@
         "optionalEnvNames": [],
         "missingEnvNames": [],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [],
+        "blockedByReportNames": [],
         "externalAccountsOrResources": [
           "Always-on Windows host, Linux host, or VPS"
         ],
@@ -488,14 +510,50 @@
       {
         "id": "owner-env-file",
         "title": "Fill the ignored local owner env file",
-        "status": "ready",
-        "ready": true,
+        "status": "needs-owner-input",
+        "ready": false,
         "requiredEnvNames": [
           "FLOWCHAIN_OWNER_ENV_FILE"
         ],
         "optionalEnvNames": [],
         "missingEnvNames": [],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "blockedByReportNames": [
+          "ownerEnvReadiness"
+        ],
         "externalAccountsOrResources": [
           "Local ignored env file or service environment"
         ],
@@ -538,6 +596,21 @@
           "FLOWCHAIN_RPC_TLS_TERMINATED"
         ],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "blockedByReportNames": [
+          "publicRpc",
+          "publicDeploymentContract"
+        ],
         "externalAccountsOrResources": [
           "DNS provider or existing domain",
           "TLS edge, reverse proxy, or tunnel"
@@ -583,6 +656,14 @@
           "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
         ],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "blockedByReportNames": [
+          "backup"
+        ],
         "externalAccountsOrResources": [
           "Persistent local disk, mounted volume, or owner-managed backup directory"
         ],
@@ -610,7 +691,7 @@
       {
         "id": "tester-write-gateway",
         "title": "Enable capped friends-and-family tester writes",
-        "status": "needs-validation",
+        "status": "needs-owner-input",
         "ready": false,
         "requiredEnvNames": [
           "FLOWCHAIN_TESTER_WRITE_ENABLED",
@@ -620,6 +701,44 @@
         "optionalEnvNames": [],
         "missingEnvNames": [],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "blockedByReportNames": [
+          "externalTester",
+          "externalTesterPacket",
+          "publicDeploymentContract"
+        ],
         "externalAccountsOrResources": [
           "Owner password manager or secret store"
         ],
@@ -688,6 +807,24 @@
           "FLOWCHAIN_PILOT_CONFIRMATIONS"
         ],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "blockedByReportNames": [
+          "bridgeLive",
+          "bridgeInfra",
+          "publicDeploymentContract"
+        ],
         "externalAccountsOrResources": [
           "Base RPC provider or owner-operated Base node",
           "Deployed pilot bridge contract details"
@@ -768,6 +905,29 @@
           "FLOWCHAIN_PILOT_CONFIRMATIONS"
         ],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "blockedByReportNames": [
+          "externalTester",
+          "externalTesterPacket",
+          "publicDeploymentContract"
+        ],
         "externalAccountsOrResources": [
           "Friends-and-family tester list"
         ],
@@ -845,6 +1005,28 @@
           "FLOWCHAIN_PILOT_CONFIRMATIONS"
         ],
         "invalidEnvNames": [],
+        "upstreamMissingEnvNames": [],
+        "upstreamInvalidEnvNames": [],
+        "blockingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED",
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "blockedByReportNames": [
+          "completionAudit",
+          "truthTable"
+        ],
         "externalAccountsOrResources": [
           "None beyond the configured launch resources"
         ],
@@ -865,12 +1047,12 @@
         "sourceReports": [
           {
             "name": "completionAudit",
-            "status": "blocked",
+            "status": "failed",
             "path": "<repo>\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json"
           },
           {
             "name": "truthTable",
-            "status": "blocked-owner-input",
+            "status": "failed",
             "path": "<repo>\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json"
           }
         ]
@@ -891,6 +1073,8 @@
       "testerStagePresent": true,
       "bridgeStagePresent": true,
       "finalAuditStagePresent": true,
+      "nonReadyStagesExplainBlockers": true,
+      "nextOwnerInputNamesPresentWhenBlocked": true,
       "envValuesPrintedFalse": true,
       "noSecrets": true,
       "broadcastsFalse": true,
@@ -1098,7 +1282,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=99603, finalizedHeight=99603",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=100749, finalizedHeight=100749",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -1325,25 +1509,25 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:48:23.1006854Z"
+      "generatedAt": "2026-05-20T10:07:08.3521672Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:36.5224950Z"
+      "generatedAt": "2026-05-20T10:09:26.4981713Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:50:23.5561531Z"
+      "generatedAt": "2026-05-20T10:09:13.5102026Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:30:07.5741653Z"
+      "generatedAt": "2026-05-20T10:06:10.2145961Z"
     },
     {
       "fileName": "public-rpc-deployment-bundle-report.json",
@@ -1361,13 +1545,13 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:17.7355550Z"
+      "generatedAt": "2026-05-20T10:09:06.1188114Z"
     },
     {
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:28.3584966Z"
+      "generatedAt": "2026-05-20T10:09:18.4797121Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -1379,7 +1563,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:33.7919191Z"
+      "generatedAt": "2026-05-20T10:09:23.9673689Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -1403,49 +1587,49 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:39.3405298Z"
+      "generatedAt": "2026-05-20T10:09:29.1777368Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:39.3405298Z"
+      "generatedAt": "2026-05-20T10:09:29.1777368Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:37.3457550Z"
+      "generatedAt": "2026-05-20T10:09:27.2339035Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:34:38.0341108Z"
+      "generatedAt": "2026-05-20T10:02:49.2858274Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:30:08.7828381Z"
+      "generatedAt": "2026-05-20T10:06:11.5389843Z"
     },
     {
       "fileName": "ops-alert-rules-report.json",
       "schema": "flowchain.ops_alert_rules_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:30:10.1447900Z"
+      "generatedAt": "2026-05-20T10:06:12.9393626Z"
     },
     {
       "fileName": "ops-metrics-export-report.json",
       "schema": "flowchain.ops_metrics_export_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:30:11.1188886Z"
+      "generatedAt": "2026-05-20T10:06:13.8886020Z"
     },
     {
       "fileName": "incident-drill-report.json",
       "schema": "flowchain.incident_drill_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T05:32:23.8352084Z"
+      "generatedAt": "2026-05-20T09:58:05.5293836Z"
     },
     {
       "fileName": "alert-install-validation-report.json",
@@ -1457,25 +1641,25 @@
       "fileName": "ops-escalation-dry-run-report.json",
       "schema": "flowchain.ops_escalation_dry_run_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:23:55.8631113Z"
+      "generatedAt": "2026-05-20T10:06:18.7435601Z"
     },
     {
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-20T07:50:38.5610774Z"
+      "generatedAt": "2026-05-20T10:09:28.4267166Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
       "schema": "flowchain.owner_activation_plan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T02:05:21.3398546+00:00"
+      "generatedAt": "2026-05-20T09:32:05.4597686+00:00"
     },
     {
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-20T07:51:16.8392128Z"
+      "generatedAt": "2026-05-20T10:09:41.8949241Z"
     }
   ],
   "envValuesPrinted": false,

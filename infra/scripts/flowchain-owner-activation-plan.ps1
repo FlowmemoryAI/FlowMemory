@@ -88,6 +88,25 @@ function Add-ActivationUnique {
     }
 }
 
+function Add-ActivationUniqueMany {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.ArrayList] $Target,
+        [AllowNull()][object[]] $Values
+    )
+
+    foreach ($value in @($Values)) {
+        Add-ActivationUnique -Target $Target -Value $value
+    }
+}
+
+function Get-ActivationEnvNameList {
+    param([AllowNull()][object] $Value)
+
+    return @($Value | ForEach-Object { "$_" } | Where-Object {
+            -not [string]::IsNullOrWhiteSpace($_) -and $_ -match '^FLOWCHAIN_[A-Z0-9_]+$'
+        })
+}
+
 function Get-ActivationSecretMarkerFindings {
     param(
         [Parameter(Mandatory = $true)][string] $Text,
@@ -132,21 +151,54 @@ function New-ActivationStage {
     $stageMissing = @($RequiredEnvNames | Where-Object { $_ -in @($script:MissingEnvNames) })
     $stageInvalid = @($RequiredEnvNames | Where-Object { $_ -in @($script:InvalidEnvNames) })
     $reportStatuses = New-Object System.Collections.ArrayList
+    $sourceMissingEnvNames = New-Object System.Collections.ArrayList
+    $sourceInvalidEnvNames = New-Object System.Collections.ArrayList
+    $blockedByReportNames = New-Object System.Collections.ArrayList
     foreach ($reportName in @($SourceReports)) {
         if ($script:Reports.Contains($reportName)) {
+            $sourceReport = $script:Reports[$reportName]
+            $sourceStatus = Get-ActivationStatus -Report $sourceReport
+            $reportContributesEnvNames = $reportName -notin @("publicDeploymentContract", "completionAudit", "truthTable")
+            $sourceMissing = if ($reportContributesEnvNames) {
+                @(Get-ActivationEnvNameList -Value (Get-ActivationProp -Object $sourceReport -Name "missingEnvNames" -Default @()) | Where-Object { $_ -in @($script:MissingEnvNames) })
+            }
+            else {
+                @()
+            }
+            $sourceInvalid = if ($reportContributesEnvNames) {
+                @(Get-ActivationEnvNameList -Value (Get-ActivationProp -Object $sourceReport -Name "invalidEnvNames" -Default @()) | Where-Object { $_ -in @($script:InvalidEnvNames) })
+            }
+            else {
+                @()
+            }
+            Add-ActivationUniqueMany -Target $sourceMissingEnvNames -Values $sourceMissing
+            Add-ActivationUniqueMany -Target $sourceInvalidEnvNames -Values $sourceInvalid
+            if ($sourceStatus -notin $ReadyStatuses) {
+                Add-ActivationUnique -Target $blockedByReportNames -Value $reportName
+            }
             [void] $reportStatuses.Add([ordered]@{
                 name = $reportName
-                status = Get-ActivationStatus -Report $script:Reports[$reportName]
+                status = $sourceStatus
                 path = $script:Paths[$reportName]
+                missingEnvNames = @($sourceMissing)
+                invalidEnvNames = @($sourceInvalid)
             })
         }
     }
 
+    $upstreamMissing = @($sourceMissingEnvNames | Where-Object { $_ -notin @($RequiredEnvNames) -and $_ -notin @($OptionalEnvNames) })
+    $upstreamInvalid = @($sourceInvalidEnvNames | Where-Object { $_ -notin @($RequiredEnvNames) -and $_ -notin @($OptionalEnvNames) })
+    $blockingEnvNames = New-Object System.Collections.ArrayList
+    Add-ActivationUniqueMany -Target $blockingEnvNames -Values $stageMissing
+    Add-ActivationUniqueMany -Target $blockingEnvNames -Values $stageInvalid
+    Add-ActivationUniqueMany -Target $blockingEnvNames -Values $upstreamMissing
+    Add-ActivationUniqueMany -Target $blockingEnvNames -Values $upstreamInvalid
+
     $reportsReady = @($reportStatuses | Where-Object { $_.status -notin $ReadyStatuses }).Count -eq 0
-    $stageStatus = if ($stageInvalid.Count -gt 0) {
+    $stageStatus = if ($stageInvalid.Count -gt 0 -or $upstreamInvalid.Count -gt 0) {
         "invalid-owner-input"
     }
-    elseif ($stageMissing.Count -gt 0) {
+    elseif (@($blockingEnvNames).Count -gt 0) {
         "needs-owner-input"
     }
     elseif ($reportsReady) {
@@ -165,6 +217,10 @@ function New-ActivationStage {
         optionalEnvNames = @($OptionalEnvNames)
         missingEnvNames = @($stageMissing)
         invalidEnvNames = @($stageInvalid)
+        upstreamMissingEnvNames = @($upstreamMissing)
+        upstreamInvalidEnvNames = @($upstreamInvalid)
+        blockingEnvNames = @($blockingEnvNames)
+        blockedByReportNames = @($blockedByReportNames)
         externalAccountsOrResources = @($ExternalAccountsOrResources)
         ownerMustDo = @($OwnerMustDo)
         ownerMustNotSend = @($OwnerMustNotSend)
@@ -215,6 +271,30 @@ $ownerEnvFile = Get-ActivationProp -Object $script:Reports.ownerEnvReadiness -Na
 $ownerEnvFileUsable = ((Get-ActivationProp -Object $ownerEnvFile -Name "exists" -Default $false) -eq $true) `
     -and ((Get-ActivationProp -Object $ownerEnvFile -Name "isFile" -Default $false) -eq $true) `
     -and ((Get-ActivationProp -Object $ownerEnvFile -Name "gitIgnored" -Default $false) -eq $true)
+$serviceStageBlockedReports = New-Object System.Collections.ArrayList
+if (-not $serviceReady) {
+    Add-ActivationUnique -Target $serviceStageBlockedReports -Value "serviceStatus"
+}
+$ownerEnvStageBlockedReports = New-Object System.Collections.ArrayList
+if ((Get-ActivationStatus -Report $script:Reports.ownerEnvReadiness) -ne "passed") {
+    Add-ActivationUnique -Target $ownerEnvStageBlockedReports -Value "ownerEnvReadiness"
+}
+$ownerEnvStageBlockingNames = New-Object System.Collections.ArrayList
+Add-ActivationUniqueMany -Target $ownerEnvStageBlockingNames -Values $script:MissingEnvNames
+Add-ActivationUniqueMany -Target $ownerEnvStageBlockingNames -Values $script:InvalidEnvNames
+$ownerEnvStageStatus = if (@($script:InvalidEnvNames).Count -gt 0) {
+    "invalid-owner-input"
+}
+elseif (@($ownerEnvStageBlockingNames).Count -gt 0) {
+    "needs-owner-input"
+}
+elseif ($ownerEnvFileUsable) {
+    "ready"
+}
+else {
+    "needs-validation"
+}
+$ownerEnvStageReady = $ownerEnvStageStatus -eq "ready"
 
 $stages = @(
     [ordered]@{
@@ -226,6 +306,10 @@ $stages = @(
         optionalEnvNames = @()
         missingEnvNames = @()
         invalidEnvNames = @()
+        upstreamMissingEnvNames = @()
+        upstreamInvalidEnvNames = @()
+        blockingEnvNames = @()
+        blockedByReportNames = @($serviceStageBlockedReports)
         externalAccountsOrResources = @("Always-on Windows host, Linux host, or VPS")
         ownerMustDo = @("Choose the host that will stay online and keep the FlowChain node/control-plane running.")
         ownerMustNotSend = @("Host login password", "SSH private key")
@@ -235,12 +319,16 @@ $stages = @(
     [ordered]@{
         id = "owner-env-file"
         title = "Fill the ignored local owner env file"
-        status = if ($ownerEnvFileUsable) { "ready" } else { "needs-validation" }
-        ready = $ownerEnvFileUsable
+        status = $ownerEnvStageStatus
+        ready = $ownerEnvStageReady
         requiredEnvNames = @("FLOWCHAIN_OWNER_ENV_FILE")
         optionalEnvNames = @()
         missingEnvNames = @()
         invalidEnvNames = @()
+        upstreamMissingEnvNames = @($script:MissingEnvNames)
+        upstreamInvalidEnvNames = @($script:InvalidEnvNames)
+        blockingEnvNames = @($ownerEnvStageBlockingNames)
+        blockedByReportNames = @($ownerEnvStageBlockedReports)
         externalAccountsOrResources = @("Local ignored env file or service environment")
         ownerMustDo = @("Run the template command, fill real values only on the launch host, and point FLOWCHAIN_OWNER_ENV_FILE at that file.")
         ownerMustNotSend = @("Owner env file contents", "Provider URLs that carry account tokens")
@@ -322,7 +410,20 @@ $missingCoverage = @($requiredOwnerEnvNames | Where-Object { $_ -notin @($covere
 $unknownMissingEnvNames = @($script:MissingEnvNames | Where-Object { $_ -notin $knownOwnerEnvNames })
 $unknownInvalidEnvNames = @($script:InvalidEnvNames | Where-Object { $_ -notin $knownOwnerEnvNames })
 $stagesNeedingOwnerInput = @($stages | Where-Object { $_.status -eq "needs-owner-input" })
+$stagesNeedingValidation = @($stages | Where-Object { $_.status -eq "needs-validation" })
+$blockedStages = @($stages | Where-Object { $_.ready -ne $true })
 $readyStages = @($stages | Where-Object { $_.ready -eq $true })
+$nextOwnerInputNames = New-Object System.Collections.ArrayList
+foreach ($stage in @($blockedStages)) {
+    foreach ($name in @($stage.blockingEnvNames)) {
+        if ($name -in $requiredOwnerEnvNames) {
+            Add-ActivationUnique -Target $nextOwnerInputNames -Value $name
+        }
+    }
+}
+if (@($nextOwnerInputNames).Count -eq 0) {
+    Add-ActivationUniqueMany -Target $nextOwnerInputNames -Values $script:MissingEnvNames
+}
 $activationReady = @($script:MissingEnvNames).Count -eq 0 -and @($script:InvalidEnvNames).Count -eq 0 -and @($stages | Where-Object { $_.ready -ne $true }).Count -eq 0
 
 $checks = [ordered]@{
@@ -340,6 +441,12 @@ $checks = [ordered]@{
     testerStagePresent = @($stages | Where-Object { $_.id -eq "tester-write-gateway" }).Count -eq 1
     bridgeStagePresent = @($stages | Where-Object { $_.id -eq "base8453-bridge-pilot" }).Count -eq 1
     finalAuditStagePresent = @($stages | Where-Object { $_.id -eq "final-go-live-audit" }).Count -eq 1
+    nonReadyStagesExplainBlockers = @($stages | Where-Object {
+            $_.ready -ne $true `
+                -and @($_.blockingEnvNames).Count -eq 0 `
+                -and @($_.blockedByReportNames).Count -eq 0
+        }).Count -eq 0
+    nextOwnerInputNamesPresentWhenBlocked = if (@($script:MissingEnvNames).Count -gt 0) { @($nextOwnerInputNames).Count -gt 0 } else { $true }
     envValuesPrintedFalse = $true
     noSecrets = $true
     broadcastsFalse = $true
@@ -361,9 +468,14 @@ $report = [ordered]@{
     unknownMissingEnvNames = @($unknownMissingEnvNames)
     unknownInvalidEnvNames = @($unknownInvalidEnvNames)
     missingCoverage = @($missingCoverage)
+    nextOwnerInputNames = @($nextOwnerInputNames)
     stageCount = @($stages).Count
     readyStageCount = @($readyStages).Count
+    blockedStageCount = @($blockedStages).Count
     stagesNeedingOwnerInputCount = @($stagesNeedingOwnerInput).Count
+    stagesNeedingValidationCount = @($stagesNeedingValidation).Count
+    readyStageIds = @($readyStages | ForEach-Object { $_.id })
+    blockedStageIds = @($blockedStages | ForEach-Object { $_.id })
     stages = @($stages)
     reportPaths = $paths
     nextCommands = @(
@@ -417,14 +529,26 @@ else {
     }
 }
 $markdownLines.Add("")
+$markdownLines.Add("## Needed Now")
+$markdownLines.Add("")
+if (@($nextOwnerInputNames).Count -eq 0) {
+    $markdownLines.Add("- None")
+}
+else {
+    foreach ($name in @($nextOwnerInputNames)) {
+        $markdownLines.Add("- ``$name``")
+    }
+}
+$markdownLines.Add("")
 $markdownLines.Add("## Activation Stages")
 $markdownLines.Add("")
-$markdownLines.Add("| Stage | Status | Missing inputs | Validate with |")
-$markdownLines.Add("| --- | --- | --- | --- |")
+$markdownLines.Add("| Stage | Status | Blocking inputs | Blocked reports | Validate with |")
+$markdownLines.Add("| --- | --- | --- | --- | --- |")
 foreach ($stage in @($stages)) {
-    $missing = if (@($stage.missingEnvNames).Count -gt 0) { (@($stage.missingEnvNames) -join ", ") } else { "none" }
+    $blocking = if (@($stage.blockingEnvNames).Count -gt 0) { (@($stage.blockingEnvNames) -join ", ") } else { "none" }
+    $blockedReports = if (@($stage.blockedByReportNames).Count -gt 0) { (@($stage.blockedByReportNames) -join ", ") } else { "none" }
     $commands = (@($stage.validationCommands) -join "; ")
-    $markdownLines.Add("| $($stage.title.Replace('|','/')) | $($stage.status) | $missing | $commands |")
+    $markdownLines.Add("| $($stage.title.Replace('|','/')) | $($stage.status) | $blocking | $blockedReports | $commands |")
 }
 $markdownLines.Add("")
 $markdownLines.Add("## Owner Actions")

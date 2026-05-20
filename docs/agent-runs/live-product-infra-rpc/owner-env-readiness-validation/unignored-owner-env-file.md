@@ -1,6 +1,6 @@
 ﻿# FlowChain Owner Env Readiness
 
-Generated: 2026-05-19T09:42:18.7660269Z
+Generated: 2026-05-20T09:43:23.1266008Z
 Status: failed
 
 This gate points the live checks at the ignored local owner env file and records only env names, statuses, and redacted child output.

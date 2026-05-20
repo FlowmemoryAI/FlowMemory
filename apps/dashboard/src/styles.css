@@ -4349,6 +4349,7 @@ code {
 .activation-stage-title,
 .activation-stage-facts,
 .activation-chip-list,
+.activation-report-list,
 .activation-command-list,
 .activation-input-grid,
 .activation-inputs details div {
@@ -4389,6 +4390,7 @@ code {
 }
 
 .activation-chip-list,
+.activation-report-list,
 .activation-command-list,
 .activation-input-grid,
 .activation-inputs details div {
@@ -4398,6 +4400,7 @@ code {
 }
 
 .activation-chip-list code,
+.activation-report-list code,
 .activation-command-list code,
 .activation-input-grid code,
 .activation-inputs details code,
@@ -4415,11 +4418,25 @@ code {
   background: #ffffff;
 }
 
+.activation-report-list {
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.activation-report-list span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .activation-commands code {
   display: block;
 }
 
 .activation-inputs,
+.activation-needed,
 .activation-commands,
 .activation-boundary {
   min-width: 0;

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_validation_report.v0",
-    "generatedAt":  "2026-05-20T05:03:23.6985833Z",
+    "generatedAt":  "2026-05-20T05:54:56.6364449Z",
     "status":  "failed",
     "statePath":  "devnet/local/service-supervisor-validation/state.json",
     "nodeDir":  "devnet/local/service-supervisor-validation/node",
@@ -8,7 +8,7 @@
     "controlPlane":  {
                          "host":  "127.0.0.1",
                          "port":  8797,
-                         "killedPid":  57580
+                         "killedPid":  7616
                      },
     "before":  {
                    "status":  "passed"
@@ -21,7 +21,7 @@
                           "status":  "passed",
                           "nodeRunning":  true,
                           "controlPlaneRunning":  true,
-                          "latestHeight":  "15243",
+                          "latestHeight":  "15312",
                           "liveProfile":  true,
                           "maxBlocks":  0
                       },
@@ -29,7 +29,7 @@
     "nodeRecovery":  {
                          "beforeCrash":  {
                                              "status":  "passed",
-                                             "pid":  69092
+                                             "pid":  42700
                                          },
                          "afterCrash":  {
                                             "status":  "failed",
@@ -40,7 +40,7 @@
                                                "status":  "failed",
                                                "nodeRunning":  false,
                                                "controlPlaneRunning":  false,
-                                               "latestHeight":  "15252",
+                                               "latestHeight":  "15319",
                                                "liveProfile":  false,
                                                "maxBlocks":  1
                                            },
@@ -50,7 +50,7 @@
                                 "beforeCrash":  {
                                                     "status":  "passed",
                                                     "loopStatus":  "running",
-                                                    "pid":  8560,
+                                                    "pid":  30972,
                                                     "commandLineMatched":  true,
                                                     "reportStatus":  "blocked",
                                                     "reportHealthy":  true
@@ -67,7 +67,7 @@
                                                       "liveProfile":  true,
                                                       "maxBlocks":  0,
                                                       "loopStatus":  "running",
-                                                      "loopPid":  26476,
+                                                      "loopPid":  57544,
                                                       "loopCommandLineMatched":  true,
                                                       "reportStatus":  "blocked",
                                                       "reportHealthy":  true
@@ -168,38 +168,38 @@
                   {
                       "name":  "pre-clean-stop",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235654055-23900-6ab759f1.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235654055-23900-6ab759f1.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520004859019-2988-2b4bf486.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520004859019-2988-2b4bf486.stderr.log"
                   },
                   {
                       "name":  "start-isolated-live-service",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235657204-23900-7a343cdf.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235657204-23900-7a343cdf.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520004902536-2988-7dbc2335.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520004902536-2988-7dbc2335.stderr.log"
                   },
                   {
                       "name":  "supervisor-once-recovery",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235801161-23900-3d547034.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235801161-23900-3d547034.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005004285-2988-2b820bbc.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005004285-2988-2b820bbc.stderr.log"
                   },
                   {
                       "name":  "supervisor-once-node-recovery",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235838183-23900-17955fa2.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260519235838183-23900-17955fa2.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005120486-2988-8c74e889.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005120486-2988-8c74e889.stderr.log"
                   },
                   {
                       "name":  "restart-with-relayer-loop",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000028734-23900-3bc61561.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000028734-23900-3bc61561.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005230191-2988-5084b7e0.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005230191-2988-5084b7e0.stderr.log"
                   },
                   {
                       "name":  "supervisor-once-relayer-loop-recovery",
                       "exitCode":  0,
-                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000203935-23900-ce79a662.stdout.log",
-                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520000203935-23900-ce79a662.stderr.log"
+                      "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005343711-2988-bb056aca.stdout.log",
+                      "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor-validation\\20260520005343711-2988-bb056aca.stderr.log"
                   }
               ],
     "envValuesPrinted":  false,

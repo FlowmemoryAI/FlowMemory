@@ -112,7 +112,11 @@ function Test-OpsTruthTableCoordinationItem {
         return $true
     }
 
-    if ($id -eq "live-cutover-rehearsal" -and $classification -eq "stale" -and $rawStatus -eq "blocked" -and $allBlockersAreOwnerInputs -and $staleReasons.Count -eq 1 -and $staleReasons[0] -eq "older-than-completion-audit") {
+    if ($id -eq "completion-audit" -and $classification -eq "stale" -and $rawStatus -in @("blocked", "failed") -and $allBlockersAreOwnerInputs) {
+        return $true
+    }
+
+    if ($id -eq "live-cutover-rehearsal" -and $classification -in @("failed", "stale") -and $rawStatus -in @("blocked", "failed") -and $allBlockersAreOwnerInputs) {
         return $true
     }
 

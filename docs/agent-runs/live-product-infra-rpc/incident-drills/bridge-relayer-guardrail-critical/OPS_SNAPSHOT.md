@@ -1,10 +1,10 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T05:32:02.8399718Z
+Generated: 2026-05-20T09:57:45.4685380Z
 Status: failed
-Latest height: 98307
-Finalized height: 98307
-Transaction intake rows: 159
+Latest height: 100638
+Finalized height: 100638
+Transaction intake rows: 169
 Runtime inbox files: 0
 
 ## Findings
@@ -15,7 +15,7 @@ Runtime inbox files: 0
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
 - critical: bridge-relayer-guardrail-failed - Bridge relayer fail-closed guardrail proof is not passed.
 - critical: bridge-direct-observe-cursor-unsafe - Standalone Base 8453 observer cursor guardrail is missing, failed, or could touch the final relayer cursor without explicit owner opt-in.
-- blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
+- blocked: external-tester-not-shareable - External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands
