@@ -352,6 +352,10 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");
     await expect(page.getByLabel("Bridge relayer check contract")).toContainText("bridge-relayer-check-contract-failed");
 
+    await page.goto("/");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge runtime credit");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("flowchain:bridge:runtime-credit:validate");
+
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);
     expect(state.unhandledRequests).toEqual([]);

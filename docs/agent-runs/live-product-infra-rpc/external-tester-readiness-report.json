@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_readiness_report.v0",
-    "generatedAt":  "2026-05-20T06:59:20.6540255Z",
+    "generatedAt":  "2026-05-20T07:15:25.6728921Z",
     "status":  "blocked",
     "localTesterRehearsalReady":  true,
     "externalSharingReady":  false,
@@ -15,14 +15,14 @@
                    "publicTesterGatewayFaucetRouteValidated":  true,
                    "liveInfraReady":  false
                },
-    "latestHeight":  "99115",
+    "latestHeight":  "99287",
     "stateFileLastWriteAgeSeconds":  3,
     "testerNetwork":  {
                           "status":  "passed",
-                          "generatedAt":  "2026-05-20T06:57:05.9906420Z",
+                          "generatedAt":  "2026-05-20T07:14:52.5637785Z",
                           "testerCount":  4,
-                          "chainBeforeBlock":  "99098",
-                          "chainAfterBlock":  "99112",
+                          "chainBeforeBlock":  "99270",
+                          "chainAfterBlock":  "99284",
                           "walletCreateCount":  4,
                           "transferCount":  4,
                           "packetExecutableSmokeValidated":  true,
@@ -143,15 +143,14 @@
                     "testerNetworkRefreshOutputRedactedTail":  [
 
                                                                ],
-                    "publicTesterGatewayRefreshPerformed":  true,
-                    "publicTesterGatewayFreshBeforeRefresh":  false,
+                    "publicTesterGatewayRefreshPerformed":  false,
+                    "publicTesterGatewayFreshBeforeRefresh":  true,
                     "publicTesterGatewayReadyBeforeRefresh":  true,
                     "publicTesterGatewayFreshAfterRefresh":  true,
                     "publicTesterGatewayReadyAfterRefresh":  true,
-                    "publicTesterGatewayRefreshExitCode":  0,
+                    "publicTesterGatewayRefreshExitCode":  null,
                     "publicTesterGatewayRefreshOutputRedactedTail":  [
-                                                                         "FlowChain public tester gateway E2E status: passed",
-                                                                         "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
+
                                                                      ]
                 },
     "ownerNextActions":  [

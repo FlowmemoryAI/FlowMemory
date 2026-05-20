@@ -126,6 +126,14 @@ $dashboardPackage = Read-JsonObject -Path $dashboardPackagePath
 $rootPackage = Read-JsonObject -Path $rootPackagePath
 $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -LiteralPath $browserSpecPath } else { "" }
 $configText = if (Test-Path -LiteralPath $playwrightConfigPath) { Get-Content -Raw -LiteralPath $playwrightConfigPath } else { "" }
+$workbenchViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/WorkbenchView.tsx"
+$workbenchDataPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/data/workbench.ts"
+$fixtureSyncPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/scripts/sync-fixtures.mjs"
+$workbenchText = @(
+    if (Test-Path -LiteralPath $workbenchViewPath) { Get-Content -Raw -LiteralPath $workbenchViewPath } else { "" }
+    if (Test-Path -LiteralPath $workbenchDataPath) { Get-Content -Raw -LiteralPath $workbenchDataPath } else { "" }
+    if (Test-Path -LiteralPath $fixtureSyncPath) { Get-Content -Raw -LiteralPath $fixtureSyncPath } else { "" }
+) -join "`n"
 
 $commands = @(
     (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard") -TimeoutSeconds 180),
@@ -148,6 +156,7 @@ $checks = [ordered]@{
     explorerRouteCovered = $specText.Contains("/explorer")
     testerLaunchRouteCovered = $specText.Contains("/tester")
     activationRouteCovered = $specText.Contains("/activation")
+    bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
@@ -172,6 +181,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation")
+    coveredProofs = @("base8453-bridge-runtime-credit-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -202,7 +212,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof -> bridge runtime credit proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

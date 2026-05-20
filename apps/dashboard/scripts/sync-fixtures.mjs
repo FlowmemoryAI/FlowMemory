@@ -52,6 +52,7 @@ const liveReadinessReportCopies = [
   "bridge-relayer-once-report.json",
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
+  "bridge-runtime-credit-validation-report.json",
   "external-tester-packet-report.json",
   "external-tester-connect-pack.json",
   "external-tester-readiness-report.json",
@@ -77,6 +78,7 @@ const liveReadinessGateLabels = new Map([
   ["state-backup-owner-path-dry-run", "Backup dry run"],
   ["base8453-bridge-edge", "Base 8453 bridge edge"],
   ["base8453-bridge-relayer-queue", "Bridge relayer queue"],
+  ["base8453-bridge-runtime-credit-proof", "Bridge runtime credit"],
   ["external-tester-sharing", "External tester packet"],
   ["public-tester-write-gateway", "Tester write gateway"],
   ["no-secret-no-broadcast", "No secrets or broadcasts"],
@@ -202,6 +204,7 @@ function writeLiveReadinessSummary() {
   const bridgeRelayer = reports["bridge-relayer-once-report.json"];
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
+  const bridgeRuntimeCreditValidation = reports["bridge-runtime-credit-validation-report.json"];
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
@@ -304,6 +307,11 @@ function writeLiveReadinessSummary() {
       bridgeRelayerMissingChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerMissingChecks, "0"),
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
+      bridgeRuntimeCreditValidationStatus: asText(bridgeRuntimeCreditValidation?.status, "not recorded"),
+      bridgeRuntimeCreditReady: bridgeRuntimeCreditValidation?.status === "passed",
+      bridgeRuntimeCreditLatencySeconds: asText(bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),
+      bridgeRuntimeCreditTransferSeconds: asText(bridgeRuntimeCreditValidation?.timing?.transferSettlementSeconds, "not recorded"),
+      bridgeRuntimeCreditFailedChecks: asText(asArray(bridgeRuntimeCreditValidation?.failedChecks).length, "0"),
       backupOwnerPathDryRunStatus: asText(backupOwnerPathDryRun?.status, "not recorded"),
       publicRpcDeploymentBundleStatus: asText(publicRpcDeploymentBundle?.status, "not recorded"),
       publicRpcOwnerRenderValidationStatus: asText(publicRpcDeploymentBundle?.renderValidation?.status, "not recorded"),
@@ -353,6 +361,10 @@ function writeLiveReadinessSummary() {
       bridgeRelayerMissingChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerMissingChecks, "0"),
       bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
+      bridgeRuntimeCreditStatus: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCredit ?? bridgeRuntimeCreditValidation?.status, "not recorded"),
+      bridgeRuntimeCreditReady: opsSnapshot?.reportStatuses?.bridgeRuntimeCreditReady === true || bridgeRuntimeCreditValidation?.status === "passed",
+      bridgeRuntimeCreditLatencySeconds: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCreditLatencySeconds ?? bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),
+      bridgeRuntimeTransferLatencySeconds: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeTransferLatencySeconds ?? bridgeRuntimeCreditValidation?.timing?.transferSettlementSeconds, "not recorded"),
       criticalCount: asText(opsSnapshot?.criticalCount, "0"),
       blockedCount: asText(opsSnapshot?.blockedCount, "0"),
       latestHeight: asText(opsSnapshot?.chain?.latestHeight, latestHeight),

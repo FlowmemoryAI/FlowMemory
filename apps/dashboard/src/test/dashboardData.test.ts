@@ -163,6 +163,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.length).toBeGreaterThan(0);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "deployment ready")?.value).toBe("false");
     expect(workbench.sections.liveReadiness.some((record) => record.id === "public-rpc-edge")).toBe(true);
+    expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "source chain ID" && fact.value === "8453"))).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
@@ -424,6 +426,7 @@ describe("dashboard fixture", () => {
     expect(html).toContain("State backup proof");
     expect(html).toContain("Backup dry run");
     expect(html).toContain("Bridge relayer queue");
+    expect(html).toContain("Bridge runtime credit");
     expect(html).toContain("External tester packet");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("flowchain:public-deployment:contract");
