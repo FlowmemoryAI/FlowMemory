@@ -199,10 +199,18 @@ function Invoke-CutoverStep {
 
     $childReport = Read-FlowChainJsonIfExists -Path $ExpectedReportPath
     $childStatus = Get-CutoverReportStatus -Report $childReport
+    $terminalChildStatuses = @(
+        "passed",
+        "blocked",
+        "blocked-owner-input",
+        "blocked-repo-work",
+        "failed",
+        "stale"
+    )
     $status = if ($timedOut) {
         "failed"
     }
-    elseif ($childStatus -in @("passed", "blocked", "failed")) {
+    elseif ($childStatus -in $terminalChildStatuses) {
         $childStatus
     }
     elseif ($exitCode -eq 0) {
@@ -222,6 +230,7 @@ function Invoke-CutoverStep {
         exitCode = [int] $exitCode
         timedOut = $timedOut
         status = $status
+        childStatus = $childStatus
         reportPath = $ExpectedReportPath
         stdoutPath = $stdoutPath
         stderrPath = $stderrPath
@@ -358,7 +367,23 @@ $missingEnvNames = $filteredMissingEnvNames
 $invalidEnvNames = $filteredInvalidEnvNames
 
 $unknownMissingEnvNames = @($missingEnvNames | Where-Object { $_ -notin $knownOwnerInputs })
-$failedSteps = @($steps | Where-Object { "$($_.status)" -eq "failed" -or [int] $_.exitCode -eq 124 -or $_.timedOut -eq $true })
+$truthTableReportStatus = Get-CutoverReportStatus -Report $reports.truthTable
+$truthTableStaleItemIds = @((Get-CutoverProp -Object $reports.truthTable -Name "items" -Default @()) | Where-Object {
+        [string](Get-CutoverProp -Object $_ -Name "classification" -Default "") -eq "stale"
+    } | ForEach-Object {
+        [string](Get-CutoverProp -Object $_ -Name "id" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$truthTableSelfReferenceStale = $truthTableReportStatus -eq "stale" `
+    -and @($truthTableStaleItemIds).Count -eq 1 `
+    -and $truthTableStaleItemIds[0] -eq "live-cutover-rehearsal"
+$truthTableAccepted = $truthTableReportStatus -in @("passed", "blocked-owner-input") -or $truthTableSelfReferenceStale
+$failedSteps = @($steps | Where-Object {
+        "$($_.status)" -eq "failed" `
+            -or "$($_.status)" -eq "blocked-repo-work" `
+            -or ("$($_.status)" -eq "stale" -and -not ("$($_.name)" -eq "Production truth table" -and $truthTableSelfReferenceStale)) `
+            -or [int] $_.exitCode -eq 124 `
+            -or $_.timedOut -eq $true
+    })
 $ready = [ordered]@{
     ownerEnvReady = (Get-CutoverProp -Object (Get-CutoverProp -Object $reports.ownerEnvReadiness -Name "readiness") -Name "ownerInputsReady" -Default $false) -eq $true
     publicDeploymentReady = (Get-CutoverProp -Object $reports.publicDeploymentContract -Name "deploymentReady" -Default $false) -eq $true
@@ -367,12 +392,15 @@ $ready = [ordered]@{
     testerPacketShareable = (Get-CutoverProp -Object $reports.externalTesterPacket -Name "packetShareable" -Default $false) -eq $true
     testerPacketValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterPacketValidation) -eq "passed"
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
-    truthTableCompleted = (Get-CutoverReportStatus -Report $reports.truthTable) -in @("passed", "blocked-owner-input")
+    truthTableCompleted = $truthTableReportStatus -in @("passed", "blocked-owner-input")
+    truthTableAccepted = $truthTableAccepted
+    truthTableSelfReferenceStaleAccepted = $truthTableReportStatus -ne "stale" -or $truthTableSelfReferenceStale
     noSecretScanPassed = (Get-CutoverReportStatus -Report $reports.noSecret) -eq "passed"
 }
 $allReady = @($ready.GetEnumerator() | Where-Object { $_.Value -ne $true }).Count -eq 0
 $blockedOnlyOnKnownOwnerInputs = $ownerEnvPathSafe `
     -and $failedSteps.Count -eq 0 `
+    -and $truthTableAccepted `
     -and @($invalidEnvNames).Count -eq 0 `
     -and @($unknownMissingEnvNames).Count -eq 0 `
     -and @($missingEnvNames).Count -gt 0
@@ -407,6 +435,8 @@ $checks = [ordered]@{
     testerPacketValidationPassed = $ready.testerPacketValidationPassed
     completionReady = $ready.completionReady
     truthTableCompleted = $ready.truthTableCompleted
+    truthTableAccepted = $ready.truthTableAccepted
+    truthTableSelfReferenceStaleAccepted = $ready.truthTableSelfReferenceStaleAccepted
     noSecretScanPassed = $ready.noSecretScanPassed
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -444,6 +474,9 @@ $report = [ordered]@{
     missingEnvNames = @($missingEnvNames)
     invalidEnvNames = @($invalidEnvNames)
     unknownMissingEnvNames = @($unknownMissingEnvNames)
+    truthTableStatus = $truthTableReportStatus
+    truthTableStaleItemIds = @($truthTableStaleItemIds)
+    truthTableSelfReferenceStaleAccepted = $truthTableSelfReferenceStale
     steps = @($steps)
     reportPaths = $paths
     checks = $checks
@@ -477,6 +510,8 @@ $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")
 $markdownLines.Add("Blocked only on known owner inputs: $blockedOnlyOnKnownOwnerInputs")
+$markdownLines.Add("Truth table status observed inside rehearsal: $truthTableReportStatus")
+$markdownLines.Add("Truth table self-reference stale accepted: $truthTableSelfReferenceStale")
 $markdownLines.Add("")
 $markdownLines.Add("## Gate Status")
 $markdownLines.Add("")
@@ -492,6 +527,17 @@ $markdownLines.Add("| Step | Status | Report |")
 $markdownLines.Add("| --- | --- | --- |")
 foreach ($step in @($steps)) {
     $markdownLines.Add("| $($step.name) | $($step.status) | ``$($step.reportPath)`` |")
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Truth Table Stale Items")
+$markdownLines.Add("")
+if (@($truthTableStaleItemIds).Count -eq 0) {
+    $markdownLines.Add("- none")
+}
+else {
+    foreach ($id in @($truthTableStaleItemIds)) {
+        $markdownLines.Add("- ``$id``")
+    }
 }
 $markdownLines.Add("")
 $markdownLines.Add("## Missing Owner Env Names")

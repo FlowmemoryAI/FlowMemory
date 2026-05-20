@@ -1,6 +1,6 @@
 # FlowChain Live Cutover Rehearsal
 
-Generated: 2026-05-20T17:13:09.7081713Z
+Generated: 2026-05-20T17:27:16.0921182Z
 Status: blocked
 
 This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.
@@ -8,6 +8,8 @@ This command runs the owner-env, public deployment, local tester wallet network,
 Owner env file: `devnet/local/owner-inputs/flowchain-owner.local.env`
 Owner env file git-ignored: True
 Blocked only on known owner inputs: True
+Truth table status observed inside rehearsal: stale
+Truth table self-reference stale accepted: True
 
 ## Gate Status
 
@@ -21,6 +23,8 @@ Blocked only on known owner inputs: True
 | testerPacketValidationPassed | True |
 | completionReady | False |
 | truthTableCompleted | False |
+| truthTableAccepted | True |
+| truthTableSelfReferenceStaleAccepted | True |
 | noSecretScanPassed | True |
 
 ## Steps
@@ -34,8 +38,12 @@ Blocked only on known owner inputs: True
 | External tester packet | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-packet-report.json` |
 | External tester packet validation | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-packet-validation-report.json` |
 | Completion audit | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-completion-audit-report.json` |
-| Production truth table | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\production-truth-table-report.json` |
+| Production truth table | stale | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\production-truth-table-report.json` |
 | No-secret scan | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json` |
+
+## Truth Table Stale Items
+
+- `live-cutover-rehearsal`
 
 ## Missing Owner Env Names
 
