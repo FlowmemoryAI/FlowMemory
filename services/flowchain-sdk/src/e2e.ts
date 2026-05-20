@@ -12,6 +12,7 @@ interface DevPackReport {
   status: "passed" | "blocked" | "failed";
   rpcUrl: string;
   checks: Record<string, boolean>;
+  failedChecks: string[];
   methodCount: number;
   publicReadyMethodCount: number;
   firstHeight: string | null;
@@ -19,6 +20,7 @@ interface DevPackReport {
   missingEnvNames: string[];
   reportPaths: Record<string, string>;
   noLiveBroadcast: boolean;
+  broadcasts: false;
   envValuesPrinted: boolean;
   noSecrets: boolean;
   languageSdks: LanguageSdkEvidence[];
@@ -839,13 +841,17 @@ async function main() {
       && inventoryText.includes("Python SDK/devkit passes live RPC e2e"),
     inventorySafe: !/(privateKey|private_key|seed phrase|mnemonic|apiKey|webhook|BEGIN RSA PRIVATE KEY|BEGIN OPENSSH PRIVATE KEY)/i.test(inventoryText),
   };
-  const status = Object.values(checks).every(Boolean) ? "passed" : "failed";
+  const failedChecks = Object.entries(checks)
+    .filter(([, passed]) => !passed)
+    .map(([name]) => name);
+  const status = failedChecks.length === 0 ? "passed" : "failed";
   const report: DevPackReport = {
     schema: "flowchain.dev_pack_e2e_report.v0",
     generatedAt: new Date().toISOString(),
     status,
     rpcUrl,
     checks,
+    failedChecks,
     methodCount: numberValue(discovery.methodCount ?? 0),
     publicReadyMethodCount: numberValue(discovery.publicReadyMethodCount ?? 0),
     firstHeight,
@@ -863,6 +869,7 @@ async function main() {
       pythonSdk: pythonSdkReportPath,
     },
     noLiveBroadcast: true,
+    broadcasts: false,
     envValuesPrinted: false,
     noSecrets: true,
     languageSdks,

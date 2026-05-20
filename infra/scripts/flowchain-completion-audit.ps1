@@ -1072,16 +1072,79 @@ $liveWalletPassed = $liveWalletExitCode -eq 0 `
     -and ((Get-AuditProp -Object $liveWallet -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $liveWallet -Name "noSecrets" -Default $false) -eq $true)
 $devPackChecks = Get-AuditProp -Object $devPack -Name "checks"
+$devPackRequiredChecks = @(
+    "discoveryLoaded",
+    "readinessLoaded",
+    "healthReadable",
+    "nodeStatusReadable",
+    "blockListReadable",
+    "blockGetReadable",
+    "transactionListReadable",
+    "transactionGetReadable",
+    "mempoolReadable",
+    "accountListReadable",
+    "balanceReadable",
+    "walletMetadataReadable",
+    "walletTransfersReadable",
+    "walletBalancesReadable",
+    "faucetEventsReadable",
+    "finalityReadable",
+    "bridgeLifecycleReadable",
+    "walletSendRuntimeBacked",
+    "waitTransactionSdkIncluded",
+    "cliJsonStatus",
+    "cliJsonBlocks",
+    "cliJsonWaitTransaction",
+    "nodeExamplePassed",
+    "signedEnvelopeExamplePassed",
+    "cliSignedEnvelopePrepared",
+    "cliSignedTransactionSubmit",
+    "browserExamplePresent",
+    "browserExampleSmokePassed",
+    "openApiSpecGenerated",
+    "postmanCollectionGenerated",
+    "curlExamplesGenerated",
+    "developerGuidesPresent",
+    "pythonSdkE2ePassed",
+    "pythonSdkDiscoveryLoaded",
+    "pythonSdkReadinessLoaded",
+    "pythonDevkitJsonStatus",
+    "pythonDevkitJsonBlocks",
+    "pythonDevkitWaitTransaction",
+    "pythonSdkDocsPresent",
+    "pythonSdkSafeDiagnostics",
+    "heightAdvanced",
+    "publicReadinessFailClosed",
+    "publicWriteMethodsBlockedFromPublicList",
+    "broadLocalStateBlockedFromPublicList",
+    "inventoryGenerated",
+    "inventorySafe"
+)
+$devPackMissingChecks = @(Get-MissingAuditChecks -Checks $devPackChecks -Names $devPackRequiredChecks)
+$devPackFailedChecks = @((Get-AuditProp -Object $devPack -Name "failedChecks" -Default @()))
+$devPackLanguageSdks = @((Get-AuditProp -Object $devPack -Name "languageSdks" -Default @()))
+$devPackImplementedLanguageNames = @($devPackLanguageSdks | Where-Object {
+    (Get-AuditProp -Object $_ -Name "status" -Default "") -eq "implemented"
+} | ForEach-Object {
+    [string](Get-AuditProp -Object $_ -Name "language" -Default "")
+})
+$devPackReportPaths = Get-AuditProp -Object $devPack -Name "reportPaths"
+$devPackRequiredReportPathNames = @("json", "markdown", "handoff", "inventory", "rpcReference", "openApi", "postman", "curlExamples", "pythonSdk")
+$devPackMissingReportPathNames = @($devPackRequiredReportPathNames | Where-Object {
+    [string]::IsNullOrWhiteSpace([string](Get-AuditProp -Object $devPackReportPaths -Name $_ -Default ""))
+})
+$devPackMethodCount = [int](Get-AuditProp -Object $devPack -Name "methodCount" -Default 0)
+$devPackPublicReadyMethodCount = [int](Get-AuditProp -Object $devPack -Name "publicReadyMethodCount" -Default -1)
 $devPackPassed = $devPackExitCode -eq 0 `
     -and (Get-ReportStatus -Report $devPack) -eq "passed" `
-    -and (Get-AuditProp -Object $devPackChecks -Name "discoveryLoaded" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "readinessLoaded" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "walletTransfersReadable" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "walletBalancesReadable" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "cliJsonStatus" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "heightAdvanced" -Default $false) -eq $true `
-    -and (Get-AuditProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true `
+    -and $devPackMissingChecks.Count -eq 0 `
+    -and $devPackFailedChecks.Count -eq 0 `
+    -and $devPackMethodCount -ge 20 `
+    -and $devPackPublicReadyMethodCount -eq 0 `
+    -and ("python" -in $devPackImplementedLanguageNames) `
+    -and $devPackMissingReportPathNames.Count -eq 0 `
+    -and (Get-AuditProp -Object $devPack -Name "noLiveBroadcast" -Default $false) -eq $true `
+    -and (Get-AuditProp -Object $devPack -Name "broadcasts" -Default $true) -eq $false `
     -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false `
     -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true
 $devPackFirstHeight = [string](Get-AuditProp -Object $devPack -Name "firstHeight" -Default "")
@@ -2960,9 +3023,9 @@ Add-AuditItem -Items $items -Id "rpc-connect-local" `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "developer-dev-pack" `
-    -Requirement "Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits a runtime-backed local wallet send, and keeps public readiness fail-closed." `
+    -Requirement "Developer SDK/devkit proof connects to the real RPC, checks readiness/discovery, reads wallet data, submits runtime-backed local wallet sends, proves CLI examples, signed-envelope submission, browser smoke, OpenAPI/Postman/cURL docs, Python SDK/devkit, and keeps public readiness fail-closed." `
     -Status $(if ($devPackPassed) { "passed" } else { "failed" }) `
-    -Evidence "devPackStatus=$(Get-ReportStatus -Report $devPack), heights=$devPackFirstHeight->$devPackSecondHeight, methodCount=$(Get-AuditProp -Object $devPack -Name "methodCount"), publicReadyMethodCount=$(Get-AuditProp -Object $devPack -Name "publicReadyMethodCount"), report=$($paths.devPack)" `
+    -Evidence "devPackStatus=$(Get-ReportStatus -Report $devPack), heights=$devPackFirstHeight->$devPackSecondHeight, methodCount=$devPackMethodCount, publicReadyMethodCount=$devPackPublicReadyMethodCount, missingChecks=$($devPackMissingChecks.Count), failedChecks=$($devPackFailedChecks.Count), languageSdks=$($devPackLanguageSdks.Count), missingReportPaths=$($devPackMissingReportPathNames.Count), noLiveBroadcast=$(Get-AuditProp -Object $devPack -Name "noLiveBroadcast" -Default $false), report=$($paths.devPack)" `
     -Commands @("npm run flowchain:dev-pack:e2e")
 
 Add-AuditItem -Items $items -Id "system-architecture-audit" `
@@ -3289,6 +3352,8 @@ Add-AuditItem -Items $items -Id "aggregate-gate" `
 $noSecretChecks = Get-AuditProp -Object $reports.noSecret -Name "checks"
 $noSecretCoverageReady = ((Get-AuditProp -Object $noSecretChecks -Name "scansDashboardPublicData" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedDevPackReports" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedSdkDocs" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate" -Default $false) -eq $true)
 $noSecretFailedChecks = @((Get-AuditProp -Object $reports.noSecret -Name "failedChecks" -Default @()))
 $noSecretSecretFindings = @((Get-AuditProp -Object $reports.noSecret -Name "secretMarkerFindings" -Default @()))
@@ -3312,7 +3377,7 @@ $noSecretSafetyReady = $noSecretCoverageReady `
 Add-AuditItem -Items $items -Id "no-secrets-no-broadcasts" `
     -Requirement "Reports and gates do not print secrets/env values and no live Base broadcast occurred." `
     -Status $(if ((Get-ReportStatus -Report $reports.noSecret) -eq "passed" -and $noSecretSafetyReady -and $liveProductNoLiveBroadcast -eq $true -and $liveProductEnvValuesPrinted -eq $false -and $baseTxDiagnosticBroadcasts -eq $false -and $baseTxDiagnosticPrintsEnvValues -eq $false -and $baseTxDiagnosticNoSecrets -eq $true -and (Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false) -eq $true -and (Get-AuditProp -Object $devPack -Name "envValuesPrinted" -Default $true) -eq $false) { "passed" } else { "failed" }) `
-    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), scansGeneratedReports=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), reportPathMatchesProductionGate=$(Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), failedChecks=$noSecretFailedCheckCount, secretFindings=$noSecretSecretFindingCount, findings=$noSecretFindingCount, liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
+    -Evidence "noSecretStatus=$(Get-ReportStatus -Report $reports.noSecret), scansGeneratedReports=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedLiveProductReports"), scansDevPack=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedDevPackReports"), scansSdkDocs=$(Get-AuditProp -Object $noSecretChecks -Name "scansGeneratedSdkDocs"), reportPathMatchesProductionGate=$(Get-AuditProp -Object $noSecretChecks -Name "reportPathMatchesProductionGate"), failedChecks=$noSecretFailedCheckCount, secretFindings=$noSecretSecretFindingCount, findings=$noSecretFindingCount, liveProductNoLiveBroadcast=$liveProductNoLiveBroadcast, baseTxDiagnosticBroadcasts=$baseTxDiagnosticBroadcasts, baseTxDiagnosticNoSecrets=$baseTxDiagnosticNoSecrets, devPackNoSecrets=$(Get-AuditProp -Object $devPack -Name "noSecrets" -Default $false), reports=$($paths.noSecret), $($paths.baseTxDiagnostic), $($paths.devPack)" `
     -Commands @("npm run flowchain:no-secret:scan")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })

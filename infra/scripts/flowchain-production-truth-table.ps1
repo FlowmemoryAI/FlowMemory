@@ -1291,6 +1291,73 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "developer-dev-pack"
+        requirement = "Developer SDK/devkit proof connects to the real RPC, proves Node and Python SDKs, CLI examples, signed-envelope submission, browser smoke, generated OpenAPI/Postman/cURL docs, runtime-backed local wallet sends, and public readiness fail-closed behavior."
+        path = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
+        command = "npm run flowchain:dev-pack:e2e"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "discoveryLoaded",
+            "readinessLoaded",
+            "healthReadable",
+            "nodeStatusReadable",
+            "blockListReadable",
+            "blockGetReadable",
+            "transactionListReadable",
+            "transactionGetReadable",
+            "mempoolReadable",
+            "accountListReadable",
+            "balanceReadable",
+            "walletMetadataReadable",
+            "walletTransfersReadable",
+            "walletBalancesReadable",
+            "faucetEventsReadable",
+            "finalityReadable",
+            "bridgeLifecycleReadable",
+            "walletSendRuntimeBacked",
+            "waitTransactionSdkIncluded",
+            "cliJsonStatus",
+            "cliJsonBlocks",
+            "cliJsonWaitTransaction",
+            "nodeExamplePassed",
+            "signedEnvelopeExamplePassed",
+            "cliSignedEnvelopePrepared",
+            "cliSignedTransactionSubmit",
+            "browserExamplePresent",
+            "browserExampleSmokePassed",
+            "openApiSpecGenerated",
+            "postmanCollectionGenerated",
+            "curlExamplesGenerated",
+            "developerGuidesPresent",
+            "pythonSdkE2ePassed",
+            "pythonSdkDiscoveryLoaded",
+            "pythonSdkReadinessLoaded",
+            "pythonDevkitJsonStatus",
+            "pythonDevkitJsonBlocks",
+            "pythonDevkitWaitTransaction",
+            "pythonSdkDocsPresent",
+            "pythonSdkSafeDiagnostics",
+            "heightAdvanced",
+            "publicReadinessFailClosed",
+            "publicWriteMethodsBlockedFromPublicList",
+            "broadLocalStateBlockedFromPublicList",
+            "inventoryGenerated",
+            "inventorySafe"
+        )
+        requiredMinimums = [ordered]@{
+            "methodCount" = 20
+        }
+        requiredEmptyArrays = @("failedChecks")
+        requiredReportProperties = [ordered]@{
+            "publicReadyMethodCount" = 0
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
+    },
+    [ordered]@{
         id = "backup-readiness"
         requirement = "Configured production backup path can create and restore manifest-backed state snapshots."
         path = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -2343,7 +2410,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -2355,6 +2422,8 @@ $definitions = @(
         requiredChecks = @(
             "scansDashboardPublicData",
             "scansGeneratedLiveProductReports",
+            "scansGeneratedDevPackReports",
+            "scansGeneratedSdkDocs",
             "reportPathMatchesProductionGate",
             "scannedCountPositive",
             "findingsEmpty",
@@ -2624,6 +2693,8 @@ function ConvertTo-TruthEvidence {
         "metricCount",
         "expectedFileCount",
         "ownerInputNameCount",
+        "methodCount",
+        "publicReadyMethodCount",
         "ruleCount",
         "criticalRuleCount",
         "blockedRuleCount",
@@ -2640,6 +2711,7 @@ function ConvertTo-TruthEvidence {
         "printsEnvValues",
         "envValuesPrinted",
         "noSecrets",
+        "noLiveBroadcast",
         "broadcasts"
     )) {
         $value = Get-TruthProp -Object $Report -Name $name
@@ -2705,6 +2777,19 @@ function ConvertTo-TruthEvidence {
             "everyCurrentFindingHasCommands",
             "dryRunEventsDoNotSend",
             "dryRunEventsStoreNoCredentials",
+            "walletSendRuntimeBacked",
+            "cliSignedTransactionSubmit",
+            "browserExampleSmokePassed",
+            "openApiSpecGenerated",
+            "postmanCollectionGenerated",
+            "curlExamplesGenerated",
+            "pythonSdkE2ePassed",
+            "pythonDevkitWaitTransaction",
+            "publicReadinessFailClosed",
+            "inventoryGenerated",
+            "inventorySafe",
+            "scansGeneratedDevPackReports",
+            "scansGeneratedSdkDocs",
             "desktopProjectConfigured",
             "mobileProjectConfigured",
             "bridgeRouteCovered",
@@ -2740,7 +2825,8 @@ function ConvertTo-TruthEvidence {
         "unmappedFindingCodes",
         "browserProjects",
         "coveredRoutes",
-        "coveredProofs"
+        "coveredProofs",
+        "languageSdks"
     )) {
         if (Test-TruthPathExists -Object $Report -Path $arrayName) {
             $values = @((Get-TruthPathProp -Object $Report -Path $arrayName))
