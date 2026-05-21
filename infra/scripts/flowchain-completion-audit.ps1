@@ -64,6 +64,7 @@ $paths = [ordered]@{
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
+    monitoringBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
     metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
@@ -511,6 +512,9 @@ $alertInstallValidationExitCode = $alertInstallValidationResult.exitCode
 $opsMetricsExportResult = Invoke-AuditChild -Path $paths.opsMetricsExport -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-metrics-export.ps1"), "-AllowBlocked", "-NoRefresh")
 $opsMetricsExportOutput = @($opsMetricsExportResult.output)
 $opsMetricsExportExitCode = $opsMetricsExportResult.exitCode
+$monitoringBundleResult = Invoke-AuditChild -Path $paths.monitoringBundle -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-monitoring-bundle.ps1"))
+$monitoringBundleOutput = @($monitoringBundleResult.output)
+$monitoringBundleExitCode = $monitoringBundleResult.exitCode
 $metricsInstallValidationResult = Invoke-AuditChild -Path $paths.metricsInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-metrics-install-validation.ps1"))
 $metricsInstallValidationOutput = @($metricsInstallValidationResult.output)
 $metricsInstallValidationExitCode = $metricsInstallValidationResult.exitCode
@@ -3151,6 +3155,38 @@ $opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsMetricsExport -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $opsMetricsExport -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExport -Name "broadcasts" -Default $true) -eq $false)
+$monitoringBundle = $reports.monitoringBundle
+$monitoringBundleStatus = Get-ReportStatus -Report $monitoringBundle
+$monitoringBundleChecks = Get-AuditProp -Object $monitoringBundle -Name "checks"
+$monitoringBundleFailedChecks = @((Get-AuditProp -Object $monitoringBundle -Name "failedChecks" -Default @()))
+$monitoringBundleSecretFindings = @((Get-AuditProp -Object $monitoringBundle -Name "secretMarkerFindings" -Default @()))
+$monitoringBundleDashboardPanelCount = [int](Get-AuditProp -Object $monitoringBundle -Name "dashboardPanelCount" -Default 0)
+$monitoringBundlePrometheusRuleCount = [int](Get-AuditProp -Object $monitoringBundle -Name "prometheusRuleCount" -Default 0)
+$monitoringBundleMissingDashboardMetricNames = @((Get-AuditProp -Object $monitoringBundle -Name "missingDashboardMetricNames" -Default @()))
+$monitoringBundleMissingPrometheusMetricNames = @((Get-AuditProp -Object $monitoringBundle -Name "missingPrometheusMetricNames" -Default @()))
+$monitoringBundleMissingSourceRuleIds = @((Get-AuditProp -Object $monitoringBundle -Name "missingSourceRuleIds" -Default @()))
+$monitoringBundleRulesWithoutCommands = @((Get-AuditProp -Object $monitoringBundle -Name "rulesWithoutCommands" -Default @()))
+$monitoringBundleCommandsWithInlineEnvAssignment = @((Get-AuditProp -Object $monitoringBundle -Name "commandsWithInlineEnvAssignment" -Default @()))
+$monitoringBundleCommandsWithUrls = @((Get-AuditProp -Object $monitoringBundle -Name "commandsWithUrls" -Default @()))
+$monitoringBundlePassed = $monitoringBundleExitCode -eq 0 `
+    -and $monitoringBundleStatus -eq "passed" `
+    -and $monitoringBundleFailedChecks.Count -eq 0 `
+    -and $monitoringBundleSecretFindings.Count -eq 0 `
+    -and $monitoringBundleDashboardPanelCount -ge 12 `
+    -and $monitoringBundlePrometheusRuleCount -ge 8 `
+    -and $monitoringBundleMissingDashboardMetricNames.Count -eq 0 `
+    -and $monitoringBundleMissingPrometheusMetricNames.Count -eq 0 `
+    -and $monitoringBundleMissingSourceRuleIds.Count -eq 0 `
+    -and $monitoringBundleRulesWithoutCommands.Count -eq 0 `
+    -and $monitoringBundleCommandsWithInlineEnvAssignment.Count -eq 0 `
+    -and $monitoringBundleCommandsWithUrls.Count -eq 0 `
+    -and ((Get-AuditProp -Object $monitoringBundleChecks -Name "dashboardIncludesCorePanels" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $monitoringBundleChecks -Name "prometheusRulesReferenceKnownAlertRuleIds" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $monitoringBundleChecks -Name "filesNoSecretMarkers" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $monitoringBundleChecks -Name "noNetworkDelivery" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $monitoringBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $monitoringBundle -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $monitoringBundle -Name "broadcasts" -Default $true) -eq $false)
 $metricsInstallValidation = $reports.metricsInstallValidation
 $metricsInstallValidationStatus = Get-ReportStatus -Report $metricsInstallValidation
 $metricsInstallValidationChecks = Get-AuditProp -Object $metricsInstallValidation -Name "checks"
@@ -3661,6 +3697,12 @@ Add-AuditItem -Items $items -Id "ops-metrics-export" `
     -Status $(if ($opsMetricsExportPassed) { "passed" } else { "failed" }) `
     -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), backupRestoreValidationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationLoaded" -Default $false), backupRestoreValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationMetricsPresent" -Default $false), backupOwnerPathDryRunLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunLoaded" -Default $false), backupOwnerPathDryRunMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcRollbackDrillMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false), publicRpcOwnerApplyMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false), bridgeNoSecretAuditLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditLoaded" -Default $false), bridgeNoSecretAuditMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditMetricsPresent" -Default $false), bridgeDeployControlMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false), serviceInstallValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false), bridgeRelayerLoopValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false), bridgeReconciliationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationLoaded" -Default $false), bridgeReconciliationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationMetricsPresent" -Default $false), bridgeReleaseEvidenceMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), secondComputerLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerLoaded" -Default $false), secondComputerMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerMetricsPresent" -Default $false), devPackLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackLoaded" -Default $false), devPackMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
     -Commands @("npm run flowchain:ops:metrics:export -- -AllowBlocked")
+
+Add-AuditItem -Items $items -Id "ops-monitoring-bundle" `
+    -Requirement "Ops monitoring bundle renders no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain metrics and alert evidence, covering block production, service health, public RPC, backup, bridge relayer, external testers, truth table, and no-secret boundaries without external delivery credentials." `
+    -Status $(if ($monitoringBundlePassed) { "passed" } else { "failed" }) `
+    -Evidence "monitoringBundle=$monitoringBundleStatus, panels=$monitoringBundleDashboardPanelCount, prometheusRules=$monitoringBundlePrometheusRuleCount, failedChecks=$($monitoringBundleFailedChecks.Count), secretFindings=$($monitoringBundleSecretFindings.Count), missingDashboardMetrics=$($monitoringBundleMissingDashboardMetricNames.Count), missingPrometheusMetrics=$($monitoringBundleMissingPrometheusMetricNames.Count), missingSourceRules=$($monitoringBundleMissingSourceRuleIds.Count), commandUrls=$($monitoringBundleCommandsWithUrls.Count), inlineEnvAssignments=$($monitoringBundleCommandsWithInlineEnvAssignment.Count), report=$($paths.monitoringBundle)" `
+    -Commands @("npm run flowchain:ops:monitoring:bundle")
 
 Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `
     -Requirement "Ops metrics scheduled export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics." `
