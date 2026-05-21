@@ -50,6 +50,7 @@ $paths = [ordered]@{
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     serviceStatus = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
 }
@@ -214,6 +215,7 @@ $ownerInputRows = @((Get-NeedsProp -Object $ownerInputs -Name "inputs" -Default 
 $goLiveHandoff = $reports.ownerGoLiveHandoff
 $activationPlan = $reports.ownerActivationPlan
 $truthTable = $reports.truthTable
+$publicDeploymentContract = $reports.publicDeploymentContract
 
 $missingRequired = New-Object System.Collections.ArrayList
 $missingOptional = New-Object System.Collections.ArrayList
@@ -256,7 +258,7 @@ $groups = @(
         -WhyNeeded "Bridge-funded testing stays closed until the Base 8453 observer, lockbox, asset, block range, pilot caps, and confirmations are configured." `
         -OwnerAction "Provide the Base RPC endpoint, lockbox and supported token addresses, asset decimals, start block, capped pilot acknowledgement, deposit cap, total cap, and confirmation depth." `
         -EnvNames @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS") `
-        -ValidationCommands @("npm run flowchain:bridge:live:check -- -AllowBlocked", "npm run flowchain:bridge:infra:check -- -AllowBlocked", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:reconciliation") `
+        -ValidationCommands @("npm run flowchain:bridge:live:check -- -AllowBlocked", "npm run flowchain:bridge:infra:check -- -AllowBlocked", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:release:evidence:validate", "npm run flowchain:bridge:reconciliation") `
         -DoNotSend @("wallet seed words", "deployer private key", "provider API secret pasted in chat", "unbounded pilot caps") `
         -Inputs $ownerInputRows
 )
@@ -271,6 +273,21 @@ $readyGroups = @($groups | Where-Object { $_.ready -eq $true })
 $reportStatuses = @($paths.GetEnumerator() | ForEach-Object {
         New-NeedsReportStatus -Name $_.Key -Report $reports[$_.Key] -Path $_.Value
     })
+$deploymentItems = @((Get-NeedsProp -Object $publicDeploymentContract -Name "items" -Default @()))
+$deploymentGateSummaries = @($deploymentItems | ForEach-Object {
+        [ordered]@{
+            id = [string](Get-NeedsProp -Object $_ -Name "id" -Default "")
+            status = [string](Get-NeedsProp -Object $_ -Name "status" -Default "missing")
+            commands = @((Get-NeedsProp -Object $_ -Name "commands" -Default @()) | ForEach-Object { "$_" })
+            blockers = @((Get-NeedsProp -Object $_ -Name "blockers" -Default @()) | ForEach-Object { "$_" })
+        }
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_.id) })
+$blockedDeploymentGates = @($deploymentGateSummaries | Where-Object { $_.status -eq "blocked" })
+$failedDeploymentGates = @($deploymentGateSummaries | Where-Object { $_.status -eq "failed" })
+$releaseEvidenceGate = $deploymentGateSummaries | Where-Object { $_.id -eq "base8453-bridge-release-evidence-validation" } | Select-Object -First 1
+$externalTesterGate = $deploymentItems | Where-Object { [string](Get-NeedsProp -Object $_ -Name "id" -Default "") -eq "external-tester-sharing" } | Select-Object -First 1
+$externalTesterEvidence = [string](Get-NeedsProp -Object $externalTesterGate -Name "evidence" -Default "")
+$baseBridgeGroup = $groups | Where-Object { $_.id -eq "base8453-bridge" } | Select-Object -First 1
 
 $truthCounts = Get-NeedsProp -Object $truthTable -Name "classificationCounts" -Default $null
 $releaseReady = (Get-NeedsProp -Object $goLiveHandoff -Name "releaseReady" -Default $false) -eq $true
@@ -291,11 +308,16 @@ $checks = [ordered]@{
     ownerGoLiveHandoffLoaded = $null -ne $goLiveHandoff
     activationPlanLoaded = $null -ne $activationPlan
     truthTableLoaded = $null -ne $truthTable
-    reportStatusDeckPresent = $reportStatuses.Count -ge 8
+    publicDeploymentContractLoaded = $null -ne $publicDeploymentContract
+    reportStatusDeckPresent = $reportStatuses.Count -ge 9
     groupCountMinimumMet = $groups.Count -ge 4
     requiredEnvCoverageComplete = $missingCoverage.Count -eq 0
     groupCommandsPresent = @($groups | Where-Object { @($_.validationCommands).Count -eq 0 }).Count -eq 0
     groupDoNotSendPresent = @($groups | Where-Object { @($_.doNotSend).Count -eq 0 }).Count -eq 0
+    deploymentGateSummaryPresent = $deploymentGateSummaries.Count -gt 0
+    releaseEvidenceGateCaptured = ($null -ne $releaseEvidenceGate) -and ([string](Get-NeedsProp -Object $releaseEvidenceGate -Name "status" -Default "") -eq "passed")
+    externalTesterGateCapturesReleaseEvidence = $externalTesterEvidence.Contains("bridgeReleaseEvidenceReady=True")
+    baseBridgeValidationIncludesReleaseEvidence = @((Get-NeedsProp -Object $baseBridgeGroup -Name "validationCommands" -Default @()) | Where-Object { "$_" -eq "npm run flowchain:bridge:release:evidence:validate" }).Count -eq 1
     knownNeededNowOwnerInputsOnly = $unknownNeededNow.Count -eq 0
     optionalOwnerInputsExcludedFromNeededNow = $optionalNeededNow.Count -eq 0
     nextOwnerInputsPresentWhenBlocked = if ($releaseReady) { $true } else { $neededNow.Count -gt 0 }
@@ -339,6 +361,11 @@ $report = [ordered]@{
     groupCount = $groups.Count
     neededNowGroupCount = $neededNowGroups.Count
     readyGroupCount = $readyGroups.Count
+    deploymentGateCount = $deploymentGateSummaries.Count
+    blockedDeploymentGateCount = $blockedDeploymentGates.Count
+    failedDeploymentGateCount = $failedDeploymentGates.Count
+    blockedDeploymentGates = @($blockedDeploymentGates)
+    failedDeploymentGates = @($failedDeploymentGates)
     groups = @($groups)
     neededNowGroups = @($neededNowGroups)
     readyGroups = @($readyGroups)
@@ -396,6 +423,25 @@ if ($readyGroups.Count -eq 0) {
 else {
     foreach ($group in $readyGroups) {
         $markdownLines.Add("- $($group.title): ready")
+    }
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Deployment Gates Blocking Sharing")
+$markdownLines.Add("")
+if ($blockedDeploymentGates.Count -eq 0 -and $failedDeploymentGates.Count -eq 0) {
+    $markdownLines.Add("No public deployment contract gate is currently blocked or failed.")
+}
+else {
+    $markdownLines.Add("| Gate | Status | First command | Blocking names |")
+    $markdownLines.Add("| --- | --- | --- | --- |")
+    foreach ($gate in @($failedDeploymentGates + $blockedDeploymentGates)) {
+        $gateCommands = @((Get-NeedsProp -Object $gate -Name "commands" -Default @()))
+        $gateBlockers = @((Get-NeedsProp -Object $gate -Name "blockers" -Default @()))
+        $firstCommand = if ($gateCommands.Count -gt 0) { [string]$gateCommands[0] } else { "not recorded" }
+        $blockers = if ($gateBlockers.Count -gt 0) { @($gateBlockers) -join '`, `' } else { "not recorded" }
+        $gateId = Get-NeedsProp -Object $gate -Name "id" -Default ""
+        $gateStatus = Get-NeedsProp -Object $gate -Name "status" -Default ""
+        $markdownLines.Add("| $gateId | $gateStatus | ``$firstCommand`` | ``$blockers`` |")
     }
 }
 $markdownLines.Add("")
