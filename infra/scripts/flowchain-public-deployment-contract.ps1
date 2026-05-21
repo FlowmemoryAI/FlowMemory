@@ -63,6 +63,7 @@ $paths = [ordered]@{
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
     publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
+    publicRpcCanaryScheduleValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
@@ -346,6 +347,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:deployment:automation",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+    "npm run flowchain:public-rpc:canary:schedule:validate",
     "npm run flowchain:public-rpc:abuse-test",
     "npm run flowchain:tester:token:setup",
     "npm run flowchain:tester:gateway:e2e",
@@ -387,6 +389,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-synthetic-canary" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-synthetic-canary.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpcSyntheticCanary)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-canary-schedule-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-canary-schedule-validation.ps1"), "-ReportPath", $paths.publicRpcCanaryScheduleValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-owner-path-dry-run" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"), "-ReportPath", $paths.backupOwnerPathDryRun)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"), "-ReportPath", $paths.backupInstallValidation)
@@ -944,6 +947,32 @@ $publicRpcSyntheticCanaryStatus = Get-DeploymentStatus -Report $publicRpcSynthet
 $publicRpcSyntheticCanaryReady = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false
 $publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
 $publicRpcSyntheticCanaryMissingEnvNames = @((Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @()))
+$publicRpcCanaryScheduleValidation = $reports.publicRpcCanaryScheduleValidation
+$publicRpcCanaryScheduleValidationStatus = Get-DeploymentStatus -Report $publicRpcCanaryScheduleValidation
+$publicRpcCanaryScheduleChecks = Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "checks"
+$publicRpcCanaryScheduleFailedChecks = @((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "failedChecks" -Default @()))
+$publicRpcCanaryScheduleReady = ($publicRpcCanaryScheduleValidationStatus -eq "passed") `
+    -and ($publicRpcCanaryScheduleFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "packageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "syntheticCanaryPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "canaryScriptReadOnlyPlan" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesCanaryScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanHasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanDoesNotMutateHost" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceHasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerPersistent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:canary:schedule:validate")
 $publicValidation = $reports.publicRpcValidation
 $publicValidationStatus = Get-DeploymentStatus -Report $publicValidation
 $publicValidationChecks = Get-DeploymentProp -Object $publicValidation -Name "checks"
@@ -1000,11 +1029,16 @@ Add-DeploymentItem -Items $items -Id "public-rpc-synthetic-canary" `
     -Evidence "canaryStatus=$publicRpcSyntheticCanaryStatus, ready=$publicRpcSyntheticCanaryReady, ownerBlocked=$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs" `
     -Commands @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
     -Blockers @($publicRpcSyntheticCanaryMissingEnvNames)
+Add-DeploymentItem -Items $items -Id "public-rpc-canary-schedule-automation" `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks without host mutation or external delivery credentials." `
+    -Status $(if ($publicRpcCanaryScheduleReady) { "passed" } else { "failed" }) `
+    -Evidence "canaryScheduleValidation=$publicRpcCanaryScheduleValidationStatus, windowsPlan=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesCanaryScript"), systemdTimer=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerRendered"), ownerEnv=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceUsesOwnerEnvFile"), noMutation=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "hostMutationPerformedFalse"), noExternalDelivery=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:public-rpc:canary:schedule:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked")
 Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
     -Requirement "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing." `
-    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicRpcSyntheticCanaryReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicRpcSyntheticCanaryStatus -in @("blocked", "passed")) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
+    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicRpcSyntheticCanaryReady -eq $true) -and ($publicRpcCanaryScheduleReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicRpcSyntheticCanaryStatus -in @("blocked", "passed")) -and ($publicRpcCanaryScheduleReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, canaryScheduleReady=$publicRpcCanaryScheduleReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:canary:schedule:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $backup = $reports.backup

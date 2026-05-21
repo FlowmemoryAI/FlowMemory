@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T07:38:30.1403514Z",
+    "generatedAt":  "2026-05-21T08:01:32.5240539Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -141,6 +141,11 @@
                          "phase":  "public-rpc",
                          "command":  "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                          "purpose":  "Run read-only public endpoint canary probes after the owner endpoint is configured."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:canary:schedule:validate",
+                         "purpose":  "Render no-secret Windows and systemd recurring public RPC canary schedule plans without mutating the owner host."
                      },
                      {
                          "phase":  "public-rpc",

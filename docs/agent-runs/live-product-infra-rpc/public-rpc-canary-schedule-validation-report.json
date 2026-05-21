@@ -1,0 +1,79 @@
+{
+    "schema":  "flowchain.public_rpc_canary_schedule_validation_report.v0",
+    "generatedAt":  "2026-05-21T07:53:25.6732598Z",
+    "status":  "passed",
+    "intervalMinutes":  5,
+    "scheduledReportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-public-rpc-synthetic-canary-report.json",
+    "scheduledMarkdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_PUBLIC_RPC_SYNTHETIC_CANARY.md",
+    "ownerEnvFileConfigured":  true,
+    "windowsTaskPlan":  {
+                            "taskName":  "FlowChainPublicRpcSyntheticCanary",
+                            "taskPath":  "\\",
+                            "intervalMinutes":  5,
+                            "execute":  "powershell.exe",
+                            "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$env:FLOWCHAIN_OWNER_ENV_FILE=\u0027devnet/local/owner-inputs/flowchain-owner.local.env\u0027; \u0026 \u0027E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-synthetic-canary.ps1\u0027 -AllowBlocked -ReportPath \u0027docs/agent-runs/live-product-infra-rpc/scheduled-public-rpc-synthetic-canary-report.json\u0027 -MarkdownPath \u0027docs/agent-runs/live-product-infra-rpc/SCHEDULED_PUBLIC_RPC_SYNTHETIC_CANARY.md\u0027\"",
+                            "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                            "ownerEnvFileConfigured":  true,
+                            "mutatesDuringValidation":  false
+                        },
+    "systemdPlan":  {
+                        "serviceName":  "flowchain-public-rpc-canary.service",
+                        "timerName":  "flowchain-public-rpc-canary.timer",
+                        "intervalMinutes":  5,
+                        "unitPreview":  {
+                                            "service":  "[Unit]\nDescription=FlowChain public RPC synthetic canary\nWants=network-online.target flowchain-live.service flowchain-supervisor.service\nAfter=network-online.target flowchain-live.service flowchain-supervisor.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-devnet/local/owner-inputs/flowchain-owner.local.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=devnet/local/owner-inputs/flowchain-owner.local.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-public-rpc-synthetic-canary.ps1 -AllowBlocked -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-public-rpc-synthetic-canary-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_PUBLIC_RPC_SYNTHETIC_CANARY.md\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs\n\n[Install]\nWantedBy=multi-user.target",
+                                            "timer":  "[Unit]\nDescription=Run FlowChain public RPC synthetic canary every 5 minutes\n\n[Timer]\nOnBootSec=2min\nOnUnitActiveSec=5min\nAccuracySec=30s\nPersistent=true\nUnit=flowchain-public-rpc-canary.service\n\n[Install]\nWantedBy=timers.target"
+                                        }
+                    },
+    "commands":  {
+                     "validate":  "npm run flowchain:public-rpc:canary:schedule:validate",
+                     "canary":  "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                     "windowsPlan":  "Register Windows Scheduled Task FlowChainPublicRpcSyntheticCanary using the rendered action in this report",
+                     "systemdPlan":  "Install flowchain-public-rpc-canary.service and flowchain-public-rpc-canary.timer from the rendered units in this report",
+                     "status":  "Check the Windows task or systemd timer, then inspect docs/agent-runs/live-product-infra-rpc/scheduled-public-rpc-synthetic-canary-report.json"
+                 },
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "syntheticCanaryPackageScriptPresent":  true,
+                   "canaryScriptExists":  true,
+                   "canaryScriptReadOnlyPlan":  true,
+                   "intervalMinutesValid":  true,
+                   "scheduledReportPathInsideRepo":  true,
+                   "scheduledMarkdownPathInsideRepo":  true,
+                   "windowsPlanRendered":  true,
+                   "windowsPlanUsesCanaryScript":  true,
+                   "windowsPlanUsesOwnerEnvFile":  true,
+                   "windowsPlanHasAllowBlocked":  true,
+                   "windowsPlanHasReportPath":  true,
+                   "windowsPlanHasMarkdownPath":  true,
+                   "windowsPlanUsesRepoWorkingDirectory":  true,
+                   "windowsPlanDoesNotMutateHost":  true,
+                   "systemdServiceRendered":  true,
+                   "systemdServiceUsesOneshot":  true,
+                   "systemdServiceUsesOwnerEnvFile":  true,
+                   "systemdServiceHasAllowBlocked":  true,
+                   "systemdServiceHasReportPath":  true,
+                   "systemdServiceHasMarkdownPath":  true,
+                   "systemdServiceHardeningPresent":  true,
+                   "systemdServiceWritePathsScoped":  true,
+                   "systemdTimerRendered":  true,
+                   "systemdTimerPersistent":  true,
+                   "systemdTimerIntervalConfigured":  true,
+                   "noExternalDelivery":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

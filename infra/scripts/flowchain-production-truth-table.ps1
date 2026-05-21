@@ -994,6 +994,56 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "public-rpc-canary-schedule-validation"
+        requirement = "Public RPC canary schedule validation renders no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only synthetic canary checks without host mutation or external delivery."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json"
+        command = "npm run flowchain:public-rpc:canary:schedule:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "syntheticCanaryPackageScriptPresent",
+            "canaryScriptExists",
+            "canaryScriptReadOnlyPlan",
+            "scheduledReportPathInsideRepo",
+            "scheduledMarkdownPathInsideRepo",
+            "windowsPlanUsesCanaryScript",
+            "windowsPlanUsesOwnerEnvFile",
+            "windowsPlanHasAllowBlocked",
+            "windowsPlanHasReportPath",
+            "windowsPlanHasMarkdownPath",
+            "windowsPlanUsesRepoWorkingDirectory",
+            "windowsPlanDoesNotMutateHost",
+            "systemdServiceRendered",
+            "systemdServiceUsesOneshot",
+            "systemdServiceUsesOwnerEnvFile",
+            "systemdServiceHasAllowBlocked",
+            "systemdServiceHasReportPath",
+            "systemdServiceHasMarkdownPath",
+            "systemdServiceHardeningPresent",
+            "systemdServiceWritePathsScoped",
+            "systemdTimerRendered",
+            "systemdTimerPersistent",
+            "systemdTimerIntervalConfigured",
+            "noExternalDelivery",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "hostMutationPerformed" = $false
+        }
+    },
+    [ordered]@{
         id = "public-rpc-validation"
         requirement = "Public RPC validation harness is present and fail-closed before endpoint sharing."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
@@ -2673,7 +2723,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

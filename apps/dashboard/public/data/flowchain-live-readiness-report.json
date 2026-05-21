@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T07:39:37.6566084Z",
+  "generatedAt": "2026-05-21T08:02:40.3990474Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "110643",
-    "finalizedHeight": "110643",
+    "latestHeight": "110824",
+    "finalizedHeight": "110824",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -121,7 +121,7 @@
     "opsEscalationDryRunStatus": "passed",
     "opsEscalationDryRunEvents": "6",
     "statusCounts": {
-      "passed": 8,
+      "passed": 9,
       "blocked": 5
     }
   },
@@ -2231,7 +2231,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110616, finalizedHeight=110616",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110798, finalizedHeight=110798",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2279,12 +2279,12 @@
       "label": "Public RPC edge",
       "status": "blocked",
       "summary": "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing.",
-      "evidence": "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
+      "evidence": "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, canaryScheduleReady=True, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
       "commands": [
         "npm run flowchain:public-rpc:validate",
         "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
-        "npm run flowchain:public-rpc:abuse-test",
-        "npm run flowchain:public-rpc:check"
+        "npm run flowchain:public-rpc:canary:schedule:validate",
+        "npm run flowchain:public-rpc:abuse-test"
       ],
       "blockers": [
         "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -2292,6 +2292,18 @@
         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
         "FLOWCHAIN_RPC_TLS_TERMINATED"
       ]
+    },
+    {
+      "id": "public-rpc-canary-schedule-automation",
+      "label": "RPC canary schedule",
+      "status": "passed",
+      "summary": "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks without host mutation or external delivery credentials.",
+      "evidence": "canaryScheduleValidation=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+      "commands": [
+        "npm run flowchain:public-rpc:canary:schedule:validate",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+      ],
+      "blockers": []
     },
     {
       "id": "state-backup",
@@ -2459,19 +2471,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:39:37.6566084Z"
+      "generatedAt": "2026-05-21T08:02:40.3990474Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:43:01.4670108Z"
+      "generatedAt": "2026-05-21T08:05:59.6739946Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:42:48.3519832Z"
+      "generatedAt": "2026-05-21T08:05:45.7143777Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -2513,7 +2525,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:42:40.9471454Z"
+      "generatedAt": "2026-05-21T08:05:38.0349345Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -2522,10 +2534,16 @@
       "generatedAt": "2026-05-21T06:00:23.2217487Z"
     },
     {
+      "fileName": "public-rpc-canary-schedule-validation-report.json",
+      "schema": "flowchain.public_rpc_canary_schedule_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-21T07:53:25.6732598Z"
+    },
+    {
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:42:53.2223119Z"
+      "generatedAt": "2026-05-21T08:05:51.2152341Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2543,7 +2561,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:42:58.6758717Z"
+      "generatedAt": "2026-05-21T08:05:56.9422140Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2573,25 +2591,25 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:43:04.7169419Z"
+      "generatedAt": "2026-05-21T08:06:03.0494825Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:43:04.7169419Z"
+      "generatedAt": "2026-05-21T08:06:03.0494825Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:43:02.4574090Z"
+      "generatedAt": "2026-05-21T08:06:00.5196874Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:24:41.0983837Z"
+      "generatedAt": "2026-05-21T07:59:25.4374197Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
@@ -2633,7 +2651,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:43:03.8550859Z"
+      "generatedAt": "2026-05-21T08:06:02.0867859Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2651,7 +2669,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:43:53.1954745Z"
+      "generatedAt": "2026-05-21T08:08:07.0755500Z"
     }
   ],
   "envValuesPrinted": false,

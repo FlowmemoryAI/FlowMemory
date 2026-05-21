@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T07:39:37.6566084Z",
+    "generatedAt":  "2026-05-21T08:02:40.3990474Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  25,
+                       "passed":  26,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  32
+                       "total":  33
                    },
     "items":  [
                   {
@@ -41,6 +41,7 @@
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
@@ -125,7 +126,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=110616, finalizedHeight=110616",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=110798, finalizedHeight=110798",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -317,13 +318,27 @@
                                    ]
                   },
                   {
+                      "id":  "public-rpc-canary-schedule-automation",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks without host mutation or external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "canaryScheduleValidation=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-edge",
                       "requirement":  "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, canaryScheduleReady=True, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:validate",
                                        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:public-rpc:check"
                                    ],
@@ -616,6 +631,7 @@
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
                         "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
+                        "publicRpcCanaryScheduleValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-canary-schedule-validation-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",

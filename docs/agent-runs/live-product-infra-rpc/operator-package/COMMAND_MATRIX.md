@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-21T07:38:30.1403514Z
+Generated: 2026-05-21T08:01:32.5240539Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -32,6 +32,7 @@ Generated: 2026-05-21T07:38:30.1403514Z
 | public-rpc | `npm run flowchain:public-rpc:command-matrix` | Map public RPC launch commands to owner inputs, mutation risk, rollback coverage, and evidence paths. |
 | public-rpc | `npm run flowchain:public-rpc:validate` | Run local public-profile RPC readiness validation. |
 | public-rpc | `npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked` | Run read-only public endpoint canary probes after the owner endpoint is configured. |
+| public-rpc | `npm run flowchain:public-rpc:canary:schedule:validate` | Render no-secret Windows and systemd recurring public RPC canary schedule plans without mutating the owner host. |
 | public-rpc | `npm run flowchain:public-rpc:abuse-test` | Run CORS, media-type, batch/body cap, rate-limit, and response hygiene probes. |
 | backup | `npm run flowchain:backup:restore:validate` | Prove restore safety and tamper rejection locally. |
 | backup | `npm run flowchain:backup:owner-path:dry-run` | Exercise backup readiness with an ignored local owner-path stand-in. |
