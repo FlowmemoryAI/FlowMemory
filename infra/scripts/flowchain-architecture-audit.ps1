@@ -768,13 +768,22 @@ $operatorPackageVerifyChecks = Get-ArchitectureProp -Object $operatorPackageVeri
 $operatorPackageVerifyFailedChecks = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "failedChecks" -Default @()))
 $operatorPackageVerifyExpectedFileCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "expectedFileCount" -Default 0)
 $operatorPackageVerifyCommandCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "commandCount" -Default 0)
+$operatorPackageVerifyGoLiveEvidenceCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "goLiveExpectedPackageEvidenceCount" -Default 0)
+$operatorPackageVerifyMissingGoLiveEvidence = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "missingGoLivePackageEvidence" -Default @()))
+$operatorPackageVerifyGoLiveEvidenceNotInManifest = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "goLivePackageEvidenceNotInManifest" -Default @()))
 $operatorPackageVerifyReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and ($operatorPackageVerifyStatus -eq "passed") `
     -and ($operatorPackageVerifyFailedChecks.Count -eq 0) `
     -and ($operatorPackageVerifyExpectedFileCount -ge 20) `
     -and ($operatorPackageVerifyCommandCount -ge 20) `
+    -and ($operatorPackageVerifyGoLiveEvidenceCount -ge 30) `
+    -and ($operatorPackageVerifyMissingGoLiveEvidence.Count -eq 0) `
+    -and ($operatorPackageVerifyGoLiveEvidenceNotInManifest.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "packageReportPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "expectedFilesPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveHandoffEvidencePresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidencePathsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidenceInManifest" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noForbiddenLocalFiles" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
@@ -803,9 +812,9 @@ Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "
     -Commands @("npm run flowchain:operator:package")
 
 Add-ArchitectureItem -Items $items -Id "node-operator-package-verify-boundary" -Layer "Operations" `
-    -Requirement "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan." `
+    -Requirement "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan." `
     -Status $(if ($operatorPackageVerifyReady) { "passed" } else { "failed" }) `
-    -Evidence "operatorPackageVerify=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, failedChecks=$($operatorPackageVerifyFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false)" `
+    -Evidence "operatorPackageVerify=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, goLiveEvidence=$operatorPackageVerifyGoLiveEvidenceCount, missingGoLiveEvidence=$($operatorPackageVerifyMissingGoLiveEvidence.Count), goLiveEvidenceNotInManifest=$($operatorPackageVerifyGoLiveEvidenceNotInManifest.Count), failedChecks=$($operatorPackageVerifyFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false)" `
     -Files @("infra/scripts/flowchain-operator-package-verify.ps1", "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md") `
     -Commands @("npm run flowchain:operator:package:verify")
 

@@ -1248,11 +1248,14 @@ $definitions = @(
     },
     [ordered]@{
         id = "node-operator-package-verify"
-        requirement = "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan."
+        requirement = "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan."
         path = "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
         command = "npm run flowchain:operator:package:verify"
         productionGate = $true
         ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            goLiveExpectedPackageEvidenceCount = 30
+        }
         requiredChecks = @(
             "packageReportExists",
             "packageReportPassed",
@@ -1267,6 +1270,9 @@ $definitions = @(
             "manifestDestinationHashesMatch",
             "reportRunbookCountEnough",
             "reportEvidenceCountEnough",
+            "goLiveHandoffEvidencePresent",
+            "goLiveExpectedEvidencePathsPresent",
+            "goLiveExpectedEvidenceInManifest",
             "ownerInputNamesOnly",
             "noForbiddenLocalFiles",
             "noSecretScanPassed",
@@ -1278,6 +1284,8 @@ $definitions = @(
         requiredEmptyArrays = @(
             "failedChecks",
             "hashProblems",
+            "missingGoLivePackageEvidence",
+            "goLivePackageEvidenceNotInManifest",
             "secretMarkerFindings"
         )
     },

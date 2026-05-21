@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package Verify
 
-Generated: 2026-05-20T23:39:51.5315275Z
+Generated: 2026-05-20T23:53:02.9545677Z
 Status: passed
 
 ## Checks
@@ -23,6 +23,9 @@ Status: passed
 | operatorDoctorEvidencePresent | True |
 | operatorDoctorNoFailedChecks | True |
 | operatorDoctorPassedOrOwnerBlocked | True |
+| goLiveHandoffEvidencePresent | True |
+| goLiveExpectedEvidencePathsPresent | True |
+| goLiveExpectedEvidenceInManifest | True |
 | ownerInputNamesOnly | True |
 | noForbiddenLocalFiles | True |
 | noSecretScanPassed | True |
@@ -35,9 +38,12 @@ Status: passed
 
 - Package report: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package-report.json`
 - Package directory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package`
-- Expected files: 86
+- Expected files: 102
 - Missing files: 0
 - Forbidden local files: 0
 - Hash problems: 0
 - Command count: 63
+- Go-live evidence paths: 33
+- Missing go-live evidence files: 0
+- Go-live evidence missing from manifest: 0
 - Owner-input names: 17

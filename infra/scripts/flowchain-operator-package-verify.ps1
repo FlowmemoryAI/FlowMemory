@@ -153,12 +153,18 @@ $expectedFiles = @(
     "evidence/owner-signup-checklist-report.json",
     "evidence/owner-activation-plan-report.json",
     "evidence/owner-go-live-handoff-report.json",
+    "evidence/owner-inputs-report.json",
+    "evidence/owner-inputs-validation-report.json",
     "evidence/owner-env-template-report.json",
     "evidence/owner-env-readiness-validation-report.json",
     "evidence/owner-env-readiness-report.json",
     "evidence/public-rpc-deployment-bundle-report.json",
     "evidence/public-rpc-deployment-automation-report.json",
+    "evidence/public-rpc-readiness-report.json",
+    "evidence/public-rpc-validation-report.json",
     "evidence/public-rpc-synthetic-canary-report.json",
+    "evidence/public-rpc-abuse-test-report.json",
+    "evidence/backup-readiness-report.json",
     "evidence/backup-restore-validation-report.json",
     "evidence/backup-owner-path-dry-run-report.json",
     "evidence/backup-install-validation-report.json",
@@ -170,6 +176,8 @@ $expectedFiles = @(
     "evidence/ops-metrics.json",
     "evidence/ops-metrics.prom.txt",
     "evidence/incident-drill-report.json",
+    "evidence/bridge-live-readiness-report.json",
+    "evidence/bridge-infra-readiness-report.json",
     "evidence/bridge-relayer-once-report.json",
     "evidence/bridge-deploy-control-validation-report.json",
     "evidence/bridge-relayer-guardrail-validation-report.json",
@@ -178,12 +186,20 @@ $expectedFiles = @(
     "evidence/real-value-pilot-aggregate-report.json",
     "evidence/bridge-reconciliation-report.json",
     "evidence/bridge-release-evidence-validation-report.json",
+    "evidence/tester-write-token-setup-report.json",
+    "evidence/public-tester-gateway-e2e-report.json",
+    "evidence/live-service-tester-network-e2e-report.json",
     "evidence/external-tester-packet-report.json",
     "evidence/external-tester-packet-validation-report.json",
+    "evidence/external-tester-client-validation-report.json",
+    "evidence/external-tester-evidence-validation-report.json",
     "evidence/dashboard-ui-readiness-report.json",
+    "evidence/public-deployment-contract-report.json",
     "evidence/flowchain-architecture-audit-report.json",
     "evidence/flowchain-completion-audit-report.json",
-    "evidence/production-truth-table-report.json"
+    "evidence/production-truth-table-report.json",
+    "evidence/live-cutover-rehearsal-report.json",
+    "evidence/no-secret-scan-report.json"
 )
 
 $missingFiles = @($expectedFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $packageFullPath $_)) })
@@ -197,6 +213,7 @@ $manifestCommands = @((Get-OperatorVerifyProp -Object $manifest -Name "commandMa
 $matrixCommands = @((Get-OperatorVerifyProp -Object $matrix -Name "commands" -Default @()))
 $manifestRunbooks = @((Get-OperatorVerifyProp -Object $manifest -Name "runbooks" -Default @()))
 $manifestEvidence = @((Get-OperatorVerifyProp -Object $manifest -Name "evidence" -Default @()))
+$manifestEvidenceDestinations = @($manifestEvidence | ForEach-Object { [string](Get-OperatorVerifyProp -Object $_ -Name "destination" -Default "") } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 $runbookHashProblems = @(Get-OperatorVerifyHashProblems -Entries $manifestRunbooks -Kind "runbook" -PackageRoot $packageFullPath)
 $evidenceHashProblems = @(Get-OperatorVerifyHashProblems -Entries $manifestEvidence -Kind "evidence" -PackageRoot $packageFullPath)
 $hashProblems = @($runbookHashProblems + $evidenceHashProblems)
@@ -205,6 +222,19 @@ $operatorDoctor = Read-FlowChainJsonIfExists -Path (Join-Path $packageFullPath "
 $operatorDoctorStatus = [string](Get-OperatorVerifyProp -Object $operatorDoctor -Name "status" -Default "missing")
 $operatorDoctorFailedChecks = @((Get-OperatorVerifyProp -Object $operatorDoctor -Name "failedChecks" -Default @()))
 $operatorDoctorBlockedOnlyOwnerInputs = (Get-OperatorVerifyProp -Object $operatorDoctor -Name "blockedOnlyOnOwnerInputs" -Default $false) -eq $true
+$goLiveHandoff = Read-FlowChainJsonIfExists -Path (Join-Path $packageFullPath "evidence/owner-go-live-handoff-report.json")
+$goLiveLaunchSequence = @((Get-OperatorVerifyProp -Object $goLiveHandoff -Name "launchSequence" -Default @()))
+$goLiveExpectedReportPaths = @($goLiveLaunchSequence | ForEach-Object {
+        @((Get-OperatorVerifyProp -Object $_ -Name "expectedReportPaths" -Default @()))
+    } | ForEach-Object { "$_" } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+$goLiveExpectedPackageEvidence = @($goLiveExpectedReportPaths | ForEach-Object {
+        $leafName = Split-Path -Leaf $_
+        if (-not [string]::IsNullOrWhiteSpace($leafName)) {
+            "evidence/$leafName"
+        }
+    } | Select-Object -Unique)
+$missingGoLivePackageEvidence = @($goLiveExpectedPackageEvidence | Where-Object { -not (Test-Path -LiteralPath (Join-Path $packageFullPath $_)) })
+$goLivePackageEvidenceNotInManifest = @($goLiveExpectedPackageEvidence | Where-Object { $_ -notin $manifestEvidenceDestinations })
 
 $scanReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-no-secret-scan-report.json"
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1") -Paths @($packageFullPath, $packageReportFullPath) -ReportPath $scanReportPath
@@ -245,6 +275,9 @@ $checks = [ordered]@{
     operatorDoctorEvidencePresent = $null -ne $operatorDoctor
     operatorDoctorNoFailedChecks = $operatorDoctorFailedChecks.Count -eq 0
     operatorDoctorPassedOrOwnerBlocked = ($operatorDoctorStatus -eq "passed") -or ($operatorDoctorStatus -eq "blocked" -and $operatorDoctorBlockedOnlyOwnerInputs)
+    goLiveHandoffEvidencePresent = $null -ne $goLiveHandoff
+    goLiveExpectedEvidencePathsPresent = $goLiveExpectedReportPaths.Count -ge 30 -and $goLiveExpectedPackageEvidence.Count -ge 30 -and $missingGoLivePackageEvidence.Count -eq 0
+    goLiveExpectedEvidenceInManifest = $goLivePackageEvidenceNotInManifest.Count -eq 0
     ownerInputNamesOnly = $manifestOwnerInputs.Count -eq 17 -and $reportOwnerInputs.Count -eq 17 -and $badOwnerInputNames.Count -eq 0
     noForbiddenLocalFiles = $forbiddenFiles.Count -eq 0
     noSecretScanPassed = $scanExitCode -eq 0 -and $scanStatus -eq "passed" -and $secretFindings.Count -eq 0 -and $scanSecretFindings.Count -eq 0
@@ -271,6 +304,10 @@ $report = [ordered]@{
     commandCount = $manifestCommands.Count
     operatorDoctorStatus = $operatorDoctorStatus
     operatorDoctorFailedCheckCount = $operatorDoctorFailedChecks.Count
+    goLiveExpectedReportPathCount = $goLiveExpectedReportPaths.Count
+    goLiveExpectedPackageEvidenceCount = $goLiveExpectedPackageEvidence.Count
+    missingGoLivePackageEvidence = @($missingGoLivePackageEvidence)
+    goLivePackageEvidenceNotInManifest = @($goLivePackageEvidenceNotInManifest)
     ownerInputNameCount = $manifestOwnerInputs.Count
     badOwnerInputNames = @($badOwnerInputNames)
     noSecretScanReportPath = $scanReportPath
@@ -307,6 +344,9 @@ $markdownLines.Add("- Missing files: $($missingFiles.Count)")
 $markdownLines.Add("- Forbidden local files: $($forbiddenFiles.Count)")
 $markdownLines.Add("- Hash problems: $($hashProblems.Count)")
 $markdownLines.Add("- Command count: $($manifestCommands.Count)")
+$markdownLines.Add("- Go-live evidence paths: $($goLiveExpectedReportPaths.Count)")
+$markdownLines.Add("- Missing go-live evidence files: $($missingGoLivePackageEvidence.Count)")
+$markdownLines.Add("- Go-live evidence missing from manifest: $($goLivePackageEvidenceNotInManifest.Count)")
 $markdownLines.Add("- Owner-input names: $($manifestOwnerInputs.Count)")
 Set-Content -LiteralPath $markdownFullPath -Value $markdownLines -Encoding UTF8
 

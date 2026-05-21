@@ -1728,6 +1728,9 @@ $operatorPackageVerifyFailedChecks = @((Get-AuditProp -Object $operatorPackageVe
 $operatorPackageVerifySecretFindings = @((Get-AuditProp -Object $operatorPackageVerify -Name "secretMarkerFindings" -Default @()))
 $operatorPackageVerifyExpectedFileCount = [int](Get-AuditProp -Object $operatorPackageVerify -Name "expectedFileCount" -Default 0)
 $operatorPackageVerifyCommandCount = [int](Get-AuditProp -Object $operatorPackageVerify -Name "commandCount" -Default 0)
+$operatorPackageVerifyGoLiveEvidenceCount = [int](Get-AuditProp -Object $operatorPackageVerify -Name "goLiveExpectedPackageEvidenceCount" -Default 0)
+$operatorPackageVerifyMissingGoLiveEvidence = @((Get-AuditProp -Object $operatorPackageVerify -Name "missingGoLivePackageEvidence" -Default @()))
+$operatorPackageVerifyGoLiveEvidenceNotInManifest = @((Get-AuditProp -Object $operatorPackageVerify -Name "goLivePackageEvidenceNotInManifest" -Default @()))
 $operatorPackageVerifySecretFindingCount = @($operatorPackageVerifySecretFindings | Where-Object { $null -ne $_ }).Count
 $operatorPackageVerifyPassed = $operatorPackageVerifyExitCode -eq 0 `
     -and $operatorPackageVerifyStatus -eq "passed" `
@@ -1735,8 +1738,14 @@ $operatorPackageVerifyPassed = $operatorPackageVerifyExitCode -eq 0 `
     -and $operatorPackageVerifySecretFindingCount -eq 0 `
     -and $operatorPackageVerifyExpectedFileCount -ge 20 `
     -and $operatorPackageVerifyCommandCount -ge 20 `
+    -and $operatorPackageVerifyGoLiveEvidenceCount -ge 30 `
+    -and $operatorPackageVerifyMissingGoLiveEvidence.Count -eq 0 `
+    -and $operatorPackageVerifyGoLiveEvidenceNotInManifest.Count -eq 0 `
     -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "packageReportPassed" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "expectedFilesPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "goLiveHandoffEvidencePresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidencePathsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidenceInManifest" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "noForbiddenLocalFiles" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
@@ -3287,9 +3296,9 @@ Add-AuditItem -Items $items -Id "node-operator-package" `
     -Commands @("npm run flowchain:operator:package")
 
 Add-AuditItem -Items $items -Id "node-operator-package-verify" `
-    -Requirement "Node operator package verifier independently checks the generated package manifest, expected files, command matrix, owner-input names, forbidden local files, and no-secret scan." `
+    -Requirement "Node operator package verifier independently checks the generated package manifest, expected files, command matrix, owner-input names, owner go-live expected evidence reports, forbidden local files, and no-secret scan." `
     -Status $(if ($operatorPackageVerifyPassed) { "passed" } else { "failed" }) `
-    -Evidence "verifyStatus=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, failedChecks=$($operatorPackageVerifyFailedChecks.Count), secretFindings=$operatorPackageVerifySecretFindingCount, report=$($paths.operatorPackageVerify)" `
+    -Evidence "verifyStatus=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, goLiveEvidence=$operatorPackageVerifyGoLiveEvidenceCount, missingGoLiveEvidence=$($operatorPackageVerifyMissingGoLiveEvidence.Count), goLiveEvidenceNotInManifest=$($operatorPackageVerifyGoLiveEvidenceNotInManifest.Count), failedChecks=$($operatorPackageVerifyFailedChecks.Count), secretFindings=$operatorPackageVerifySecretFindingCount, report=$($paths.operatorPackageVerify)" `
     -Commands @("npm run flowchain:operator:package:verify")
 
 Add-AuditItem -Items $items -Id "public-rpc-readiness-validator-self-test" `
