@@ -775,6 +775,56 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "owner-needs-now"
+        requirement = "Owner needs-now report answers what the L1 needs now by grouping remaining owner-input blockers into public RPC edge, backup, tester gateway, and Base 8453 bridge actions without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"
+        command = "npm run flowchain:owner:needs-now"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "missingRequiredCoverage",
+            "unknownNeededNowEnvNames",
+            "optionalNeededNowEnvNames",
+            "invalidEnvNames"
+        )
+        requiredMinimums = [ordered]@{
+            groupCount = 4
+            neededNowGroupCount = 1
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "ownerInputsLoaded",
+            "ownerGoLiveHandoffLoaded",
+            "activationPlanLoaded",
+            "truthTableLoaded",
+            "reportStatusDeckPresent",
+            "groupCountMinimumMet",
+            "requiredEnvCoverageComplete",
+            "groupCommandsPresent",
+            "groupDoNotSendPresent",
+            "knownNeededNowOwnerInputsOnly",
+            "optionalOwnerInputsExcludedFromNeededNow",
+            "nextOwnerInputsPresentWhenBlocked",
+            "neededNowGroupsPresentWhenBlocked",
+            "readyTesterGatewayCaptured",
+            "noReleaseReadyClaimWhileBlocked",
+            "publicSharingBlockedUntilReady",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredReportProperties = [ordered]@{
+            "launchReadinessStatus" = "blocked-owner-input"
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+    },
+    [ordered]@{
         id = "owner-env-template"
         requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
         path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T08:37:08.9104458Z",
+    "generatedAt":  "2026-05-21T09:05:25.2956257Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -101,6 +101,11 @@
                          "phase":  "owner-setup",
                          "command":  "npm run flowchain:owner:go-live-handoff",
                          "purpose":  "Generate the exact no-secret go-live handoff deck, next owner inputs, validation commands, and do-not-send list."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner:needs-now",
+                         "purpose":  "Generate the current no-secret answer to what the L1 needs now, grouped by owner action and validation command."
                      },
                      {
                          "phase":  "owner-setup",

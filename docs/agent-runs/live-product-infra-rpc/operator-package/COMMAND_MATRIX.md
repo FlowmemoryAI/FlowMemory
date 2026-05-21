@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-21T08:37:08.9104458Z
+Generated: 2026-05-21T09:05:25.2956257Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -24,6 +24,7 @@ Generated: 2026-05-21T08:37:08.9104458Z
 | owner-setup | `npm run flowchain:owner:signup-checklist` | List exactly what the owner must sign up for or create before public launch. |
 | owner-setup | `npm run flowchain:owner:activation-plan` | Generate the current ordered launch activation plan and exact validation commands. |
 | owner-setup | `npm run flowchain:owner:go-live-handoff` | Generate the exact no-secret go-live handoff deck, next owner inputs, validation commands, and do-not-send list. |
+| owner-setup | `npm run flowchain:owner:needs-now` | Generate the current no-secret answer to what the L1 needs now, grouped by owner action and validation command. |
 | owner-setup | `npm run flowchain:owner-env:template` | Create or preserve the ignored local owner env scaffold with empty values only. |
 | owner-setup | `npm run flowchain:owner-env:readiness:validate` | Prove unsafe owner env file paths fail before live gates run. |
 | owner-setup | `npm run flowchain:owner-env:readiness -- -AllowBlocked` | Run live gates through the ignored owner env file and report only names and statuses. |

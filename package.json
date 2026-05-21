@@ -76,6 +76,7 @@
     "flowchain:owner:signup-checklist": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-signup-checklist.ps1",
     "flowchain:owner:activation-plan": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-activation-plan.ps1",
     "flowchain:owner:go-live-handoff": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-go-live-handoff.ps1",
+    "flowchain:owner:needs-now": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-needs-now.ps1",
     "flowchain:owner-env:template": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-env-template.ps1",
     "flowchain:owner-env:readiness": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-env-readiness.ps1",
     "flowchain:owner-env:readiness:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-owner-env-readiness-validation.ps1",
