@@ -369,6 +369,10 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("Next owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
     await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();
     await expect(page.getByLabel("Missing owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("Guide rows");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("absolute non-local HTTPS endpoint");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("owner DNS, tunnel, or reverse proxy hostname");
 
     await page.goto("/bridge");
     await expect(page.getByRole("heading", { name: "Bridge funds into Flowchain" })).toBeVisible();

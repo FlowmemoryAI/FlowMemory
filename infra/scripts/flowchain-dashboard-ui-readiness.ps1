@@ -181,6 +181,9 @@ $checks = [ordered]@{
     ownerNeedsNowGroupsCovered = $specText.Contains("Owner setup groups") -and $specText.Contains("Public RPC edge validation commands") -and $workbenchText.Contains("neededNowGroups")
     ownerNeedsNowActionsCovered = $specText.Contains("Pick the public RPC URL") -and $workbenchText.Contains("ownerAction")
     ownerNeedsNowReadyGroupCovered = $specText.Contains("Ready setup groups") -and $specText.Contains("Tester write gateway") -and $workbenchText.Contains("readyGroups")
+    ownerEnvTemplateReportCopied = $workbenchText.Contains("owner-env-template-report.json") -and $workbenchText.Contains("ownerEnvTemplate")
+    ownerEnvFieldGuideCovered = $specText.Contains("Owner env field guide") -and $specText.Contains("absolute non-local HTTPS endpoint") -and $workbenchText.Contains("fieldGuide")
+    ownerEnvFieldGuideBoundaryCovered = $specText.Contains("Guide rows") -and $workbenchText.Contains("ownerEnvTemplateNoSecrets") -and $workbenchText.Contains("ownerEnvTemplateEnvValuesPrinted")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
     dashboardUnitTestsPassed = ($commands | Where-Object { $_.label -eq "dashboard unit render tests" } | Select-Object -First 1).exitCode -eq 0
@@ -204,7 +207,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge", "/ops", "/alerts")
-    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "base8453-bridge-reconciliation-schedule-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-needs-now-groups", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
+    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "base8453-bridge-reconciliation-schedule-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-needs-now-groups", "owner-env-field-guide", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -235,7 +238,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner needs-now grouped action proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> bridge reconciliation schedule proof -> real-value pilot aggregate proof -> ops observability proof -> alert list proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner needs-now grouped action proof -> owner env field-guide proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> bridge reconciliation schedule proof -> real-value pilot aggregate proof -> ops observability proof -> alert list proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

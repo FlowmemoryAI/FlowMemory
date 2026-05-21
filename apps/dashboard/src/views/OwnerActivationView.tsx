@@ -3,6 +3,7 @@ import {
   ArrowRightLeft,
   CheckCircle2,
   ClipboardCheck,
+  FileText,
   HardDrive,
   KeyRound,
   ListChecks,
@@ -60,6 +61,16 @@ interface OwnerInputGroup {
   ownerAction?: string;
   validationCommands?: string[];
   doNotSend?: string[];
+}
+
+interface OwnerEnvFieldGuideItem {
+  name: string;
+  group: string;
+  required: boolean;
+  purpose: string;
+  validation: string;
+  source: string;
+  doNotSend: string;
 }
 
 const OWNER_INPUT_GROUPS = [
@@ -194,6 +205,22 @@ function parseOwnerNeedGroup(value: unknown): OwnerInputGroup | null {
   };
 }
 
+function parseOwnerEnvFieldGuideItem(value: unknown): OwnerEnvFieldGuideItem | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  return {
+    name: text(value.name, "OWNER_ENV_NAME"),
+    group: text(value.group, "operator input"),
+    required: value.required === true,
+    purpose: text(value.purpose, "Owner-provided launch input."),
+    validation: text(value.validation, "not recorded"),
+    source: text(value.source, "owner-controlled infrastructure"),
+    doNotSend: text(value.doNotSend, "owner env file contents"),
+  };
+}
+
 function stageIcon(id: string) {
   if (id.includes("public-rpc")) return Server;
   if (id.includes("backup")) return HardDrive;
@@ -235,6 +262,7 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const activation = isRecord(liveReadiness?.ownerActivation) ? liveReadiness.ownerActivation : null;
   const handoff = isRecord(liveReadiness?.ownerGoLiveHandoff) ? liveReadiness.ownerGoLiveHandoff : null;
   const ownerNeedsNow = isRecord(liveReadiness?.ownerNeedsNow) ? liveReadiness.ownerNeedsNow : null;
+  const ownerEnvTemplate = isRecord(liveReadiness?.ownerEnvTemplate) ? liveReadiness.ownerEnvTemplate : null;
   const stageSource = handoff ?? activation;
   const stages = asArray(stageSource?.stages).map(parseStage).filter((stage): stage is ActivationStage => stage !== null);
   const needsNowGroups = asArray(ownerNeedsNow?.neededNowGroups)
@@ -243,6 +271,9 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const readyOwnerGroups = asArray(ownerNeedsNow?.readyGroups)
     .map(parseOwnerNeedGroup)
     .filter((group): group is OwnerInputGroup => group !== null);
+  const ownerEnvFieldGuide = asArray(ownerEnvTemplate?.fieldGuide)
+    .map(parseOwnerEnvFieldGuideItem)
+    .filter((item): item is OwnerEnvFieldGuideItem => item !== null);
   const missingEnvNames = stringList(handoff?.missingEnvNames ?? activation?.missingEnvNames);
   const invalidEnvNames = stringList(handoff?.invalidEnvNames ?? activation?.invalidEnvNames);
   const nextOwnerInputNames = stringList(ownerNeedsNow?.nextOwnerInputNames ?? handoff?.nextOwnerInputNames ?? activation?.nextOwnerInputNames);
@@ -301,6 +332,10 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const ownerNeedsNowStatus = text(ownerNeedsNow?.status ?? metrics.ownerNeedsNowStatus, "not recorded");
   const ownerNeedsNowNeededGroupCount = text(ownerNeedsNow?.neededNowGroupCount ?? metrics.ownerNeedsNowNeededGroupCount, String(ownerInputGroups.length));
   const ownerNeedsNowReadyGroupCount = text(ownerNeedsNow?.readyGroupCount ?? metrics.ownerNeedsNowReadyGroupCount, String(readyOwnerGroups.length));
+  const ownerEnvTemplateStatus = text(ownerEnvTemplate?.status ?? metrics.ownerEnvTemplateStatus, "not recorded");
+  const ownerEnvFieldGuideCount = text(ownerEnvTemplate?.fieldGuideCount ?? metrics.ownerEnvTemplateFieldGuideCount, String(ownerEnvFieldGuide.length));
+  const ownerEnvTemplateNoSecrets = ownerEnvTemplate?.noSecrets === true || metrics.ownerEnvTemplateNoSecrets === true;
+  const ownerEnvTemplateValuesPrinted = ownerEnvTemplate?.envValuesPrinted === true || metrics.ownerEnvTemplateEnvValuesPrinted === true;
 
   return (
     <div className="view-stack activation-view">
@@ -606,6 +641,62 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
             </div>
           </article>
         </aside>
+      </section>
+
+      <section className="panel activation-field-guide-panel" aria-label="Owner env field guide">
+        <div className="panel-heading">
+          <div>
+            <FileText size={18} aria-hidden="true" />
+            <h2>Env field guide</h2>
+          </div>
+          <StatusBadge status={ownerEnvTemplateStatus === "passed" && ownerEnvTemplateNoSecrets ? "verified" : "pending"} compact />
+        </div>
+        <div className="activation-field-guide-summary">
+          <div>
+            <span>Guide rows</span>
+            <strong>{ownerEnvFieldGuideCount}</strong>
+            <small>template {ownerEnvTemplateStatus}</small>
+          </div>
+          <div>
+            <span>Values printed</span>
+            <strong>{String(ownerEnvTemplateValuesPrinted)}</strong>
+            <small>keeps real values in the ignored owner env file</small>
+          </div>
+          <div>
+            <span>No-secret check</span>
+            <strong>{String(ownerEnvTemplateNoSecrets)}</strong>
+            <small>field guide records names and rules only</small>
+          </div>
+        </div>
+        {ownerEnvFieldGuide.length > 0 ? (
+          <div className="activation-field-guide-list">
+            {ownerEnvFieldGuide.map((item) => (
+              <article key={`field-guide:${item.name}`} className="activation-field-guide-item">
+                <div>
+                  <code>{item.name}</code>
+                  <span>{item.required ? "required" : "optional"} / {item.group}</span>
+                </div>
+                <p>{item.purpose}</p>
+                <dl>
+                  <div>
+                    <dt>Validation</dt>
+                    <dd>{item.validation}</dd>
+                  </div>
+                  <div>
+                    <dt>Where to get it</dt>
+                    <dd>{item.source}</dd>
+                  </div>
+                  <div>
+                    <dt>Do not send</dt>
+                    <dd>{item.doNotSend}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <EmptyState title="Env field guide missing" detail="Run npm run flowchain:owner-env:template, then refresh dashboard fixtures." />
+        )}
       </section>
     </div>
   );

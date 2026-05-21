@@ -73,6 +73,7 @@ const liveReadinessReportCopies = [
   "alert-install-validation-report.json",
   "ops-escalation-dry-run-report.json",
   "owner-inputs-report.json",
+  "owner-env-template-report.json",
   "owner-activation-plan-report.json",
   "owner-go-live-handoff-report.json",
   "owner-needs-now-report.json",
@@ -240,6 +241,7 @@ function writeLiveReadinessSummary() {
   const alertInstallValidation = reports["alert-install-validation-report.json"];
   const opsEscalationDryRun = reports["ops-escalation-dry-run-report.json"];
   const ownerInputs = reports["owner-inputs-report.json"];
+  const ownerEnvTemplate = reports["owner-env-template-report.json"];
   const ownerActivationPlan = reports["owner-activation-plan-report.json"];
   const ownerGoLiveHandoff = reports["owner-go-live-handoff-report.json"];
   const ownerNeedsNow = reports["owner-needs-now-report.json"];
@@ -318,6 +320,15 @@ function writeLiveReadinessSummary() {
     validationCommands: commandList(group?.validationCommands, 6),
     doNotSend: uniqueTexts(group?.doNotSend),
   });
+  const toOwnerEnvFieldGuide = (item) => ({
+    name: sanitizeText(item?.name),
+    group: sanitizeText(item?.group),
+    required: item?.required === true,
+    purpose: sanitizeText(item?.purpose),
+    validation: sanitizeText(item?.validation),
+    source: sanitizeText(item?.source),
+    doNotSend: sanitizeText(item?.doNotSend),
+  });
   const activationStages = asArray(ownerActivationPlan?.stages).map(toActivationStage);
   const goLiveStages = asArray(ownerGoLiveHandoff?.stages).map(toActivationStage);
   const goLiveLaunchSequence = asArray(ownerGoLiveHandoff?.launchSequence).map(toLaunchStep);
@@ -325,6 +336,7 @@ function writeLiveReadinessSummary() {
   const ownerNeedGroups = asArray(ownerNeedsNow?.groups).map(toOwnerNeedGroup);
   const ownerNeededNowGroups = asArray(ownerNeedsNow?.neededNowGroups).map(toOwnerNeedGroup);
   const ownerReadyGroups = asArray(ownerNeedsNow?.readyGroups).map(toOwnerNeedGroup);
+  const ownerEnvFieldGuide = asArray(ownerEnvTemplate?.fieldGuide).map(toOwnerEnvFieldGuide);
   const activationForbiddenItems = uniqueTexts(activationStages.flatMap((stage) => stage.ownerMustNotSend));
   const goLiveForbiddenItems = uniqueTexts(ownerGoLiveHandoff?.mustNotSend ?? goLiveStages.flatMap((stage) => stage.ownerMustNotSend));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
@@ -439,6 +451,11 @@ function writeLiveReadinessSummary() {
       publicTesterGatewayNoSecrets: opsSnapshot?.reportStatuses?.publicTesterGatewayNoSecrets === true || publicTesterGateway?.noSecrets === true,
       publicTesterGatewayNoBroadcasts: opsSnapshot?.reportStatuses?.publicTesterGatewayNoBroadcasts === true || publicTesterGateway?.broadcasts === false,
       ownerInputReady: ownerInputs?.ownerInputReady === true,
+      ownerEnvTemplateStatus: asText(ownerEnvTemplate?.status, "not recorded"),
+      ownerEnvTemplateFieldGuideCount: asText(ownerEnvTemplate?.fieldGuideCount, String(ownerEnvFieldGuide.length)),
+      ownerEnvTemplateRequiredEnvNameCount: asText(ownerEnvTemplate?.requiredEnvNameCount, "0"),
+      ownerEnvTemplateNoSecrets: ownerEnvTemplate?.noSecrets === true,
+      ownerEnvTemplateEnvValuesPrinted: ownerEnvTemplate?.envValuesPrinted === true,
       ownerActivationStatus: asText(ownerActivationPlan?.status, "not recorded"),
       ownerActivationReady: ownerActivationPlan?.activationReady === true,
       ownerActivationStageCount: asText(ownerActivationPlan?.stageCount, String(activationStages.length)),
@@ -615,6 +632,18 @@ function writeLiveReadinessSummary() {
       noSecrets: ownerActivationPlan?.noSecrets === true,
       broadcasts: ownerActivationPlan?.broadcasts === true,
       envValuesPrinted: ownerActivationPlan?.envValuesPrinted === true,
+    },
+    ownerEnvTemplate: {
+      status: asText(ownerEnvTemplate?.status, "not recorded"),
+      requiredEnvNameCount: asText(ownerEnvTemplate?.requiredEnvNameCount, "0"),
+      optionalEnvNameCount: asText(asArray(ownerEnvTemplate?.optionalEnvNames).length, "0"),
+      fieldGuideCount: asText(ownerEnvTemplate?.fieldGuideCount, String(ownerEnvFieldGuide.length)),
+      fieldGuide: ownerEnvFieldGuide,
+      checks: ownerEnvTemplate?.checks ?? {},
+      failedChecks: uniqueTexts(ownerEnvTemplate?.failedChecks),
+      noSecrets: ownerEnvTemplate?.noSecrets === true,
+      broadcasts: ownerEnvTemplate?.broadcasts === true,
+      envValuesPrinted: ownerEnvTemplate?.envValuesPrinted === true,
     },
     ownerGoLiveHandoff: {
       status: asText(ownerGoLiveHandoff?.status, "not recorded"),

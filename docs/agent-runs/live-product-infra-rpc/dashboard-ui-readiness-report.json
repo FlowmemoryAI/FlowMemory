@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T10:34:23.3900858+00:00",
+    "generatedAt":  "2026-05-21T11:47:11.1004558+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -35,6 +35,9 @@
                    "ownerNeedsNowGroupsCovered":  true,
                    "ownerNeedsNowActionsCovered":  true,
                    "ownerNeedsNowReadyGroupCovered":  true,
+                   "ownerEnvTemplateReportCopied":  true,
+                   "ownerEnvFieldGuideCovered":  true,
+                   "ownerEnvFieldGuideBoundaryCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
                    "dashboardUnitTestsPassed":  true,
@@ -70,7 +73,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  33,
+                         "durationSeconds":  38,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  32
                      },
@@ -90,7 +93,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  232,
+                         "durationSeconds":  337,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -118,6 +121,7 @@
                           "real-value-pilot-aggregate-proof",
                           "public-rpc-command-matrix-proof",
                           "owner-needs-now-groups",
+                          "owner-env-field-guide",
                           "owner-host-apply-plan",
                           "owner-host-apply-execution",
                           "owner-host-apply-rollback",

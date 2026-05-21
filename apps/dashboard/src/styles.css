@@ -4635,6 +4635,116 @@ code {
   text-transform: none;
 }
 
+.activation-field-guide-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.activation-field-guide-summary {
+  display: grid;
+  grid-template-columns: 0.6fr 0.9fr 0.9fr;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #b8c7c0;
+  border-radius: 8px;
+  background: #b8c7c0;
+}
+
+.activation-field-guide-summary div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  background: #f7faf5;
+}
+
+.activation-field-guide-summary span,
+.activation-field-guide-item dt {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.activation-field-guide-summary strong {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.activation-field-guide-summary small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.activation-field-guide-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.activation-field-guide-item {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #bfd0c8;
+  border-radius: 8px;
+  background: #fbfcf8;
+}
+
+.activation-field-guide-item > div:first-child {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.activation-field-guide-item code {
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 7px;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.activation-field-guide-item span,
+.activation-field-guide-item p,
+.activation-field-guide-item dd {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.activation-field-guide-item p {
+  margin: 0;
+  color: #43534d;
+}
+
+.activation-field-guide-item dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.activation-field-guide-item dl div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.activation-field-guide-item dt,
+.activation-field-guide-item dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .ops-command-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -5551,6 +5661,7 @@ code {
   .tester-launch-route-pair,
   .tester-launch-route-pair > div > div,
   .activation-command-panel,
+  .activation-field-guide-summary,
   .activation-host-apply-proof,
   .activation-stage-facts,
   .workbench-switcher,

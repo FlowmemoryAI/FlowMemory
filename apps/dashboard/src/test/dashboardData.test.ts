@@ -175,6 +175,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix commands")?.value).toBe("20");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret audit")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret findings")?.value).toBe("0");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "owner env template")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "owner env field guide")?.value).toBe("19");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix commands")?.value).toBe("21");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
@@ -563,6 +565,11 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Owner inputs");
     expect(html).toContain("Next commands");
     expect(html).toContain("Do not send");
+    expect(html).toContain("Env field guide");
+    expect(html).toContain("Guide rows");
+    expect(html).toContain("absolute non-local HTTPS endpoint");
+    expect(html).toContain("owner DNS, tunnel, or reverse proxy hostname");
+    expect(html).toContain("Where to get it");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("FLOWCHAIN_BASE8453_RPC_URL");
     expect(html).toContain("npm run flowchain:owner-env:readiness");
