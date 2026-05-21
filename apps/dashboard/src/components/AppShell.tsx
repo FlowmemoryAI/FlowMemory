@@ -11,6 +11,7 @@ import {
   ClipboardList,
   ArrowRightLeft,
   Compass,
+  GitBranch,
   RadioReceiver,
   LayoutDashboard,
   Monitor,
@@ -38,6 +39,7 @@ const NAV_ITEMS = [
   { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/tester", label: "Tester launch", icon: UserPlus },
   { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
+  { to: "/hooks", label: "V4 hooks", icon: GitBranch },
   { to: "/explorer", label: "Explorer", icon: Compass },
   { to: "/ops", label: "Ops", icon: ShieldAlert },
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
@@ -57,7 +59,8 @@ export function AppShell({ data, canaryData, workbench, children }: AppShellProp
   const location = useLocation();
   const isBridgeRoute = location.pathname.startsWith("/bridge");
   const isWalletRoute = location.pathname.startsWith("/wallet");
-  if (isBridgeRoute || isWalletRoute) {
+  const isHooksRoute = location.pathname.startsWith("/hooks");
+  if (isBridgeRoute || isWalletRoute || isHooksRoute) {
     return <>{children}</>;
   }
 
