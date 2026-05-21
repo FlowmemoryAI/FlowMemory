@@ -29,6 +29,7 @@ import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
 import { BridgePilotView } from "../views/BridgePilotView";
 import { OpsView } from "../views/OpsView";
+import { AlertsView } from "../views/AlertsView";
 import { OwnerActivationView } from "../views/OwnerActivationView";
 import { UniswapHooksView } from "../views/UniswapHooksView";
 import { WorkbenchView } from "../views/WorkbenchView";
@@ -633,6 +634,16 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Tester gateway proof");
     expect(html).toContain("Ops install proof");
     expect(html).toContain("public-rpc-not-ready");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the alerts route without exposing tester secrets", () => {
+    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(AlertsView, { data })));
+
+    expect(html).toContain("Alerts");
+    expect(html).toContain("Verifier failed");
+    expect(html).toContain("UPSTREAM_LOSS");
+    expect(html).toContain("next action");
     expect(html).not.toContain("local-tester-write-token");
   });
 

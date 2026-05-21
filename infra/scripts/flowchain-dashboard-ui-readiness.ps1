@@ -128,11 +128,15 @@ $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -Lit
 $configText = if (Test-Path -LiteralPath $playwrightConfigPath) { Get-Content -Raw -LiteralPath $playwrightConfigPath } else { "" }
 $workbenchViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/WorkbenchView.tsx"
 $ownerActivationViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/OwnerActivationView.tsx"
+$opsViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/OpsView.tsx"
+$alertsViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/AlertsView.tsx"
 $workbenchDataPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/data/workbench.ts"
 $fixtureSyncPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/scripts/sync-fixtures.mjs"
 $workbenchText = @(
     if (Test-Path -LiteralPath $workbenchViewPath) { Get-Content -Raw -LiteralPath $workbenchViewPath } else { "" }
     if (Test-Path -LiteralPath $ownerActivationViewPath) { Get-Content -Raw -LiteralPath $ownerActivationViewPath } else { "" }
+    if (Test-Path -LiteralPath $opsViewPath) { Get-Content -Raw -LiteralPath $opsViewPath } else { "" }
+    if (Test-Path -LiteralPath $alertsViewPath) { Get-Content -Raw -LiteralPath $alertsViewPath } else { "" }
     if (Test-Path -LiteralPath $workbenchDataPath) { Get-Content -Raw -LiteralPath $workbenchDataPath } else { "" }
     if (Test-Path -LiteralPath $fixtureSyncPath) { Get-Content -Raw -LiteralPath $fixtureSyncPath } else { "" }
 ) -join "`n"
@@ -159,10 +163,14 @@ $checks = [ordered]@{
     testerLaunchRouteCovered = $specText.Contains("/tester")
     activationRouteCovered = $specText.Contains("/activation")
     bridgeRouteCovered = $specText.Contains("/bridge")
+    opsRouteCovered = $specText.Contains("/ops")
+    alertsRouteCovered = $specText.Contains("/alerts")
     bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail") -and $specText.Contains("Pilot aggregate")
     bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
     bridgeCommandMatrixProofCovered = $specText.Contains("Bridge command matrix") -and $specText.Contains("flowchain:bridge:command-matrix") -and $workbenchText.Contains("bridgeCommandMatrix")
     realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
+    opsObservabilityProofCovered = $specText.Contains("Ops center") -and $specText.Contains("Active rules") -and $specText.Contains("Ops install proof") -and $workbenchText.Contains("opsMetricCount")
+    alertsListProofCovered = $specText.Contains("Verifier failed") -and $specText.Contains("UPSTREAM_LOSS") -and $workbenchText.Contains("recommendedAction")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     publicRpcCommandMatrixProofCovered = $specText.Contains("RPC command matrix") -and $specText.Contains("flowchain:public-rpc:command-matrix") -and $workbenchText.Contains("publicRpcCommandMatrix")
     ownerHostApplyPlanProofCovered = $specText.Contains("owner-host-apply.sh plan") -and $workbenchText.Contains("launchSequence") -and $workbenchText.Contains("Owner host apply proof")
@@ -190,8 +198,8 @@ $report = [ordered]@{
     secretMarkerFindings = @()
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
-    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge")
-    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback")
+    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge", "/ops", "/alerts")
+    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -222,7 +230,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof -> ops observability proof -> alert list proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

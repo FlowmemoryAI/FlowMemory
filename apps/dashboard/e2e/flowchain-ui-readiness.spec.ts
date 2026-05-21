@@ -386,6 +386,15 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Autorecovery drill");
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Public RPC automation");
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Systemd service plan");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Ops install proof");
+    await expect(page.getByText("Active rules", { exact: true })).toBeVisible();
+    await expect(page.getByText("Escalation dry run", { exact: true }).first()).toBeVisible();
+
+    await page.goto("/alerts");
+    await expect(page.getByRole("heading", { name: "Alerts" })).toBeVisible();
+    await expect(page.getByText("Verifier failed", { exact: true })).toBeVisible();
+    await expect(page.getByText("UPSTREAM_LOSS", { exact: true })).toBeVisible();
+    await expect(page.getByText("next action").first()).toBeVisible();
 
     await page.goto("/");
     await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge runtime credit");

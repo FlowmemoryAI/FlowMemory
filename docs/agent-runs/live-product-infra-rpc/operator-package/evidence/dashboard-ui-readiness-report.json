@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T07:16:11.5083041+00:00",
+    "generatedAt":  "2026-05-21T07:37:25.8635403+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -17,10 +17,14 @@
                    "testerLaunchRouteCovered":  true,
                    "activationRouteCovered":  true,
                    "bridgeRouteCovered":  true,
+                   "opsRouteCovered":  true,
+                   "alertsRouteCovered":  true,
                    "bridgePilotRuntimeProofCovered":  true,
                    "bridgeRuntimeCreditProofCovered":  true,
                    "bridgeCommandMatrixProofCovered":  true,
                    "realValuePilotAggregateProofCovered":  true,
+                   "opsObservabilityProofCovered":  true,
+                   "alertsListProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
                    "publicRpcCommandMatrixProofCovered":  true,
                    "ownerHostApplyPlanProofCovered":  true,
@@ -51,7 +55,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  6,
+                         "durationSeconds":  5,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -61,9 +65,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  38,
+                         "durationSeconds":  34,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  28
+                         "stderrLineCount":  32
                      },
                      {
                          "label":  "dashboard production build",
@@ -71,7 +75,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  9,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
                      },
@@ -81,7 +85,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  382,
+                         "durationSeconds":  311,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -98,7 +102,9 @@
                           "/explorer",
                           "/tester",
                           "/activation",
-                          "/bridge"
+                          "/bridge",
+                          "/ops",
+                          "/alerts"
                       ],
     "coveredProofs":  [
                           "base8453-bridge-command-matrix-proof",
@@ -107,7 +113,9 @@
                           "public-rpc-command-matrix-proof",
                           "owner-host-apply-plan",
                           "owner-host-apply-execution",
-                          "owner-host-apply-rollback"
+                          "owner-host-apply-rollback",
+                          "ops-observability-proof",
+                          "alerts-list-proof"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
