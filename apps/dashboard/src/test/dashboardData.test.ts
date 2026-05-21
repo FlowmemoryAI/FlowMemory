@@ -168,6 +168,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.some((record) => record.id === "public-rpc-edge")).toBe(true);
     expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge reconciliation schedule")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge reconciliation no mutation")?.value).toBe("true");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix commands")?.value).toBe("20");
@@ -546,6 +548,10 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Provision durable state backup storage");
     expect(html).toContain("Configure capped Base 8453 bridge pilot observation");
     expect(html).toContain("Needed now");
+    expect(html).toContain("Owner setup groups");
+    expect(html).toContain("Public RPC edge");
+    expect(html).toContain("Backup storage");
+    expect(html).toContain("Base 8453 bridge");
     expect(html).toContain("blocked by");
     expect(html).toContain("Owner inputs");
     expect(html).toContain("Next commands");
@@ -603,6 +609,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Transfer settlement");
     expect(html).toContain("Relayer guardrail");
     expect(html).toContain("Relayer loop");
+    expect(html).toContain("Reconciliation schedule");
+    expect(html).toContain("flowchain:bridge:reconciliation:schedule:validate");
     expect(html).toContain(`${liveReadinessReport.metrics.realValuePilotAggregateCommandsRun} proof commands`);
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditLatencySeconds}s`);
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditTransferSeconds}s`);

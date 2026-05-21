@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T08:18:49.9708202Z",
+  "generatedAt": "2026-05-21T08:38:18.4536182Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "110950",
-    "finalizedHeight": "110950",
+    "latestHeight": "111104",
+    "finalizedHeight": "111104",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -44,6 +44,11 @@
     "bridgeCommandMatrixNoBroadcasts": true,
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerLoopValidationStatus": "passed",
+    "bridgeReconciliationScheduleStatus": "passed",
+    "bridgeReconciliationScheduleReady": true,
+    "bridgeReconciliationScheduleIntervalMinutes": "5",
+    "bridgeReconciliationScheduleNoMutation": true,
+    "bridgeReconciliationScheduleNoExternalDelivery": true,
     "bridgeRuntimeCreditValidationStatus": "passed",
     "bridgeRuntimeCreditReady": true,
     "bridgeRuntimeCreditLatencySeconds": "0.845",
@@ -181,6 +186,11 @@
     "bridgeCommandMatrixNoBroadcasts": true,
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerGuardrailReady": true,
+    "bridgeReconciliationScheduleStatus": "passed",
+    "bridgeReconciliationScheduleReady": true,
+    "bridgeReconciliationScheduleIntervalMinutes": "5",
+    "bridgeReconciliationScheduleNoMutation": true,
+    "bridgeReconciliationScheduleNoExternalDelivery": true,
     "bridgeRuntimeCreditStatus": "passed",
     "bridgeRuntimeCreditReady": true,
     "bridgeRuntimeCreditLatencySeconds": "0.845",
@@ -2231,7 +2241,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110921, finalizedHeight=110921",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=111064, finalizedHeight=111064",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2483,19 +2493,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:18:49.9708202Z"
+      "generatedAt": "2026-05-21T08:38:18.4536182Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:25.4626147Z"
+      "generatedAt": "2026-05-21T08:43:51.0508657Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T08:22:10.3296166Z"
+      "generatedAt": "2026-05-21T08:43:36.8837136Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -2537,7 +2547,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:01.3590681Z"
+      "generatedAt": "2026-05-21T08:43:29.0230923Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -2555,7 +2565,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:16.2425752Z"
+      "generatedAt": "2026-05-21T08:43:42.2001330Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2573,7 +2583,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:22.5676973Z"
+      "generatedAt": "2026-05-21T08:43:47.9107802Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2609,25 +2619,25 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:29.6382589Z"
+      "generatedAt": "2026-05-21T08:43:54.7897280Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:29.6382589Z"
+      "generatedAt": "2026-05-21T08:43:54.7897280Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:26.6046418Z"
+      "generatedAt": "2026-05-21T08:43:52.1155849Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:59:25.4374197Z"
+      "generatedAt": "2026-05-21T08:43:12.8617018Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
@@ -2669,7 +2679,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:22:28.8463032Z"
+      "generatedAt": "2026-05-21T08:43:53.9347107Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2687,7 +2697,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T08:24:11.9550082Z"
+      "generatedAt": "2026-05-21T08:45:27.9421803Z"
     }
   ],
   "envValuesPrinted": false,

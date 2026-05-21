@@ -219,6 +219,7 @@ function writeLiveReadinessSummary() {
   const bridgeRelayerGuardrail = reports["bridge-relayer-guardrail-validation-report.json"];
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
   const bridgeRuntimeCreditValidation = reports["bridge-runtime-credit-validation-report.json"];
+  const bridgeReconciliationScheduleValidation = reports["bridge-reconciliation-schedule-validation-report.json"];
   const realValuePilotAggregate = reports["real-value-pilot-aggregate-report.json"];
   const bridgeCommandMatrix = reports["bridge-command-matrix-report.json"];
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
@@ -365,6 +366,11 @@ function writeLiveReadinessSummary() {
       bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
+      bridgeReconciliationScheduleStatus: asText(bridgeReconciliationScheduleValidation?.status, "not recorded"),
+      bridgeReconciliationScheduleReady: bridgeReconciliationScheduleValidation?.status === "passed",
+      bridgeReconciliationScheduleIntervalMinutes: asText(bridgeReconciliationScheduleValidation?.intervalMinutes, "not recorded"),
+      bridgeReconciliationScheduleNoMutation: bridgeReconciliationScheduleValidation?.hostMutationPerformed === false,
+      bridgeReconciliationScheduleNoExternalDelivery: bridgeReconciliationScheduleValidation?.checks?.noExternalDelivery === true,
       bridgeRuntimeCreditValidationStatus: asText(bridgeRuntimeCreditValidation?.status, "not recorded"),
       bridgeRuntimeCreditReady: bridgeRuntimeCreditValidation?.status === "passed",
       bridgeRuntimeCreditLatencySeconds: asText(bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),
@@ -499,6 +505,11 @@ function writeLiveReadinessSummary() {
       bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
+      bridgeReconciliationScheduleStatus: asText(bridgeReconciliationScheduleValidation?.status, "not recorded"),
+      bridgeReconciliationScheduleReady: bridgeReconciliationScheduleValidation?.status === "passed",
+      bridgeReconciliationScheduleIntervalMinutes: asText(bridgeReconciliationScheduleValidation?.intervalMinutes, "not recorded"),
+      bridgeReconciliationScheduleNoMutation: bridgeReconciliationScheduleValidation?.hostMutationPerformed === false,
+      bridgeReconciliationScheduleNoExternalDelivery: bridgeReconciliationScheduleValidation?.checks?.noExternalDelivery === true,
       bridgeRuntimeCreditStatus: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCredit ?? bridgeRuntimeCreditValidation?.status, "not recorded"),
       bridgeRuntimeCreditReady: opsSnapshot?.reportStatuses?.bridgeRuntimeCreditReady === true || bridgeRuntimeCreditValidation?.status === "passed",
       bridgeRuntimeCreditLatencySeconds: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCreditLatencySeconds ?? bridgeRuntimeCreditValidation?.timing?.queueToSpendableSeconds, "not recorded"),

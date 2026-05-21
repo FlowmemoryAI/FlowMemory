@@ -440,6 +440,17 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       status: statusFromMetric(liveMetrics.bridgeRelayerLoopValidationStatus),
       Icon: ListChecks,
     },
+    {
+      label: "Reconciliation schedule",
+      value: text(liveMetrics.bridgeReconciliationScheduleStatus),
+      detail: `${text(liveMetrics.bridgeReconciliationScheduleIntervalMinutes, "not recorded")} minute cadence; no mutation ${text(liveMetrics.bridgeReconciliationScheduleNoMutation, "false")}`,
+      command: "npm run flowchain:bridge:reconciliation:schedule:validate",
+      status:
+        liveMetrics.bridgeReconciliationScheduleReady === true
+          ? "verified"
+          : statusFromMetric(liveMetrics.bridgeReconciliationScheduleStatus),
+      Icon: Activity,
+    },
   ] satisfies Array<{
     label: string;
     value: string;

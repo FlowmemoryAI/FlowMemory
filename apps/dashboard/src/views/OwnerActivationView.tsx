@@ -48,6 +48,45 @@ interface ActivationLaunchStep {
   stopOnFailure: boolean;
 }
 
+interface OwnerInputGroup {
+  id: string;
+  title: string;
+  detail: string;
+  command: string;
+  names: string[];
+}
+
+const OWNER_INPUT_GROUPS = [
+  {
+    id: "public-rpc",
+    title: "Public RPC edge",
+    detail: "Domain, TLS edge, CORS origins, and public rate-limit values.",
+    command: "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+    matches: (name: string) => name.startsWith("FLOWCHAIN_RPC_") && name !== "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+  },
+  {
+    id: "backup",
+    title: "Backup storage",
+    detail: "Writable persistent path for manifest-backed state snapshots and restore drills.",
+    command: "npm run flowchain:backup:check",
+    matches: (name: string) => name === "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+  },
+  {
+    id: "base8453-bridge",
+    title: "Base 8453 bridge",
+    detail: "Base RPC, lockbox, supported asset, block range, caps, confirmations, and pilot acknowledgement.",
+    command: "npm run flowchain:bridge:infra:check",
+    matches: (name: string) => name.startsWith("FLOWCHAIN_BASE8453_") || name.startsWith("FLOWCHAIN_PILOT_"),
+  },
+  {
+    id: "tester-gateway",
+    title: "Tester write gateway",
+    detail: "Optional friends-and-family write token and capped tester send controls.",
+    command: "npm run flowchain:tester:token:setup",
+    matches: (name: string) => name.startsWith("FLOWCHAIN_TESTER_"),
+  },
+] satisfies Array<Omit<OwnerInputGroup, "names"> & { matches: (name: string) => boolean }>;
+
 function isRecord(value: unknown): value is UnknownRecord {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -132,6 +171,31 @@ function stageIcon(id: string) {
   return CheckCircle2;
 }
 
+function groupOwnerInputs(names: string[]): OwnerInputGroup[] {
+  const uniqueNames = [...new Set(names)];
+  const grouped = OWNER_INPUT_GROUPS.map((group) => ({
+    id: group.id,
+    title: group.title,
+    detail: group.detail,
+    command: group.command,
+    names: uniqueNames.filter(group.matches),
+  })).filter((group) => group.names.length > 0);
+  const covered = new Set(grouped.flatMap((group) => group.names));
+  const remaining = uniqueNames.filter((name) => !covered.has(name));
+
+  if (remaining.length > 0) {
+    grouped.push({
+      id: "operator-input",
+      title: "Operator input",
+      detail: "Owner-provided value tracked by the launch contract.",
+      command: "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+      names: remaining,
+    });
+  }
+
+  return grouped;
+}
+
 export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const liveReadiness = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
   const metrics = isRecord(liveReadiness?.metrics) ? liveReadiness.metrics : {};
@@ -193,6 +257,7 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const noSecrets = (handoff ?? activation)?.noSecrets === true;
   const envValuesPrinted = (handoff ?? activation)?.envValuesPrinted === true;
   const broadcasts = (handoff ?? activation)?.broadcasts === true;
+  const ownerInputGroups = groupOwnerInputs(nextOwnerInputNames.length > 0 ? nextOwnerInputNames : missingEnvNames);
 
   return (
     <div className="view-stack activation-view">
@@ -407,6 +472,27 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
               {nextOwnerInputNames.map((name) => (
                 <code key={`next-owner:${name}`}>{name}</code>
               ))}
+            </div>
+            <div className="activation-need-groups" aria-label="Owner setup groups">
+              {ownerInputGroups.length > 0 ? (
+                ownerInputGroups.map((group) => (
+                  <article key={group.id} className="activation-need-group">
+                    <div>
+                      <strong>{group.title}</strong>
+                      <span>{group.names.length} input{group.names.length === 1 ? "" : "s"}</span>
+                    </div>
+                    <p>{group.detail}</p>
+                    <code>{group.command}</code>
+                    <div>
+                      {group.names.map((name) => (
+                        <code key={`${group.id}:${name}`}>{name}</code>
+                      ))}
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <small>No owner-input blockers are reported.</small>
+              )}
             </div>
           </article>
 

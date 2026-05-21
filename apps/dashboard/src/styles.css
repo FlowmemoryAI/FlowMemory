@@ -4307,6 +4307,7 @@ code {
 .activation-side,
 .activation-launch-sequence,
 .activation-launch-step-list,
+.activation-need-groups,
 .activation-commands div,
 .activation-boundary div {
   display: grid;
@@ -4399,6 +4400,7 @@ code {
 .activation-report-list,
 .activation-command-list,
 .activation-input-grid,
+.activation-need-group div:last-child,
 .activation-inputs details div {
   display: flex;
   flex-wrap: wrap;
@@ -4409,6 +4411,7 @@ code {
 .activation-report-list code,
 .activation-command-list code,
 .activation-input-grid code,
+.activation-need-group code,
 .activation-inputs details code,
 .activation-commands code {
   max-width: 100%;
@@ -4545,6 +4548,45 @@ code {
 .activation-commands,
 .activation-boundary {
   min-width: 0;
+}
+
+.activation-need-groups {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.activation-need-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #bfd0c8;
+  border-radius: 8px;
+  background: #f8fbf6;
+}
+
+.activation-need-group > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.activation-need-group strong {
+  color: var(--ink);
+}
+
+.activation-need-group span,
+.activation-need-group p {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.activation-need-group p {
+  margin: 0;
+  line-height: 1.4;
 }
 
 .activation-inputs details {
