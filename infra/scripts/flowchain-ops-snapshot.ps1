@@ -444,6 +444,15 @@ $publicRpcDeploymentAutomationRollbackReady = ((Get-OpsProp -Object $publicRpcDe
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
 $publicRpcDeploymentAutomationApplyPlanReady = ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false) -eq $true) `
@@ -452,6 +461,8 @@ $publicRpcDeploymentAutomationApplyPlanReady = ((Get-OpsProp -Object $publicRpcD
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdInstallCommand" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdUninstallRollback" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesNginxReload" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true)
 $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and $publicRpcDeploymentAutomationStatus -eq "passed" `
@@ -944,12 +955,18 @@ $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedReportPath" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceExpectedReportPathsScoped" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
     -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0 `
     -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0 `
@@ -1259,6 +1276,17 @@ $report = [ordered]@{
         publicRpcCommandPlanTruthTable = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false
         publicRpcCommandPlanNoSecretScan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false
         publicRpcOwnerHostApplyPlanReady = $publicRpcDeploymentAutomationApplyPlanReady
+        publicRpcOwnerHostApplyScriptRendered = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false
+        publicRpcOwnerHostApplyScriptModes = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false
+        publicRpcOwnerHostApplyScriptHashes = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false
+        publicRpcOwnerHostApplyScriptPostDeploy = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false
+        publicRpcOwnerHostApplyScriptInPlan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptRendered = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptModes = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptParses = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptHashes = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptPostDeploy = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false
+        publicRpcWindowsOwnerHostApplyScriptInPlan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false
         publicRpcOwnerHostApplyPlanArtifactsHashed = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false
         publicRpcOwnerHostApplyPlanInstallTargetsMapped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false
         publicRpcOwnerHostApplyPlanInstallPhase = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false
@@ -1437,6 +1465,12 @@ $report = [ordered]@{
         ownerGoLiveInvalidExpectedReportPaths = $ownerGoLiveHandoffInvalidExpectedReportPaths.Count
         ownerGoLiveMissingLaunchPackageScripts = $ownerGoLiveHandoffMissingLaunchPackageScripts.Count
         ownerGoLiveRollbackCommandCount = $ownerGoLiveHandoffRollbackCommandCount
+        ownerGoLiveOwnerHostApplyPlan = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false
+        ownerGoLiveOwnerHostApplyExecution = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false
+        ownerGoLiveOwnerHostApplyRollback = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false
+        ownerGoLiveWindowsOwnerHostApplyPlan = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false
+        ownerGoLiveWindowsOwnerHostApplyExecution = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false
+        ownerGoLiveWindowsOwnerHostApplyRollback = Get-OpsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false
         ownerGoLiveMissingRollbackPackageScripts = $ownerGoLiveHandoffMissingRollbackPackageScripts.Count
         ownerGoLiveNextInputCount = $ownerGoLiveHandoffNextInputs.Count
         ownerGoLiveFailedChecks = $ownerGoLiveHandoffFailedChecks.Count

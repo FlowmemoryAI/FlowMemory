@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 108411
+flowchain_latest_height 109054
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 108411
+flowchain_finalized_height 109054
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 1
+flowchain_state_file_age_seconds 10
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 17744.627
+flowchain_transaction_intake_file_age_seconds 23337.411
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -226,6 +226,24 @@ flowchain_public_rpc_owner_host_apply_script_post_deploy 1
 # HELP flowchain_public_rpc_owner_host_apply_script_in_plan One when the owner-host apply plan lists the generated apply script and rollback command.
 # TYPE flowchain_public_rpc_owner_host_apply_script_in_plan gauge
 flowchain_public_rpc_owner_host_apply_script_in_plan 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_rendered One when public RPC deployment automation renders a Windows owner-host apply script.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_rendered gauge
+flowchain_public_rpc_windows_owner_host_apply_script_rendered 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_modes One when the Windows owner-host apply script includes plan, apply, and rollback modes.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_modes gauge
+flowchain_public_rpc_windows_owner_host_apply_script_modes 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_parses One when the generated Windows owner-host apply script parses as PowerShell.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_parses gauge
+flowchain_public_rpc_windows_owner_host_apply_script_parses 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_hashes One when the Windows owner-host apply script verifies rendered artifact hashes before host mutation.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_hashes gauge
+flowchain_public_rpc_windows_owner_host_apply_script_hashes 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_post_deploy One when the Windows owner-host apply script runs post-deploy public RPC and truth proof commands.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_post_deploy gauge
+flowchain_public_rpc_windows_owner_host_apply_script_post_deploy 1
+# HELP flowchain_public_rpc_windows_owner_host_apply_script_in_plan One when the owner-host apply plan lists the Windows apply script and rollback command.
+# TYPE flowchain_public_rpc_windows_owner_host_apply_script_in_plan gauge
+flowchain_public_rpc_windows_owner_host_apply_script_in_plan 1
 # HELP flowchain_public_rpc_owner_host_artifacts_hashed One when public RPC owner-host rendered artifacts have SHA256 hashes.
 # TYPE flowchain_public_rpc_owner_host_artifacts_hashed gauge
 flowchain_public_rpc_owner_host_artifacts_hashed 1
@@ -381,10 +399,10 @@ flowchain_bridge_direct_observe_staged_cursor_not_written 1
 flowchain_bridge_runtime_credit_ready 1
 # HELP flowchain_bridge_runtime_credit_latency_seconds Seconds from bridge handoff queue to spendable L1 credit in runtime validation.
 # TYPE flowchain_bridge_runtime_credit_latency_seconds gauge
-flowchain_bridge_runtime_credit_latency_seconds 0.686
+flowchain_bridge_runtime_credit_latency_seconds 0.845
 # HELP flowchain_bridge_runtime_transfer_latency_seconds Seconds from credited wallet transfer queue to spendable transfer in runtime validation.
 # TYPE flowchain_bridge_runtime_transfer_latency_seconds gauge
-flowchain_bridge_runtime_transfer_latency_seconds 0.548
+flowchain_bridge_runtime_transfer_latency_seconds 0.695
 # HELP flowchain_bridge_runtime_credit_failed_checks Failed checks in bridge runtime credit validation.
 # TYPE flowchain_bridge_runtime_credit_failed_checks gauge
 flowchain_bridge_runtime_credit_failed_checks 0
@@ -807,25 +825,43 @@ flowchain_owner_go_live_failed_checks 0
 flowchain_owner_go_live_launch_sequence_ready 1
 # HELP flowchain_owner_go_live_launch_sequence_steps Ordered owner go-live launch sequence step count.
 # TYPE flowchain_owner_go_live_launch_sequence_steps gauge
-flowchain_owner_go_live_launch_sequence_steps 9
+flowchain_owner_go_live_launch_sequence_steps 10
 # HELP flowchain_owner_go_live_launch_sequence_commands Ordered owner go-live launch sequence command count.
 # TYPE flowchain_owner_go_live_launch_sequence_commands gauge
-flowchain_owner_go_live_launch_sequence_commands 36
+flowchain_owner_go_live_launch_sequence_commands 42
 # HELP flowchain_owner_go_live_launch_evidence_reports Expected evidence report path count in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_evidence_reports gauge
-flowchain_owner_go_live_launch_evidence_reports 33
+flowchain_owner_go_live_launch_evidence_reports 43
 # HELP flowchain_owner_go_live_launch_invalid_evidence_reports Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_invalid_evidence_reports gauge
 flowchain_owner_go_live_launch_invalid_evidence_reports 0
 # HELP flowchain_owner_go_live_launch_missing_package_scripts Missing package scripts referenced by owner go-live launch sequence npm commands.
 # TYPE flowchain_owner_go_live_launch_missing_package_scripts gauge
 flowchain_owner_go_live_launch_missing_package_scripts 0
+# HELP flowchain_owner_go_live_owner_host_apply_plan One when the owner go-live launch sequence includes Linux owner-host apply planning.
+# TYPE flowchain_owner_go_live_owner_host_apply_plan gauge
+flowchain_owner_go_live_owner_host_apply_plan 1
+# HELP flowchain_owner_go_live_owner_host_apply_execution One when the owner go-live launch sequence includes Linux owner-host apply execution.
+# TYPE flowchain_owner_go_live_owner_host_apply_execution gauge
+flowchain_owner_go_live_owner_host_apply_execution 1
+# HELP flowchain_owner_go_live_owner_host_apply_rollback One when owner go-live rollback commands include Linux owner-host apply rollback.
+# TYPE flowchain_owner_go_live_owner_host_apply_rollback gauge
+flowchain_owner_go_live_owner_host_apply_rollback 1
+# HELP flowchain_owner_go_live_windows_owner_host_apply_plan One when the owner go-live launch sequence includes Windows owner-host apply planning.
+# TYPE flowchain_owner_go_live_windows_owner_host_apply_plan gauge
+flowchain_owner_go_live_windows_owner_host_apply_plan 1
+# HELP flowchain_owner_go_live_windows_owner_host_apply_execution One when the owner go-live launch sequence includes Windows owner-host apply execution.
+# TYPE flowchain_owner_go_live_windows_owner_host_apply_execution gauge
+flowchain_owner_go_live_windows_owner_host_apply_execution 1
+# HELP flowchain_owner_go_live_windows_owner_host_apply_rollback One when owner go-live rollback commands include Windows owner-host apply rollback.
+# TYPE flowchain_owner_go_live_windows_owner_host_apply_rollback gauge
+flowchain_owner_go_live_windows_owner_host_apply_rollback 1
 # HELP flowchain_owner_go_live_rollback_ready One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop.
 # TYPE flowchain_owner_go_live_rollback_ready gauge
 flowchain_owner_go_live_rollback_ready 1
 # HELP flowchain_owner_go_live_rollback_commands Owner go-live rollback command count.
 # TYPE flowchain_owner_go_live_rollback_commands gauge
-flowchain_owner_go_live_rollback_commands 7
+flowchain_owner_go_live_rollback_commands 9
 # HELP flowchain_owner_go_live_rollback_missing_package_scripts Missing package scripts referenced by owner go-live rollback npm commands.
 # TYPE flowchain_owner_go_live_rollback_missing_package_scripts gauge
 flowchain_owner_go_live_rollback_missing_package_scripts 0

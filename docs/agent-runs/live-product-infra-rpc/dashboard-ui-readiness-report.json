@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T02:53:53.3969190+00:00",
+    "generatedAt":  "2026-05-21T04:27:23.7925177+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -49,7 +49,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  9,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -59,7 +59,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  36,
+                         "durationSeconds":  62,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  28
                      },
@@ -69,7 +69,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  4,
+                         "durationSeconds":  5,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
                      },
@@ -77,9 +77,9 @@
                          "label":  "control-plane tester gateway tests",
                          "command":  "npm test --prefix services/control-plane",
                          "exitCode":  0,
-                         "timeoutSeconds":  300,
+                         "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  288,
+                         "durationSeconds":  364,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }

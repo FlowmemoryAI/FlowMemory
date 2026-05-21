@@ -1,11 +1,20 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-21T02:04:23.2595726Z",
+    "generatedAt":  "2026-05-21T03:37:32.9504299Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "ops-snapshot",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  },
+                                  {
+                                      "name":  "ops-alerts",
+                                      "exitCode":  0,
+                                      "outputLineCount":  5
+                                  }
                               ]
                 },
     "reportPaths":  {
@@ -47,7 +56,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  289,
+    "metricCount":  301,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -110,6 +119,17 @@
                                 "flowchain_public_rpc_command_plan_truth_table",
                                 "flowchain_public_rpc_command_plan_no_secret_scan",
                                 "flowchain_public_rpc_owner_host_apply_plan_ready",
+                                "flowchain_public_rpc_owner_host_apply_script_rendered",
+                                "flowchain_public_rpc_owner_host_apply_script_modes",
+                                "flowchain_public_rpc_owner_host_apply_script_hashes",
+                                "flowchain_public_rpc_owner_host_apply_script_post_deploy",
+                                "flowchain_public_rpc_owner_host_apply_script_in_plan",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_rendered",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_modes",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_parses",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_hashes",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy",
+                                "flowchain_public_rpc_windows_owner_host_apply_script_in_plan",
                                 "flowchain_public_rpc_owner_host_artifacts_hashed",
                                 "flowchain_public_rpc_owner_host_install_targets_mapped",
                                 "flowchain_public_rpc_owner_host_systemd_install_command",
@@ -301,6 +321,12 @@
                                 "flowchain_owner_go_live_launch_evidence_reports",
                                 "flowchain_owner_go_live_launch_invalid_evidence_reports",
                                 "flowchain_owner_go_live_launch_missing_package_scripts",
+                                "flowchain_owner_go_live_owner_host_apply_plan",
+                                "flowchain_owner_go_live_owner_host_apply_execution",
+                                "flowchain_owner_go_live_owner_host_apply_rollback",
+                                "flowchain_owner_go_live_windows_owner_host_apply_plan",
+                                "flowchain_owner_go_live_windows_owner_host_apply_execution",
+                                "flowchain_owner_go_live_windows_owner_host_apply_rollback",
                                 "flowchain_owner_go_live_rollback_ready",
                                 "flowchain_owner_go_live_rollback_commands",
                                 "flowchain_owner_go_live_rollback_missing_package_scripts",

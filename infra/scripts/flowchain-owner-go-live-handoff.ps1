@@ -252,7 +252,8 @@ $launchSequence = @(
             "npm run flowchain:public-rpc:deployment-bundle",
             "npm run flowchain:public-rpc:deployment:automation",
             "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>",
-            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -270,7 +271,8 @@ $launchSequence = @(
             "npm run flowchain:service:install:systemd:validate",
             "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
             "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
-            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
@@ -284,7 +286,8 @@ $launchSequence = @(
         ownerInputBlockedAllowedBeforeInputs = $false
         stopOnFailure = $true
         commands = @(
-            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply"
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Apply"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
@@ -432,6 +435,7 @@ $rollbackCommands = @(
     "npm run flowchain:service:restart -- -LiveProfile",
     "npm run flowchain:service:stop",
     "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Rollback",
     "npm run flowchain:emergency:stop-local",
     "npm run flowchain:bridge:emergency-stop",
     "npm run flowchain:public-deployment:contract -- -AllowBlocked"
@@ -506,6 +510,8 @@ $checks = [ordered]@{
     launchSequenceCoversPublicRpcRender = $launchSequenceCommandText.Contains("flowchain-public-rpc-deployment-automation.ps1 -Action Render")
     launchSequenceCoversOwnerHostApplyPlan = $launchSequenceCommandText.Contains("owner-host-apply.sh plan")
     launchSequenceCoversOwnerHostApplyExecution = $launchSequenceCommandText.Contains("owner-host-apply.sh apply")
+    launchSequenceCoversWindowsOwnerHostApplyPlan = $launchSequenceCommandText.Contains("owner-host-apply.ps1 -Action Plan")
+    launchSequenceCoversWindowsOwnerHostApplyExecution = $launchSequenceCommandText.Contains("owner-host-apply.ps1 -Action Apply")
     launchSequenceCoversSystemdInstallPlan = $launchSequenceCommandText.Contains("flowchain:service:install:systemd -- -Action Plan")
     launchSequenceCoversServiceMonitor = $launchSequenceCommandText.Contains("flowchain:service:monitor")
     launchSequenceCoversPublicRpcCanary = $launchSequenceCommandText.Contains("flowchain:public-rpc:synthetic-canary")
@@ -522,6 +528,7 @@ $checks = [ordered]@{
     rollbackCoversBridgeEmergencyStop = $rollbackCommandText.Contains("flowchain:bridge:emergency-stop")
     rollbackCoversOpsSnapshot = $rollbackCommandText.Contains("flowchain:ops:snapshot")
     rollbackCoversOwnerHostApplyRollback = $rollbackCommandText.Contains("owner-host-apply.sh rollback")
+    rollbackCoversWindowsOwnerHostApplyRollback = $rollbackCommandText.Contains("owner-host-apply.ps1 -Action Rollback")
     rollbackPackageScriptsPresent = $missingRollbackPackageScriptNames.Count -eq 0
     releaseClaimBlockedUntilTruthPassed = $releaseReady -or (-not $truthTableClear)
     packetShareBlockedUntilReady = $packetShareable -or (-not $releaseReady)

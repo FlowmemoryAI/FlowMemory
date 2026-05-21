@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-21T02:04:23.2595726Z
+Generated: 2026-05-21T03:37:32.9504299Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 289
+- Metric count: 301
 
 ## Required Metrics
 
@@ -72,6 +72,17 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_rpc_command_plan_truth_table: present
 - flowchain_public_rpc_command_plan_no_secret_scan: present
 - flowchain_public_rpc_owner_host_apply_plan_ready: present
+- flowchain_public_rpc_owner_host_apply_script_rendered: present
+- flowchain_public_rpc_owner_host_apply_script_modes: present
+- flowchain_public_rpc_owner_host_apply_script_hashes: present
+- flowchain_public_rpc_owner_host_apply_script_post_deploy: present
+- flowchain_public_rpc_owner_host_apply_script_in_plan: present
+- flowchain_public_rpc_windows_owner_host_apply_script_rendered: present
+- flowchain_public_rpc_windows_owner_host_apply_script_modes: present
+- flowchain_public_rpc_windows_owner_host_apply_script_parses: present
+- flowchain_public_rpc_windows_owner_host_apply_script_hashes: present
+- flowchain_public_rpc_windows_owner_host_apply_script_post_deploy: present
+- flowchain_public_rpc_windows_owner_host_apply_script_in_plan: present
 - flowchain_public_rpc_owner_host_artifacts_hashed: present
 - flowchain_public_rpc_owner_host_install_targets_mapped: present
 - flowchain_public_rpc_owner_host_systemd_install_command: present
@@ -263,6 +274,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_owner_go_live_launch_evidence_reports: present
 - flowchain_owner_go_live_launch_invalid_evidence_reports: present
 - flowchain_owner_go_live_launch_missing_package_scripts: present
+- flowchain_owner_go_live_owner_host_apply_plan: present
+- flowchain_owner_go_live_owner_host_apply_execution: present
+- flowchain_owner_go_live_owner_host_apply_rollback: present
+- flowchain_owner_go_live_windows_owner_host_apply_plan: present
+- flowchain_owner_go_live_windows_owner_host_apply_execution: present
+- flowchain_owner_go_live_windows_owner_host_apply_rollback: present
 - flowchain_owner_go_live_rollback_ready: present
 - flowchain_owner_go_live_rollback_commands: present
 - flowchain_owner_go_live_rollback_missing_package_scripts: present

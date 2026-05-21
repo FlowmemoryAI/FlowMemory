@@ -164,7 +164,25 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const ownerHostApplyRollbackCovered =
     handoffChecks.rollbackCoversOwnerHostApplyRollback === true ||
     rollbackCommands.some((command) => command.includes("owner-host-apply.sh rollback"));
-  const ownerHostApplyCovered = ownerHostApplyPlanCovered && ownerHostApplyExecutionCovered && ownerHostApplyRollbackCovered;
+  const windowsOwnerHostApplyPlanCovered =
+    handoffChecks.launchSequenceCoversWindowsOwnerHostApplyPlan === true ||
+    metrics.windowsOwnerHostApplyPlanCovered === true ||
+    launchSequence.some((step) => step.commands.some((command) => command.includes("owner-host-apply.ps1 -Action Plan")));
+  const windowsOwnerHostApplyExecutionCovered =
+    handoffChecks.launchSequenceCoversWindowsOwnerHostApplyExecution === true ||
+    metrics.windowsOwnerHostApplyExecutionCovered === true ||
+    launchSequence.some((step) => step.commands.some((command) => command.includes("owner-host-apply.ps1 -Action Apply")));
+  const windowsOwnerHostApplyRollbackCovered =
+    handoffChecks.rollbackCoversWindowsOwnerHostApplyRollback === true ||
+    metrics.windowsOwnerHostApplyRollbackCovered === true ||
+    rollbackCommands.some((command) => command.includes("owner-host-apply.ps1 -Action Rollback"));
+  const ownerHostApplyCovered =
+    ownerHostApplyPlanCovered &&
+    ownerHostApplyExecutionCovered &&
+    ownerHostApplyRollbackCovered &&
+    windowsOwnerHostApplyPlanCovered &&
+    windowsOwnerHostApplyExecutionCovered &&
+    windowsOwnerHostApplyRollbackCovered;
   const handoffStatus = text(handoff?.status ?? metrics.ownerGoLiveHandoffStatus, "not recorded");
   const activationStatus = text(activation?.status ?? metrics.ownerActivationStatus, "not recorded");
   const readyStageCount = text(handoff?.readyStageCount ?? activation?.readyStageCount ?? metrics.ownerActivationReadyStageCount, "0");
@@ -311,19 +329,34 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
             </div>
             <div className="activation-host-apply-proof" aria-label="Owner host apply proof">
               <div>
-                <span>Plan</span>
+                <span>Plan Linux</span>
                 <strong>{String(ownerHostApplyPlanCovered)}</strong>
                 <code>owner-host-apply.sh plan</code>
               </div>
               <div>
-                <span>Apply</span>
+                <span>Apply Linux</span>
                 <strong>{String(ownerHostApplyExecutionCovered)}</strong>
                 <code>owner-host-apply.sh apply</code>
               </div>
               <div>
-                <span>Rollback</span>
+                <span>Rollback Linux</span>
                 <strong>{String(ownerHostApplyRollbackCovered)}</strong>
                 <code>owner-host-apply.sh rollback</code>
+              </div>
+              <div>
+                <span>Plan Windows</span>
+                <strong>{String(windowsOwnerHostApplyPlanCovered)}</strong>
+                <code>owner-host-apply.ps1 -Action Plan</code>
+              </div>
+              <div>
+                <span>Apply Windows</span>
+                <strong>{String(windowsOwnerHostApplyExecutionCovered)}</strong>
+                <code>owner-host-apply.ps1 -Action Apply</code>
+              </div>
+              <div>
+                <span>Rollback Windows</span>
+                <strong>{String(windowsOwnerHostApplyRollbackCovered)}</strong>
+                <code>owner-host-apply.ps1 -Action Rollback</code>
               </div>
             </div>
             {launchSequence.length > 0 ? (

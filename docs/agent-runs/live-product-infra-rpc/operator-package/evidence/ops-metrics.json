@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T02:04:22.7871830Z",
+    "generatedAt":  "2026-05-21T03:37:32.3938156Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -35,19 +35,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  108411
+                        "value":  109054
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  108411
+                        "value":  109054
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  10
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -89,7 +89,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  17744.627
+                        "value":  23337.411
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -488,6 +488,42 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_rendered",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation renders a Windows owner-host apply script.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_modes",
+                        "type":  "gauge",
+                        "help":  "One when the Windows owner-host apply script includes plan, apply, and rollback modes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_parses",
+                        "type":  "gauge",
+                        "help":  "One when the generated Windows owner-host apply script parses as PowerShell.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_hashes",
+                        "type":  "gauge",
+                        "help":  "One when the Windows owner-host apply script verifies rendered artifact hashes before host mutation.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy",
+                        "type":  "gauge",
+                        "help":  "One when the Windows owner-host apply script runs post-deploy public RPC and truth proof commands.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_windows_owner_host_apply_script_in_plan",
+                        "type":  "gauge",
+                        "help":  "One when the owner-host apply plan lists the Windows apply script and rollback command.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_rpc_owner_host_artifacts_hashed",
                         "type":  "gauge",
                         "help":  "One when public RPC owner-host rendered artifacts have SHA256 hashes.",
@@ -797,13 +833,13 @@
                         "name":  "flowchain_bridge_runtime_credit_latency_seconds",
                         "type":  "gauge",
                         "help":  "Seconds from bridge handoff queue to spendable L1 credit in runtime validation.",
-                        "value":  0.686
+                        "value":  0.845
                     },
                     {
                         "name":  "flowchain_bridge_runtime_transfer_latency_seconds",
                         "type":  "gauge",
                         "help":  "Seconds from credited wallet transfer queue to spendable transfer in runtime validation.",
-                        "value":  0.548
+                        "value":  0.695
                     },
                     {
                         "name":  "flowchain_bridge_runtime_credit_failed_checks",
@@ -1649,19 +1685,19 @@
                         "name":  "flowchain_owner_go_live_launch_sequence_steps",
                         "type":  "gauge",
                         "help":  "Ordered owner go-live launch sequence step count.",
-                        "value":  9
+                        "value":  10
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_sequence_commands",
                         "type":  "gauge",
                         "help":  "Ordered owner go-live launch sequence command count.",
-                        "value":  36
+                        "value":  42
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_evidence_reports",
                         "type":  "gauge",
                         "help":  "Expected evidence report path count in the owner go-live launch sequence.",
-                        "value":  33
+                        "value":  43
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_invalid_evidence_reports",
@@ -1676,6 +1712,42 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_owner_go_live_owner_host_apply_plan",
+                        "type":  "gauge",
+                        "help":  "One when the owner go-live launch sequence includes Linux owner-host apply planning.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_owner_host_apply_execution",
+                        "type":  "gauge",
+                        "help":  "One when the owner go-live launch sequence includes Linux owner-host apply execution.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_owner_host_apply_rollback",
+                        "type":  "gauge",
+                        "help":  "One when owner go-live rollback commands include Linux owner-host apply rollback.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_windows_owner_host_apply_plan",
+                        "type":  "gauge",
+                        "help":  "One when the owner go-live launch sequence includes Windows owner-host apply planning.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_windows_owner_host_apply_execution",
+                        "type":  "gauge",
+                        "help":  "One when the owner go-live launch sequence includes Windows owner-host apply execution.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_windows_owner_host_apply_rollback",
+                        "type":  "gauge",
+                        "help":  "One when owner go-live rollback commands include Windows owner-host apply rollback.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_owner_go_live_rollback_ready",
                         "type":  "gauge",
                         "help":  "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop.",
@@ -1685,7 +1757,7 @@
                         "name":  "flowchain_owner_go_live_rollback_commands",
                         "type":  "gauge",
                         "help":  "Owner go-live rollback command count.",
-                        "value":  7
+                        "value":  9
                     },
                     {
                         "name":  "flowchain_owner_go_live_rollback_missing_package_scripts",
@@ -1766,7 +1838,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  289,
+    "metricCount":  301,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

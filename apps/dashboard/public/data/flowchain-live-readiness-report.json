@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T02:31:48.4312802Z",
+  "generatedAt": "2026-05-21T04:00:02.7377404Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "108669",
-    "finalizedHeight": "108669",
+    "latestHeight": "109211",
+    "finalizedHeight": "109211",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -74,12 +74,15 @@
     "ownerGoLiveNextInputCount": 14,
     "ownerGoLiveStageCount": "8",
     "ownerGoLiveLaunchSequenceCount": "10",
-    "ownerGoLiveLaunchSequenceCommandCount": "39",
+    "ownerGoLiveLaunchSequenceCommandCount": "42",
     "ownerGoLiveExpectedReportPathCount": "43",
-    "ownerGoLiveRollbackCommandCount": "8",
+    "ownerGoLiveRollbackCommandCount": "9",
     "ownerHostApplyPlanCovered": true,
     "ownerHostApplyExecutionCovered": true,
     "ownerHostApplyRollbackCovered": true,
+    "windowsOwnerHostApplyPlanCovered": true,
+    "windowsOwnerHostApplyExecutionCovered": true,
+    "windowsOwnerHostApplyRollbackCovered": true,
     "noSecretStatus": "passed",
     "opsSnapshotStatus": "blocked",
     "opsAlertState": "blocked",
@@ -90,7 +93,7 @@
     "opsCriticalRuleCount": "33",
     "opsBlockedRuleCount": "7",
     "opsUnmappedCurrentFindingCount": 0,
-    "opsMetricCount": "289",
+    "opsMetricCount": "301",
     "opsRequiredMetricsPresent": true,
     "opsPublicRpcSecurityHeaderMetricsPresent": true,
     "incidentDrillStatus": "passed",
@@ -127,7 +130,7 @@
     "publicRpcDeploymentAutomationAction": "Validate",
     "publicRpcSecurityHeaders": true,
     "publicRpcRenderedSecurityHeaders": true,
-    "opsMetricCount": "289",
+    "opsMetricCount": "301",
     "opsRequiredMetricsPresent": true,
     "publicTesterGatewayStatus": "passed",
     "publicTesterGatewayAccountCount": "2",
@@ -143,8 +146,8 @@
     "bridgeRelayerGuardrailReady": true,
     "bridgeRuntimeCreditStatus": "passed",
     "bridgeRuntimeCreditReady": true,
-    "bridgeRuntimeCreditLatencySeconds": "0.686",
-    "bridgeRuntimeTransferLatencySeconds": "0.548",
+    "bridgeRuntimeCreditLatencySeconds": "0.845",
+    "bridgeRuntimeTransferLatencySeconds": "0.695",
     "realValuePilotAggregateStatus": "passed",
     "realValuePilotAggregateReady": true,
     "realValuePilotAggregateCommandsRun": "6",
@@ -154,8 +157,8 @@
     "realValuePilotAggregateOwnerGoNoGo": true,
     "criticalCount": "0",
     "blockedCount": "6",
-    "latestHeight": "108411",
-    "finalizedHeight": "108411",
+    "latestHeight": "109060",
+    "finalizedHeight": "109060",
     "monitorStatus": "passed",
     "monitorHeightAdvanced": true,
     "findings": [
@@ -1185,9 +1188,9 @@
     "blockedStageCount": "7",
     "nextCommandCount": "62",
     "launchSequenceCount": "10",
-    "launchSequenceCommandCount": "39",
+    "launchSequenceCommandCount": "42",
     "launchSequenceExpectedReportPathCount": "43",
-    "rollbackCommandCount": "8",
+    "rollbackCommandCount": "9",
     "mustNotSendCount": "18",
     "missingEnvNames": [
       "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -1737,7 +1740,8 @@
           "npm run flowchain:public-rpc:deployment-bundle",
           "npm run flowchain:public-rpc:deployment:automation",
           "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>",
-          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan",
+          "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan"
         ],
         "expectedReportPaths": [
           "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -1754,7 +1758,8 @@
           "npm run flowchain:service:install:systemd:validate",
           "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
           "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
-          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan",
+          "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan"
         ],
         "expectedReportPaths": [
           "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
@@ -1767,7 +1772,8 @@
         "title": "Apply owner-host public RPC edge",
         "status": "not recorded",
         "commands": [
-          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply"
+          "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply",
+          "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Apply"
         ],
         "expectedReportPaths": [
           "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
@@ -1910,6 +1916,7 @@
       "npm run flowchain:service:restart -- -LiveProfile",
       "npm run flowchain:service:stop",
       "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback",
+      "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Rollback",
       "npm run flowchain:emergency:stop-local",
       "npm run flowchain:bridge:emergency-stop",
       "npm run flowchain:public-deployment:contract -- -AllowBlocked"
@@ -1943,6 +1950,8 @@
       "launchSequenceCoversPublicRpcRender": true,
       "launchSequenceCoversOwnerHostApplyPlan": true,
       "launchSequenceCoversOwnerHostApplyExecution": true,
+      "launchSequenceCoversWindowsOwnerHostApplyPlan": true,
+      "launchSequenceCoversWindowsOwnerHostApplyExecution": true,
       "launchSequenceCoversSystemdInstallPlan": true,
       "launchSequenceCoversServiceMonitor": true,
       "launchSequenceCoversPublicRpcCanary": true,
@@ -1959,6 +1968,7 @@
       "rollbackCoversBridgeEmergencyStop": true,
       "rollbackCoversOpsSnapshot": true,
       "rollbackCoversOwnerHostApplyRollback": true,
+      "rollbackCoversWindowsOwnerHostApplyRollback": true,
       "rollbackPackageScriptsPresent": true,
       "releaseClaimBlockedUntilTruthPassed": true,
       "packetShareBlockedUntilReady": true,
@@ -2169,7 +2179,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=108641, finalizedHeight=108641",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=109185, finalizedHeight=109185",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2397,25 +2407,25 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:31:48.4312802Z"
+      "generatedAt": "2026-05-21T04:00:02.7377404Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:40.8372990Z"
+      "generatedAt": "2026-05-21T04:04:36.4119053Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:36:11.8398310Z"
+      "generatedAt": "2026-05-21T04:04:14.8536165Z"
     },
     {
       "fileName": "service-monitor-report.json",
       "schema": "flowchain.service_monitor_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T01:56:12.2331896Z"
+      "generatedAt": "2026-05-21T03:38:12.9737557Z"
     },
     {
       "fileName": "service-supervisor-validation-report.json",
@@ -2445,19 +2455,19 @@
       "fileName": "public-rpc-deployment-automation-report.json",
       "schema": "flowchain.public_rpc_deployment_automation_report.v1",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:05:54.2310320Z"
+      "generatedAt": "2026-05-21T03:35:07.2182530Z"
     },
     {
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:35:59.9754600Z"
+      "generatedAt": "2026-05-21T04:04:01.1703706Z"
     },
     {
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:22.5994025Z"
+      "generatedAt": "2026-05-21T04:04:23.6942257Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2469,7 +2479,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:34.2329240Z"
+      "generatedAt": "2026-05-21T04:04:31.9873699Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2499,43 +2509,43 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:46.6182238Z"
+      "generatedAt": "2026-05-21T04:04:40.9023320Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:46.6182238Z"
+      "generatedAt": "2026-05-21T04:04:40.9023320Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:42.4144228Z"
+      "generatedAt": "2026-05-21T04:04:37.7206645Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:11:23.1128185Z"
+      "generatedAt": "2026-05-21T03:44:41.0650567Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
       "schema": "flowchain.ops_snapshot_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:04:16.3211042Z"
+      "generatedAt": "2026-05-21T03:38:16.5892390Z"
     },
     {
       "fileName": "ops-alert-rules-report.json",
       "schema": "flowchain.ops_alert_rules_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:04:19.0285293Z"
+      "generatedAt": "2026-05-21T03:38:17.4155640Z"
     },
     {
       "fileName": "ops-metrics-export-report.json",
       "schema": "flowchain.ops_metrics_export_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:04:23.2595726Z"
+      "generatedAt": "2026-05-21T03:37:32.9504299Z"
     },
     {
       "fileName": "incident-drill-report.json",
@@ -2559,7 +2569,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T02:36:45.4658146Z"
+      "generatedAt": "2026-05-21T04:04:39.7892059Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2571,13 +2581,13 @@
       "fileName": "owner-go-live-handoff-report.json",
       "schema": "flowchain.owner_go_live_handoff_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:28:01.7322742Z"
+      "generatedAt": "2026-05-21T03:35:24.7340848Z"
     },
     {
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T02:38:03.6619516Z"
+      "generatedAt": "2026-05-21T04:07:03.8064928Z"
     }
   ],
   "envValuesPrinted": false,

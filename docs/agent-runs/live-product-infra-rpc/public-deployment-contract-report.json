@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T03:12:33.9083653Z",
+    "generatedAt":  "2026-05-21T04:40:29.4562746Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -111,9 +111,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, concrete owner-host plan/apply/rollback script, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -125,7 +125,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=108894, finalizedHeight=108894",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=109408, finalizedHeight=109408",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],

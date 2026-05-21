@@ -527,6 +527,9 @@ describe("dashboard fixture", () => {
     expect(html).toContain("owner-host-apply.sh plan");
     expect(html).toContain("owner-host-apply.sh apply");
     expect(html).toContain("owner-host-apply.sh rollback");
+    expect(html).toContain("owner-host-apply.ps1 -Action Plan");
+    expect(html).toContain("owner-host-apply.ps1 -Action Apply");
+    expect(html).toContain("owner-host-apply.ps1 -Action Rollback");
     expect(html).toContain("Apply owner-host public RPC edge");
     expect(html).toContain("Expose repo-owned FlowChain RPC");
     expect(html).toContain("Provision durable state backup storage");

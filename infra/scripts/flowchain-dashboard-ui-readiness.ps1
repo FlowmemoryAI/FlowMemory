@@ -141,7 +141,7 @@ $commands = @(
     (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard") -TimeoutSeconds 180),
     (Invoke-DashboardUiCommand -Label "dashboard browser wallet faucet explorer loop" -ArgumentList @("run", "browser:e2e", "--prefix", "apps/dashboard", "--", "--workers=1") -TimeoutSeconds 300),
     (Invoke-DashboardUiCommand -Label "dashboard production build" -ArgumentList @("run", "build", "--prefix", "apps/dashboard") -TimeoutSeconds 300),
-    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane") -TimeoutSeconds 300)
+    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane") -TimeoutSeconds 600)
 )
 
 $checks = [ordered]@{

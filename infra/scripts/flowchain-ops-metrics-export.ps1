@@ -336,6 +336,10 @@ $ownerGoLiveHandoffLaunchSequenceReady = ((Get-MetricsProp -Object $ownerGoLiveH
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedReportPath" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceExpectedReportPathsScoped" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepStopsOnFailure" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTruthAndNoSecret" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCommandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
@@ -348,6 +352,8 @@ $ownerGoLiveHandoffRollbackReady = ((Get-MetricsProp -Object $ownerGoLiveHandoff
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOpsSnapshot" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
     -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0
 $ownerGoLiveHandoffInputSeparationReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "requiredAndOptionalOwnerInputsSeparated" -Default $false) -eq $true) `
@@ -398,6 +404,11 @@ $publicRpcDeploymentAutomationApplyPlanReady = ((Get-MetricsProp -Object $public
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false) -eq $true) `
@@ -407,6 +418,7 @@ $publicRpcDeploymentAutomationApplyPlanReady = ((Get-MetricsProp -Object $public
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdUninstallRollback" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesNginxReload" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true)
 $backupRestoreValidationChecks = Get-MetricsProp -Object $backupRestoreValidation -Name "checks"
 $backupRestoreValidationFailedChecks = @((Get-MetricsProp -Object $backupRestoreValidation -Name "failedChecks" -Default @()))
@@ -625,6 +637,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_apply_s
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_apply_script_hashes" -Help "One when the owner-host apply script verifies rendered artifact hashes before host mutation." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false) -eq $true))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_apply_script_post_deploy" -Help "One when the owner-host apply script runs post-deploy public RPC and truth proof commands." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false) -eq $true))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_apply_script_in_plan" -Help "One when the owner-host apply plan lists the generated apply script and rollback command." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_rendered" -Help "One when public RPC deployment automation renders a Windows owner-host apply script." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_modes" -Help "One when the Windows owner-host apply script includes plan, apply, and rollback modes." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_parses" -Help "One when the generated Windows owner-host apply script parses as PowerShell." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_hashes" -Help "One when the Windows owner-host apply script verifies rendered artifact hashes before host mutation." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy" -Help "One when the Windows owner-host apply script runs post-deploy public RPC and truth proof commands." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false) -eq $true))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_windows_owner_host_apply_script_in_plan" -Help "One when the owner-host apply plan lists the Windows apply script and rollback command." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false) -eq $true))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_artifacts_hashed" -Help "One when public RPC owner-host rendered artifacts have SHA256 hashes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_install_targets_mapped" -Help "One when public RPC owner-host artifacts map to install targets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_systemd_install_command" -Help "One when public RPC owner-host apply plan includes the systemd install command." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdInstallCommand" -Default $false))
@@ -823,6 +841,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_evidence_reports" -Help "Expected evidence report path count in the owner go-live launch sequence." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveExpectedReportPathCount" -Default $ownerGoLiveHandoffExpectedReportPathCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_invalid_evidence_reports" -Help "Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveInvalidExpectedReportPaths" -Default $ownerGoLiveHandoffInvalidExpectedReportPaths.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live launch sequence npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingLaunchPackageScripts" -Default $ownerGoLiveHandoffMissingLaunchPackageScripts.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_owner_host_apply_plan" -Help "One when the owner go-live launch sequence includes Linux owner-host apply planning." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_owner_host_apply_execution" -Help "One when the owner go-live launch sequence includes Linux owner-host apply execution." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_owner_host_apply_rollback" -Help "One when owner go-live rollback commands include Linux owner-host apply rollback." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_windows_owner_host_apply_plan" -Help "One when the owner go-live launch sequence includes Windows owner-host apply planning." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_windows_owner_host_apply_execution" -Help "One when the owner go-live launch sequence includes Windows owner-host apply execution." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_windows_owner_host_apply_rollback" -Help "One when owner go-live rollback commands include Windows owner-host apply rollback." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_ready" -Help "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffRollbackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_commands" -Help "Owner go-live rollback command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveRollbackCommandCount" -Default $ownerGoLiveHandoffRollbackCommandCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live rollback npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingRollbackPackageScripts" -Default $ownerGoLiveHandoffMissingRollbackPackageScripts.Count))
@@ -956,6 +980,17 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_command_plan_truth_table",
     "flowchain_public_rpc_command_plan_no_secret_scan",
     "flowchain_public_rpc_owner_host_apply_plan_ready",
+    "flowchain_public_rpc_owner_host_apply_script_rendered",
+    "flowchain_public_rpc_owner_host_apply_script_modes",
+    "flowchain_public_rpc_owner_host_apply_script_hashes",
+    "flowchain_public_rpc_owner_host_apply_script_post_deploy",
+    "flowchain_public_rpc_owner_host_apply_script_in_plan",
+    "flowchain_public_rpc_windows_owner_host_apply_script_rendered",
+    "flowchain_public_rpc_windows_owner_host_apply_script_modes",
+    "flowchain_public_rpc_windows_owner_host_apply_script_parses",
+    "flowchain_public_rpc_windows_owner_host_apply_script_hashes",
+    "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy",
+    "flowchain_public_rpc_windows_owner_host_apply_script_in_plan",
     "flowchain_public_rpc_owner_host_artifacts_hashed",
     "flowchain_public_rpc_owner_host_install_targets_mapped",
     "flowchain_public_rpc_owner_host_systemd_install_command",
@@ -1147,6 +1182,12 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_launch_evidence_reports",
     "flowchain_owner_go_live_launch_invalid_evidence_reports",
     "flowchain_owner_go_live_launch_missing_package_scripts",
+    "flowchain_owner_go_live_owner_host_apply_plan",
+    "flowchain_owner_go_live_owner_host_apply_execution",
+    "flowchain_owner_go_live_owner_host_apply_rollback",
+    "flowchain_owner_go_live_windows_owner_host_apply_plan",
+    "flowchain_owner_go_live_windows_owner_host_apply_execution",
+    "flowchain_owner_go_live_windows_owner_host_apply_rollback",
     "flowchain_owner_go_live_rollback_ready",
     "flowchain_owner_go_live_rollback_commands",
     "flowchain_owner_go_live_rollback_missing_package_scripts",
@@ -1366,6 +1407,17 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_truth_table",
         "flowchain_public_rpc_command_plan_no_secret_scan",
         "flowchain_public_rpc_owner_host_apply_plan_ready",
+        "flowchain_public_rpc_owner_host_apply_script_rendered",
+        "flowchain_public_rpc_owner_host_apply_script_modes",
+        "flowchain_public_rpc_owner_host_apply_script_hashes",
+        "flowchain_public_rpc_owner_host_apply_script_post_deploy",
+        "flowchain_public_rpc_owner_host_apply_script_in_plan",
+        "flowchain_public_rpc_windows_owner_host_apply_script_rendered",
+        "flowchain_public_rpc_windows_owner_host_apply_script_modes",
+        "flowchain_public_rpc_windows_owner_host_apply_script_parses",
+        "flowchain_public_rpc_windows_owner_host_apply_script_hashes",
+        "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy",
+        "flowchain_public_rpc_windows_owner_host_apply_script_in_plan",
         "flowchain_public_rpc_owner_host_artifacts_hashed",
         "flowchain_public_rpc_owner_host_install_targets_mapped",
         "flowchain_public_rpc_owner_host_systemd_install_command",
@@ -1390,6 +1442,17 @@ $checks = [ordered]@{
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcOwnerHostApplyPlanMetricsPresent = @(
         "flowchain_public_rpc_owner_host_apply_plan_ready",
+        "flowchain_public_rpc_owner_host_apply_script_rendered",
+        "flowchain_public_rpc_owner_host_apply_script_modes",
+        "flowchain_public_rpc_owner_host_apply_script_hashes",
+        "flowchain_public_rpc_owner_host_apply_script_post_deploy",
+        "flowchain_public_rpc_owner_host_apply_script_in_plan",
+        "flowchain_public_rpc_windows_owner_host_apply_script_rendered",
+        "flowchain_public_rpc_windows_owner_host_apply_script_modes",
+        "flowchain_public_rpc_windows_owner_host_apply_script_parses",
+        "flowchain_public_rpc_windows_owner_host_apply_script_hashes",
+        "flowchain_public_rpc_windows_owner_host_apply_script_post_deploy",
+        "flowchain_public_rpc_windows_owner_host_apply_script_in_plan",
         "flowchain_public_rpc_owner_host_artifacts_hashed",
         "flowchain_public_rpc_owner_host_install_targets_mapped",
         "flowchain_public_rpc_owner_host_systemd_install_command",
@@ -1492,6 +1555,12 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_launch_evidence_reports",
         "flowchain_owner_go_live_launch_invalid_evidence_reports",
         "flowchain_owner_go_live_launch_missing_package_scripts",
+        "flowchain_owner_go_live_owner_host_apply_plan",
+        "flowchain_owner_go_live_owner_host_apply_execution",
+        "flowchain_owner_go_live_owner_host_apply_rollback",
+        "flowchain_owner_go_live_windows_owner_host_apply_plan",
+        "flowchain_owner_go_live_windows_owner_host_apply_execution",
+        "flowchain_owner_go_live_windows_owner_host_apply_rollback",
         "flowchain_owner_go_live_rollback_ready",
         "flowchain_owner_go_live_rollback_commands",
         "flowchain_owner_go_live_rollback_missing_package_scripts"

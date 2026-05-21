@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_go_live_handoff_report.v0",
-    "generatedAt":  "2026-05-21T02:28:01.7322742Z",
+    "generatedAt":  "2026-05-21T03:35:24.7340848Z",
     "status":  "passed",
     "releaseReady":  false,
     "activationReady":  false,
@@ -38,6 +38,8 @@
                    "launchSequenceCoversPublicRpcRender":  true,
                    "launchSequenceCoversOwnerHostApplyPlan":  true,
                    "launchSequenceCoversOwnerHostApplyExecution":  true,
+                   "launchSequenceCoversWindowsOwnerHostApplyPlan":  true,
+                   "launchSequenceCoversWindowsOwnerHostApplyExecution":  true,
                    "launchSequenceCoversSystemdInstallPlan":  true,
                    "launchSequenceCoversServiceMonitor":  true,
                    "launchSequenceCoversPublicRpcCanary":  true,
@@ -54,6 +56,7 @@
                    "rollbackCoversBridgeEmergencyStop":  true,
                    "rollbackCoversOpsSnapshot":  true,
                    "rollbackCoversOwnerHostApplyRollback":  true,
+                   "rollbackCoversWindowsOwnerHostApplyRollback":  true,
                    "rollbackPackageScriptsPresent":  true,
                    "releaseClaimBlockedUntilTruthPassed":  true,
                    "packetShareBlockedUntilReady":  true,
@@ -166,7 +169,7 @@
     "blockedStageCount":  7,
     "nextCommandCount":  62,
     "launchSequenceCount":  10,
-    "launchSequenceCommandCount":  39,
+    "launchSequenceCommandCount":  42,
     "launchSequenceExpectedReportPathCount":  43,
     "invalidLaunchSequenceExpectedReportPaths":  [
 
@@ -175,7 +178,7 @@
     "missingLaunchSequencePackageScriptNames":  [
 
                                                 ],
-    "rollbackCommandCount":  8,
+    "rollbackCommandCount":  9,
     "rollbackPackageScriptCount":  7,
     "missingRollbackPackageScriptNames":  [
 
@@ -624,7 +627,8 @@
                                                 "npm run flowchain:public-rpc:deployment-bundle",
                                                 "npm run flowchain:public-rpc:deployment:automation",
                                                 "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e",
-                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan"
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                                "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Plan"
                                             ],
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -644,7 +648,8 @@
                                                 "npm run flowchain:service:install:systemd:validate",
                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
-                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan"
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                                "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Plan"
                                             ],
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
@@ -660,7 +665,8 @@
                                "ownerInputBlockedAllowedBeforeInputs":  false,
                                "stopOnFailure":  true,
                                "commands":  [
-                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh apply"
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh apply",
+                                                "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Apply"
                                             ],
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
@@ -820,6 +826,7 @@
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:stop",
                              "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
+                             "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Rollback",
                              "npm run flowchain:emergency:stop-local",
                              "npm run flowchain:bridge:emergency-stop",
                              "npm run flowchain:public-deployment:contract -- -AllowBlocked"

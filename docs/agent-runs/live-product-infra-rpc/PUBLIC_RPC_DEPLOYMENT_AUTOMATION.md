@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-21T02:05:54.2310320Z
+Generated: 2026-05-21T03:35:07.2182530Z
 Status: passed
 Action: Validate
 
@@ -39,9 +39,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedShellPreflightWritten: True
 - renderedWindowsPreflightWritten: True
 - renderedOwnerHostApplyScriptWritten: True
+- renderedOwnerHostApplyPowerShellWritten: True
 - renderedOwnerHostApplyScriptHasPlanApplyRollback: True
+- renderedOwnerHostApplyPowerShellHasPlanApplyRollback: True
+- renderedOwnerHostApplyPowerShellParses: True
 - renderedOwnerHostApplyScriptVerifiesHashes: True
+- renderedOwnerHostApplyPowerShellVerifiesHashes: True
 - renderedOwnerHostApplyScriptRunsPostDeployProof: True
+- renderedOwnerHostApplyPowerShellRunsPostDeployProof: True
 - renderedReportWritten: True
 - renderedReportPassed: True
 - renderedReportAllowedOriginCountPresent: True
@@ -91,6 +96,7 @@ This validator proves the owner-host public RPC deployment path can render concr
 - ownerHostApplyPlanIncludesSystemdUninstallRollback: True
 - ownerHostApplyPlanIncludesNginxReload: True
 - ownerHostApplyPlanIncludesOwnerApplyScript: True
+- ownerHostApplyPlanIncludesWindowsOwnerApplyScript: True
 - ownerHostApplyPlanIncludesPostDeployEvidence: True
 - ownerHostApplyPlanValuesPrintedFalse: True
 - ownerHostApplyPlanEnvValuesPrintedFalse: True
@@ -131,6 +137,8 @@ This validator proves the owner-host public RPC deployment path can render concr
 - nginx -t
 - bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>
 - powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_WINDOWS_PREFLIGHT_SCRIPT>
+- npm run flowchain:service:install:windows -- -Action Plan
+- powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
 - npm run flowchain:public-rpc:abuse-test
@@ -143,13 +151,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 
 ## Rendered Artifact Manifest
 
-- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=d58192516e75e79d43d7398ce20fde31f2abe1a0e9619627c69938e08d3fc081
-- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=d8d2e250a3b743e362396d2e2af302a0ec2c500847f9628480ed0d8d8ac7da23
-- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=43e7bb7c0793552f14a41374285eb321a65477c0e8634a3859a7f8ee9ba4c582
-- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=91444c4ad3479bb04b8693a4c2a6f843cc342351b578f12b640225e41f503fa4
-- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=a3b7fc41cd11daad0423f37a987dfbe6a1289bfedaec652e7b7133b5d0736da5
-- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=5ad27b6388f784371d83934cab3955868a4b6f83eb71c2e530cdee164ab8634d
-- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=4c7752a4c5fc8b543398d6e789563073cc440fc92b7204076c57d0dcea3c3fc9
+- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=90932da09b8653cd20f22fb8c847e9ec85d54d51e51999e3f127302971be38b1
+- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=18b7dc444a21bc0d9f557a7352de8ac9348ea7909459105f66676a4a704216ef
+- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=1de42388fddac453761597bb067ff779f60f71b7bdf629cfccc7cc8ced1d7434
+- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=cdec272c2662eec38a70c72f0738c1847f6e89b797e4e4e3f226a8dc2c715cfc
+- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=03773e4dd5322ce5485c2648eb5e5ace176f05da1046d6c05a9bb6fe193ef525
+- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=313304f4964dc1d0769d975447d999d3d8415fd11560a0efd2b4ae153652820c
+- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=4720c0dc0920c540786dca14ccac80fe956bcb7ebe9f00a46344156c32d145a2
+- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=1a5982f38ec161fdb3ce81fc9d7741eeed0f68926c4fad3962f342f85d7bd2a0
 
 ## Owner Host Apply Phases
 
