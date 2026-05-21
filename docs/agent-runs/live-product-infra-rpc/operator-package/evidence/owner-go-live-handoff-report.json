@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_go_live_handoff_report.v0",
-    "generatedAt":  "2026-05-21T03:35:24.7340848Z",
+    "generatedAt":  "2026-05-21T05:08:44.1977784Z",
     "status":  "passed",
     "releaseReady":  false,
     "activationReady":  false,
@@ -169,12 +169,12 @@
     "blockedStageCount":  7,
     "nextCommandCount":  62,
     "launchSequenceCount":  10,
-    "launchSequenceCommandCount":  42,
-    "launchSequenceExpectedReportPathCount":  43,
+    "launchSequenceCommandCount":  43,
+    "launchSequenceExpectedReportPathCount":  44,
     "invalidLaunchSequenceExpectedReportPaths":  [
 
                                                  ],
-    "launchSequencePackageScriptCount":  34,
+    "launchSequencePackageScriptCount":  35,
     "missingLaunchSequencePackageScriptNames":  [
 
                                                 ],
@@ -753,6 +753,7 @@
                                "commands":  [
                                                 "npm run flowchain:bridge:live:check -- -AllowBlocked",
                                                 "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                                                "npm run flowchain:bridge:command-matrix",
                                                 "npm run flowchain:bridge:relayer:guardrail:validate",
                                                 "npm run flowchain:bridge:relayer:loop:validate",
                                                 "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
@@ -761,6 +762,7 @@
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",

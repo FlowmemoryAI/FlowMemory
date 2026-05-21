@@ -58,6 +58,7 @@ $paths = [ordered]@{
     backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeCommandMatrix = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
     bridgeDeployControl = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
@@ -557,6 +558,29 @@ $backupOwnerPathDryRunReady = $backupOwnerPathDryRunStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false)
 $bridgeLiveStatus = Get-OpsStatus -Report $reports.bridgeLive
 $bridgeInfraStatus = Get-OpsStatus -Report $reports.bridgeInfra
+$bridgeCommandMatrixStatus = Get-OpsStatus -Report $reports.bridgeCommandMatrix
+$bridgeCommandMatrixChecks = Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "checks"
+$bridgeCommandMatrixFailedChecks = @((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "failedChecks" -Default @()))
+$bridgeCommandMatrixMissingScripts = @((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "missingScripts" -Default @()))
+$bridgeCommandMatrixMissingPhases = @((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "missingPhases" -Default @()))
+$bridgeCommandMatrixBroadcastAckGaps = @((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "liveBroadcastRowsWithoutAck" -Default @()))
+$bridgeCommandMatrixBadOwnerInputs = @((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$bridgeCommandMatrixReady = $bridgeCommandMatrixStatus -eq "passed" `
+    -and $bridgeCommandMatrixFailedChecks.Count -eq 0 `
+    -and $bridgeCommandMatrixMissingScripts.Count -eq 0 `
+    -and $bridgeCommandMatrixMissingPhases.Count -eq 0 `
+    -and $bridgeCommandMatrixBroadcastAckGaps.Count -eq 0 `
+    -and $bridgeCommandMatrixBadOwnerInputs.Count -eq 0 `
+    -and ([int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "commandCount" -Default 0) -ge 18) `
+    -and ([int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 10) `
+    -and ((Get-OpsProp -Object $bridgeCommandMatrixChecks -Name "liveBroadcastCommandsAckGated" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeCommandMatrixChecks -Name "deployObserveRelayerControlReleaseCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeCommandMatrixChecks -Name "commandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $bridgeCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $bridgeDeployControlStatus = Get-OpsStatus -Report $reports.bridgeDeployControl
 $bridgeDeployControlChecks = Get-OpsProp -Object $reports.bridgeDeployControl -Name "checks"
 $bridgeDeployControlFailedChecks = @((Get-OpsProp -Object $reports.bridgeDeployControl -Name "failedChecks" -Default @()))
@@ -1034,6 +1058,9 @@ if (-not $backupOwnerPathDryRunReady) {
 if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "bridge-not-ready" -Message "Base 8453 bridge readiness is not ready for external funded testing." -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:emergency-stop")
 }
+if (-not $bridgeCommandMatrixReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-command-matrix-failed" -Message "Bridge command matrix is missing or unsafe: every pilot command must be mapped to risk, owner inputs, acknowledgement gates, and committed evidence without secrets or broadcasts." -Commands @("npm run flowchain:bridge:command-matrix", "npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:reconciliation")
+}
 if (-not $bridgeDeployControlReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-deploy-control-validation-failed" -Message "Bridge deploy/control validation is missing or failed: deploy, pause, resume, and emergency-stop paths must fail closed and require explicit owner broadcast acknowledgement." -Commands @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
 }
@@ -1149,6 +1176,12 @@ $incidentCommands = [ordered]@{
         "npm run flowchain:emergency:stop-local",
         "npm run flowchain:bridge:emergency-stop",
         "npm run flowchain:emergency:export-evidence"
+    )
+    bridgePilot = @(
+        "npm run flowchain:bridge:command-matrix",
+        "npm run flowchain:bridge:deploy:control:validate",
+        "npm run flowchain:bridge:relayer:guardrail:validate",
+        "npm run flowchain:bridge:reconciliation"
     )
     bridgeRelayerLoop = @(
         "npm run flowchain:service:status",
@@ -1323,6 +1356,18 @@ $report = [ordered]@{
         backupOwnerPathDryRunDidNotMutateLiveState = Get-OpsProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false
         bridgeLive = $bridgeLiveStatus
         bridgeInfra = $bridgeInfraStatus
+        bridgeCommandMatrix = $bridgeCommandMatrixStatus
+        bridgeCommandMatrixReady = $bridgeCommandMatrixReady
+        bridgeCommandMatrixCommands = [int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "commandCount" -Default 0)
+        bridgeCommandMatrixPhases = [int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "phaseCount" -Default 0)
+        bridgeCommandMatrixLiveBroadcastCommands = [int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0)
+        bridgeCommandMatrixCommittedEvidencePaths = [int](Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        bridgeCommandMatrixFailedChecks = $bridgeCommandMatrixFailedChecks.Count
+        bridgeCommandMatrixMissingScripts = $bridgeCommandMatrixMissingScripts.Count
+        bridgeCommandMatrixMissingPhases = $bridgeCommandMatrixMissingPhases.Count
+        bridgeCommandMatrixBroadcastAckGaps = $bridgeCommandMatrixBroadcastAckGaps.Count
+        bridgeCommandMatrixNoSecrets = ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true)
+        bridgeCommandMatrixNoBroadcasts = ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
         bridgeDeployControl = $bridgeDeployControlStatus
         bridgeDeployControlReady = $bridgeDeployControlReady
         bridgeDeployControlFailedChecks = $bridgeDeployControlFailedChecks.Count

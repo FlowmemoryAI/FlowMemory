@@ -1,17 +1,17 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T03:38:17.4155640Z",
+    "generatedAt":  "2026-05-21T05:11:53.0142574Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
     "opsSnapshotPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
     "opsRefresh":  {
-                       "performed":  true,
+                       "performed":  false,
                        "exitCode":  0,
-                       "outputLineCount":  5
+                       "outputLineCount":  0
                    },
-    "ruleCount":  40,
-    "criticalRuleCount":  33,
+    "ruleCount":  41,
+    "criticalRuleCount":  34,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -42,6 +42,7 @@
                                 "backup-restore-validation-failed",
                                 "backup-owner-path-dry-run-failed",
                                 "bridge-deploy-control-validation-failed",
+                                "bridge-command-matrix-failed",
                                 "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
@@ -111,6 +112,7 @@
                    "backupRestoreValidationRuleCoversSafety":  true,
                    "backupOwnerPathDryRunRuleCoversOwnerPath":  true,
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
+                   "bridgeCommandMatrixRuleCoversLaunchRunbook":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "bridgeReconciliationRuleCoversCursorAndReplay":  true,
@@ -285,6 +287,20 @@
                                        "npm run flowchain:bridge:deploy:control:validate",
                                        "npm run flowchain:bridge:deploy:base8453",
                                        "npm run flowchain:bridge:emergency-stop"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-command-matrix-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-command-matrix-failed"
+                                       ],
+                      "signal":  "Bridge command matrix is missing or unsafe.",
+                      "threshold":  "command matrix must cover deploy, observe, relayer, control, release, owner input names, broadcast acknowledgement gates, committed evidence paths, no-secret, and no-broadcast checks",
+                      "commands":  [
+                                       "npm run flowchain:bridge:command-matrix",
+                                       "npm run flowchain:bridge:deploy:control:validate",
+                                       "npm run flowchain:bridge:reconciliation"
                                    ]
                   },
                   {

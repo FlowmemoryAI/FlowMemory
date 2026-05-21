@@ -366,6 +366,7 @@ $launchSequence = @(
         commands = @(
             "npm run flowchain:bridge:live:check -- -AllowBlocked",
             "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+            "npm run flowchain:bridge:command-matrix",
             "npm run flowchain:bridge:relayer:guardrail:validate",
             "npm run flowchain:bridge:relayer:loop:validate",
             "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
@@ -374,6 +375,7 @@ $launchSequence = @(
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
             "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
+            "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
             "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
             "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
             "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",

@@ -64,6 +64,7 @@ $reportPaths = [ordered]@{
     backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfraReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
@@ -382,6 +383,16 @@ $bridgeDeployControlMetricNames = @(
 )
 $missingBridgeDeployControlMetricNames = @($bridgeDeployControlMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
 $opsMetricsHasBridgeDeployControlMetrics = $missingBridgeDeployControlMetricNames.Count -eq 0
+$bridgeCommandMatrixMetricNames = @(
+    "flowchain_bridge_command_matrix_ready",
+    "flowchain_bridge_command_matrix_commands_total",
+    "flowchain_bridge_command_matrix_live_broadcast_commands",
+    "flowchain_bridge_command_matrix_missing_scripts",
+    "flowchain_bridge_command_matrix_broadcast_ack_gaps",
+    "flowchain_bridge_command_matrix_no_secrets"
+)
+$missingBridgeCommandMatrixMetricNames = @($bridgeCommandMatrixMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeCommandMatrixMetrics = $missingBridgeCommandMatrixMetricNames.Count -eq 0
 $supervisorNodeRecoveryMetricNames = @(
     "flowchain_supervisor_node_recovery_validated",
     "flowchain_supervisor_node_restart_attempts",
@@ -608,6 +619,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeCommandMatrixRuleCoversLaunchRunbook" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false) -eq $true) `
     -and ($opsMetricsExportStatus -eq "passed") `
@@ -631,6 +643,9 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasBridgeDeployControlMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeCommandMatrixMetrics -eq $true) `
     -and ($opsMetricsHasSupervisorNodeRecoveryMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasServiceInstallValidationMetrics -eq $true) `
@@ -674,7 +689,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
     -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), relayerLoopAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false), bridgeReconciliationAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false), secondComputerAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false), serviceInstallAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), devPackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false), publicRpcRollbackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), publicRpcApplyPlanAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false), backupRestoreAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false), backupOwnerPathAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false), bridgeDeployControlAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, publicRpcRollbackMetrics=$opsMetricsHasPublicRpcRollbackDrillMetrics, publicRpcOwnerApplyMetrics=$opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics, backupRestoreMetrics=$opsMetricsHasBackupRestoreValidationMetrics, backupOwnerPathMetrics=$opsMetricsHasBackupOwnerPathDryRunMetrics, bridgeDeployControlMetrics=$opsMetricsHasBridgeDeployControlMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, serviceInstallValidationMetrics=$opsMetricsHasServiceInstallValidationMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReconciliationMetrics=$opsMetricsHasBridgeReconciliationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, secondComputerMetrics=$opsMetricsHasSecondComputerMetrics, devPackMetrics=$opsMetricsHasDevPackMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), relayerLoopAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false), bridgeReconciliationAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false), secondComputerAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false), serviceInstallAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), devPackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false), publicRpcRollbackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), publicRpcApplyPlanAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false), backupRestoreAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false), backupOwnerPathAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false), bridgeDeployControlAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), bridgeCommandMatrixAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeCommandMatrixRuleCoversLaunchRunbook" -Default $false), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, publicRpcRollbackMetrics=$opsMetricsHasPublicRpcRollbackDrillMetrics, publicRpcOwnerApplyMetrics=$opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics, backupRestoreMetrics=$opsMetricsHasBackupRestoreValidationMetrics, backupOwnerPathMetrics=$opsMetricsHasBackupOwnerPathDryRunMetrics, bridgeDeployControlMetrics=$opsMetricsHasBridgeDeployControlMetrics, bridgeCommandMatrixMetrics=$opsMetricsHasBridgeCommandMatrixMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, serviceInstallValidationMetrics=$opsMetricsHasServiceInstallValidationMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReconciliationMetrics=$opsMetricsHasBridgeReconciliationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, secondComputerMetrics=$opsMetricsHasSecondComputerMetrics, devPackMetrics=$opsMetricsHasDevPackMetrics, metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
     -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
@@ -1164,6 +1179,39 @@ Add-ArchitectureItem -Items $items -Id "bridge-live-edge" -Layer "Bridge" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:diagnose:tx") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+$bridgeCommandMatrix = $reports.bridgeCommandMatrix
+$bridgeCommandMatrixStatus = Get-ArchitectureStatus -Report $bridgeCommandMatrix
+$bridgeCommandMatrixChecks = Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "checks"
+$bridgeCommandMatrixFailedChecks = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "failedChecks" -Default @()))
+$bridgeCommandMatrixMissingScripts = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "missingScripts" -Default @()))
+$bridgeCommandMatrixMissingPhases = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "missingPhases" -Default @()))
+$bridgeCommandMatrixBroadcastAckGaps = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastRowsWithoutAck" -Default @()))
+$bridgeCommandMatrixBadOwnerInputRows = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$bridgeCommandMatrixReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:command-matrix") `
+    -and (Test-RepoFile -Path "infra/scripts/flowchain-bridge-command-matrix.ps1") `
+    -and ($bridgeCommandMatrixStatus -eq "passed") `
+    -and ($bridgeCommandMatrixFailedChecks.Count -eq 0) `
+    -and ($bridgeCommandMatrixMissingScripts.Count -eq 0) `
+    -and ($bridgeCommandMatrixMissingPhases.Count -eq 0) `
+    -and ($bridgeCommandMatrixBroadcastAckGaps.Count -eq 0) `
+    -and ($bridgeCommandMatrixBadOwnerInputRows.Count -eq 0) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "commandCount" -Default 0) -ge 18) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 10) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "liveBroadcastCommandsAckGated" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "deployObserveRelayerControlReleaseCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "commandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+Add-ArchitectureItem -Items $items -Id "bridge-command-matrix-boundary" -Layer "Bridge" `
+    -Requirement "Bridge pilot operations expose a single no-secret command matrix that maps every deploy, observe, relayer, credit, reconciliation, withdrawal/release, emergency-control, and release command to owner input names, acknowledgement gates, risk class, and committed evidence paths." `
+    -Status $(if ($bridgeCommandMatrixReady) { "passed" } else { "failed" }) `
+    -Evidence "matrix=$bridgeCommandMatrixStatus, commands=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'commandCount' -Default 0), phases=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'phaseCount' -Default 0), liveBroadcastCommands=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'liveBroadcastCapableCommandCount' -Default 0), committedEvidencePaths=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'committedEvidencePathCount' -Default 0), failedChecks=$($bridgeCommandMatrixFailedChecks.Count), missingScripts=$($bridgeCommandMatrixMissingScripts.Count), missingPhases=$($bridgeCommandMatrixMissingPhases.Count), ackGaps=$($bridgeCommandMatrixBroadcastAckGaps.Count)" `
+    -Files @("infra/scripts/flowchain-bridge-command-matrix.ps1", "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json", "docs/agent-runs/live-product-infra-rpc/BRIDGE_COMMAND_MATRIX.md") `
+    -Commands @("npm run flowchain:bridge:command-matrix")
 
 $bridgeRelayer = $reports.bridgeRelayerOnce
 $bridgeRelayerGuardrail = $reports.bridgeRelayerGuardrailValidation
@@ -2010,6 +2058,8 @@ $report = [ordered]@{
         missingPublicRpcOwnerHostApplyPlanMetricNames = @($missingPublicRpcOwnerHostApplyPlanMetricNames)
         bridgeDeployControlMetricsPresent = $opsMetricsHasBridgeDeployControlMetrics
         missingBridgeDeployControlMetricNames = @($missingBridgeDeployControlMetricNames)
+        bridgeCommandMatrixMetricsPresent = $opsMetricsHasBridgeCommandMatrixMetrics
+        missingBridgeCommandMatrixMetricNames = @($missingBridgeCommandMatrixMetricNames)
         supervisorNodeRecoveryMetricsPresent = $opsMetricsHasSupervisorNodeRecoveryMetrics
         missingSupervisorNodeRecoveryMetricNames = @($missingSupervisorNodeRecoveryMetricNames)
         serviceInstallValidationMetricsPresent = $opsMetricsHasServiceInstallValidationMetrics
@@ -2040,6 +2090,18 @@ $report = [ordered]@{
         nodeRecoveryLiveProfile = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false)
         nodeRecoveryMaxBlocksUnbounded = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false)
         relayerRecovered = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false)
+    }
+    bridgeCommandMatrixEvidence = [ordered]@{
+        status = $bridgeCommandMatrixStatus
+        ready = $bridgeCommandMatrixReady
+        commandCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "commandCount" -Default 0)
+        phaseCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "phaseCount" -Default 0)
+        liveBroadcastCapableCommandCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0)
+        committedEvidencePathCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        failedChecks = @($bridgeCommandMatrixFailedChecks)
+        missingScripts = @($bridgeCommandMatrixMissingScripts)
+        missingPhases = @($bridgeCommandMatrixMissingPhases)
+        liveBroadcastRowsWithoutAck = @($bridgeCommandMatrixBroadcastAckGaps)
     }
     bridgeRelayerSafetyEvidence = [ordered]@{
         status = $bridgeRelayerStatus

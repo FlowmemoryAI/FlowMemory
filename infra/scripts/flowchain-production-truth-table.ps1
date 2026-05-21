@@ -1605,6 +1605,52 @@ $definitions = @(
         ownerInputGate = $true
     },
     [ordered]@{
+        id = "bridge-command-matrix"
+        requirement = "Bridge pilot command matrix maps deploy, observe, relayer, credit, withdrawal/release, emergency-control, smoke, and release commands to owner env names, broadcast acknowledgement gates, risk class, and evidence paths without owner-value leakage."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+        command = "npm run flowchain:bridge:command-matrix"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "allRequiredScriptsPresent",
+            "phaseCoverageComplete",
+            "deployObserveRelayerControlReleaseCovered",
+            "liveBroadcastCommandsAckGated",
+            "observeCommandOperatorAckGated",
+            "relayerOnceOperatorAckGated",
+            "controlCommandsBroadcastAckGated",
+            "deployCommandBroadcastAckGated",
+            "requiredEnvReferencesPresent",
+            "requiredAckReferencesPresent",
+            "validationSignalsPresent",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "commandsAvoidKeyMaterial",
+            "ownerInputNamesOnly",
+            "committedEvidencePathsCovered",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingScripts",
+            "missingPhases",
+            "liveBroadcastRowsWithoutAck",
+            "badOwnerInputRows"
+        )
+        requiredMinimums = [ordered]@{
+            commandCount = 18
+            liveBroadcastCapableCommandCount = 4
+            committedEvidencePathCount = 10
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "base-tx-diagnostic-fail-closed"
         requirement = "Base 8453 transaction diagnosis fails closed without owner env/tx inputs, prints no env values, writes no secrets, and never broadcasts."
         path = "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"

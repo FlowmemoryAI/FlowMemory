@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T03:37:32.3938156Z",
+    "generatedAt":  "2026-05-21T05:11:54.7798051Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -13,6 +13,7 @@
                           "publicRpcDeploymentAutomationStatus":  "passed",
                           "backupRestoreValidationStatus":  "passed",
                           "backupOwnerPathDryRunStatus":  "passed",
+                          "bridgeCommandMatrixStatus":  "passed",
                           "bridgeRelayerLoopValidationStatus":  "passed",
                           "bridgeReconciliationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
@@ -35,19 +36,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  109054
+                        "value":  109610
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  109054
+                        "value":  109610
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  10
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -89,7 +90,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  23337.411
+                        "value":  28998.985
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -119,13 +120,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  40
+                        "value":  41
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  33
+                        "value":  34
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -732,6 +733,42 @@
                         "type":  "gauge",
                         "help":  "One when bridge infrastructure readiness is passed.",
                         "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_ready",
+                        "type":  "gauge",
+                        "help":  "One when the bridge command matrix is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_commands_total",
+                        "type":  "gauge",
+                        "help":  "Bridge command matrix command count.",
+                        "value":  20
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_live_broadcast_commands",
+                        "type":  "gauge",
+                        "help":  "Bridge command matrix commands capable of live broadcast and requiring acknowledgement gates.",
+                        "value":  4
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_missing_scripts",
+                        "type":  "gauge",
+                        "help":  "Missing package scripts in bridge command matrix.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_broadcast_ack_gaps",
+                        "type":  "gauge",
+                        "help":  "Live-broadcast bridge commands missing explicit broadcast acknowledgement coverage.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_command_matrix_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when bridge command matrix reports no secrets and no env value printing.",
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_deploy_control_validation_ready",
@@ -1691,13 +1728,13 @@
                         "name":  "flowchain_owner_go_live_launch_sequence_commands",
                         "type":  "gauge",
                         "help":  "Ordered owner go-live launch sequence command count.",
-                        "value":  42
+                        "value":  43
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_evidence_reports",
                         "type":  "gauge",
                         "help":  "Expected evidence report path count in the owner go-live launch sequence.",
-                        "value":  43
+                        "value":  44
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_invalid_evidence_reports",
@@ -1838,7 +1875,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  301,
+    "metricCount":  307,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

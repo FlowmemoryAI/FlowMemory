@@ -78,6 +78,7 @@ $paths = [ordered]@{
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
     bridgeDeployControlValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
@@ -409,6 +410,9 @@ $backupOwnerPathDryRunExitCode = $backupOwnerPathDryRunResult.exitCode
 $backupInstallValidationResult = Invoke-AuditChild -Path $paths.backupInstallValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"))
 $backupInstallValidationOutput = @($backupInstallValidationResult.output)
 $backupInstallValidationExitCode = $backupInstallValidationResult.exitCode
+$bridgeCommandMatrixResult = Invoke-AuditChild -Path $paths.bridgeCommandMatrix -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-command-matrix.ps1"))
+$bridgeCommandMatrixOutput = @($bridgeCommandMatrixResult.output)
+$bridgeCommandMatrixExitCode = $bridgeCommandMatrixResult.exitCode
 $bridgeDeployControlValidationResult = Invoke-AuditChild -Path $paths.bridgeDeployControlValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-deploy-control-validation.ps1"))
 $bridgeDeployControlValidationOutput = @($bridgeDeployControlValidationResult.output)
 $bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationResult.exitCode
@@ -2238,6 +2242,51 @@ $backupInstallValidationPassed = $backupInstallValidationExitCode -eq 0 `
     -and ((Get-AuditProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $backupInstallValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeCommandMatrix = $reports.bridgeCommandMatrix
+$bridgeCommandMatrixStatus = Get-ReportStatus -Report $bridgeCommandMatrix
+$bridgeCommandMatrixChecks = Get-AuditProp -Object $bridgeCommandMatrix -Name "checks"
+$bridgeCommandMatrixFailedChecks = @((Get-AuditProp -Object $bridgeCommandMatrix -Name "failedChecks" -Default @()))
+$bridgeCommandMatrixMissingScripts = @((Get-AuditProp -Object $bridgeCommandMatrix -Name "missingScripts" -Default @()))
+$bridgeCommandMatrixMissingPhases = @((Get-AuditProp -Object $bridgeCommandMatrix -Name "missingPhases" -Default @()))
+$bridgeCommandMatrixBroadcastAckGaps = @((Get-AuditProp -Object $bridgeCommandMatrix -Name "liveBroadcastRowsWithoutAck" -Default @()))
+$bridgeCommandMatrixRows = @((Get-AuditProp -Object $bridgeCommandMatrix -Name "rows" -Default @()))
+$bridgeCommandMatrixRequiredChecks = @(
+    "allRequiredScriptsPresent",
+    "phaseCoverageComplete",
+    "deployObserveRelayerControlReleaseCovered",
+    "liveBroadcastCommandsAckGated",
+    "observeCommandOperatorAckGated",
+    "relayerOnceOperatorAckGated",
+    "controlCommandsBroadcastAckGated",
+    "deployCommandBroadcastAckGated",
+    "requiredEnvReferencesPresent",
+    "requiredAckReferencesPresent",
+    "validationSignalsPresent",
+    "commandsAvoidInlineEnvAssignment",
+    "commandsAvoidUrls",
+    "commandsAvoidKeyMaterial",
+    "ownerInputNamesOnly",
+    "committedEvidencePathsCovered",
+    "envValuesPrintedFalse",
+    "broadcastsFalse",
+    "noSecrets"
+)
+$bridgeCommandMatrixMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeCommandMatrixChecks -Names $bridgeCommandMatrixRequiredChecks)
+$bridgeCommandMatrixFalseRequiredChecks = @($bridgeCommandMatrixRequiredChecks | Where-Object { (Get-AuditProp -Object $bridgeCommandMatrixChecks -Name $_ -Default $false) -ne $true })
+$bridgeCommandMatrixPassed = $bridgeCommandMatrixExitCode -eq 0 `
+    -and $bridgeCommandMatrixStatus -eq "passed" `
+    -and $bridgeCommandMatrixFailedChecks.Count -eq 0 `
+    -and $bridgeCommandMatrixMissingScripts.Count -eq 0 `
+    -and $bridgeCommandMatrixMissingPhases.Count -eq 0 `
+    -and $bridgeCommandMatrixBroadcastAckGaps.Count -eq 0 `
+    -and $bridgeCommandMatrixMissingChecks.Count -eq 0 `
+    -and $bridgeCommandMatrixFalseRequiredChecks.Count -eq 0 `
+    -and $bridgeCommandMatrixRows.Count -ge 18 `
+    -and ([int](Get-AuditProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-AuditProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 10) `
+    -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $bridgeDeployControlValidation = $reports.bridgeDeployControlValidation
 $bridgeDeployControlValidationStatus = Get-ReportStatus -Report $bridgeDeployControlValidation
 $bridgeDeployControlChecks = Get-AuditProp -Object $bridgeDeployControlValidation -Name "checks"
@@ -2877,6 +2926,7 @@ $opsAlertRequiredChecks = @(
     "backupRestoreValidationRuleCoversSafety",
     "backupOwnerPathDryRunRuleCoversOwnerPath",
     "bridgeDeployControlRuleCoversDeploymentControls",
+    "bridgeCommandMatrixRuleCoversLaunchRunbook",
     "supervisorNodeRecoveryRuleCoversLiveProfile",
     "bridgeRelayerLoopRuleCoversValidationTelemetry",
     "bridgeReconciliationRuleCoversCursorAndReplay",
@@ -2960,6 +3010,8 @@ $opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixLoaded" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false) -eq $true) `
@@ -3529,6 +3581,12 @@ Add-AuditItem -Items $items -Id "bridge-funds" `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
+Add-AuditItem -Items $items -Id "bridge-command-matrix" `
+    -Requirement "Bridge pilot command matrix maps deploy, observe, relayer, credit, withdrawal/release, emergency-control, smoke, and release commands to owner env names, broadcast acknowledgement gates, risk class, and evidence paths without owner-value leakage." `
+    -Status $(if ($bridgeCommandMatrixPassed) { "passed" } else { "failed" }) `
+    -Evidence "matrixStatus=$bridgeCommandMatrixStatus, commands=$($bridgeCommandMatrixRows.Count), phases=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "phaseCount" -Default 0), liveBroadcastCommands=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0), committedEvidencePaths=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0), failedChecks=$($bridgeCommandMatrixFailedChecks.Count), missingScripts=$($bridgeCommandMatrixMissingScripts.Count), missingPhases=$($bridgeCommandMatrixMissingPhases.Count), broadcastAckGaps=$($bridgeCommandMatrixBroadcastAckGaps.Count), report=$($paths.bridgeCommandMatrix)" `
+    -Commands @("npm run flowchain:bridge:command-matrix")
+
 Add-AuditItem -Items $items -Id "bridge-local-pilot-proof" `
     -Requirement "Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast." `
     -Status $(if ($bridgePilotLocalPassed) { "passed" } else { "failed" }) `
@@ -3699,6 +3757,8 @@ $report = [ordered]@{
     backupOwnerPathDryRunOutputRedacted = @($backupOwnerPathDryRunOutput | ForEach-Object { "$_" })
     backupInstallValidationExitCode = $backupInstallValidationExitCode
     backupInstallValidationOutputRedacted = @($backupInstallValidationOutput | ForEach-Object { "$_" })
+    bridgeCommandMatrixExitCode = $bridgeCommandMatrixExitCode
+    bridgeCommandMatrixOutputRedacted = @($bridgeCommandMatrixOutput | ForEach-Object { "$_" })
     bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationExitCode
     bridgeDeployControlValidationOutputRedacted = @($bridgeDeployControlValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerOnceExitCode = $bridgeRelayerOnceExitCode
@@ -3809,6 +3869,8 @@ $report = [ordered]@{
         upgradeRehearsalPassed = $upgradeRehearsalPassed
         installCheckStatus = $installCheckStatus
         installCheckPassed = $installCheckPassed
+        bridgeCommandMatrixStatus = $bridgeCommandMatrixStatus
+        bridgeCommandMatrixPassed = $bridgeCommandMatrixPassed
         bridgeDeployControlValidationStatus = $bridgeDeployControlValidationStatus
         bridgeDeployControlValidationPassed = $bridgeDeployControlValidationPassed
         bridgeRelayerOnceStatus = $bridgeRelayerOnceStatus
@@ -3868,6 +3930,7 @@ $report = [ordered]@{
         "npm run flowchain:service:supervisor:validate",
         "npm run flowchain:service:install:validate",
         "npm run flowchain:dev-pack:e2e",
+        "npm run flowchain:bridge:command-matrix",
         "npm run flowchain:bridge:relayer:guardrail:validate",
         "npm run flowchain:bridge:relayer:loop:validate",
         "npm run flowchain:bridge:runtime-credit:validate",

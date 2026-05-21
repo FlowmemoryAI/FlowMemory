@@ -1,9 +1,9 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-21T03:38:16.5892390Z
+Generated: 2026-05-21T05:11:50.6289293Z
 Status: blocked
-Latest height: 109060
-Finalized height: 109060
+Latest height: 109610
+Finalized height: 109610
 Transaction intake rows: 187
 Runtime inbox files: 0
 
@@ -58,6 +58,12 @@ Runtime inbox files: 0
 - npm run flowchain:emergency:stop-local
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:emergency:export-evidence
+
+### bridgePilot
+- npm run flowchain:bridge:command-matrix
+- npm run flowchain:bridge:deploy:control:validate
+- npm run flowchain:bridge:relayer:guardrail:validate
+- npm run flowchain:bridge:reconciliation
 
 ### bridgeRelayerLoop
 - npm run flowchain:service:status

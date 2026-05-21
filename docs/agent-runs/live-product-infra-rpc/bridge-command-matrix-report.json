@@ -1,0 +1,713 @@
+{
+    "schema":  "flowchain.bridge_command_matrix_report.v0",
+    "generatedAt":  "2026-05-21T05:10:16.7291033Z",
+    "status":  "passed",
+    "commandCount":  20,
+    "phaseCount":  9,
+    "liveBroadcastCapableCommandCount":  4,
+    "committedEvidencePathCount":  12,
+    "requiredPhases":  [
+                           "preflight",
+                           "deploy-control",
+                           "observe",
+                           "credit",
+                           "pilot-proof",
+                           "withdraw-release",
+                           "emergency-control",
+                           "local-smoke",
+                           "release"
+                       ],
+    "missingPhases":  [
+
+                      ],
+    "rows":  [
+                 {
+                     "script":  "flowchain:bridge:live:check",
+                     "phase":  "preflight",
+                     "purpose":  "Fail-closed bridge live readiness check before owner-funded pilot work.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-live-check.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-live-check.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "read-only-owner-input-gate",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:infra:check",
+                     "phase":  "preflight",
+                     "purpose":  "Fail-closed bridge infrastructure check covering owner inputs and local bridge state.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-env-bridge-readiness.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "read-only-owner-input-gate",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:deploy:base8453",
+                     "phase":  "deploy-control",
+                     "purpose":  "Dry-run or explicitly broadcast the owner-approved Base 8453 lockbox deployment.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-deploy.ps1",
+                     "scriptPath":  "infra/scripts/bridge-base8453-deploy.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "owner-live-broadcast-gated",
+                     "liveBroadcastCapable":  true,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_OWNER_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_RELEASE_AUTHORITY_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/base8453-deploy-readiness.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:deploy:control:validate",
+                     "phase":  "deploy-control",
+                     "purpose":  "Validate deploy, pause, resume, and emergency-stop fail-closed behavior without broadcasting.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-deploy-control-validation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-deploy-control-validation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:observe:base8453",
+                     "phase":  "observe",
+                     "purpose":  "Observe owner-approved Base 8453 lockbox deposits and stage cursor movement before local crediting.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+                     "scriptPath":  "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "read-only-owner-input-gate",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                              "FLOWCHAIN_BASE8453_CURSOR_STATE"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/bridge-observe-base8453-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:relayer:once",
+                     "phase":  "observe",
+                     "purpose":  "Run the production-shaped relayer once, with staged cursor and no final commit while owner inputs are missing.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-once.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-relayer-once.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-l1-credit-gated",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:relayer:guardrail:validate",
+                     "phase":  "observe",
+                     "purpose":  "Prove missing owner inputs cannot mutate the final cursor or queue credits.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:relayer:loop:validate",
+                     "phase":  "observe",
+                     "purpose":  "Validate relayer loop start/status/stop, PID cleanup, and recovery behavior.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:runtime-credit:validate",
+                     "phase":  "credit",
+                     "purpose":  "Validate Base 8453 handoff credits become spendable, transferable, replay-safe, and restart-safe.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:real-value-pilot:e2e",
+                     "phase":  "pilot-proof",
+                     "purpose":  "Aggregate bounded pilot proof across contracts, bridge, runtime, wallet, dashboard, and ops.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-real-value-pilot-e2e.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-real-value-pilot-e2e.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:reconciliation",
+                     "phase":  "credit",
+                     "purpose":  "Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-reconciliation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-reconciliation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:withdraw:intent",
+                     "phase":  "withdraw-release",
+                     "purpose":  "Write local withdrawal intent evidence from a credited bridge pilot handoff.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -ApplyCredit -WithdrawalIntent -ReportPath devnet/local/bridge-live-readiness/bridge-withdraw-intent-report.json",
+                     "scriptPath":  "infra/scripts/bridge-base-mainnet-pilot-observe.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-evidence-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+                                          ],
+                     "optionalEnvNames":  [
+                                              "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/bridge-withdraw-intent-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:release:evidence",
+                     "phase":  "withdraw-release",
+                     "purpose":  "Write release evidence for the pilot without broadcasting owner release transactions.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-release-evidence.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-release-evidence.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-evidence-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:release:evidence:validate",
+                     "phase":  "withdraw-release",
+                     "purpose":  "Validate withdrawal and release evidence matching, mismatch rejection, and no-broadcast boundaries.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-release-evidence-validation.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-release-evidence-validation.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:pause",
+                     "phase":  "emergency-control",
+                     "purpose":  "Dry-run or explicitly execute Base lockbox pause.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Pause",
+                     "scriptPath":  "infra/scripts/bridge-base8453-control.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "owner-live-broadcast-gated",
+                     "liveBroadcastCapable":  true,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/base8453-control-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:resume",
+                     "phase":  "emergency-control",
+                     "purpose":  "Dry-run or explicitly execute Base lockbox resume.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Resume",
+                     "scriptPath":  "infra/scripts/bridge-base8453-control.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "owner-live-broadcast-gated",
+                     "liveBroadcastCapable":  true,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/base8453-control-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:emergency-stop",
+                     "phase":  "emergency-control",
+                     "purpose":  "Dry-run or explicitly execute Base lockbox emergency stop.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action EmergencyStop",
+                     "scriptPath":  "infra/scripts/bridge-base8453-control.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "owner-live-broadcast-gated",
+                     "liveBroadcastCapable":  true,
+                     "requiredEnvNames":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+                                                 "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                 "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/base8453-control-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:local-credit:smoke",
+                     "phase":  "local-smoke",
+                     "purpose":  "Run local bridge credit smoke path without live Base or owner funds.",
+                     "exists":  true,
+                     "packageCommand":  "npm run bridge:local-credit:smoke",
+                     "scriptPath":  "",
+                     "scriptTextAvailable":  false,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:command-matrix",
+                     "phase":  "release",
+                     "purpose":  "Regenerate this bridge command, risk, ack, and report-path matrix.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-command-matrix.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-command-matrix.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
+                     "committedEvidencePath":  true,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 },
+                 {
+                     "script":  "flowchain:bridge:no-secret-audit",
+                     "phase":  "release",
+                     "purpose":  "Scan generated bridge readiness evidence for secret-shaped material.",
+                     "exists":  true,
+                     "packageCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-no-secret-audit.ps1",
+                     "scriptPath":  "infra/scripts/flowchain-bridge-no-secret-audit.ps1",
+                     "scriptTextAvailable":  true,
+                     "riskClass":  "local-validation-no-broadcast",
+                     "liveBroadcastCapable":  false,
+                     "requiredEnvNames":  [
+
+                                          ],
+                     "optionalEnvNames":  [
+
+                                          ],
+                     "requiredAckEnvNames":  [
+
+                                             ],
+                     "requiredEnvReferencesPresent":  true,
+                     "requiredAcksPresent":  true,
+                     "requiredValidationSignalsPresent":  true,
+                     "expectedReportPath":  "devnet/local/bridge-live-readiness/bridge-no-secret-audit-report.json",
+                     "committedEvidencePath":  false,
+                     "commandAvoidsInlineEnvAssignment":  true,
+                     "commandAvoidsUrls":  true,
+                     "commandAvoidsKeyMaterial":  true,
+                     "ownerInputNamesOnly":  true
+                 }
+             ],
+    "missingScripts":  [
+
+                       ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "commandsWithUrls":  [
+
+                         ],
+    "commandsWithKeyMaterialReference":  [
+
+                                         ],
+    "rowsMissingEnvReferences":  [
+
+                                 ],
+    "rowsMissingAckReferences":  [
+
+                                 ],
+    "rowsMissingValidationSignals":  [
+
+                                     ],
+    "liveBroadcastRowsWithoutAck":  [
+
+                                    ],
+    "badOwnerInputRows":  [
+
+                          ],
+    "checks":  {
+                   "allRequiredScriptsPresent":  true,
+                   "phaseCoverageComplete":  true,
+                   "deployObserveRelayerControlReleaseCovered":  true,
+                   "liveBroadcastCommandsAckGated":  true,
+                   "observeCommandOperatorAckGated":  true,
+                   "relayerOnceOperatorAckGated":  true,
+                   "controlCommandsBroadcastAckGated":  true,
+                   "deployCommandBroadcastAckGated":  true,
+                   "requiredEnvReferencesPresent":  true,
+                   "requiredAckReferencesPresent":  true,
+                   "validationSignalsPresent":  true,
+                   "commandsAvoidInlineEnvAssignment":  true,
+                   "commandsAvoidUrls":  true,
+                   "commandsAvoidKeyMaterial":  true,
+                   "ownerInputNamesOnly":  true,
+                   "committedEvidencePathsCovered":  true,
+                   "envValuesPrintedFalse":  true,
+                   "broadcastsFalse":  true,
+                   "noSecrets":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

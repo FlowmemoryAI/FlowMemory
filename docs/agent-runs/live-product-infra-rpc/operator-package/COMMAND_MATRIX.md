@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-21T04:39:08.0696381Z
+Generated: 2026-05-21T05:33:41.9190027Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -50,6 +50,7 @@ Generated: 2026-05-21T04:39:08.0696381Z
 | ops | `npm run flowchain:ops:alerts:install:systemd:validate` | Validate Linux systemd timer alert refresh plan without mutating the owner host. |
 | ops | `npm run flowchain:ops:incident-drill` | Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents. |
 | bridge | `npm run flowchain:bridge:relayer:once -- -AllowBlocked` | Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist. |
+| bridge | `npm run flowchain:bridge:command-matrix` | Map bridge deploy, observe, relayer, credit, release, and emergency-control commands to owner inputs, acknowledgement gates, risk class, and evidence paths. |
 | bridge | `npm run flowchain:bridge:deploy:control:validate` | Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements. |
 | bridge | `npm run flowchain:bridge:relayer:guardrail:validate` | Prove missing owner inputs cannot mutate cursor state or queue credits. |
 | bridge | `npm run flowchain:bridge:relayer:loop:validate` | Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process. |

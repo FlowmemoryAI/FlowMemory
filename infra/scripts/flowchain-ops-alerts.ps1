@@ -178,6 +178,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-command-matrix-failed"
+        severity = "critical"
+        findingCodes = @("bridge-command-matrix-failed")
+        signal = "Bridge command matrix is missing or unsafe."
+        threshold = "command matrix must cover deploy, observe, relayer, control, release, owner input names, broadcast acknowledgement gates, committed evidence paths, no-secret, and no-broadcast checks"
+        commands = @("npm run flowchain:bridge:command-matrix", "npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:reconciliation")
+    },
+    [ordered]@{
         id = "bridge-relayer-check-contract-failed"
         severity = "critical"
         findingCodes = @("bridge-relayer-check-contract-failed")
@@ -480,6 +488,16 @@ $bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRule.Coun
     -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("fail closed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($bridgeDeployControlRule[0].commands) -contains "npm run flowchain:bridge:deploy:control:validate")
+$bridgeCommandMatrixRule = @($rules | Where-Object { $_.id -eq "bridge-command-matrix-failed" } | Select-Object -First 1)
+$bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRule.Count -eq 1 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("deploy", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("observe", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("relayer", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("control", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("release", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("committed evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeCommandMatrixRule[0].commands) -contains "npm run flowchain:bridge:command-matrix")
 $bridgeRelayerLoopRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-loop-unhealthy" } | Select-Object -First 1)
 $bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -eq 1 `
     -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("validation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -573,6 +591,7 @@ $checks = [ordered]@{
     backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRuleCoversSafety
     backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
+    bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRuleCoversLaunchRunbook
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRuleCoversCursorAndReplay

@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-21T03:37:32.9504299Z
+Generated: 2026-05-21T05:11:55.3698188Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 301
+- Metric count: 307
 
 ## Required Metrics
 
@@ -118,6 +118,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_backup_owner_path_dry_run_no_secrets: present
 - flowchain_bridge_live_ready: present
 - flowchain_bridge_infra_ready: present
+- flowchain_bridge_command_matrix_ready: present
+- flowchain_bridge_command_matrix_commands_total: present
+- flowchain_bridge_command_matrix_live_broadcast_commands: present
+- flowchain_bridge_command_matrix_missing_scripts: present
+- flowchain_bridge_command_matrix_broadcast_ack_gaps: present
+- flowchain_bridge_command_matrix_no_secrets: present
 - flowchain_bridge_deploy_control_validation_ready: present
 - flowchain_bridge_deploy_control_failed_checks: present
 - flowchain_bridge_deploy_control_missing_checks: present
@@ -311,6 +317,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | publicTesterGatewayLoaded | True |
 | externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
+| bridgeCommandMatrixLoaded | True |
 | bridgeDeployControlLoaded | True |
 | bridgeRelayerLoopValidationLoaded | True |
 | bridgeReconciliationLoaded | True |
@@ -334,6 +341,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | serviceInstallValidationMetricsPresent | True |
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
+| bridgeCommandMatrixMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
 | bridgeReconciliationMetricsPresent | True |
 | bridgeDeployControlMetricsPresent | True |

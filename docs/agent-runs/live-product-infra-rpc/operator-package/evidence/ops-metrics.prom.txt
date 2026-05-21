@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 109054
+flowchain_latest_height 109610
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 109054
+flowchain_finalized_height 109610
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 10
+flowchain_state_file_age_seconds 1
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 23337.411
+flowchain_transaction_intake_file_age_seconds 28998.985
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 40
+flowchain_ops_alert_rules_total 41
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 33
+flowchain_ops_alert_rules_critical 34
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -349,6 +349,24 @@ flowchain_bridge_live_ready 0
 # HELP flowchain_bridge_infra_ready One when bridge infrastructure readiness is passed.
 # TYPE flowchain_bridge_infra_ready gauge
 flowchain_bridge_infra_ready 0
+# HELP flowchain_bridge_command_matrix_ready One when the bridge command matrix is passed and safe.
+# TYPE flowchain_bridge_command_matrix_ready gauge
+flowchain_bridge_command_matrix_ready 1
+# HELP flowchain_bridge_command_matrix_commands_total Bridge command matrix command count.
+# TYPE flowchain_bridge_command_matrix_commands_total gauge
+flowchain_bridge_command_matrix_commands_total 20
+# HELP flowchain_bridge_command_matrix_live_broadcast_commands Bridge command matrix commands capable of live broadcast and requiring acknowledgement gates.
+# TYPE flowchain_bridge_command_matrix_live_broadcast_commands gauge
+flowchain_bridge_command_matrix_live_broadcast_commands 4
+# HELP flowchain_bridge_command_matrix_missing_scripts Missing package scripts in bridge command matrix.
+# TYPE flowchain_bridge_command_matrix_missing_scripts gauge
+flowchain_bridge_command_matrix_missing_scripts 0
+# HELP flowchain_bridge_command_matrix_broadcast_ack_gaps Live-broadcast bridge commands missing explicit broadcast acknowledgement coverage.
+# TYPE flowchain_bridge_command_matrix_broadcast_ack_gaps gauge
+flowchain_bridge_command_matrix_broadcast_ack_gaps 0
+# HELP flowchain_bridge_command_matrix_no_secrets One when bridge command matrix reports no secrets and no env value printing.
+# TYPE flowchain_bridge_command_matrix_no_secrets gauge
+flowchain_bridge_command_matrix_no_secrets 1
 # HELP flowchain_bridge_deploy_control_validation_ready One when bridge deploy/control validation is passed and safe.
 # TYPE flowchain_bridge_deploy_control_validation_ready gauge
 flowchain_bridge_deploy_control_validation_ready 1
@@ -828,10 +846,10 @@ flowchain_owner_go_live_launch_sequence_ready 1
 flowchain_owner_go_live_launch_sequence_steps 10
 # HELP flowchain_owner_go_live_launch_sequence_commands Ordered owner go-live launch sequence command count.
 # TYPE flowchain_owner_go_live_launch_sequence_commands gauge
-flowchain_owner_go_live_launch_sequence_commands 42
+flowchain_owner_go_live_launch_sequence_commands 43
 # HELP flowchain_owner_go_live_launch_evidence_reports Expected evidence report path count in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_evidence_reports gauge
-flowchain_owner_go_live_launch_evidence_reports 43
+flowchain_owner_go_live_launch_evidence_reports 44
 # HELP flowchain_owner_go_live_launch_invalid_evidence_reports Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_invalid_evidence_reports gauge
 flowchain_owner_go_live_launch_invalid_evidence_reports 0
