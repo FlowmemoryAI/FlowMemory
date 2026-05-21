@@ -46,6 +46,23 @@ export function validateDashboardData(payload: unknown): DashboardData {
   assertArray(candidate.memoryReceipts, "memoryReceipts");
   assertArray(candidate.rootfieldBundles, "rootfieldBundles");
   assertArray(candidate.agentMemoryViews, "agentMemoryViews");
+  assertArray(candidate.agentBondTasks, "agentBondTasks");
+  assertArray(candidate.agentBondSettlements, "agentBondSettlements");
+  assertArray(candidate.agentBondPassportViews, "agentBondPassportViews");
+  assertArray(candidate.agentBondPassports, "agentBondPassports");
+  assertArray(candidate.bondedTaskEnvelopes, "bondedTaskEnvelopes");
+  assertArray(candidate.bondedExecutionReceipts, "bondedExecutionReceipts");
+  if (candidate.agentBondPhase2Gate === undefined || typeof candidate.agentBondPhase2Gate !== "object") { throw new Error("Dashboard fixture is missing agentBondPhase2Gate."); }
+  if (candidate.agentBondA2A === undefined || typeof candidate.agentBondA2A !== "object") { throw new Error("Dashboard fixture is missing agentBondA2A."); }
+  if (candidate.agentBondMcp === undefined || typeof candidate.agentBondMcp !== "object") { throw new Error("Dashboard fixture is missing agentBondMcp."); }
+  if (candidate.agentBondX402 === undefined || typeof candidate.agentBondX402 !== "object") { throw new Error("Dashboard fixture is missing agentBondX402."); }
+  if (candidate.agentBondCredit === undefined || typeof candidate.agentBondCredit !== "object") { throw new Error("Dashboard fixture is missing agentBondCredit."); }
+  if (candidate.agentBondUnderwriters === undefined || typeof candidate.agentBondUnderwriters !== "object") { throw new Error("Dashboard fixture is missing agentBondUnderwriters."); }
+  if (candidate.agentBondPublicClaim === undefined || typeof candidate.agentBondPublicClaim !== "object") { throw new Error("Dashboard fixture is missing agentBondPublicClaim."); }
+  assertArray(candidate.agentBondRecoursePolicies, "agentBondRecoursePolicies");
+  assertArray(candidate.agentBondRecourseDecisions, "agentBondRecourseDecisions");
+  assertArray(candidate.agentBondFailureWaterfalls, "agentBondFailureWaterfalls");
+  assertArray(candidate.baseAgentMemoryScouts, "baseAgentMemoryScouts");
   assertArray(candidate.devnetBlocks, "devnetBlocks");
   assertArray(candidate.hardwareNodes, "hardwareNodes");
   assertArray(candidate.alerts, "alerts");

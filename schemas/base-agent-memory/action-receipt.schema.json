@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.action_receipt.v1",
+  "title": "Base Agent Memory ActionReceipt V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "actionReceiptId", "agentId", "sequence", "previewHash", "observationRoot", "action", "target", "selector", "success", "valueSpent", "reasonCode"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.action_receipt.v1" },
+    "actionReceiptId": { "$ref": "#/$defs/hex32" },
+    "agentId": { "$ref": "#/$defs/hex32" },
+    "sequence": { "type": "string", "pattern": "^[0-9]+$" },
+    "previewHash": { "$ref": "#/$defs/hex32" },
+    "observationRoot": { "$ref": "#/$defs/hex32" },
+    "action": { "type": "string" },
+    "target": { "$ref": "#/$defs/address" },
+    "selector": { "type": "string", "pattern": "^0x[0-9a-fA-F]{8}$" },
+    "success": { "type": "boolean" },
+    "valueSpent": { "type": "string", "pattern": "^[0-9]+$" },
+    "reasonCode": { "type": "string" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "agent-bonds-recourse-policy/v1",
+  "policyId": "recourse-api-data-low-risk-v1",
+  "status": "active",
+  "scope": {
+    "taskClasses": [
+      "data.extract",
+      "api.call"
+    ],
+    "maxRiskTier": 1,
+    "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "verifierAllowlist": [
+      "verifier_ci_001"
+    ],
+    "requesterAllowlist": [
+      "requester_fixture_001"
+    ]
+  },
+  "constraints": {
+    "maxCoveragePerTaskUSDC": "25000000",
+    "maxCoveragePerAgentUSDC": "100000000",
+    "maxCoveragePerRequesterUSDC": "50000000",
+    "maxCoveragePerVerifierUSDC": "100000000",
+    "maxCoveragePerPoolUSDC": "500000000",
+    "minAgentStakeToCoverageRatioBps": 20000,
+    "minFeeToCoverageRatioBps": 250,
+    "requireObjectiveAcceptanceCriteria": true,
+    "excludedTaskClasses": [
+      "research.open_ended",
+      "code.deploy.production"
+    ]
+  },
+  "pricing": {
+    "baseRecourseFeeBps": 150,
+    "coverageRatioBps": 5000,
+    "maxCoverageRatioBps": 5000
+  },
+  "claimRules": {
+    "coveredFailureStates": [
+      "slashed_invalid",
+      "slashed_timeout"
+    ],
+    "challengeFinalityRequired": true,
+    "cooldownSeconds": 3600,
+    "requesterBadFaithExclusion": true
+  },
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "updatedAt": "2026-05-21T12:00:00.000Z"
+  }
+}

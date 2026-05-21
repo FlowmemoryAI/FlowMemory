@@ -125,7 +125,8 @@
       "indexer": "fixtures/deployments/base-canary-indexer-state.json",
       "verifier": "not-applicable-for-canary-v0",
       "devnet": "not-applicable-for-canary-v0",
-      "hardware": "not-applicable-for-canary-v0"
+      "hardware": "not-applicable-for-canary-v0",
+      "agentBondFixture": "not-applicable-for-canary-v0"
     }
   },
   "chain": {
@@ -853,6 +854,67 @@
       }
     }
   ],
+  "agentBondTasks": [],
+  "agentBondSettlements": [],
+  "agentBondPassportViews": [],
+  "agentBondPassports": [],
+  "bondedTaskEnvelopes": [],
+  "bondedExecutionReceipts": [],
+  "agentBondPhase2Gate": {
+    "id": "agent-bond-phase2-gate-canary",
+    "foundationReady": false,
+    "status": "stale",
+    "blockers": [
+      "Phase 2 fixtures are not generated from the Base canary dashboard path."
+    ],
+    "lastUpdated": "2026-05-13T23:49:07.586Z",
+    "provenance": {
+      "subsystem": "worker",
+      "origin": "live",
+      "chainContext": "base-mainnet-canary",
+      "fixturePath": "fixtures/deployments/base-canary-indexer-state.json",
+      "localPathHint": "apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json"
+    }
+  },
+  "agentBondA2A": {
+    "agentCards": [],
+    "extensions": []
+  },
+  "agentBondMcp": {
+    "tools": [],
+    "resources": [],
+    "prompts": []
+  },
+  "agentBondX402": {
+    "paymentIntents": []
+  },
+  "agentBondCredit": {
+    "scores": []
+  },
+  "agentBondUnderwriters": {
+    "pools": [],
+    "allocations": []
+  },
+  "agentBondPublicClaim": {
+    "claimLevel": "internal_dev",
+    "enabled": false,
+    "blockers": [
+      "Base canary dashboard does not project public Agent Bonds Phase 2 claims."
+    ],
+    "status": "stale",
+    "lastUpdated": "2026-05-13T23:49:07.586Z",
+    "provenance": {
+      "subsystem": "worker",
+      "origin": "live",
+      "chainContext": "base-mainnet-canary",
+      "fixturePath": "fixtures/deployments/base-canary-indexer-state.json",
+      "localPathHint": "apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json"
+    }
+  },
+  "agentBondRecoursePolicies": [],
+  "agentBondRecourseDecisions": [],
+  "agentBondFailureWaterfalls": [],
+  "baseAgentMemoryScouts": [],
   "devnetBlocks": [],
   "hardwareNodes": [],
   "alerts": [

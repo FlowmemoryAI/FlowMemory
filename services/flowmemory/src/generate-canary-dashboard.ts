@@ -21,6 +21,15 @@ const FLOWPULSE_CONTRACT_TYPE_NAMES: Record<string, FlowPulseContractTypeName> =
   "2": "ROOT_COMMITTED",
   "3": "ROOTFIELD_STATUS_CHANGED",
   "4": "SWAP_MEMORY_SIGNAL",
+  "5": "TASK_OPENED",
+  "6": "TASK_ACCEPTED",
+  "7": "TASK_STARTED",
+  "8": "TASK_EVIDENCE_COMMITTED",
+  "9": "TASK_VERIFIED",
+  "10": "TASK_FAILED",
+  "11": "TASK_CHALLENGED",
+  "12": "TASK_SETTLED",
+  "13": "TASK_SLASHED",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -146,6 +155,22 @@ export interface CanaryDashboardData {
   memoryReceipts: JsonObject[];
   rootfieldBundles: JsonObject[];
   agentMemoryViews: JsonObject[];
+  agentBondTasks: JsonObject[];
+  agentBondSettlements: JsonObject[];
+  agentBondPassportViews: JsonObject[];
+  agentBondPassports: JsonObject[];
+  bondedTaskEnvelopes: JsonObject[];
+  bondedExecutionReceipts: JsonObject[];
+  agentBondPhase2Gate: JsonObject;
+  agentBondA2A: JsonObject;
+  agentBondMcp: JsonObject;
+  agentBondX402: JsonObject;
+  agentBondCredit: JsonObject;
+  agentBondUnderwriters: JsonObject;
+  agentBondPublicClaim: JsonObject;
+  agentBondRecoursePolicies: JsonObject[];
+  agentBondRecourseDecisions: JsonObject[];
+  agentBondFailureWaterfalls: JsonObject[];
   devnetBlocks: JsonObject[];
   hardwareNodes: JsonObject[];
   alerts: JsonObject[];
@@ -477,6 +502,7 @@ function buildCanaryDashboardData(
         verifier: "not-applicable-for-canary-v0",
         devnet: "not-applicable-for-canary-v0",
         hardware: "not-applicable-for-canary-v0",
+        agentBondFixture: "not-applicable-for-canary-v0",
       },
     },
     chain: {
@@ -551,6 +577,37 @@ function buildCanaryDashboardData(
       lastUpdated: generatedAt,
       provenance: provenance("worker", paths.indexerPath, generatedAt),
     })),
+    agentBondTasks: [],
+    agentBondSettlements: [],
+    agentBondPassportViews: [],
+    agentBondPassports: [],
+    bondedTaskEnvelopes: [],
+    bondedExecutionReceipts: [],
+    agentBondPhase2Gate: {
+      id: "agent-bond-phase2-gate-canary",
+      foundationReady: false,
+      status: "stale",
+      blockers: ["Phase 2 fixtures are not generated from the Base canary dashboard path."],
+      lastUpdated: generatedAt,
+      provenance: provenance("worker", "apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json"),
+    },
+    agentBondA2A: { agentCards: [], extensions: [] },
+    agentBondMcp: { tools: [], resources: [], prompts: [] },
+    agentBondX402: { paymentIntents: [] },
+    agentBondCredit: { scores: [] },
+    agentBondUnderwriters: { pools: [], allocations: [] },
+    agentBondPublicClaim: {
+      claimLevel: "internal_dev",
+      enabled: false,
+      blockers: ["Base canary dashboard does not project public Agent Bonds Phase 2 claims."],
+      status: "stale",
+      lastUpdated: generatedAt,
+      provenance: provenance("worker", "apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json"),
+    },
+    agentBondRecoursePolicies: [],
+    agentBondRecourseDecisions: [],
+    agentBondFailureWaterfalls: [],
+    baseAgentMemoryScouts: [],
     devnetBlocks: [],
     hardwareNodes: [],
     alerts: [{

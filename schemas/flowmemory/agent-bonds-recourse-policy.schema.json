@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_recourse_policy.v1",
+  "title": "FlowMemory Agent Bonds Recourse Policy V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "status",
+    "scope",
+    "constraints",
+    "pricing",
+    "claimRules",
+    "timestamps"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-bonds-recourse-policy/v1"
+    },
+    "policyId": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "paused",
+        "retired"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskClasses",
+        "maxRiskTier",
+        "settlementToken"
+      ],
+      "properties": {
+        "taskClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxRiskTier": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "settlementToken": {
+          "$ref": "#/$defs/address"
+        },
+        "verifierAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requesterAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxCoveragePerTaskUSDC",
+        "maxCoveragePerAgentUSDC",
+        "maxCoveragePerRequesterUSDC",
+        "maxCoveragePerVerifierUSDC",
+        "maxCoveragePerPoolUSDC",
+        "minAgentStakeToCoverageRatioBps",
+        "minFeeToCoverageRatioBps",
+        "requireObjectiveAcceptanceCriteria"
+      ],
+      "properties": {
+        "maxCoveragePerTaskUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "maxCoveragePerAgentUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "maxCoveragePerRequesterUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "maxCoveragePerVerifierUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "maxCoveragePerPoolUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "minAgentStakeToCoverageRatioBps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minFeeToCoverageRatioBps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requireObjectiveAcceptanceCriteria": {
+          "type": "boolean"
+        },
+        "excludedTaskClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseRecourseFeeBps",
+        "coverageRatioBps"
+      ],
+      "properties": {
+        "baseRecourseFeeBps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverageRatioBps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxCoverageRatioBps": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "claimRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coveredFailureStates",
+        "challengeFinalityRequired",
+        "cooldownSeconds"
+      ],
+      "properties": {
+        "coveredFailureStates": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "slashed_invalid",
+              "slashed_timeout",
+              "challenge_upheld"
+            ]
+          }
+        },
+        "challengeFinalityRequired": {
+          "type": "boolean"
+        },
+        "cooldownSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requesterBadFaithExclusion": {
+          "type": "boolean"
+        }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "createdAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/dateTime"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

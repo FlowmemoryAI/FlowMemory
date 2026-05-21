@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "agent-credit-score-sim-report/v1",
+  "generatedAt": "2026-05-21T21:40:51.513Z",
+  "score": {
+    "schemaVersion": "agent-credit-score/v1",
+    "agentId": "agent_code_001",
+    "operatorId": "operator_flowmemory_fixture",
+    "score": 163,
+    "riskBand": "E",
+    "computedAt": "2026-05-21T21:40:51.477Z",
+    "expiresAt": "2026-06-20T21:40:51.478Z",
+    "inputs": {
+      "completedTasks": 5,
+      "settledTasks": 1,
+      "challengedTasks": 1,
+      "upheldChallenges": 1,
+      "slashedTasks": 2,
+      "timeoutTasks": 1,
+      "unsupportedTasks": 1,
+      "totalSettledUSDC": "50000000",
+      "totalSlashedUSDC": "30000000",
+      "uniqueVerifierCount": 1,
+      "recentReceiptCount": 5
+    },
+    "components": {
+      "successLowerBound": 0.036223160969787456,
+      "valueWeightedExperience": 100,
+      "verifierDiversity": 15,
+      "slashPenalty": 100,
+      "timeoutPenalty": 30,
+      "challengePenalty": 125,
+      "evidencePenalty": 15,
+      "recencyAdjustment": 0
+    },
+    "outputs": {
+      "bondBpsMultiplier": 2.5,
+      "maxOpenExposureUSDC": "0",
+      "maxTaskPayoutUSDC": "0",
+      "confirmingVerifierRequired": true,
+      "underwriterEligible": false,
+      "publicLabel": "E"
+    },
+    "reasonCodes": [
+      "RISK_BAND_E"
+    ]
+  }
+}

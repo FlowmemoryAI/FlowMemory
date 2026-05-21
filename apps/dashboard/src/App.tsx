@@ -6,6 +6,7 @@ import { DEFAULT_CANARY_DASHBOARD_DATA_PATH, fetchDashboardData } from "./data/l
 import type { DashboardData } from "./data/types";
 import { DEFAULT_CONTROL_PLANE_URL, buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
+import { AgentBondsView } from "./views/AgentBondsView";
 import { BridgePilotView } from "./views/BridgePilotView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
 import { DevnetBlocksView } from "./views/DevnetBlocksView";
@@ -13,10 +14,12 @@ import { ExternalTesterLaunchView } from "./views/ExternalTesterLaunchView";
 import { ExplorerView } from "./views/ExplorerView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
+import { BaseAgentMemoryView } from "./views/BaseAgentMemoryView";
 import { HardwareNodesView } from "./views/HardwareNodesView";
 import { OpsView } from "./views/OpsView";
 import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
+import { PublicAgentNetworkView } from "./views/PublicAgentNetworkView";
 import { RootfieldsView } from "./views/RootfieldsView";
 import { UniswapHooksView } from "./views/UniswapHooksView";
 import { VerifierReportsView } from "./views/VerifierReportsView";
@@ -131,7 +134,10 @@ export default function App() {
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
+        <Route path="/agent-bonds" element={<AgentBondsView data={data} />} />
+        <Route path="/agents" element={<BaseAgentMemoryView data={data} />} />
         <Route path="/flowpulse" element={<FlowPulseStreamView data={data} />} />
+        <Route path="/public-network" element={<PublicAgentNetworkView />} />
         <Route path="/rootfields" element={<RootfieldsView data={data} />} />
         <Route path="/work" element={<WorkReceiptsView data={data} />} />
         <Route path="/verifier" element={<VerifierReportsView data={data} />} />

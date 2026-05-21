@@ -33,6 +33,11 @@ function stringField(value: unknown, name: string): string {
   return String(value);
 }
 
+function asObject(value: unknown): JsonObject | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
+}
+
+
 function smokeSignedEnvelope(): JsonObject {
   const vectors = JSON.parse(
     readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
@@ -53,6 +58,8 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   const receipt = state.launchCore.memoryReceipts[0];
   const reportId = receipt?.reportId;
   const artifactUri = receipt?.evidenceRefs[0]?.uri;
+  const agentBondTask = state.launchCore.agentBondFixture?.task as { taskId?: string } | undefined;
+  const taskScoutFixture = (state.taskScoutFixture ?? state.launchCore.taskScoutFixture ?? null) as JsonObject | null;
   const block = firstDevnetBlock(state);
   const txIds = Array.isArray(block.txIds) ? block.txIds : [];
   const txId = stringField(txIds[0], "devnet txId");
@@ -86,9 +93,26 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   const swaps = dispatchJsonRpc({ jsonrpc: "2.0", id: "swaps-prefetch", method: "swap_list" }, { state }) as RpcSuccessResponse;
   const swap = ((swaps.result as JsonObject).swaps as JsonObject[])[0];
   const swapId = stringField(swap.swapId, "swapId");
+  const taskScoutAgentId = stringField(asObject(taskScoutFixture?.agentConfig)?.agentId, "taskScout agentId");
+  const publicClasses = dispatchJsonRpc({ jsonrpc: "2.0", id: "public-classes-prefetch", method: "public_agent_network_classes_list", params: { limit: 10 } }, { state }) as RpcSuccessResponse;
+  const publicClass = ((publicClasses.result as JsonObject).classes as JsonObject[])[0];
+  const publicClassId = stringField(publicClass.classId, "public classId");
+  const publicTools = dispatchJsonRpc({ jsonrpc: "2.0", id: "public-tools-prefetch", method: "public_agent_network_tools_list", params: { limit: 10 } }, { state }) as RpcSuccessResponse;
+  const publicTool = ((publicTools.result as JsonObject).tools as JsonObject[])[0];
+  const publicToolSetRoot = stringField(publicTool.toolSetRoot, "public toolSetRoot");
+  const publicSwarmClasses = dispatchJsonRpc({ jsonrpc: "2.0", id: "public-swarm-classes-prefetch", method: "public_swarm_classes_list", params: { limit: 10 } }, { state }) as RpcSuccessResponse;
+  const publicSwarmClass = ((publicSwarmClasses.result as JsonObject).classes as JsonObject[])[0];
+  const publicSwarmClassId = stringField(publicSwarmClass.swarmClass, "public swarmClass");
 
-  if (rootfieldId === undefined || receipt === undefined || reportId === undefined || artifactUri === undefined) {
-    throw new Error("control-plane smoke requires launch-core rootfield, receipt, report, and artifact fixture data");
+  if (
+    rootfieldId === undefined
+    || receipt === undefined
+    || reportId === undefined
+    || artifactUri === undefined
+    || typeof agentBondTask?.taskId !== "string"
+    || taskScoutFixture === null
+  ) {
+    throw new Error("control-plane smoke requires launch-core rootfield, receipt, report, artifact fixture data, agent bond task fixture data, and task scout fixture data");
   }
 
   const requests = [
@@ -109,6 +133,24 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "pilotEmergencyStatus", method: "pilot_emergency_status" },
     { jsonrpc: "2.0", id: "bridgeLiveReadiness", method: "bridge_live_readiness" },
     { jsonrpc: "2.0", id: "pilotLifecycleRecords", method: "pilot_lifecycle_record_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "agentBondReadiness", method: "agent_bond_readiness_get" },
+    { jsonrpc: "2.0", id: "agentBondTasks", method: "agent_bond_task_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "agentBondTask", method: "agent_bond_task_get", params: { taskId: agentBondTask.taskId } },
+    { jsonrpc: "2.0", id: "agentBondLaunchStatus", method: "agent_bond_public_launch_status_get" },
+    { jsonrpc: "2.0", id: "agentBondPassportList", method: "agent_bond_passport_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "agentBondPassport", method: "agent_bond_passport_get", params: { agentId: "agent_code_001" } },
+    { jsonrpc: "2.0", id: "agentBondEnvelopeQuote", method: "agent_bond_envelope_quote", params: { taskClass: "code.patch", payoutUSDC: "50000000" } },
+    { jsonrpc: "2.0", id: "agentBondReceiptList", method: "agent_bond_receipt_list", params: { agentId: "agent_code_001", limit: 10 } },
+    { jsonrpc: "2.0", id: "agentBondPhase2Gate", method: "agent_bond_phase2_gate_get" },
+    { jsonrpc: "2.0", id: "agentBondA2ACard", method: "agent_bond_a2a_agent_card_get", params: { agentId: "agent_code_001" } },
+    { jsonrpc: "2.0", id: "agentBondMcpTools", method: "agent_bond_mcp_tools_get" },
+    { jsonrpc: "2.0", id: "agentBondX402Intent", method: "agent_bond_x402_payment_intent_create", params: { mode: "service_payment" } },
+    { jsonrpc: "2.0", id: "agentBondCredit", method: "agent_bond_credit_score_get", params: { agentId: "agent_code_001" } },
+    { jsonrpc: "2.0", id: "agentBondUnderwriterPools", method: "agent_bond_underwriter_pool_list" },
+    { jsonrpc: "2.0", id: "agentBondPublicClaim", method: "agent_bond_public_claim_status_get" },
+    { jsonrpc: "2.0", id: "agentBondRecoursePolicy", method: "agent_bond_recourse_policy_get" },
+    { jsonrpc: "2.0", id: "agentBondRecourseDecision", method: "agent_bond_recourse_decision_quote", params: { agentId: "agent_data_001" } },
+    { jsonrpc: "2.0", id: "agentBondFailureWaterfall", method: "agent_bond_failure_waterfall_get" },
     { jsonrpc: "2.0", id: "devnet", method: "devnet_state", params: { includeBlocks: true } },
     { jsonrpc: "2.0", id: "blocks", method: "block_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "block", method: "block_get", params: { blockNumber: stringField(block.blockNumber, "blockNumber"), includeTransactions: true } },
@@ -149,6 +191,17 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "rootfield", method: "rootfield_get", params: { rootfieldId } },
     { jsonrpc: "2.0", id: "agents", method: "agent_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "agent", method: "agent_get", params: { rootfieldId } },
+    { jsonrpc: "2.0", id: "baseAgentScouts", method: "base_agent_memory_task_scout_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "baseAgentScout", method: "base_agent_memory_task_scout_get", params: { agentId: taskScoutAgentId } },
+    { jsonrpc: "2.0", id: "baseAgentReplay", method: "base_agent_memory_replay_get", params: { agentId: taskScoutAgentId } },
+    { jsonrpc: "2.0", id: "publicAgentClasses", method: "public_agent_network_classes_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "publicAgentClass", method: "public_agent_network_class_get", params: { classId: publicClassId } },
+    { jsonrpc: "2.0", id: "publicAgentTools", method: "public_agent_network_tools_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "publicAgentToolSet", method: "public_agent_network_tool_set_get", params: { toolSetRoot: publicToolSetRoot } },
+    { jsonrpc: "2.0", id: "publicAgentLaunchPreview", method: "public_agent_launch_preview", params: { owner: accountId, classId: publicClassId, objectiveText: "Launch a task scout", profileText: "Public task scout profile", toolSetRoot: publicToolSetRoot, autonomyLevel: 2, riskLevel: 1, bondToken: "0x2000000000000000000000000000000000000001", bondAmount: "10000000000000000000", fuelToken: "0x2000000000000000000000000000000000000001", initialFuelAmount: "5000000000000000000", discoverable: true } },
+    { jsonrpc: "2.0", id: "publicSwarmClasses", method: "public_swarm_classes_list", params: { limit: 10 } },
+    { jsonrpc: "2.0", id: "publicSwarmClass", method: "public_swarm_class_get", params: { swarmClass: publicSwarmClassId } },
+    { jsonrpc: "2.0", id: "publicSwarmLaunchPreview", method: "public_swarm_launch_preview", params: { creator: accountId, swarmClass: publicSwarmClassId, missionText: "Research a launch opportunity", profileText: "Research swarm profile", budgetAsset: "0x2000000000000000000000000000000000000001", initialBudget: "1000000000000000000" } },
     { jsonrpc: "2.0", id: "models", method: "model_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "model", method: "model_get", params: { rootfieldId } },
     { jsonrpc: "2.0", id: "workReceipts", method: "work_receipt_list", params: { limit: 10 } },

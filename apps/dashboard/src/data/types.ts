@@ -36,6 +36,16 @@ export type FlowPulseContractTypeName =
   | "ROOT_COMMITTED"
   | "ROOTFIELD_STATUS_CHANGED"
   | "SWAP_MEMORY_SIGNAL"
+  | "TASK_OPENED"
+  | "TASK_ACCEPTED"
+  | "TASK_STARTED"
+  | "TASK_EVIDENCE_COMMITTED"
+  | "TASK_VERIFIED"
+  | "TASK_FAILED"
+  | "TASK_CHALLENGED"
+  | "TASK_SETTLED"
+  | "TASK_SLASHED"
+  | "AGENT_MEMORY_CORRECTED"
   | "UNKNOWN_FLOWPULSE_TYPE";
 
 export interface FlowPulseContractEvent {
@@ -142,6 +152,7 @@ export interface FixtureMetadata {
     verifier: string;
     devnet: string;
     hardware: string;
+    agentBondFixture: string;
   };
 }
 
@@ -307,6 +318,155 @@ export interface AgentMemoryView extends ProvenancedRecord {
   localOnly: boolean;
 }
 
+export interface AgentBondTaskRecord extends ProvenancedRecord {
+  taskId: string;
+  rootfieldId: string;
+  requester: string;
+  agent: string;
+  verifier: string;
+  payout: string;
+  agentBond: string;
+  disputeBond: string;
+  reportStatus: string;
+  settlementStatus: string;
+}
+
+export interface AgentBondSettlementRecord extends ProvenancedRecord {
+  settlementId: string;
+  taskId: string;
+  settlementToken: string;
+  totalEscrowed: string;
+  totalReleased: string;
+  reserveAmount: string;
+  transferCount: number;
+}
+
+export interface AgentBondPassportView extends ProvenancedRecord {
+  viewId: string;
+  agent: string;
+  rootfieldId: string;
+  latestTaskId: string;
+  verifiedTaskCount: number;
+  failedTaskCount: number;
+  slashedTaskCount: number;
+  totalPayoutEarned: string;
+  totalBondAtRisk: string;
+  reputationScore: number;
+}
+
+
+export interface AgentBondPassportRecord extends ProvenancedRecord {
+  passportId: string;
+  agentId: string;
+  operatorId: string;
+  displayName: string;
+  riskBand: string;
+}
+
+export interface BondedTaskEnvelopeRecord extends ProvenancedRecord {
+  envelopeId: string;
+  envelopeHash: string;
+  taskClass: string;
+  payoutUSDC: string;
+  fundingMode: string;
+}
+
+export interface BondedExecutionReceiptRecord extends ProvenancedRecord {
+  receiptId: string;
+  terminalState: string;
+  agentId: string;
+  envelopeId: string;
+  slashedUSDC: string;
+}
+
+
+export interface AgentBondRecoursePolicyRecord extends ProvenancedRecord {
+  policyId: string;
+  statusLabel: string;
+  taskClasses: string[];
+  maxCoveragePerTaskUSDC: string;
+  maxRiskTier: number;
+}
+
+export interface AgentBondRecourseDecisionRecord extends ProvenancedRecord {
+  decisionId: string;
+  policyId: string;
+  envelopeId: string;
+  decisionStatus: string;
+  approvedCoverageUSDC: string;
+  premiumUSDC: string;
+  reasonCodes: string[];
+  policyAttestationId?: string;
+  policyAttestationSignerId?: string;
+}
+
+export interface AgentBondFailureWaterfallRecord extends ProvenancedRecord {
+  waterfallId: string;
+  receiptId: string;
+  terminalState: string;
+  toRequesterUSDC: string;
+  recourseUSDC: string;
+  slashedUSDC: string;
+}
+
+export interface AgentBondPhase2GateRecord extends ProvenancedRecord {
+  foundationReady: boolean;
+  passportReady?: boolean;
+  envelopeReady?: boolean;
+  receiptReady?: boolean;
+  blockers: string[] | { message: string }[];
+}
+
+export interface AgentBondsDashboardData {
+  passports: AgentBondPassportRecord[];
+  envelopes: BondedTaskEnvelopeRecord[];
+  receipts: BondedExecutionReceiptRecord[];
+  phase2Gate: AgentBondPhase2GateRecord;
+  a2a: {
+    agentCards: Record<string, unknown>[];
+    extensions: Record<string, unknown>[];
+  };
+  mcp: {
+    tools: Record<string, unknown>[];
+    resources: string[];
+    prompts?: string[];
+  };
+  x402: {
+    paymentIntents: Record<string, unknown>[];
+  };
+  credit: {
+    scores: Record<string, unknown>[];
+  };
+  underwriters: {
+    pools: Record<string, unknown>[];
+    allocations: Record<string, unknown>[];
+  };
+  publicClaim: Record<string, unknown>;
+}
+
+export interface BaseAgentMemoryScoutRecord extends ProvenancedRecord {
+  viewId: string;
+  agentId: string;
+  rootfieldId: string;
+  latestMemoryRoot: string;
+  sequence: string;
+  action: string;
+  reasonCode: string;
+  previewHash: string;
+  actionReceiptId: string;
+  memoryDeltaId: string;
+  verifierReportId: string;
+  checksPassed: number;
+  checksTotal: number;
+  verifiedMemoryCount: number;
+  pendingMemoryCount: number;
+  failedMemoryCount: number;
+  replayWarnings: string[];
+  localOnly: boolean;
+}
+
+
+
 export interface DevnetBlock extends ProvenancedRecord {
   blockNumber: number;
   blockHash: string;
@@ -356,6 +516,23 @@ export interface DashboardData {
   memoryReceipts: MemoryReceipt[];
   rootfieldBundles: RootfieldBundle[];
   agentMemoryViews: AgentMemoryView[];
+  agentBondTasks: AgentBondTaskRecord[];
+  agentBondSettlements: AgentBondSettlementRecord[];
+  agentBondPassportViews: AgentBondPassportView[];
+  agentBondPassports: AgentBondPassportRecord[];
+  bondedTaskEnvelopes: BondedTaskEnvelopeRecord[];
+  bondedExecutionReceipts: BondedExecutionReceiptRecord[];
+  agentBondPhase2Gate: AgentBondPhase2GateRecord;
+  agentBondA2A: AgentBondsDashboardData["a2a"];
+  agentBondMcp: AgentBondsDashboardData["mcp"];
+  agentBondX402: AgentBondsDashboardData["x402"];
+  agentBondCredit: AgentBondsDashboardData["credit"];
+  agentBondUnderwriters: AgentBondsDashboardData["underwriters"];
+  agentBondPublicClaim: AgentBondsDashboardData["publicClaim"];
+  agentBondRecoursePolicies: AgentBondRecoursePolicyRecord[];
+  agentBondRecourseDecisions: AgentBondRecourseDecisionRecord[];
+  agentBondFailureWaterfalls: AgentBondFailureWaterfallRecord[];
+  baseAgentMemoryScouts: BaseAgentMemoryScoutRecord[];
   devnetBlocks: DevnetBlock[];
   hardwareNodes: HardwareNode[];
   alerts: AlertIncident[];

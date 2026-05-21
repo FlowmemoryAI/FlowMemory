@@ -1,0 +1,11 @@
+{
+  "name": "@flowmemory/agent-memory-sdk-v1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts"
+  }
+}

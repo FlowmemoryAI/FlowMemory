@@ -68,6 +68,22 @@ Current launch target is not:
 - Dashboard uses generated fixtures until a production API is explicitly scoped.
 - Dashboard copy does not imply production deployment, production L1, full trustless verification, free storage, or AI running on-chain.
 
+## Agent Bonds Gates
+
+- `forge test --match-path tests/AgentBondManager.t.sol` passes.
+- `forge test --match-path tests/AgentBondTimelockedMultisig.t.sol` passes.
+- `npm run flowmemory:agent-bonds:v1` passes.
+- `npm run flowmemory:agent-bonds:replay` passes.
+- `npm run flowmemory:agent-bonds:simulate` passes.
+- `npm run flowmemory:agent-bonds:readiness` passes.
+- `npm run flowmemory:agent-bonds:pilot-config:validate -- fixtures/agent-bonds/pilot-config.template.json` passes for the filled pilot config.
+- Pilot mode, allowlists, payout cap, open-exposure cap, and open-task cap are configured before any public value-bearing pilot.
+- Designated verifier and confirming verifier are separate operators for production-shaped objective policies.
+- `npm test --prefix services/control-plane` passes with Agent Bonds runtime/readiness methods available.
+- Evidence availability commitments and retention windows are documented and tested.
+- Public docs explicitly describe dispute-resolution trust assumptions and emergency controls.
+
+
 ## Review Gates
 
 - CI passes.

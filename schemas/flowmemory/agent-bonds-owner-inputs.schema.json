@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_owner_inputs.v1",
+  "title": "FlowMemory Agent Bonds Owner Inputs V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "network", "contracts", "roles", "caps", "policy", "signoffs"],
+  "properties": {
+    "schema": { "const": "flowmemory.agent_bonds_owner_inputs.v1" },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainId", "networkName"],
+      "properties": {
+        "chainId": { "type": "integer", "minimum": 1 },
+        "networkName": { "type": "string", "minLength": 1 }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["settlementToken", "stakeToken", "escrow", "stakeRegistry", "policyRegistry", "manager", "multisig"],
+      "properties": {
+        "settlementToken": { "$ref": "#/$defs/address" },
+        "stakeToken": { "$ref": "#/$defs/address" },
+        "escrow": { "$ref": "#/$defs/address" },
+        "stakeRegistry": { "$ref": "#/$defs/address" },
+        "policyRegistry": { "$ref": "#/$defs/address" },
+        "manager": { "$ref": "#/$defs/address" },
+        "multisig": { "$ref": "#/$defs/address" }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["multisigOwners", "threshold", "pauseGuardian", "resolutionAuthority", "designatedVerifier", "confirmingVerifier", "requester", "agent"],
+      "properties": {
+        "multisigOwners": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/address" } },
+        "threshold": { "type": "integer", "minimum": 2 },
+        "pauseGuardian": { "$ref": "#/$defs/address" },
+        "resolutionAuthority": { "$ref": "#/$defs/address" },
+        "designatedVerifier": { "$ref": "#/$defs/address" },
+        "confirmingVerifier": { "$ref": "#/$defs/address" },
+        "requester": { "$ref": "#/$defs/address" },
+        "agent": { "$ref": "#/$defs/address" }
+      }
+    },
+    "caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxPayoutPerTask", "maxOpenExposure", "maxOpenTasks"],
+      "properties": {
+        "maxPayoutPerTask": { "$ref": "#/$defs/uintString" },
+        "maxOpenExposure": { "$ref": "#/$defs/uintString" },
+        "maxOpenTasks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredConfirmations", "minAvailabilityWindowSeconds"],
+      "properties": {
+        "requiredConfirmations": { "type": "integer", "minimum": 1 },
+        "minAvailabilityWindowSeconds": { "type": "integer", "minimum": 3600 }
+      }
+    },
+    "signoffs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["externalReviewer", "ownerSigner", "runtimeOperator", "goNoGoOwner"],
+      "properties": {
+        "externalReviewer": { "type": "string", "minLength": 1 },
+        "ownerSigner": { "type": "string", "minLength": 1 },
+        "runtimeOperator": { "type": "string", "minLength": 1 },
+        "goNoGoOwner": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" }
+  }
+}

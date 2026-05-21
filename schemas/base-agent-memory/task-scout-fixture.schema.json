@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.task_scout.fixture.v1",
+  "title": "Base Agent Memory Task Scout Fixture V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "generatedAt", "mode", "chainId", "contracts", "agentConfig", "hotMemory", "taskObservation", "stepPreview", "actionReceipt", "memoryCell", "memoryDelta", "flowPulses", "verifierReport", "rootflowTransition", "agentMemoryView"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.task_scout.fixture.v1" },
+    "generatedAt": { "type": "string" },
+    "mode": { "const": "fixture" },
+    "chainId": { "type": "string", "pattern": "^[0-9]+$" },
+    "contracts": { "type": "object", "additionalProperties": { "$ref": "#/$defs/address" } },
+    "agentConfig": { "type": "object" },
+    "hotMemory": { "type": "object" },
+    "taskObservation": { "type": "object" },
+    "stepPreview": { "type": "object" },
+    "actionReceipt": { "type": "object" },
+    "memoryCell": { "type": "object" },
+    "memoryDelta": { "type": "object" },
+    "flowPulses": { "type": "array", "minItems": 2, "items": { "type": "object" } },
+    "verifierReport": { "type": "object" },
+    "rootflowTransition": { "type": "object" },
+    "agentMemoryView": { "type": "object" }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }
+  }
+}

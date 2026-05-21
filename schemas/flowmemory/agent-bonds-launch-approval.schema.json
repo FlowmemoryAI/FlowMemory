@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_launch_approval.v1",
+  "title": "FlowMemory Agent Bonds Launch Approval V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "network",
+    "pilotConfigPath",
+    "readinessReportPath",
+    "operatorBundlePath",
+    "externalReview",
+    "operatorSeparation",
+    "runtimeEvidence",
+    "goNoGoDecision"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.agent_bonds_launch_approval.v1" },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainId", "networkName"],
+      "properties": {
+        "chainId": { "type": "integer", "minimum": 1 },
+        "networkName": { "type": "string", "minLength": 1 }
+      }
+    },
+    "pilotConfigPath": { "type": "string", "minLength": 1 },
+    "readinessReportPath": { "type": "string", "minLength": 1 },
+    "operatorBundlePath": { "type": "string", "minLength": 1 },
+    "externalReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "reviewer", "reportPath", "completedAt"],
+      "properties": {
+        "completed": { "type": "boolean" },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reportPath": { "type": "string", "minLength": 1 },
+        "completedAt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "operatorSeparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "checklistPath", "signedBy", "completedAt"],
+      "properties": {
+        "completed": { "type": "boolean" },
+        "checklistPath": { "type": "string", "minLength": 1 },
+        "signedBy": { "type": "string", "minLength": 1 },
+        "completedAt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "runtimeEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["multiOperatorRunCompleted", "evidencePath", "completedAt"],
+      "properties": {
+        "multiOperatorRunCompleted": { "type": "boolean" },
+        "evidencePath": { "type": "string", "minLength": 1 },
+        "completedAt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "goNoGoDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approved", "decisionOwner", "decisionPath", "approvedAt"],
+      "properties": {
+        "approved": { "type": "boolean" },
+        "decisionOwner": { "type": "string", "minLength": 1 },
+        "decisionPath": { "type": "string", "minLength": 1 },
+        "approvedAt": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

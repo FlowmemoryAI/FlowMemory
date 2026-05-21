@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.agent_memory_view.v1",
+  "title": "Base Agent Memory AgentMemoryView V1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "viewId", "agentId", "rootfieldId", "status", "latestMemoryRoot", "sequence", "activeGoal", "hotMemory", "verifiedMemory", "pendingMemory", "failedOrCorrectedMemory", "recentActions", "nextActionPreview", "replayWarnings", "localOnly"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.agent_memory_view.v1" },
+    "viewId": { "$ref": "#/$defs/hex32" },
+    "agentId": { "$ref": "#/$defs/hex32" },
+    "rootfieldId": { "$ref": "#/$defs/hex32" },
+    "status": { "$ref": "#/$defs/status" },
+    "latestMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "sequence": { "type": "string", "pattern": "^[0-9]+$" },
+    "activeGoal": { "$ref": "#/$defs/hex32" },
+    "hotMemory": { "type": "object" },
+    "verifiedMemory": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "pendingMemory": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "failedOrCorrectedMemory": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "recentActions": { "type": "array", "items": { "$ref": "#/$defs/hex32" } },
+    "nextActionPreview": { "$ref": "#/$defs/hex32" },
+    "replayWarnings": { "type": "array", "items": { "type": "string" } },
+    "localOnly": { "const": true }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "status": { "enum": ["pending", "verified", "failed", "unresolved", "unsupported", "reorged"] }
+  }
+}

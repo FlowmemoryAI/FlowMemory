@@ -1,0 +1,57 @@
+{
+  "schema": "flowmemory.agent_bonds_pilot_config.v1",
+  "network": {
+    "chainId": 8453,
+    "networkName": "base-mainnet-capped-pilot"
+  },
+  "contracts": {
+    "settlementToken": "0x0000000000000000000000000000000000000c01",
+    "stakeToken": "0x0000000000000000000000000000000000000c02",
+    "escrow": "0x0000000000000000000000000000000000000e01",
+    "stakeRegistry": "0x0000000000000000000000000000000000000e02",
+    "policyRegistry": "0x0000000000000000000000000000000000000e03",
+    "manager": "0x0000000000000000000000000000000000000e04",
+    "multisig": "0x0000000000000000000000000000000000000e05"
+  },
+  "roles": {
+    "multisigOwners": [
+      "0x0000000000000000000000000000000000000a01",
+      "0x0000000000000000000000000000000000000a02",
+      "0x0000000000000000000000000000000000000a03"
+    ],
+    "threshold": 2,
+    "pauseGuardian": "0x0000000000000000000000000000000000000b01",
+    "resolutionAuthority": "0x0000000000000000000000000000000000000b02",
+    "requesters": [
+      "0x0000000000000000000000000000000000000101"
+    ],
+    "agents": [
+      "0x0000000000000000000000000000000000000a91"
+    ],
+    "verifiers": [
+      "0x0000000000000000000000000000000000000f11"
+    ],
+    "confirmingVerifiers": [
+      "0x0000000000000000000000000000000000000f22"
+    ]
+  },
+  "caps": {
+    "maxPayoutPerTask": "100000000",
+    "maxOpenExposure": "160000000",
+    "maxOpenTasks": 1
+  },
+  "policy": {
+    "policyId": "0x733a73a684bcb3791ba85b0bec92565825d06b89b9a868d81f634490efa85c40",
+    "requiredConfirmations": 1,
+    "minAvailabilityWindowSeconds": 86400
+  },
+  "custody": {
+    "slitherPassed": true,
+    "readinessReportPath": "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json"
+  },
+  "docs": {
+    "boundaryDoc": "docs/AGENT_BONDS_PUBLIC_LAUNCH_BOUNDARY.md",
+    "runbookDoc": "docs/OPERATIONS/AGENT_BONDS_CAPPED_PILOT_RUNBOOK.md",
+    "reviewDoc": "docs/reviews/AGENT_BONDS_V1_SECURITY_REVIEW.md"
+  }
+}

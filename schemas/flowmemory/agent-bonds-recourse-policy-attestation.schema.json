@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_recourse_policy_attestation.v1",
+  "title": "FlowMemory Agent Bonds Recourse Policy Attestation V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "attestationId",
+    "decisionId",
+    "policyId",
+    "envelopeId",
+    "decisionHash",
+    "signerId",
+    "signerKeyId",
+    "publicKey",
+    "signatureAlgorithm",
+    "signingDigest",
+    "signature",
+    "issuedAt",
+    "expiresAt",
+    "nonce"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-bonds-recourse-policy-attestation/v1"
+    },
+    "attestationId": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "decisionId": {
+      "type": "string"
+    },
+    "policyId": {
+      "type": "string"
+    },
+    "envelopeId": {
+      "type": "string"
+    },
+    "decisionHash": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "signerId": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "signerKeyId": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "publicKey": {
+      "type": "string",
+      "pattern": "^0x0[23][0-9a-fA-F]{64}$"
+    },
+    "signatureAlgorithm": {
+      "const": "secp256k1-keccak256-flowmemory-recourse-policy-v1"
+    },
+    "signingDigest": {
+      "$ref": "#/$defs/bytes32"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{128}$"
+    },
+    "issuedAt": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "expiresAt": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "nonce": {
+      "$ref": "#/$defs/bytes32"
+    }
+  },
+  "$defs": {
+    "bytes32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

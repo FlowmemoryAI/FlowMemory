@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_credit_score_attestation.v1",
+  "title": "Agent Credit Score Attestation V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "attestationId",
+    "agentId",
+    "scoreHash",
+    "score",
+    "riskBand",
+    "validFrom",
+    "validUntil",
+    "signer",
+    "signature",
+    "canonicalPayloadHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-credit-score-attestation/v1"
+    },
+    "attestationId": {
+      "type": "string"
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "scoreHash": {
+      "$ref": "#/$defs/hex32"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "riskBand": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "UNRATED"
+      ]
+    },
+    "taskClass": {
+      "type": "string"
+    },
+    "validFrom": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "validUntil": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "signer": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "canonicalPayloadHash": {
+      "$ref": "#/$defs/hex32"
+    }
+  },
+  "$defs": {
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

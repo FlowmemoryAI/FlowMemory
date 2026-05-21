@@ -18,6 +18,7 @@ import {
   RadioTower,
   ShieldAlert,
   ShieldCheck,
+  ShieldPlus,
   UserPlus,
   Wallet,
 } from "lucide-react";
@@ -43,7 +44,10 @@ const NAV_ITEMS = [
   { to: "/overview", label: "Overview", icon: LayoutDashboard },
   { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
+  { to: "/agent-bonds", label: "Agent Bonds", icon: ShieldPlus },
   { to: "/flowpulse", label: "FlowPulse", icon: Activity },
+  { to: "/agents", label: "Base agents", icon: BrainCircuit },
+  { to: "/public-network", label: "Public network", icon: Network },
   { to: "/rootfields", label: "Rootfields", icon: Boxes },
   { to: "/work", label: "Work lanes", icon: ClipboardCheck },
   { to: "/verifier", label: "Verifier", icon: ShieldCheck },

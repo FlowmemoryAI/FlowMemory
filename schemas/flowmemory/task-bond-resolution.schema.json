@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.task_bond_resolution.v1",
+  "title": "FlowMemory TaskBond Resolution V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "resolutionId",
+    "taskId",
+    "reportId",
+    "resolvedStatus",
+    "challenged",
+    "challengeBond",
+    "resolver",
+    "resolvedAt",
+    "reasonCodes"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.task_bond_resolution.v1" },
+    "resolutionId": { "$ref": "#/$defs/hex32" },
+    "taskId": { "$ref": "#/$defs/hex32" },
+    "reportId": { "$ref": "#/$defs/hex32" },
+    "resolvedStatus": { "enum": ["verified", "failed", "unsupported", "reorged"] },
+    "challenged": { "type": "boolean" },
+    "challengeBond": { "$ref": "#/$defs/uintString" },
+    "resolver": { "$ref": "#/$defs/address" },
+    "resolvedAt": { "type": "string", "format": "date-time" },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" }
+  }
+}

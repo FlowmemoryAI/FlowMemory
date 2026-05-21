@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "agent-bonds-public-claim/v1",
+  "claimLevel": "capped_pilot",
+  "enabled": true,
+  "headline": "FlowMemory Agent Bonds accountability architecture",
+  "shortClaim": "FlowMemory Agent Bonds supports bounded, evidence-backed agent work primitives.",
+  "longClaim": "FlowMemory Agent Bonds exposes Passport, Envelope, and Receipt primitives for bounded agent accountability without claiming public value-bearing launch approval.",
+  "allowedClaims": [
+    "capped pilot architecture",
+    "passport envelope receipt primitives"
+  ],
+  "disallowedClaims": [
+    "risk-free",
+    "guaranteed safe",
+    "insured",
+    "fully insured",
+    "guaranteed payout",
+    "guaranteed reimbursement",
+    "cannot fail",
+    "prevents hallucinations",
+    "first ever",
+    "only protocol",
+    "audit-approved",
+    "production safe",
+    "unlimited public launch",
+    "uncapped",
+    "regulator-approved"
+  ],
+  "substantiation": {
+    "schemaVersion": "agent-bonds-claim-substantiation/v1",
+    "passportReady": true,
+    "envelopeReady": true,
+    "receiptReady": true,
+    "a2aReady": true,
+    "mcpReady": true,
+    "x402Ready": true,
+    "creditScoringReady": true,
+    "underwriterPoolsReady": false,
+    "unsafeClaimScanPassing": true,
+    "substantiationMatrixPresent": true
+  },
+  "blockers": [],
+  "generatedAt": "2026-05-21T12:00:00.000Z"
+}

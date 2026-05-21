@@ -59,6 +59,11 @@ const EXPECTED_CHAIN_CAPABILITIES = [
   "wallet_transfer_history_reads",
   "real_value_pilot_reads",
   "real_value_pilot_operator_steps",
+  "agent_bond_runtime_reads",
+  "agent_bond_public_launch_status_reads",
+  "base_agent_memory_runtime_reads",
+  "public_agent_network_launch_reads",
+  "public_swarm_network_reads",
   "devnet_handoff_reads",
   "no_secret_response_checks",
   "raw_json_reads",
@@ -119,6 +124,40 @@ test("dispatches JSON-RPC methods against local fixture state", () => {
   assert.equal(response.id, "status");
   assert.equal(response.result.schema, "flowmemory.control_plane.chain_status.v0");
   assert.equal(response.result.localOnly, true);
+});
+
+test("exposes agent bond runtime and readiness methods", () => {
+  const state = loadControlPlaneState();
+  state.agentBondReadinessReport = { ok: true };
+  state.agentBondReplayReport = { match: true };
+  state.agentBondEconomicReport = { scenarios: [{ name: "fixture" }] };
+  const list = dispatchJsonRpc({ jsonrpc: "2.0", id: "agent-bond-list", method: "agent_bond_task_list" }, { state }) as RpcSuccessResponse;
+  const row = ((list.result as JsonObject).tasks as JsonObject[])[0];
+  const task = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: "agent-bond-task", method: "agent_bond_task_get", params: { taskId: row.taskId } },
+    { state },
+  ) as RpcSuccessResponse;
+  const readiness = dispatchJsonRpc({ jsonrpc: "2.0", id: "agent-bond-readiness", method: "agent_bond_readiness_get" }, { state }) as RpcSuccessResponse;
+  const replay = dispatchJsonRpc({ jsonrpc: "2.0", id: "agent-bond-replay", method: "agent_bond_replay_report_get" }, { state }) as RpcSuccessResponse;
+  const economics = dispatchJsonRpc({ jsonrpc: "2.0", id: "agent-bond-economics", method: "agent_bond_economic_report_get" }, { state }) as RpcSuccessResponse;
+  const publicLaunchStatus = dispatchJsonRpc({ jsonrpc: "2.0", id: "agent-bond-launch-status", method: "agent_bond_public_launch_status_get" }, { state }) as RpcSuccessResponse;
+
+  assert.equal((list.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_task_list.v1");
+  assert.equal((list.result as JsonObject).count, 1);
+  assert.equal(row.status, "settled");
+  assert.equal(row.readinessOk, true);
+  assert.equal(row.replayMatch, true);
+  assert.equal((task.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_task.v1");
+  assert.equal((((task.result as JsonObject).fixture as JsonObject).schema), "flowmemory.agent_bonds.fixture.v1");
+  assert.equal((readiness.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_readiness.v1");
+  assert.equal((((readiness.result as JsonObject).readinessReport as JsonObject).ok), true);
+  assert.equal((replay.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_replay_report.v1");
+  assert.equal((((replay.result as JsonObject).report as JsonObject).match), true);
+  assert.equal((economics.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_economic_report.v1");
+  assert.equal(Array.isArray(((economics.result as JsonObject).report as JsonObject).scenarios), true);
+  assert.equal((publicLaunchStatus.result as JsonObject).schema, "flowmemory.control_plane.agent_bond_public_launch_status.v1");
+  assert.equal((publicLaunchStatus.result as JsonObject).status, "blocked");
+  assert.ok(Array.isArray((publicLaunchStatus.result as JsonObject).blockers));
 });
 
 test("returns stable invalid params errors for missing required params", () => {
@@ -336,8 +375,8 @@ test("recovers when generated launch/indexer/verifier fixtures are missing", () 
     assert.equal(state.sources.launchCore.status, "recovered");
     assert.equal(state.sources.indexer.status, "recovered");
     assert.equal(state.sources.verifier.status, "recovered");
-    assert.equal(response.result.counts.observations, 8);
-    assert.equal(response.result.counts.verifierReports, 8);
+    assert.equal(response.result.counts.observations, 10);
+    assert.equal(response.result.counts.verifierReports, 10);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -370,6 +409,165 @@ test("looks up receipt, report, and memory provenance", () => {
   assert.match(String(memoryCell.result.extensionPoint), /projected from RootfieldBundle/);
 });
 
+test("exposes base agent memory task scout and replay reads", () => {
+  const state = loadControlPlaneState();
+  const fixture = state.launchCore.taskScoutFixture;
+  assert.ok(fixture);
+  const agentId = fixture?.agentConfig.agentId;
+  assert.equal(typeof agentId, "string");
+
+  const listResponse = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 1, method: "base_agent_memory_task_scout_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const getResponse = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 2, method: "base_agent_memory_task_scout_get", params: { agentId } },
+    { state },
+  ) as RpcSuccessResponse;
+  const replayResponse = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 3, method: "base_agent_memory_replay_get", params: { agentId } },
+    { state },
+  ) as RpcSuccessResponse;
+
+  assert.equal(listResponse.result.schema, "flowmemory.control_plane.base_agent_memory_scout_list.v1");
+  assert.equal(listResponse.result.count, 1);
+  assert.equal(getResponse.result.schema, "flowmemory.control_plane.base_agent_memory_task_scout.v1");
+  assert.equal(getResponse.result.fixture.agentConfig.agentId, agentId);
+  assert.equal(replayResponse.result.schema, "flowmemory.control_plane.base_agent_memory_replay.v1");
+  assert.equal(replayResponse.result.report.status, "verified");
+});
+
+
+test("exposes public agent network class tool and launch preview methods", () => {
+  const state = loadControlPlaneState();
+  const classes = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 1, method: "public_agent_network_classes_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const firstClass = ((classes.result as JsonObject).classes as JsonObject[])[0];
+  const classId = String(firstClass.classId);
+  const classGet = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 2, method: "public_agent_network_class_get", params: { classId } },
+    { state },
+  ) as RpcSuccessResponse;
+  const tools = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 3, method: "public_agent_network_tools_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const firstTool = ((tools.result as JsonObject).tools as JsonObject[])[0];
+  const toolSetRoot = String(firstTool.toolSetRoot);
+  const toolSet = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 4, method: "public_agent_network_tool_set_get", params: { toolSetRoot } },
+    { state },
+  ) as RpcSuccessResponse;
+  const preview = dispatchJsonRpc(
+    {
+      jsonrpc: "2.0",
+      id: 5,
+      method: "public_agent_launch_preview",
+      params: {
+        owner: "0x1000000000000000000000000000000000000001",
+        classId,
+        objectiveText: "Launch a task scout",
+        profileText: "Public task scout profile",
+        toolSetRoot,
+        autonomyLevel: 2,
+        riskLevel: 1,
+        bondToken: "0x2000000000000000000000000000000000000001",
+        bondAmount: "10000000000000000000",
+        fuelToken: "0x2000000000000000000000000000000000000001",
+        initialFuelAmount: "5000000000000000000",
+        discoverable: true,
+      },
+    },
+    { state },
+  ) as RpcSuccessResponse;
+  assert.equal(classes.result.schema, "flowmemory.control_plane.public_agent_class_list.v1");
+  assert.equal(classGet.result.schema, "flowmemory.control_plane.public_agent_class.v1");
+  assert.equal(toolSet.result.schema, "flowmemory.control_plane.public_agent_tool_set.v1");
+  assert.equal(preview.result.schema, "flowmemory.control_plane.public_agent_launch_preview.v1");
+  assert.equal((preview.result.preview as JsonObject).valid, true);
+});
+
+test("exposes public swarm class and launch preview methods", () => {
+  const state = loadControlPlaneState();
+  const classes = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 1, method: "public_swarm_classes_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const firstClass = ((classes.result as JsonObject).classes as JsonObject[])[0];
+  const swarmClass = String(firstClass.swarmClass);
+  const classGet = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 2, method: "public_swarm_class_get", params: { swarmClass } },
+    { state },
+  ) as RpcSuccessResponse;
+  const preview = dispatchJsonRpc(
+    {
+      jsonrpc: "2.0",
+      id: 3,
+      method: "public_swarm_launch_preview",
+      params: {
+        creator: "0x1000000000000000000000000000000000000001",
+        swarmClass,
+        missionText: "Research a launch opportunity",
+        profileText: "Research swarm profile",
+        budgetAsset: "0x2000000000000000000000000000000000000001",
+        initialBudget: "1000000000000000000",
+      },
+    },
+    { state },
+  ) as RpcSuccessResponse;
+  assert.equal(classes.result.schema, "flowmemory.control_plane.public_swarm_class_list.v1");
+  assert.equal(classGet.result.schema, "flowmemory.control_plane.public_swarm_class.v1");
+  assert.equal(preview.result.schema, "flowmemory.control_plane.public_swarm_launch_preview.v1");
+  assert.equal((preview.result.preview as JsonObject).valid, true);
+});
+
+test("exposes public agent launch intent, discovery, and swarm replay methods", () => {
+  const state = loadControlPlaneState();
+  const publicClasses = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 0, method: "public_agent_network_classes_list", params: { limit: 10 } },
+    { state },
+  ) as RpcSuccessResponse;
+  const firstClass = ((publicClasses.result as JsonObject).classes as JsonObject[])[0];
+  const classId = String(firstClass.classId);
+  const launchIntent = dispatchJsonRpc(
+    {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "public_agent_launch_intent_get",
+      params: {
+        owner: "0x1000000000000000000000000000000000000001",
+        classId,
+        objectiveText: "Launch a task scout",
+        profileText: "Public task scout profile",
+        toolSetRoot: "0xd6717d12f7068dbdbdfd4e9444d1aadf133b650aeb92fa44f2c1667af14e3c94",
+        autonomyLevel: 2,
+        riskLevel: 1,
+        bondToken: "0x2000000000000000000000000000000000000001",
+        bondAmount: "10000000000000000000",
+        fuelToken: "0x2000000000000000000000000000000000000001",
+        initialFuelAmount: "5000000000000000000",
+        discoverable: true,
+        rootfieldId: "0x1111111111111111111111111111111111111111111111111111111111111111",
+        validAfter: "1",
+        validUntil: "2",
+        nonce: "0",
+        salt: "0x2222222222222222222222222222222222222222222222222222222222222222"
+      },
+    },
+    { state },
+  ) as RpcSuccessResponse;
+  const launch = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "public_agent_launch_get" }, { state }) as RpcSuccessResponse;
+  const discover = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "public_agent_discover", params: { limit: 10 } }, { state }) as RpcSuccessResponse;
+  const swarmGet = dispatchJsonRpc({ jsonrpc: "2.0", id: 4, method: "public_swarm_get" }, { state }) as RpcSuccessResponse;
+  const swarmReplay = dispatchJsonRpc({ jsonrpc: "2.0", id: 5, method: "public_swarm_replay_get" }, { state }) as RpcSuccessResponse;
+  assert.equal(launchIntent.result.schema, "flowmemory.control_plane.public_agent_launch_intent.v1");
+  assert.equal(launch.result.schema, "flowmemory.control_plane.public_agent_launch.v1");
+  assert.equal(discover.result.schema, "flowmemory.control_plane.public_agent_discovery.v1");
+  assert.equal(swarmGet.result.schema, "flowmemory.control_plane.public_swarm.v1");
+  assert.equal(swarmReplay.result.schema, "flowmemory.control_plane.public_swarm_replay.v1");
+});
 test("supports receipt and report object lookup by provenance-linked ids", () => {
   const state = loadControlPlaneState();
   const receipt = state.launchCore.memoryReceipts[0];
@@ -1373,6 +1571,21 @@ test("smoke client queries the complete local lifecycle surface", () => {
     "flowmemory.control_plane.wallet_balance_list.v0",
     "flowmemory.control_plane.wallet_transfer_history.v0",
     "flowmemory.control_plane.raw_json.v0",
+    "flowmemory.control_plane.agent_bond_readiness.v1",
+    "flowmemory.control_plane.agent_bond_task_list.v1",
+    "flowmemory.control_plane.agent_bond_task.v1",
+    "flowmemory.control_plane.agent_bond_public_launch_status.v1",
+    "flowmemory.control_plane.base_agent_memory_scout_list.v1",
+    "flowmemory.control_plane.base_agent_memory_task_scout.v1",
+    "flowmemory.control_plane.base_agent_memory_replay.v1",
+    "flowmemory.control_plane.public_agent_class_list.v1",
+    "flowmemory.control_plane.public_agent_class.v1",
+    "flowmemory.control_plane.public_agent_tool_list.v1",
+    "flowmemory.control_plane.public_agent_tool_set.v1",
+    "flowmemory.control_plane.public_agent_launch_preview.v1",
+    "flowmemory.control_plane.public_swarm_class_list.v1",
+    "flowmemory.control_plane.public_swarm_class.v1",
+    "flowmemory.control_plane.public_swarm_launch_preview.v1",
   ]) {
     assert.ok(responseSchemas.includes(expectedSchema), `smoke response should include ${expectedSchema}`);
   }

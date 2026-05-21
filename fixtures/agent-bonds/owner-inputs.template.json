@@ -1,0 +1,44 @@
+{
+  "schema": "flowmemory.agent_bonds_owner_inputs.v1",
+  "network": {
+    "chainId": 8453,
+    "networkName": "base-mainnet-capped-pilot"
+  },
+  "contracts": {
+    "settlementToken": "0x0000000000000000000000000000000000000000",
+    "stakeToken": "0x0000000000000000000000000000000000000000",
+    "escrow": "0x0000000000000000000000000000000000000000",
+    "stakeRegistry": "0x0000000000000000000000000000000000000000",
+    "policyRegistry": "0x0000000000000000000000000000000000000000",
+    "manager": "0x0000000000000000000000000000000000000000",
+    "multisig": "0x0000000000000000000000000000000000000000"
+  },
+  "roles": {
+    "multisigOwners": [
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000"
+    ],
+    "threshold": 2,
+    "pauseGuardian": "0x0000000000000000000000000000000000000000",
+    "resolutionAuthority": "0x0000000000000000000000000000000000000000",
+    "designatedVerifier": "0x0000000000000000000000000000000000000000",
+    "confirmingVerifier": "0x0000000000000000000000000000000000000000",
+    "requester": "0x0000000000000000000000000000000000000000",
+    "agent": "0x0000000000000000000000000000000000000000"
+  },
+  "caps": {
+    "maxPayoutPerTask": "100000000",
+    "maxOpenExposure": "160000000",
+    "maxOpenTasks": 1
+  },
+  "policy": {
+    "requiredConfirmations": 1,
+    "minAvailabilityWindowSeconds": 86400
+  },
+  "signoffs": {
+    "externalReviewer": "PENDING_EXTERNAL_REVIEWER",
+    "ownerSigner": "PENDING_OWNER_SIGNOFF",
+    "runtimeOperator": "PENDING_RUNTIME_OPERATOR",
+    "goNoGoOwner": "PENDING_GO_NO_GO_OWNER"
+  }
+}

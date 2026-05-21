@@ -50,6 +50,22 @@ describe("dashboard fixture", () => {
     expect(data.memorySignals.every((signal) => signal.contractEvent.topicMatchesContract)).toBe(true);
     expect(data.memorySignals.some((signal) => signal.signalType === "swap_memory_signal")).toBe(true);
     expect(data.rootflowTransitions.every((transition) => transition.contractEventRef.signalId === transition.memorySignalId)).toBe(true);
+    expect(data.agentBondTasks.length).toBeGreaterThan(0);
+    expect(data.agentBondSettlements.length).toBeGreaterThan(0);
+    expect(data.agentBondPassportViews.length).toBeGreaterThan(0);
+    expect(data.agentBondPassports.length).toBeGreaterThan(0);
+    expect(data.bondedTaskEnvelopes.length).toBeGreaterThan(0);
+    expect(data.bondedExecutionReceipts.length).toBeGreaterThan(0);
+    expect(data.agentBondPhase2Gate.foundationReady).toBe(true);
+    expect(data.agentBondA2A.agentCards.length).toBeGreaterThan(0);
+    expect(data.agentBondMcp.tools.length).toBeGreaterThan(0);
+    expect(data.agentBondX402.paymentIntents.length).toBeGreaterThan(0);
+    expect(data.agentBondCredit.scores.length).toBeGreaterThan(0);
+    expect(data.agentBondUnderwriters.pools.length).toBeGreaterThan(0);
+    expect(data.agentBondRecoursePolicies.length).toBeGreaterThan(0);
+    expect(data.agentBondRecourseDecisions.length).toBeGreaterThan(0);
+    expect(data.agentBondFailureWaterfalls.length).toBeGreaterThan(0);
+    expect(data.baseAgentMemoryScouts.length).toBeGreaterThan(0);
   });
 
   it("loads the Base canary dashboard mode separately from local fixtures", () => {
@@ -62,6 +78,16 @@ describe("dashboard fixture", () => {
     expect(canaryData.verifierReports).toHaveLength(0);
     expect(canaryData.memorySignals.some((signal) => signal.signalType === "swap_memory_signal")).toBe(true);
     expect(canaryData.agentMemoryViews.every((view) => view.localOnly === false)).toBe(true);
+    expect(canaryData.agentBondTasks).toHaveLength(0);
+    expect(canaryData.agentBondSettlements).toHaveLength(0);
+    expect(canaryData.agentBondPassportViews).toHaveLength(0);
+    expect(canaryData.agentBondPassports).toHaveLength(0);
+    expect(canaryData.bondedTaskEnvelopes).toHaveLength(0);
+    expect(canaryData.bondedExecutionReceipts).toHaveLength(0);
+    expect(canaryData.agentBondPhase2Gate.foundationReady).toBe(false);
+    expect(canaryData.agentBondRecoursePolicies).toHaveLength(0);
+    expect(canaryData.agentBondRecourseDecisions).toHaveLength(0);
+    expect(canaryData.agentBondFailureWaterfalls).toHaveLength(0);
   });
 
   it("covers every required dashboard status", () => {
@@ -76,6 +102,17 @@ describe("dashboard fixture", () => {
       ...data.memoryReceipts,
       ...data.rootfieldBundles,
       ...data.agentMemoryViews,
+      ...data.agentBondTasks,
+      ...data.agentBondSettlements,
+      ...data.agentBondPassportViews,
+      ...data.agentBondPassports,
+      ...data.bondedTaskEnvelopes,
+      ...data.bondedExecutionReceipts,
+      data.agentBondPhase2Gate,
+      ...data.agentBondRecoursePolicies,
+      ...data.agentBondRecourseDecisions,
+      ...data.agentBondFailureWaterfalls,
+      ...data.baseAgentMemoryScouts,
       ...data.devnetBlocks,
       ...data.hardwareNodes,
       ...data.alerts,
@@ -99,6 +136,17 @@ describe("dashboard fixture", () => {
       ...data.memoryReceipts,
       ...data.rootfieldBundles,
       ...data.agentMemoryViews,
+      ...data.agentBondTasks,
+      ...data.agentBondSettlements,
+      ...data.agentBondPassportViews,
+      ...data.agentBondPassports,
+      ...data.bondedTaskEnvelopes,
+      ...data.bondedExecutionReceipts,
+      data.agentBondPhase2Gate,
+      ...data.agentBondRecoursePolicies,
+      ...data.agentBondRecourseDecisions,
+      ...data.agentBondFailureWaterfalls,
+      ...data.baseAgentMemoryScouts,
       ...data.devnetBlocks,
       ...data.hardwareNodes,
       ...data.alerts,

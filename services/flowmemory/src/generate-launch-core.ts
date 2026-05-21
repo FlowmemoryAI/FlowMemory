@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,7 +10,11 @@ import {
   verifierStatusToFlowMemoryStatus,
   type FlowMemoryStatus,
 } from "./status.ts";
+import { buildTaskScoutFixture, writeTaskScoutFixture } from "./agent-memory.ts";
+import { getAgentBondsPhase2Gate } from "./agent-bonds-phase2-gate.ts";
+import { buildPublicClaimPackage } from "./agent-bonds-public-claim.ts";
 import type {
+  AgentBondFixtureEnvelope,
   AgentMemoryView,
   FlowPulseContractEvent,
   FlowPulseContractEventRef,
@@ -20,6 +24,7 @@ import type {
   MemorySignal,
   RootfieldBundle,
   RootflowTransition,
+  TaskScoutFixtureEnvelope,
 } from "./types.ts";
 
 const ZERO_ROOT = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -33,6 +38,22 @@ const FLOWPULSE_CONTRACT_TYPE_NAMES: Record<string, FlowPulseContractTypeName> =
   "2": "ROOT_COMMITTED",
   "3": "ROOTFIELD_STATUS_CHANGED",
   "4": "SWAP_MEMORY_SIGNAL",
+  "5": "TASK_OPENED",
+  "6": "TASK_ACCEPTED",
+  "7": "TASK_STARTED",
+  "8": "TASK_EVIDENCE_COMMITTED",
+  "9": "TASK_VERIFIED",
+  "10": "TASK_FAILED",
+  "11": "TASK_CHALLENGED",
+  "12": "TASK_SETTLED",
+  "13": "TASK_SLASHED",
+  "14": "AGENT_REGISTERED",
+  "15": "AGENT_POLICY_UPDATED",
+  "16": "AGENT_STEP_COMMITTED",
+  "17": "AGENT_ACTION_EXECUTED",
+  "18": "AGENT_MEMORY_COMMITTED",
+  "19": "AGENT_PAUSED",
+  "34": "AGENT_MEMORY_CORRECTED",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -103,6 +124,10 @@ export interface LaunchCorePaths {
   transitionsOutPath: string;
   dashboardOutPath: string;
   dashboardRuntimePath: string;
+  agentBondFixturePath: string;
+  agentMemoryFixturePath: string;
+  agentMemoryViewPath: string;
+  agentMemoryReplayPath: string;
 }
 
 export interface DashboardData {
@@ -118,6 +143,23 @@ export interface DashboardData {
   memoryReceipts: JsonObject[];
   rootfieldBundles: JsonObject[];
   agentMemoryViews: JsonObject[];
+  agentBondTasks: JsonObject[];
+  agentBondSettlements: JsonObject[];
+  agentBondPassportViews: JsonObject[];
+  agentBondPassports: JsonObject[];
+  bondedTaskEnvelopes: JsonObject[];
+  bondedExecutionReceipts: JsonObject[];
+  agentBondPhase2Gate: JsonObject;
+  agentBondA2A: JsonObject;
+  agentBondMcp: JsonObject;
+  agentBondX402: JsonObject;
+  agentBondCredit: JsonObject;
+  agentBondUnderwriters: JsonObject;
+  agentBondPublicClaim: JsonObject;
+  agentBondRecoursePolicies: JsonObject[];
+  agentBondRecourseDecisions: JsonObject[];
+  agentBondFailureWaterfalls: JsonObject[];
+  baseAgentMemoryScouts: JsonObject[];
   devnetBlocks: JsonObject[];
   hardwareNodes: JsonObject[];
   alerts: JsonObject[];
@@ -132,6 +174,10 @@ export const DEFAULT_LAUNCH_CORE_PATHS: LaunchCorePaths = {
   transitionsOutPath: "fixtures/launch-core/rootflow-transitions.json",
   dashboardOutPath: "fixtures/dashboard/flowmemory-dashboard-v0.json",
   dashboardRuntimePath: "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
+  agentBondFixturePath: "fixtures/agent-bonds/agent-bonds-v1.json",
+  agentMemoryFixturePath: "fixtures/base-agent-memory/task-scout-v0.json",
+  agentMemoryViewPath: "fixtures/base-agent-memory/task-scout-agent-memory-view.json",
+  agentMemoryReplayPath: "fixtures/base-agent-memory/task-scout-replay-report.json",
 };
 
 function readJson<T>(path: string): T {
@@ -141,6 +187,14 @@ function readJson<T>(path: string): T {
 function writeJson(path: string, value: unknown): void {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function readJsonDir(path: string): JsonObject[] {
+  const resolved = resolve(REPO_ROOT, path);
+  if (!existsSync(resolved)) return [];
+  return readdirSync(resolved)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => readJson<JsonObject>(resolve(path, name)));
 }
 
 function stableId(schema: string, value: unknown): string {
@@ -156,6 +210,15 @@ function pulseTypeName(pulseType: string): MemorySignal["signalType"] {
   }
   if (pulseType === "4") {
     return "swap_memory_signal";
+  }
+  if (pulseType === "16") {
+    return "agent_step_committed";
+  }
+  if (pulseType === "18") {
+    return "agent_memory_committed";
+  }
+  if (pulseType === "34") {
+    return "agent_memory_corrected";
   }
   return "unsupported_pulse";
 }
@@ -313,7 +376,13 @@ function buildMemoryReceipt(report: VerifierReport): MemoryReceipt {
   };
 }
 
-export function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierPersistence, paths: LaunchCorePaths): LaunchCoreOutput {
+export function buildLaunchCore(
+  indexer: IndexerPersistence,
+  verifier: VerifierPersistence,
+  paths: LaunchCorePaths,
+  agentBondFixture: AgentBondFixtureEnvelope,
+  taskScoutFixture: TaskScoutFixtureEnvelope,
+): LaunchCoreOutput {
   const sortedObservations = sortObservations(indexer.state.observations);
   const reportByObservation = new Map(verifier.reports.map((report) => [report.reportCore.observationId, report]));
   const receiptByObservation = new Map<string, MemoryReceipt>();
@@ -345,9 +414,9 @@ export function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierP
     const report = reportByObservation.get(observation.observationId);
     const receipt = receiptByObservation.get(observation.observationId);
     const previousRoot = currentRootByRootfield.get(observation.rootfieldId) ?? ZERO_ROOT;
-    const attemptedRoot = observation.pulseType === "2" ? observation.subject : previousRoot;
+    const attemptedRoot = observation.pulseType === "2" || observation.pulseType === "18" ? observation.subject : previousRoot;
     const status = transitionStatus(observation.lifecycleState, report?.reportCore.status);
-    const nextRoot = status === "verified" && observation.pulseType === "2" ? attemptedRoot : previousRoot;
+    const nextRoot = status === "verified" && (observation.pulseType === "2" || observation.pulseType === "18") ? attemptedRoot : previousRoot;
     const parentTransitionId = latestTransitionByPulse.get(observation.parentPulseId) ?? null;
 
     const transitionCore = {
@@ -467,6 +536,8 @@ export function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierP
       verifier: paths.verifierPath,
       devnet: paths.devnetPath,
       hardware: paths.hardwarePath,
+      agentBondFixture: paths.agentBondFixturePath,
+      agentMemoryFixture: paths.agentMemoryFixturePath,
     },
     statusAdapter: VERIFIER_TO_FLOW_MEMORY_STATUS,
     memorySignals,
@@ -474,6 +545,8 @@ export function buildLaunchCore(indexer: IndexerPersistence, verifier: VerifierP
     rootflowTransitions,
     rootfieldBundles,
     agentMemoryViews,
+    agentBondFixture,
+    taskScoutFixture,
     acceptance: {
       loadedFlowPulses: indexer.state.pulses.length,
       indexedObservations: indexer.state.observations.length,
@@ -509,6 +582,7 @@ function buildDashboardData(
   verifier: VerifierPersistence,
   devnet: JsonObject,
   hardware: JsonObject,
+  taskScoutFixture: TaskScoutFixtureEnvelope,
 ): DashboardData {
   const currentBlock = Math.max(...indexer.state.observations.map((observation) => Number(observation.blockNumber)));
   const finalizedBlock = Math.max(
@@ -635,6 +709,169 @@ function buildDashboardData(
     }] : []),
   ];
 
+  const agentBondTask = launchCore.agentBondFixture?.task as Record<string, unknown> | undefined;
+  const agentBondSettlement = launchCore.agentBondFixture?.settlement as Record<string, unknown> | undefined;
+  const agentBondPassport = launchCore.agentBondFixture?.agentMemoryView as Record<string, unknown> | undefined;
+  const agentBondReport = launchCore.agentBondFixture?.verifierReport as Record<string, unknown> | undefined;
+  const agentBondProvenancePath = String(launchCore.sourcePaths.agentBondFixture);
+  const agentBondTasks = agentBondTask ? [{
+    id: String(agentBondTask.taskId),
+    taskId: String(agentBondTask.taskId),
+    rootfieldId: String(agentBondTask.rootfieldId),
+    requester: String(agentBondTask.requester),
+    agent: String(agentBondTask.agent),
+    verifier: String(agentBondTask.verifier),
+    payout: String(agentBondTask.payout),
+    agentBond: String(agentBondTask.agentBond),
+    disputeBond: String(agentBondTask.disputeBond),
+    reportStatus: String(agentBondReport?.status ?? "unknown"),
+    settlementStatus: String(agentBondSettlement?.status ?? "unknown"),
+    status: "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", agentBondProvenancePath),
+  }] : [];
+  const agentBondSettlements = agentBondSettlement ? [{
+    id: String(agentBondSettlement.settlementId),
+    settlementId: String(agentBondSettlement.settlementId),
+    taskId: String(agentBondSettlement.taskId),
+    settlementToken: String(agentBondSettlement.settlementToken),
+    totalEscrowed: String(agentBondSettlement.totalEscrowed),
+    totalReleased: String(agentBondSettlement.totalReleased),
+    reserveAmount: String(agentBondSettlement.reserveAmount),
+    transferCount: Array.isArray(agentBondSettlement.transfers) ? agentBondSettlement.transfers.length : 0,
+    status: agentBondSettlement.status === "slashed" ? "failed" : agentBondSettlement.status === "refunded" ? "unresolved" : "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", agentBondProvenancePath),
+  }] : [];
+  const agentBondPassportViews = agentBondPassport ? [{
+    id: String(agentBondPassport.viewId),
+    viewId: String(agentBondPassport.viewId),
+    agent: String(agentBondPassport.agent),
+    rootfieldId: String(agentBondPassport.rootfieldId),
+    latestTaskId: String(agentBondPassport.latestTaskId),
+    verifiedTaskCount: Number(agentBondPassport.verifiedTaskCount ?? 0),
+    failedTaskCount: Number(agentBondPassport.failedTaskCount ?? 0),
+    slashedTaskCount: Number(agentBondPassport.slashedTaskCount ?? 0),
+    totalPayoutEarned: String(agentBondPassport.totalPayoutEarned ?? "0"),
+    totalBondAtRisk: String(agentBondPassport.totalBondAtRisk ?? "0"),
+    reputationScore: Number(agentBondPassport.reputationScore ?? 0),
+    status: "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", agentBondProvenancePath),
+  }] : [];
+
+  const passportFixtures = readJsonDir("fixtures/agent-bonds/passports");
+  const envelopeFixtures = readJsonDir("fixtures/agent-bonds/envelopes");
+  const receiptFixtures = readJsonDir("fixtures/agent-bonds/receipts");
+  const a2aCardFixtures = readJsonDir("fixtures/agent-bonds/a2a").filter((entry) => typeof entry.name === "string");
+  const a2aExtensionFixtures = readJsonDir("fixtures/agent-bonds/a2a").filter((entry) => entry.uri === "https://flowmemory.ai/a2a/extensions/agent-bonds/v1");
+  const mcpTools = readJson<JsonObject>("fixtures/agent-bonds/mcp/tools-list.agent-bonds.json");
+  const x402PaymentIntents = readJsonDir("fixtures/agent-bonds/x402").filter((entry) => entry.schemaVersion === "x402-agent-bonds-payment-intent/v1");
+  const creditScores = readJsonDir("fixtures/agent-bonds/credit").filter((entry) => entry.schemaVersion === "agent-credit-score/v1");
+  const underwriterPools = readJsonDir("fixtures/agent-bonds/underwriters").filter((entry) => entry.schemaVersion === "underwriter-pool/v1");
+  const underwriterAllocations = readJsonDir("fixtures/agent-bonds/underwriters").filter((entry) => entry.schemaVersion === "underwriter-allocation/v1");
+  const recoursePolicies = readJsonDir("fixtures/agent-bonds/recourse").filter((entry) => entry.schemaVersion === "agent-bonds-recourse-policy/v1");
+  const recourseDecisions = readJsonDir("fixtures/agent-bonds/recourse").filter((entry) => entry.schemaVersion === "agent-bonds-recourse-decision/v1");
+  const recourseWaterfalls = readJsonDir("fixtures/agent-bonds/recourse").filter((entry) => entry.schemaVersion === "agent-bonds-failure-waterfall/v1");
+  const agentBondRecoursePolicies = recoursePolicies.map((policy) => ({
+    id: String(policy.policyId ?? stableId("flowmemory.dashboard.agent_bond_recourse_policy.v1", policy)),
+    policyId: String(policy.policyId ?? "unknown"),
+    statusLabel: String(policy.status ?? "unknown"),
+    taskClasses: Array.isArray((policy.scope as JsonObject | undefined)?.taskClasses) ? ((policy.scope as JsonObject).taskClasses as string[]) : [],
+    maxCoveragePerTaskUSDC: String(((policy.constraints as JsonObject | undefined)?.maxCoveragePerTaskUSDC) ?? "0"),
+    maxRiskTier: Number(((policy.scope as JsonObject | undefined)?.maxRiskTier) ?? 0),
+    status: policy.status === "active" ? "verified" : policy.status === "draft" ? "pending" : "stale",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/recourse"),
+  }));
+  const agentBondRecourseDecisions = recourseDecisions.map((decision) => ({
+    id: String(decision.decisionId ?? stableId("flowmemory.dashboard.agent_bond_recourse_decision.v1", decision)),
+    decisionId: String(decision.decisionId ?? "unknown"),
+    policyId: String(decision.policyId ?? "unknown"),
+    envelopeId: String(decision.envelopeId ?? "unknown"),
+    decisionStatus: String(decision.status ?? "unknown"),
+    approvedCoverageUSDC: String(decision.approvedCoverageUSDC ?? "0"),
+    premiumUSDC: String(decision.premiumUSDC ?? "0"),
+    reasonCodes: Array.isArray(decision.reasonCodes) ? decision.reasonCodes as string[] : [],
+    policyAttestationId: String(((decision.policyAttestation as JsonObject | undefined)?.attestationId) ?? ""),
+    policyAttestationSignerId: String(((decision.policyAttestation as JsonObject | undefined)?.signerId) ?? ""),
+    status: decision.status === "approved" ? "verified" : decision.status === "manual_review" ? "pending" : "failed",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/recourse"),
+  }));
+  const agentBondFailureWaterfalls = recourseWaterfalls.map((waterfall) => ({
+    id: String(waterfall.waterfallId ?? stableId("flowmemory.dashboard.agent_bond_failure_waterfall.v1", waterfall)),
+    waterfallId: String(waterfall.waterfallId ?? "unknown"),
+    receiptId: String(waterfall.receiptId ?? "unknown"),
+    terminalState: String(waterfall.terminalState ?? "unknown"),
+    toRequesterUSDC: String(((waterfall.totals as JsonObject | undefined)?.toRequesterUSDC) ?? "0"),
+    recourseUSDC: String(((waterfall.totals as JsonObject | undefined)?.recourseUSDC) ?? "0"),
+    slashedUSDC: String(((waterfall.totals as JsonObject | undefined)?.slashedUSDC) ?? "0"),
+    status: String(waterfall.terminalState ?? "").includes("slashed") ? "failed" : "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/recourse"),
+  }));
+  const phase2Gate = getAgentBondsPhase2Gate();
+  const publicClaim = buildPublicClaimPackage({ claimLevel: "integration_beta", generatedAt: GENERATED_AT });
+  const agentBondPassports = passportFixtures.map((passport) => ({
+    id: String(passport.passportId ?? passport.agentId),
+    passportId: String(passport.passportId ?? passport.agentId),
+    agentId: String(passport.agentId ?? "unknown"),
+    operatorId: String(passport.operatorId ?? "unknown"),
+    displayName: String(passport.displayName ?? passport.agentId ?? "unknown"),
+    riskBand: String(((passport.capacity as JsonObject | undefined)?.riskBand) ?? "UNRATED"),
+    status: passport.status === "revoked" ? "failed" : passport.status === "paused" || passport.status === "draft" ? "pending" : "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/passports"),
+  }));
+  const bondedTaskEnvelopes = envelopeFixtures.filter((entry) => entry.schemaVersion === "bonded-task-envelope/v1").map((envelope) => ({
+    id: String(envelope.envelopeId),
+    envelopeId: String(envelope.envelopeId),
+    envelopeHash: String(envelope.envelopeHash),
+    taskClass: String(((envelope.task as JsonObject | undefined)?.taskClass) ?? "unknown"),
+    payoutUSDC: String(((envelope.economics as JsonObject | undefined)?.payoutUSDC) ?? "0"),
+    fundingMode: String(((envelope.payment as JsonObject | undefined)?.fundingMode) ?? "unknown"),
+    status: "pending",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/envelopes"),
+  }));
+  const bondedExecutionReceipts = receiptFixtures.filter((entry) => entry.schemaVersion === "bonded-execution-receipt/v1").map((receipt) => ({
+    id: String(receipt.receiptId),
+    receiptId: String(receipt.receiptId),
+    terminalState: String(((receipt.lifecycle as JsonObject | undefined)?.terminalState) ?? "unknown"),
+    agentId: String(((receipt.participants as JsonObject | undefined)?.agentId) ?? "unknown"),
+    envelopeId: String(receipt.envelopeId ?? "unknown"),
+    slashedUSDC: String(((receipt.settlement as JsonObject | undefined)?.slashedUSDC) ?? "0"),
+    status: String(((receipt.lifecycle as JsonObject | undefined)?.terminalState) ?? "").includes("slashed") ? "failed" : String(((receipt.lifecycle as JsonObject | undefined)?.terminalState) ?? "") === "refunded_unsupported" ? "unsupported" : "verified",
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/agent-bonds/receipts"),
+  }));
+
+  const baseAgentMemoryScouts = [{
+    id: taskScoutFixture.agentMemoryView.viewId,
+    viewId: taskScoutFixture.agentMemoryView.viewId,
+    agentId: taskScoutFixture.agentConfig.agentId,
+    rootfieldId: taskScoutFixture.agentConfig.rootfieldId,
+    latestMemoryRoot: taskScoutFixture.agentMemoryView.latestMemoryRoot,
+    sequence: taskScoutFixture.agentMemoryView.sequence,
+    status: taskScoutFixture.verifierReport.status,
+    action: taskScoutFixture.stepPreview.action,
+    reasonCode: taskScoutFixture.stepPreview.reasonCode,
+    previewHash: taskScoutFixture.stepPreview.previewHash,
+    actionReceiptId: taskScoutFixture.actionReceipt.actionReceiptId,
+    memoryDeltaId: taskScoutFixture.memoryDelta.memoryDeltaId,
+    verifierReportId: taskScoutFixture.verifierReport.verifierReportId,
+    checksPassed: taskScoutFixture.verifierReport.checks.filter((check) => check.status === "pass").length,
+    checksTotal: taskScoutFixture.verifierReport.checks.length,
+    verifiedMemoryCount: taskScoutFixture.agentMemoryView.verifiedMemory.length,
+    pendingMemoryCount: taskScoutFixture.agentMemoryView.pendingMemory.length,
+    failedMemoryCount: taskScoutFixture.agentMemoryView.failedOrCorrectedMemory.length,
+    replayWarnings: taskScoutFixture.agentMemoryView.replayWarnings,
+    localOnly: true,
+    lastUpdated: GENERATED_AT,
+    provenance: provenance("worker", "fixtures/base-agent-memory/task-scout-v0.json"),
+  }];
+
   return {
     metadata: {
       schema: "flowmemory.dashboard.fixture.v0",
@@ -648,6 +885,8 @@ function buildDashboardData(
         verifier: "services/verifier/out/reports.json",
         devnet: "fixtures/launch-core/generated/devnet/state.json",
         hardware: "hardware/fixtures/flowrouter_sample_seed42.json",
+        agentBondFixture: "fixtures/agent-bonds/agent-bonds-v1.json",
+        agentMemoryFixture: "fixtures/base-agent-memory/task-scout-v0.json",
       },
     },
     chain: {
@@ -762,6 +1001,48 @@ function buildDashboardData(
       lastUpdated: GENERATED_AT,
       provenance: provenance("worker", "fixtures/launch-core/flowmemory-launch-v0.json"),
     })),
+    agentBondTasks,
+    agentBondSettlements,
+    agentBondPassportViews,
+    agentBondPassports,
+    bondedTaskEnvelopes,
+    bondedExecutionReceipts,
+    agentBondPhase2Gate: {
+      id: "agent-bond-phase2-gate",
+      ...phase2Gate,
+      status: phase2Gate.foundationReady ? "verified" : "unresolved",
+      lastUpdated: GENERATED_AT,
+      provenance: provenance("worker", "devnet/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"),
+    },
+    agentBondA2A: {
+      agentCards: a2aCardFixtures,
+      extensions: a2aExtensionFixtures,
+    },
+    agentBondMcp: {
+      tools: Array.isArray(mcpTools.tools) ? mcpTools.tools : [],
+      resources: Array.isArray(mcpTools.resources) ? mcpTools.resources : [],
+      prompts: Array.isArray(mcpTools.prompts) ? mcpTools.prompts : [],
+    },
+    agentBondX402: {
+      paymentIntents: x402PaymentIntents,
+    },
+    agentBondCredit: {
+      scores: creditScores,
+    },
+    agentBondUnderwriters: {
+      pools: underwriterPools,
+      allocations: underwriterAllocations,
+    },
+    agentBondRecoursePolicies,
+    agentBondRecourseDecisions,
+    agentBondFailureWaterfalls,
+    agentBondPublicClaim: {
+      ...publicClaim,
+      status: publicClaim.enabled ? "verified" : "unresolved",
+      lastUpdated: GENERATED_AT,
+      provenance: provenance("worker", "fixtures/agent-bonds/claims"),
+    },
+    baseAgentMemoryScouts,
     devnetBlocks: blocks.map((block) => ({
       id: String(block.blockHash),
       blockNumber: Number(block.blockNumber),
@@ -790,8 +1071,10 @@ export function generateLaunchCore(paths: LaunchCorePaths = DEFAULT_LAUNCH_CORE_
   const verifier = readJson<VerifierPersistence>(paths.verifierPath);
   const devnet = readJson<JsonObject>(paths.devnetPath);
   const hardware = readJson<JsonObject>(paths.hardwarePath);
-  const launchCore = buildLaunchCore(indexer, verifier, paths);
-  const dashboard = buildDashboardData(launchCore, indexer, verifier, devnet, hardware);
+  const agentBondFixture = readJson<AgentBondFixtureEnvelope>(paths.agentBondFixturePath);
+  const taskScoutFixture = buildTaskScoutFixture();
+  const launchCore = buildLaunchCore(indexer, verifier, paths, agentBondFixture, taskScoutFixture);
+  const dashboard = buildDashboardData(launchCore, indexer, verifier, devnet, hardware, taskScoutFixture);
 
   writeJson(paths.launchOutPath, launchCore);
   writeJson(paths.transitionsOutPath, {
@@ -801,6 +1084,11 @@ export function generateLaunchCore(paths: LaunchCorePaths = DEFAULT_LAUNCH_CORE_
   });
   writeJson(paths.dashboardOutPath, dashboard);
   writeJson(paths.dashboardRuntimePath, dashboard);
+  writeTaskScoutFixture({
+    fixturePath: paths.agentMemoryFixturePath,
+    viewPath: paths.agentMemoryViewPath,
+    replayPath: paths.agentMemoryReplayPath,
+  });
 
   return { launchCore, dashboard };
 }
@@ -860,6 +1148,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       ...dashboard.memoryReceipts,
       ...dashboard.rootfieldBundles,
       ...dashboard.agentMemoryViews,
+      ...dashboard.agentBondTasks,
+      ...dashboard.agentBondSettlements,
+      ...dashboard.agentBondPassportViews,
       ...dashboard.devnetBlocks,
       ...dashboard.hardwareNodes,
       ...dashboard.alerts,

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_go_no_go_attestation.v1",
+  "title": "FlowMemory Agent Bonds Go/No-Go Attestation V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "approved", "decisionOwner", "decisionPath", "docPath", "approvedAt"],
+  "properties": {
+    "schema": { "const": "flowmemory.agent_bonds_go_no_go_attestation.v1" },
+    "approved": { "type": "boolean" },
+    "decisionOwner": { "type": "string", "minLength": 1 },
+    "decisionPath": { "type": "string", "minLength": 1 },
+    "docPath": { "type": "string", "minLength": 1 },
+    "approvedAt": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}

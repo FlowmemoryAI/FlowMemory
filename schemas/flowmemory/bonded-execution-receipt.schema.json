@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.bonded_execution_receipt.v1",
+  "title": "FlowMemory Bonded Execution Receipt V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "receiptHash",
+    "taskId",
+    "envelopeId",
+    "envelopeHash",
+    "participants",
+    "lifecycle",
+    "evidence",
+    "settlement",
+    "reputationDelta",
+    "flowPulse",
+    "integrations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "bonded-execution-receipt/v1"
+    },
+    "receiptId": {
+      "type": "string"
+    },
+    "receiptHash": {
+      "$ref": "#/$defs/hex32"
+    },
+    "taskId": {
+      "type": "string"
+    },
+    "envelopeId": {
+      "type": "string"
+    },
+    "envelopeHash": {
+      "$ref": "#/$defs/hex32"
+    },
+    "participants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requesterId",
+        "agentId"
+      ],
+      "properties": {
+        "requesterId": {
+          "type": "string"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "verifierId": {
+          "type": "string"
+        },
+        "confirmingVerifierId": {
+          "type": "string"
+        },
+        "resolutionAuthorityId": {
+          "type": "string"
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createdAt",
+        "terminalState"
+      ],
+      "properties": {
+        "createdAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "acceptedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "submittedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "reportedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "confirmedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "challengedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "resolvedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "settledAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "terminalState": {
+          "enum": [
+            "settled_success",
+            "refunded_unsupported",
+            "slashed_invalid",
+            "slashed_timeout",
+            "cancelled_before_acceptance",
+            "challenge_upheld",
+            "challenge_rejected",
+            "emergency_resolved"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "redacted"
+      ],
+      "properties": {
+        "evidenceHash": {
+          "$ref": "#/$defs/hex32"
+        },
+        "evidenceUri": {
+          "type": "string"
+        },
+        "evidenceSchema": {
+          "type": "string"
+        },
+        "availabilityProofHash": {
+          "$ref": "#/$defs/hex32"
+        },
+        "redacted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verifierReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportHash",
+        "result"
+      ],
+      "properties": {
+        "reportHash": {
+          "$ref": "#/$defs/hex32"
+        },
+        "result": {
+          "enum": [
+            "valid",
+            "invalid",
+            "unsupported"
+          ]
+        },
+        "reasonCode": {
+          "type": "string"
+        }
+      }
+    },
+    "settlement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "settlementToken",
+        "settlementChainId",
+        "payoutUSDC",
+        "agentBondUSDC",
+        "verifierFeeUSDC",
+        "requesterRefundUSDC",
+        "agentPayoutUSDC",
+        "verifierPayoutUSDC",
+        "slashedUSDC",
+        "transactionHashes"
+      ],
+      "properties": {
+        "settlementToken": {
+          "$ref": "#/$defs/address"
+        },
+        "settlementChainId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "payoutUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "agentBondUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "verifierFeeUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "requesterRefundUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "agentPayoutUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "verifierPayoutUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "slashedUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "protocolFeeUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "transactionHashes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hex32"
+          }
+        }
+      }
+    },
+    "reputationDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent"
+      ],
+      "properties": {
+        "agent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "completedDelta",
+            "settledDelta",
+            "challengedDelta",
+            "slashedDelta",
+            "timeoutDelta",
+            "scoreImpactHint"
+          ],
+          "properties": {
+            "completedDelta": {
+              "type": "integer"
+            },
+            "settledDelta": {
+              "type": "integer"
+            },
+            "challengedDelta": {
+              "type": "integer"
+            },
+            "slashedDelta": {
+              "type": "integer"
+            },
+            "timeoutDelta": {
+              "type": "integer"
+            },
+            "scoreImpactHint": {
+              "enum": [
+                "positive",
+                "neutral",
+                "negative",
+                "severe_negative"
+              ]
+            }
+          }
+        },
+        "verifier": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reportsDelta",
+            "overturnedDelta",
+            "slashedDelta",
+            "scoreImpactHint"
+          ],
+          "properties": {
+            "reportsDelta": {
+              "type": "integer"
+            },
+            "overturnedDelta": {
+              "type": "integer"
+            },
+            "slashedDelta": {
+              "type": "integer"
+            },
+            "scoreImpactHint": {
+              "enum": [
+                "positive",
+                "neutral",
+                "negative",
+                "severe_negative"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "flowPulse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pulseIds",
+        "lifecycleRecordHashes"
+      ],
+      "properties": {
+        "pulseIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lifecycleRecordHashes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hex32"
+          }
+        }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "a2a": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "contextId": {
+              "type": "string"
+            },
+            "taskId": {
+              "type": "string"
+            },
+            "artifactIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "mcp": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "toolCallId": {
+              "type": "string"
+            },
+            "server": {
+              "type": "string"
+            },
+            "resourceUri": {
+              "type": "string"
+            }
+          }
+        },
+        "x402": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "paymentIntentId": {
+              "type": "string"
+            },
+            "paymentTransactionHash": {
+              "$ref": "#/$defs/hex32"
+            }
+          }
+        }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "signer",
+          "role",
+          "algorithm",
+          "signature",
+          "signedAt"
+        ],
+        "properties": {
+          "signer": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "algorithm": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "signedAt": {
+            "$ref": "#/$defs/dateTime"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

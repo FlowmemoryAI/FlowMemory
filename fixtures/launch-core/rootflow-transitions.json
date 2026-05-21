@@ -219,6 +219,66 @@
         "txHash": "0x3333333333333333333333333333333333333333333333333333333333333338",
         "logIndex": "7"
       }
+    },
+    {
+      "schema": "flowmemory.rootflow_transition.v0",
+      "transitionId": "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "parentTransitionId": null,
+      "memorySignalId": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+      "memoryReceiptId": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "reportId": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "previousRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "attemptedRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "nextRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "status": "pending",
+      "blockNumber": "17000001",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "sequence": "1",
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "16",
+        "pulseTypeName": "AGENT_STEP_COMMITTED",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "0"
+      }
+    },
+    {
+      "schema": "flowmemory.rootflow_transition.v0",
+      "transitionId": "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+      "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "parentTransitionId": "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+      "memorySignalId": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+      "memoryReceiptId": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "reportId": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "previousRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "attemptedRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "nextRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "status": "pending",
+      "blockNumber": "17000001",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "sequence": "2",
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "18",
+        "pulseTypeName": "AGENT_MEMORY_COMMITTED",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "1"
+      }
     }
   ]
 }

@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.bonded_task_envelope.v1",
+  "title": "FlowMemory Bonded Task Envelope V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "envelopeId",
+    "envelopeHash",
+    "requesterId",
+    "task",
+    "policy",
+    "economics",
+    "acceptanceCriteria",
+    "evidence",
+    "recourse",
+    "payment",
+    "timestamps"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "bonded-task-envelope/v1"
+    },
+    "envelopeId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "envelopeHash": {
+      "$ref": "#/$defs/hex32"
+    },
+    "requesterId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "verifierId": {
+      "type": "string"
+    },
+    "confirmingVerifierId": {
+      "type": "string"
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskClass",
+        "title",
+        "description",
+        "objectiveOnly",
+        "deliverableType"
+      ],
+      "properties": {
+        "taskClass": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "objectiveOnly": {
+          "type": "boolean"
+        },
+        "deliverableType": {
+          "type": "string"
+        },
+        "expectedOutputSchema": {
+          "type": "string"
+        },
+        "acceptedOutputModes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "riskTier",
+        "requiredConfirmations",
+        "submissionWindowSeconds",
+        "disputeWindowSeconds",
+        "graceWindowSeconds",
+        "evidenceAvailabilityWindowSeconds"
+      ],
+      "properties": {
+        "policyId": {
+          "type": "string"
+        },
+        "policyHash": {
+          "$ref": "#/$defs/hex32"
+        },
+        "riskTier": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requiredConfirmations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "submissionWindowSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "disputeWindowSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "graceWindowSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidenceAvailabilityWindowSeconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "economics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "settlementToken",
+        "settlementTokenSymbol",
+        "settlementChainId",
+        "payoutUSDC",
+        "agentBondUSDC",
+        "verifierFeeUSDC",
+        "requesterCancelBondUSDC",
+        "disputeBondUSDC"
+      ],
+      "properties": {
+        "settlementToken": {
+          "$ref": "#/$defs/address"
+        },
+        "settlementTokenSymbol": {
+          "type": "string"
+        },
+        "settlementChainId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "payoutUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "agentBondUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "verifierFeeUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "requesterCancelBondUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "disputeBondUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "protocolFeeUSDC": {
+          "$ref": "#/$defs/uintString"
+        }
+      }
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "description",
+          "required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "ci_passes",
+              "schema_valid",
+              "onchain_event",
+              "api_receipt",
+              "human_review",
+              "source_citation",
+              "custom"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "verifierInstructions": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredEvidenceSchema",
+        "acceptedEvidenceTypes",
+        "evidenceCommitmentRequired",
+        "availabilityProofRequired",
+        "redactionAllowed"
+      ],
+      "properties": {
+        "requiredEvidenceSchema": {
+          "type": "string"
+        },
+        "acceptedEvidenceTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidenceCommitmentRequired": {
+          "type": "boolean"
+        },
+        "availabilityProofRequired": {
+          "type": "boolean"
+        },
+        "redactionAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "recourse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "noSubmission",
+        "invalidSubmission",
+        "unsupportedTask",
+        "verifierError",
+        "requesterBadFaithChallenge"
+      ],
+      "properties": {
+        "noSubmission": {
+          "enum": [
+            "refund_and_slash",
+            "refund_only",
+            "manual_resolution"
+          ]
+        },
+        "invalidSubmission": {
+          "enum": [
+            "refund_and_slash",
+            "retry",
+            "manual_resolution"
+          ]
+        },
+        "unsupportedTask": {
+          "const": "refund_without_slash"
+        },
+        "verifierError": {
+          "enum": [
+            "overturn_and_slash_verifier",
+            "manual_resolution"
+          ]
+        },
+        "requesterBadFaithChallenge": {
+          "enum": [
+            "slash_dispute_bond",
+            "manual_resolution"
+          ]
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fundingMode"
+      ],
+      "properties": {
+        "fundingMode": {
+          "enum": [
+            "direct_erc20_escrow",
+            "erc20_authorization",
+            "x402_service_payment",
+            "x402_escrow_bridge",
+            "manual_fixture"
+          ]
+        },
+        "x402": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "paymentIntentId": {
+              "type": "string"
+            },
+            "paymentRequiredPayloadHash": {
+              "$ref": "#/$defs/hex32"
+            },
+            "paymentTransactionHash": {
+              "$ref": "#/$defs/hex32"
+            },
+            "facilitator": {
+              "type": "string"
+            },
+            "network": {
+              "type": "string"
+            },
+            "asset": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "a2a": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contextId": {
+          "type": "string"
+        },
+        "taskId": {
+          "type": "string"
+        },
+        "messageId": {
+          "type": "string"
+        },
+        "agentCardUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "originServer": {
+          "type": "string"
+        },
+        "originTool": {
+          "type": "string"
+        },
+        "toolCallId": {
+          "type": "string"
+        }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createdAt"
+      ],
+      "properties": {
+        "createdAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/dateTime"
+        }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "signer",
+          "role",
+          "algorithm",
+          "signature",
+          "signedAt"
+        ],
+        "properties": {
+          "signer": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "requester",
+              "agent",
+              "verifier",
+              "operator"
+            ]
+          },
+          "algorithm": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "signedAt": {
+            "$ref": "#/$defs/dateTime"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

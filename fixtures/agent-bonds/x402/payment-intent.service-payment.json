@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "x402-agent-bonds-payment-intent/v1",
+  "paymentIntentId": "x402_service_001",
+  "mode": "service_payment",
+  "network": {
+    "chainId": 8453,
+    "caip2": "eip155:8453"
+  },
+  "asset": {
+    "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "symbol": "USDC",
+    "decimals": 6
+  },
+  "amount": {
+    "atomic": "250000",
+    "display": "0.25",
+    "currency": "USDC"
+  },
+  "payTo": "0x3000000000000000000000000000000000000002",
+  "description": "Pay for quote generation.",
+  "x402": {
+    "paymentRequiredPayloadHash": "0x242ca5506b1a94cc24877fdc8f74c6bcf4872132bea2b6914e5f2a9160e5c37f",
+    "facilitator": "fixture-facilitator"
+  },
+  "status": "payment_required",
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "expiresAt": "2026-05-22T12:00:00.000Z"
+  }
+}

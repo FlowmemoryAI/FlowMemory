@@ -5,6 +5,36 @@ export type FlowPulseContractTypeName =
   | "ROOT_COMMITTED"
   | "ROOTFIELD_STATUS_CHANGED"
   | "SWAP_MEMORY_SIGNAL"
+  | "TASK_OPENED"
+  | "TASK_ACCEPTED"
+  | "TASK_STARTED"
+  | "TASK_EVIDENCE_COMMITTED"
+  | "TASK_VERIFIED"
+  | "TASK_FAILED"
+  | "TASK_CHALLENGED"
+  | "TASK_SETTLED"
+  | "TASK_SLASHED"
+  | "AGENT_REGISTERED"
+  | "AGENT_POLICY_UPDATED"
+  | "AGENT_STEP_COMMITTED"
+  | "AGENT_ACTION_EXECUTED"
+  | "AGENT_MEMORY_COMMITTED"
+  | "AGENT_PAUSED"
+  | "AGENT_BOND_PASSPORT_CREATED"
+  | "AGENT_BOND_PASSPORT_UPDATED"
+  | "AGENT_BOND_ENVELOPE_QUOTED"
+  | "AGENT_BOND_ENVELOPE_SIGNED"
+  | "AGENT_BOND_RECEIPT_EMITTED"
+  | "AGENT_BOND_CREDIT_SCORE_UPDATED"
+  | "AGENT_BOND_UNDERWRITER_CAPACITY_ALLOCATED"
+  | "AGENT_BOND_UNDERWRITER_CAPACITY_LOCKED"
+  | "AGENT_BOND_UNDERWRITER_LOSS_EVENT"
+  | "AGENT_BOND_A2A_TASK_LINKED"
+  | "AGENT_BOND_MCP_TOOL_LINKED"
+  | "AGENT_BOND_X402_PAYMENT_LINKED"
+  | "AGENT_BOND_PUBLIC_CLAIM_GENERATED"
+  | "AGENT_BOND_PUBLIC_CLAIM_BLOCKED"
+  | "AGENT_MEMORY_CORRECTED"
   | "UNKNOWN_FLOWPULSE_TYPE";
 
 export interface FlowPulseContractEvent {
@@ -60,7 +90,14 @@ export interface MemorySignal {
   observationId: string;
   pulseId: string;
   rootfieldId: string;
-  signalType: "rootfield_registration" | "root_commitment" | "swap_memory_signal" | "unsupported_pulse";
+  signalType:
+    | "rootfield_registration"
+    | "root_commitment"
+    | "swap_memory_signal"
+    | "agent_step_committed"
+    | "agent_memory_committed"
+    | "agent_memory_corrected"
+    | "unsupported_pulse";
   status: FlowMemoryStatus;
   chainId: string;
   emittingContract: string;
@@ -156,6 +193,27 @@ export interface AgentMemoryView {
   localOnly: true;
 }
 
+
+export type TaskScoutFixtureEnvelope = import("./agent-memory.ts").TaskScoutFixtureEnvelope;
+
+export interface AgentBondFixtureEnvelope {
+  schema: "flowmemory.agent_bonds.fixture.v1";
+  generatedAt: string;
+  mode: "fixture";
+  task: Record<string, unknown>;
+  evidence: Record<string, unknown>;
+  availabilityProof: Record<string, unknown>;
+  verifierReport: Record<string, unknown>;
+  resolution: Record<string, unknown>;
+  settlement: Record<string, unknown>;
+  flowPulses: Array<Record<string, unknown>>;
+  memoryReceipt: Record<string, unknown>;
+  rootflowTransition: Record<string, unknown>;
+  rootfieldBundle: Record<string, unknown>;
+  agentMemoryView: Record<string, unknown>;
+  accounting: Record<string, unknown>;
+}
+
 export interface LaunchCoreOutput {
   schema: "flowmemory.launch_core.v0";
   generatedAt: string;
@@ -165,6 +223,8 @@ export interface LaunchCoreOutput {
     verifier: string;
     devnet: string;
     hardware: string;
+    agentBondFixture: string;
+    agentMemoryFixture: string;
   };
   statusAdapter: {
     valid: "verified";
@@ -178,6 +238,8 @@ export interface LaunchCoreOutput {
   rootflowTransitions: RootflowTransition[];
   rootfieldBundles: RootfieldBundle[];
   agentMemoryViews: AgentMemoryView[];
+  agentBondFixture?: AgentBondFixtureEnvelope;
+  taskScoutFixture?: TaskScoutFixtureEnvelope;
   acceptance: {
     loadedFlowPulses: number;
     indexedObservations: number;

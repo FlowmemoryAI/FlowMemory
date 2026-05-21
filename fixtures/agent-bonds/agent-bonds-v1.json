@@ -1,0 +1,540 @@
+{
+  "schema": "flowmemory.agent_bonds.fixture.v1",
+  "generatedAt": "2026-05-20T12:00:00.000Z",
+  "mode": "fixture",
+  "task": {
+    "schema": "flowmemory.task_bond_task.v1",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+    "policyId": "0xc7ca001e01a90830fa34a9e0fbf9df8427e092eec483f64a07c9ec6dd02f9aba",
+    "requester": "0x0000000000000000000000000000000000000101",
+    "agent": "0x0000000000000000000000000000000000000a91",
+    "verifier": "0x0000000000000000000000000000000000000f11",
+    "termsHash": "0xcf20ab1c72738fc3f8053ee35fdac72f365901c152ec995660f4a3374d06edff",
+    "payout": "100000000",
+    "agentBond": "25000000",
+    "verifierFee": "10000000",
+    "requesterCancelBond": "25000000",
+    "disputeBond": "50000000",
+    "requiredConfirmations": 1,
+    "confirmedVerifierCount": 1,
+    "status": "settled",
+    "openedAt": "2026-05-20T12:00:00.000Z",
+    "acceptedAt": "2026-05-20T12:01:00.000Z",
+    "submissionDeadline": "2026-05-21T12:01:00.000Z",
+    "challengeDeadline": "2026-05-22T12:04:00.000Z",
+    "flowPulseIds": [
+      "0xf2436a6c01d478d1a4e213be39bcfabbded56cd2b2d6060ca085d02be582b538",
+      "0xc48c96d91355cffc009d25bf61b64eda31c1ec573cfe546a001eb7629ef85204",
+      "0x2f32b69d17eb7569efa76dcfbe29619db786bef85e9c54be7ce8fa1422b4d48f",
+      "0x67224b2eb9ad87e3e29dd95a250876671d1f40b72bcc13fee96d4dd2a6be7bcf",
+      "0x5c5f57cd1a384054087ef95166ca0c6de9771f1b4a1af6f67b3c74a7f245aafb",
+      "0x99bb317ae3e8bec975953cd44a9927b7e390d03cce4b8febbfd00de8cd21f8e3"
+    ]
+  },
+  "evidence": {
+    "schema": "flowmemory.task_bond_evidence.v1",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "submittedBy": "0x0000000000000000000000000000000000000a91",
+    "evidenceCommitment": "0x3ecbf41ff8d2a1c4b053d8d6d219334d92a3315df87dd6facba2aaf89fc1855c",
+    "artifactCommitment": "0x845028003579b155dd384a548c8eeebd2937088e5f3d1fcd2b223c9439295697",
+    "availabilityCommitment": "0x44dd6c455d83d63f78bc00bfd275e96e34bd1dc807f7af62ccb99e9bf81f8d11",
+    "availabilityUntil": "2026-05-23T12:00:00.000Z",
+    "evidenceURI": "fixture://agent-bonds/evidence/objective-code-patch.json",
+    "submittedAt": "2026-05-20T12:03:00.000Z",
+    "checks": [
+      {
+        "name": "artifact commitment is nonzero",
+        "passed": true
+      },
+      {
+        "name": "availability commitment is present",
+        "passed": true
+      },
+      {
+        "name": "declared verifier command passed",
+        "passed": true,
+        "detail": "npm test --prefix services/flowmemory"
+      }
+    ]
+  },
+  "availabilityProof": {
+    "schema": "flowmemory.task_bond_availability_proof.v1",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "availabilityCommitment": "0x44dd6c455d83d63f78bc00bfd275e96e34bd1dc807f7af62ccb99e9bf81f8d11",
+    "providerId": "0x275c7ba3af27b47b1bbf67a95c06bafdc5682073a533d91b77c45d15c2c129b2",
+    "retentionPolicyHash": "0x245316b618431688254b00ece7c187ea221a336b2021ee983c5871617a2f512c",
+    "availabilitySampleRoot": "0x224c6abc0f11954f401b7cdf570ee3be77409b6e757db83a4faa209f56e7fb58",
+    "availableUntil": "2026-05-23T12:00:00.000Z",
+    "evidenceURI": "fixture://agent-bonds/evidence/objective-code-patch.json",
+    "status": "available",
+    "checks": [
+      {
+        "name": "retention policy exceeds challenge window",
+        "passed": true
+      },
+      {
+        "name": "availability sample root matches commitment payload",
+        "passed": true
+      }
+    ]
+  },
+  "verifierReport": {
+    "schema": "flowmemory.task_bond_verifier_report.v1",
+    "reportId": "0xd079123431866173fa17949617e38b444c6db0ce874a96426efbce2373bc04d1",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "verifier": "0x0000000000000000000000000000000000000f11",
+    "status": "valid",
+    "reportDigest": "0xea975d361c799f794754692a30900f5ba0847a342f9b45518b59bb80dc1d8092",
+    "evidenceCommitment": "0x3ecbf41ff8d2a1c4b053d8d6d219334d92a3315df87dd6facba2aaf89fc1855c",
+    "policyId": "0xc7ca001e01a90830fa34a9e0fbf9df8427e092eec483f64a07c9ec6dd02f9aba",
+    "confirmationsRequired": 1,
+    "confirmedBy": [
+      "0x0000000000000000000000000000000000000f22"
+    ],
+    "submittedAt": "2026-05-20T12:04:00.000Z",
+    "reasonCodes": [
+      "OBJECTIVE_TASK_VERIFIED",
+      "INDEPENDENT_CONFIRMATION_RECORDED"
+    ],
+    "checks": [
+      {
+        "name": "evidence commitment matches task",
+        "passed": true
+      },
+      {
+        "name": "availability commitment valid through challenge window",
+        "passed": true
+      },
+      {
+        "name": "deterministic command passed",
+        "passed": true
+      }
+    ]
+  },
+  "resolution": {
+    "schema": "flowmemory.task_bond_resolution.v1",
+    "resolutionId": "0xeeb2264c87f2853c89c9d3884921103066a012131a33928f9e98741224faba11",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "reportId": "0xd079123431866173fa17949617e38b444c6db0ce874a96426efbce2373bc04d1",
+    "resolvedStatus": "verified",
+    "challenged": false,
+    "challengeBond": "0",
+    "resolver": "0x0000000000000000000000000000000000000f11",
+    "resolvedAt": "2026-05-22T13:00:00.000Z",
+    "reasonCodes": [
+      "CHALLENGE_WINDOW_EXPIRED",
+      "INDEPENDENT_CONFIRMATION_SATISFIED"
+    ]
+  },
+  "settlement": {
+    "schema": "flowmemory.task_bond_settlement.v1",
+    "settlementId": "0xe840c52ab8a5acdf1780cc67606b65f61c6e0efd71bc209754f28c433c9d65a9",
+    "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "status": "settled",
+    "settledAt": "2026-05-22T13:00:00.000Z",
+    "settlementToken": "0x0000000000000000000000000000000000000c01",
+    "totalEscrowed": "160000000",
+    "totalReleased": "160000000",
+    "reserveAmount": "0",
+    "transfers": [
+      {
+        "to": "0x0000000000000000000000000000000000000a91",
+        "amount": "100000000",
+        "reason": "agent_payout"
+      },
+      {
+        "to": "0x0000000000000000000000000000000000000a91",
+        "amount": "25000000",
+        "reason": "agent_bond_return"
+      },
+      {
+        "to": "0x0000000000000000000000000000000000000101",
+        "amount": "25000000",
+        "reason": "requester_cancel_bond_return"
+      },
+      {
+        "to": "0x0000000000000000000000000000000000000f11",
+        "amount": "10000000",
+        "reason": "verifier_fee"
+      }
+    ]
+  },
+  "flowPulses": [
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0xf2436a6c01d478d1a4e213be39bcfabbded56cd2b2d6060ca085d02be582b538",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "5",
+      "pulseTypeName": "TASK_OPENED",
+      "indexed": {
+        "pulseId": "0xf2436a6c01d478d1a4e213be39bcfabbded56cd2b2d6060ca085d02be582b538",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000101"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0x20016ea504df1eddfb842634d1ef32227592e1ff035e093b100465e33cdafae7",
+        "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "sequence": "1",
+        "occurredAt": "2026-05-20T12:00:00.000Z",
+        "uri": "fixture://agent-bonds/task-opened"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900001",
+        "blockHash": "0xabeefda61eac15ede3a5d8fb74af8d0e0cb5d588b0607bfd4fef31b70659b9f3",
+        "txHash": "0x562d1dbe15d3e8d3a71354a80f53fc287a4cdc4bc54807aa39419d4e63699e92",
+        "transactionIndex": "0",
+        "logIndex": "1",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    },
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0xc48c96d91355cffc009d25bf61b64eda31c1ec573cfe546a001eb7629ef85204",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "6",
+      "pulseTypeName": "TASK_ACCEPTED",
+      "indexed": {
+        "pulseId": "0xc48c96d91355cffc009d25bf61b64eda31c1ec573cfe546a001eb7629ef85204",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000a91"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0xf8b22abaf417fb68adde23cf05c6a2855ac2a30e5578593419456b4ac7e9a63b",
+        "parentPulseId": "0xf2436a6c01d478d1a4e213be39bcfabbded56cd2b2d6060ca085d02be582b538",
+        "sequence": "2",
+        "occurredAt": "2026-05-20T12:01:00.000Z",
+        "uri": "fixture://agent-bonds/task-accepted"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900002",
+        "blockHash": "0xb9dbb92ba54eb87312e972e51a0ae2254d7d6c89b801974e087d17d442d7880d",
+        "txHash": "0x1d9611dd187cf14ce059b389141a7456119ab79c2b70aeae6013d3a6ba539259",
+        "transactionIndex": "0",
+        "logIndex": "2",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    },
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0x2f32b69d17eb7569efa76dcfbe29619db786bef85e9c54be7ce8fa1422b4d48f",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "7",
+      "pulseTypeName": "TASK_STARTED",
+      "indexed": {
+        "pulseId": "0x2f32b69d17eb7569efa76dcfbe29619db786bef85e9c54be7ce8fa1422b4d48f",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000a91"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0xa85fcdb742590e20e5b782e3b985276a620cd62fd4652de81ce570659be66100",
+        "parentPulseId": "0xc48c96d91355cffc009d25bf61b64eda31c1ec573cfe546a001eb7629ef85204",
+        "sequence": "3",
+        "occurredAt": "2026-05-20T12:01:30.000Z",
+        "uri": "fixture://agent-bonds/task-started"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900003",
+        "blockHash": "0x099a8052363c13838aa229131381320ee572dc6d8f0efe32b8754be603fbde64",
+        "txHash": "0xbd90c7a067a9c52ce2a8453373dd860829ec0e4873797c5caedaf2ceaaba0cbb",
+        "transactionIndex": "0",
+        "logIndex": "3",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    },
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0x67224b2eb9ad87e3e29dd95a250876671d1f40b72bcc13fee96d4dd2a6be7bcf",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "8",
+      "pulseTypeName": "TASK_EVIDENCE_COMMITTED",
+      "indexed": {
+        "pulseId": "0x67224b2eb9ad87e3e29dd95a250876671d1f40b72bcc13fee96d4dd2a6be7bcf",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000a91"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0x18efaa3424c5633ffb34fc6c93fe734b3b01b9de903ffa6b13a385e26ec84f65",
+        "parentPulseId": "0x2f32b69d17eb7569efa76dcfbe29619db786bef85e9c54be7ce8fa1422b4d48f",
+        "sequence": "4",
+        "occurredAt": "2026-05-20T12:03:00.000Z",
+        "uri": "fixture://agent-bonds/evidence"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900004",
+        "blockHash": "0xe8803c2c0251058ec4d4a58cbad2cc93bcb034bd0b2c5b7bf6f483e7e0a8a207",
+        "txHash": "0x5e4546e1ef6c343a87935c6758783882944f644b16504d274d6b1f062a36eedd",
+        "transactionIndex": "0",
+        "logIndex": "4",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    },
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0x5c5f57cd1a384054087ef95166ca0c6de9771f1b4a1af6f67b3c74a7f245aafb",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "9",
+      "pulseTypeName": "TASK_VERIFIED",
+      "indexed": {
+        "pulseId": "0x5c5f57cd1a384054087ef95166ca0c6de9771f1b4a1af6f67b3c74a7f245aafb",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000f11"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0xea975d361c799f794754692a30900f5ba0847a342f9b45518b59bb80dc1d8092",
+        "parentPulseId": "0x67224b2eb9ad87e3e29dd95a250876671d1f40b72bcc13fee96d4dd2a6be7bcf",
+        "sequence": "5",
+        "occurredAt": "2026-05-20T12:04:00.000Z",
+        "uri": "fixture://agent-bonds/verifier-report"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900005",
+        "blockHash": "0x9e042693c80b1b0e6483382c55f35cb5c3ea96e0cab6d0d05231e7db0142939f",
+        "txHash": "0x9600650ef586e07999121d44a61ad555a7a00ebfca79ad1ecebf76d6d8f56a55",
+        "transactionIndex": "0",
+        "logIndex": "5",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    },
+    {
+      "schema": "flowmemory.flowpulse_contract_event.v0",
+      "pulseId": "0x99bb317ae3e8bec975953cd44a9927b7e390d03cce4b8febbfd00de8cd21f8e3",
+      "interfaceName": "IFlowPulse",
+      "eventName": "FlowPulse",
+      "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "topicMatchesContract": true,
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "12",
+      "pulseTypeName": "TASK_SETTLED",
+      "indexed": {
+        "pulseId": "0x99bb317ae3e8bec975953cd44a9927b7e390d03cce4b8febbfd00de8cd21f8e3",
+        "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+        "actor": "0x0000000000000000000000000000000000000101"
+      },
+      "payload": {
+        "subject": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "commitment": "0xdb447df202fa7f96dbb27434eb28d10959e359899de6494c14bc01c249e13cc8",
+        "parentPulseId": "0x5c5f57cd1a384054087ef95166ca0c6de9771f1b4a1af6f67b3c74a7f245aafb",
+        "sequence": "6",
+        "occurredAt": "2026-05-22T13:00:00.000Z",
+        "uri": "fixture://agent-bonds/settlement"
+      },
+      "receiptLocator": {
+        "chainId": "8453",
+        "blockNumber": "900006",
+        "blockHash": "0xb754cc9bd34ee35c3856a9820d2ac36e4d349a089e071b31966804508d4139d2",
+        "txHash": "0x5b4a71047d34a1b06d642889f4597b4b65d4659039f78b2b455786a7c311dc15",
+        "transactionIndex": "0",
+        "logIndex": "6",
+        "receiptStatus": "1"
+      },
+      "receiptDerivedFields": [
+        "blockHash",
+        "txHash",
+        "transactionIndex",
+        "logIndex",
+        "receiptStatus"
+      ]
+    }
+  ],
+  "memoryReceipt": {
+    "schema": "flowmemory.memory_receipt.v0",
+    "receiptId": "0xfb17b987a32151a72706fd9cd4e8cccbe0a24ca134039afbd8c7fbb3c3442ef9",
+    "reportId": "0xd079123431866173fa17949617e38b444c6db0ce874a96426efbce2373bc04d1",
+    "reportDigest": "0xea975d361c799f794754692a30900f5ba0847a342f9b45518b59bb80dc1d8092",
+    "observationId": "0xa4dd80cc7041c9522edc0ca16352d83ae6f562b74cff322937dbe505a370fbbb",
+    "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+    "verifierStatus": "valid",
+    "flowMemoryStatus": "verified",
+    "resolverPolicyId": "agent-bonds.objective-code.v1",
+    "verifierSpecVersion": "agent-bonds-verifier.v2",
+    "checksPassed": 3,
+    "checksTotal": 3,
+    "reasonCodes": [
+      "OBJECTIVE_TASK_VERIFIED",
+      "INDEPENDENT_CONFIRMATION_RECORDED"
+    ],
+    "evidenceRefs": [
+      {
+        "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+        "evidenceCommitment": "0x3ecbf41ff8d2a1c4b053d8d6d219334d92a3315df87dd6facba2aaf89fc1855c",
+        "artifactCommitment": "0x845028003579b155dd384a548c8eeebd2937088e5f3d1fcd2b223c9439295697",
+        "availabilityCommitment": "0x44dd6c455d83d63f78bc00bfd275e96e34bd1dc807f7af62ccb99e9bf81f8d11",
+        "availableUntil": "2026-05-23T12:00:00.000Z",
+        "uri": "fixture://agent-bonds/evidence/objective-code-patch.json"
+      }
+    ]
+  },
+  "rootflowTransition": {
+    "schema": "flowmemory.rootflow_transition.v0",
+    "transitionId": "0x564eeb817774f5172424dd5f606c8e8bcb7b58173535d05c8916607f8a61edeb",
+    "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+    "observationId": "0xa4dd80cc7041c9522edc0ca16352d83ae6f562b74cff322937dbe505a370fbbb",
+    "pulseId": "0x5c5f57cd1a384054087ef95166ca0c6de9771f1b4a1af6f67b3c74a7f245aafb",
+    "parentPulseId": "0x67224b2eb9ad87e3e29dd95a250876671d1f40b72bcc13fee96d4dd2a6be7bcf",
+    "parentTransitionId": null,
+    "memorySignalId": "0x41099d689f44359a6d85a43655eb99d589ce5ff57712244cbdac779736286a4b",
+    "memoryReceiptId": "0xfb17b987a32151a72706fd9cd4e8cccbe0a24ca134039afbd8c7fbb3c3442ef9",
+    "reportId": "0xd079123431866173fa17949617e38b444c6db0ce874a96426efbce2373bc04d1",
+    "previousRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "attemptedRoot": "0x168e03955e185cde768e7f96ada4541d29cff73a71166ea5b65770ddeebbc3e5",
+    "nextRoot": "0x168e03955e185cde768e7f96ada4541d29cff73a71166ea5b65770ddeebbc3e5",
+    "status": "verified",
+    "blockNumber": "900005",
+    "txHash": "0x9600650ef586e07999121d44a61ad555a7a00ebfca79ad1ecebf76d6d8f56a55",
+    "sequence": "5",
+    "reasonCodes": [
+      "OBJECTIVE_TASK_VERIFIED",
+      "INDEPENDENT_CONFIRMATION_RECORDED"
+    ],
+    "contractEventRef": {
+      "signalId": "0x41099d689f44359a6d85a43655eb99d589ce5ff57712244cbdac779736286a4b",
+      "eventName": "FlowPulse",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "sourceContract": "0x0000000000000000000000000000000000000b0d",
+      "pulseTypeId": "9",
+      "pulseTypeName": "TASK_VERIFIED",
+      "txHash": "0x9600650ef586e07999121d44a61ad555a7a00ebfca79ad1ecebf76d6d8f56a55",
+      "logIndex": "5"
+    }
+  },
+  "rootfieldBundle": {
+    "schema": "flowmemory.rootfield_bundle.v0",
+    "bundleId": "0x487a4c4f00f5d79b9dbbf07b8eb3bf7a766c9c85aace1bd83214c817a0e8d1c4",
+    "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+    "latestRoot": "0x168e03955e185cde768e7f96ada4541d29cff73a71166ea5b65770ddeebbc3e5",
+    "latestTransitionId": "0x564eeb817774f5172424dd5f606c8e8bcb7b58173535d05c8916607f8a61edeb",
+    "status": "verified",
+    "transitionIds": [
+      "0x564eeb817774f5172424dd5f606c8e8bcb7b58173535d05c8916607f8a61edeb"
+    ],
+    "memorySignalIds": [
+      "0x41099d689f44359a6d85a43655eb99d589ce5ff57712244cbdac779736286a4b"
+    ],
+    "memoryReceiptIds": [
+      "0xfb17b987a32151a72706fd9cd4e8cccbe0a24ca134039afbd8c7fbb3c3442ef9"
+    ],
+    "verifierReportIds": [
+      "0xd079123431866173fa17949617e38b444c6db0ce874a96426efbce2373bc04d1"
+    ],
+    "counts": {
+      "observations": 6,
+      "transitions": 1,
+      "receipts": 1,
+      "verified": 1,
+      "failed": 0,
+      "unresolved": 0,
+      "unsupported": 0,
+      "reorged": 0
+    }
+  },
+  "agentMemoryView": {
+    "schema": "flowmemory.task_bond_agent_memory_view.v1",
+    "viewId": "0x78fc0e4496e77499efd73a881599af5c9ec6717f709ecb9e7a07c6cfd8ba96b1",
+    "agent": "0x0000000000000000000000000000000000000a91",
+    "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+    "latestTaskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+    "taskIds": [
+      "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06"
+    ],
+    "verifiedTaskCount": 1,
+    "failedTaskCount": 0,
+    "slashedTaskCount": 0,
+    "totalPayoutEarned": "100000000",
+    "totalBondAtRisk": "25000000",
+    "reputationScore": 0.22314355131420976,
+    "limitations": [
+      "Heavy task artifacts are off-chain and represented by commitments.",
+      "This fixture demonstrates local/test accountability plumbing, not an open verifier market."
+    ]
+  },
+  "accounting": {
+    "requesterEscrow": "135000000",
+    "agentBond": "25000000",
+    "totalEscrowed": "160000000",
+    "totalReleased": "160000000",
+    "reserveAmount": "0",
+    "balances": {
+      "agent": "125000000",
+      "requester": "25000000",
+      "verifier": "10000000"
+    }
+  }
+}

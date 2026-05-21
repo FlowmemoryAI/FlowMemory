@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_recourse_decision.v1",
+  "title": "FlowMemory Agent Bonds Recourse Decision V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "decisionId",
+    "policyId",
+    "envelopeId",
+    "agentId",
+    "requesterId",
+    "status",
+    "requestedCoverageUSDC",
+    "approvedCoverageUSDC",
+    "premiumUSDC",
+    "reasonCodes",
+    "inputs",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-bonds-recourse-decision/v1"
+    },
+    "decisionId": {
+      "type": "string"
+    },
+    "policyId": {
+      "type": "string"
+    },
+    "envelopeId": {
+      "type": "string"
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "requesterId": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "approved",
+        "denied",
+        "manual_review"
+      ]
+    },
+    "requestedCoverageUSDC": {
+      "$ref": "#/$defs/uintString"
+    },
+    "approvedCoverageUSDC": {
+      "$ref": "#/$defs/uintString"
+    },
+    "premiumUSDC": {
+      "$ref": "#/$defs/uintString"
+    },
+    "reasonCodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "createdAt": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "policyAttestation": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

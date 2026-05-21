@@ -166,6 +166,42 @@ jobs:
       - name: Validate launch schemas
         run: npm run validate:launch
 
+  agent-bonds:
+    name: Agent Bonds readiness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install services dependencies
+        run: npm ci
+
+      - name: Install dashboard dependencies
+        run: npm ci --prefix apps/dashboard
+
+      - name: Run Agent Bonds readiness pack
+        run: npm run flowmemory:agent-bonds:readiness
+
+      - name: Confirm only external public-launch blockers remain
+        run: npm run flowmemory:agent-bonds:public-launch:blockers
+
   crypto:
     name: Crypto
     runs-on: ubuntu-latest

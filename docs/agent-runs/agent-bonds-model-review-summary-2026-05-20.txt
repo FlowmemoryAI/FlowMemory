@@ -1,0 +1,10 @@
+DeepSeek review: conservative pushback. It argued the repo might still need stronger invariant/fuzz coverage, better adversarial economic coverage, richer multi-operator runtime harnessing, clearer capped-to-uncapped transition logic, and harder admin-role review.
+
+GPT browser review: partial response only, but its visible conclusion was that none of the listed concerns looked launch-blocking on the repo side provided the claimed gates are genuinely enforced.
+
+Repo-actionable change applied from that disagreement:
+- added a dedicated `agent-bonds` CI job in `.github/workflows/ci.yml` to enforce the Agent Bonds readiness pack and the external-only blocker audit in CI.
+
+Current conclusion after model review plus current verification:
+- repo-side implementation remains complete
+- external signoff remains the only blocker to a real public value-bearing launch

@@ -252,6 +252,71 @@ export class FlowChainClient {
     return this.call("withdrawal_get", params);
   }
 
+  publicAgentNetworkClassesList(params: JsonValue = { limit: 10 }) {
+    return this.call("public_agent_network_classes_list", params);
+  }
+
+  publicAgentNetworkClassGet(params: JsonValue) {
+    return this.call("public_agent_network_class_get", params);
+  }
+
+  publicAgentNetworkToolsList(params: JsonValue = { limit: 10 }) {
+    return this.call("public_agent_network_tools_list", params);
+  }
+
+  publicAgentNetworkToolSetGet(params: JsonValue) {
+    return this.call("public_agent_network_tool_set_get", params);
+  }
+
+  publicAgentLaunchPreview(params: JsonValue) {
+    return this.call("public_agent_launch_preview", params);
+  }
+
+  publicAgentLaunchIntentGet(params: JsonValue) {
+    return this.call("public_agent_launch_intent_get", params);
+  }
+
+  publicAgentLaunchGet(params: JsonValue = {}) {
+    return this.call("public_agent_launch_get", params);
+  }
+
+  publicAgentDiscover(params: JsonValue = { limit: 10 }) {
+    return this.call("public_agent_discover", params);
+  }
+
+  publicSwarmClassesList(params: JsonValue = { limit: 10 }) {
+    return this.call("public_swarm_classes_list", params);
+  }
+
+  publicSwarmClassGet(params: JsonValue) {
+    return this.call("public_swarm_class_get", params);
+  }
+
+  publicSwarmLaunchPreview(params: JsonValue) {
+    return this.call("public_swarm_launch_preview", params);
+  }
+
+  publicSwarmGet(params: JsonValue = {}) {
+    return this.call("public_swarm_get", params);
+  }
+
+  publicSwarmReplayGet(params: JsonValue = {}) {
+    return this.call("public_swarm_replay_get", params);
+  }
+
+  baseAgentMemoryScoutList(params: JsonValue = { limit: 10 }) {
+    return this.call("base_agent_memory_task_scout_list", params);
+  }
+
+  baseAgentMemoryScoutGet(params: JsonValue) {
+    return this.call("base_agent_memory_task_scout_get", params);
+  }
+
+  baseAgentMemoryReplayGet(params: JsonValue) {
+    return this.call("base_agent_memory_replay_get", params);
+  }
+
+
   walletSend(request: WalletSendRequest) {
     return this.postControlPlane("/wallets/send", request as unknown as JsonValue);
   }

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "agent-bonds-recourse-decision/v1",
+  "decisionId": "decision_api_data_001",
+  "policyId": "recourse-api-data-low-risk-v1",
+  "envelopeId": "env_api_data_recourse_001",
+  "agentId": "agent_data_001",
+  "requesterId": "requester_fixture_001",
+  "status": "approved",
+  "requestedCoverageUSDC": "25000000",
+  "approvedCoverageUSDC": "25000000",
+  "premiumUSDC": "375000",
+  "reasonCodes": [
+    "TASK_CLASS_ALLOWED",
+    "RISK_TIER_ALLOWED",
+    "OBJECTIVE_ACCEPTANCE_CONFIRMED",
+    "STAKE_RATIO_SUFFICIENT"
+  ],
+  "inputs": {
+    "taskClass": "data.extract",
+    "riskTier": 1,
+    "agentRiskBand": "UNRATED",
+    "poolAvailableCapacityUSDC": "500000000",
+    "stakeCapacityUSDC": "500000000"
+  },
+  "createdAt": "2026-05-21T12:00:00.000Z",
+  "policyAttestation": {
+    "schemaVersion": "agent-bonds-recourse-policy-attestation/v1",
+    "attestationId": "0xc8484c2e045fa38c4202d549cf1bfd26660c2f3c4958d8d1b6818648c0b38112",
+    "decisionId": "decision_api_data_001",
+    "policyId": "recourse-api-data-low-risk-v1",
+    "envelopeId": "env_api_data_recourse_001",
+    "decisionHash": "0xc18af548dd3d299a4326e45b05cc0a72548ad74815c3e1d64ba5d81f7cf8097e",
+    "signerId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "signerKeyId": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "publicKey": "0x031b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f",
+    "signatureAlgorithm": "secp256k1-keccak256-flowmemory-recourse-policy-v1",
+    "signingDigest": "0xd5f6c16b0e33c357b31d3ef2478a6404b123890e27d042645e6c8cd4733d35a7",
+    "signature": "0x8ee466c16d2982a8d808dba47b079d5d85551a805e783a12f8bc6cafc855f283720395835cdac7f9de871106a9730bb732cab9959337f03f1ab33e166d2639e1",
+    "issuedAt": "2026-05-21T12:00:00.000Z",
+    "expiresAt": "2026-06-20T12:00:00.000Z",
+    "nonce": "0x3333333333333333333333333333333333333333333333333333333333333333"
+  }
+}

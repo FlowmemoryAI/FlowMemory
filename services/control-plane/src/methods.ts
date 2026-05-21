@@ -1,13 +1,42 @@
 import { appendFileSync, mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-import { canonicalJson, findSecret, keccak256Hex } from "../../shared/src/index.ts";
+import { canonicalJson, findSecret, keccak256Hex, keccak256Utf8 } from "../../shared/src/index.ts";
 import { spawnCargoSync } from "./cargo.ts";
 import { bridgeSourceEventReplayKey, flowchainBridgeObservationId } from "../../../crypto/src/production-l1.js";
 import { localTransactionReplayKey } from "../../../crypto/src/transactions.js";
 import { verifyFlowchainEnvelope } from "../../../crypto/src/runtime-validation.js";
 import { cryptoRejected, invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
 import { loadControlPlaneState, repoRoot, resolveControlPlanePath } from "./fixture-state.ts";
+import { getAgentBondPassport, listAgentBondPassports, validateAgentBondPassport, computePassportCapacityView } from "../../flowmemory/src/agent-bond-passport.ts";
+import { quoteBondedTaskEnvelope, validateBondedTaskEnvelope, computeEnvelopeHash, envelopeToAgentBondManagerCreateTaskArgs, envelopeFromA2AMessage } from "../../flowmemory/src/bonded-task-envelope.ts";
+import { validateBondedExecutionReceipt, listReceiptsForAgent, listReceiptsForEnvelope, receiptToPassportReputationDelta } from "../../flowmemory/src/bonded-execution-receipt.ts";
+import { getAgentBondsPhase2Gate, getAgentBondsFoundationReadiness } from "../../flowmemory/src/agent-bonds-phase2-gate.ts";
+import { buildA2AAgentCardFromPassport, buildA2AAgentBondsExtension, validateA2AAgentBondsExtension, extractBondedTaskEnvelopeFromA2AMetadata } from "../../flowmemory/src/a2a-agent-bonds.ts";
+import { listAgentBondMcpTools, getAgentBondMcpResource, getAgentBondMcpPrompt, runAgentBondMcpTool } from "../../flowmemory/src/mcp-agent-bonds.ts";
+import { createX402ServicePaymentIntent, createX402EscrowBridgeIntent, buildX402PaymentRequiredPayload, validateX402PaymentReceipt, linkX402PaymentToEnvelope } from "../../flowmemory/src/x402-agent-bonds.ts";
+import { computeAgentCreditScoreFromReceipts, validateCreditScoreAttestation, buildCreditScoreAttestation } from "../../flowmemory/src/agent-credit-score.ts";
+import { validateUnderwriterPool, validateUnderwriterAllocation, validateUnderwriterLossEvent, computePoolAvailableCapacity, canPoolBackEnvelope, allocatePoolCapacity, simulateLossWaterfall, applyUnderwriterCapacityToPassport, sampleUnderwriterPool } from "../../flowmemory/src/underwriter-pools.ts";
+import { buildPublicClaimPackage, validatePublicClaimPackage, getPublicClaimStatus, scanUnsafeAgentBondClaims } from "../../flowmemory/src/agent-bonds-public-claim.ts";
+import { sampleRecoursePolicy, buildRecourseDecision, buildFailureWaterfall, validateAgentBondsRecourseDecision } from "../../flowmemory/src/agent-bonds-recourse-policy.ts";
+import {
+  buildPublicAgentLaunchIntent,
+  buildPublicAgentLaunchPreview,
+  buildPrototypePublicAgentLaunchRecord,
+  getPublicAgentClass,
+  getPublicToolSet,
+  hashPublicAgentLaunchIntent,
+  listPublicAgentClasses,
+  listPublicTools,
+} from "../../flowmemory/src/public-agent-network.ts";
+import {
+  buildPrototypePublicSwarmRecord,
+  buildPublicSwarmLaunchIntent,
+  buildPublicSwarmLaunchPreview,
+  getPublicSwarmClass,
+  hashPublicSwarmLaunchIntent,
+  listPublicSwarmClasses,
+} from "../../flowmemory/src/public-swarm-network.ts";
 import {
   bridgeLiveReadiness,
   pilotCapStatus,
@@ -90,6 +119,18 @@ function optionalBoolean(params: JsonObject, name: string): boolean {
 
 function asJsonObject(value: JsonValue | undefined): JsonObject | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
+}
+
+function readJsonObjectIfPresent(path: string): JsonObject | null {
+  const resolved = resolveControlPlanePath(path);
+  if (!existsSync(resolved)) {
+    return null;
+  }
+  try {
+    return JSON.parse(readFileSync(resolved, "utf8")) as JsonObject;
+  } catch {
+    return null;
+  }
 }
 
 function asJsonArray(value: JsonValue | undefined): JsonValue[] {
@@ -1306,7 +1347,67 @@ function agentRows(state: LoadedControlPlaneState): JsonObject[] {
       localOnly: true,
     });
   }
+  const taskScout = taskScoutFixtureObject(state);
+  if (taskScout !== null) {
+    rows.push({
+      schema: "flowmemory.control_plane.agent_row.v0",
+      agentId: stringValue(asJsonObject(taskScout.agentConfig)?.agentId) ?? stringValue(asJsonObject(taskScout.agentMemoryView)?.viewId) ?? ZERO_ROOT,
+      rootfieldId: stringValue(asJsonObject(taskScout.agentConfig)?.rootfieldId) ?? null,
+      status: stringValue(asJsonObject(taskScout.verifierReport)?.status) ?? stringValue(asJsonObject(taskScout.agentMemoryView)?.status) ?? "observed",
+      agentAccount: asJsonObject(taskScout.agentConfig) ?? null,
+      agentMemoryView: asJsonObject(taskScout.agentMemoryView) ?? null,
+      source: "base-agent-memory-fixture",
+      localOnly: true,
+    });
+  }
   return rows.sort((left, right) => String(left.agentId).localeCompare(String(right.agentId)));
+}
+
+function taskScoutFixtureObject(state: LoadedControlPlaneState): JsonObject | null {
+  const loaded = asJsonObject(state.taskScoutFixture as JsonValue | undefined);
+  if (loaded !== null) {
+    return loaded;
+  }
+  return asJsonObject(state.launchCore.taskScoutFixture as unknown as JsonValue | undefined);
+}
+
+function taskScoutReplayReportObject(state: LoadedControlPlaneState): JsonObject | null {
+  const loaded = asJsonObject(state.taskScoutReplayReport as JsonValue | undefined);
+  if (loaded !== null) {
+    return loaded;
+  }
+  const taskScout = taskScoutFixtureObject(state);
+  return asJsonObject(taskScout?.verifierReport as JsonValue | undefined);
+}
+
+function baseAgentMemoryScoutRows(state: LoadedControlPlaneState): JsonObject[] {
+  const fixture = taskScoutFixtureObject(state);
+  if (fixture === null) {
+    return [];
+  }
+  const agentConfig = asJsonObject(fixture.agentConfig) ?? {};
+  const agentMemoryView = asJsonObject(fixture.agentMemoryView) ?? {};
+  const stepPreview = asJsonObject(fixture.stepPreview) ?? {};
+  const actionReceipt = asJsonObject(fixture.actionReceipt) ?? {};
+  const memoryDelta = asJsonObject(fixture.memoryDelta) ?? {};
+  const verifierReport = asJsonObject(fixture.verifierReport) ?? {};
+  return [{
+    schema: "flowmemory.control_plane.base_agent_memory_scout_row.v1",
+    agentId: stringValue(agentConfig.agentId),
+    viewId: stringValue(agentMemoryView.viewId),
+    rootfieldId: stringValue(agentConfig.rootfieldId) ?? stringValue(agentMemoryView.rootfieldId),
+    status: stringValue(verifierReport.status) ?? stringValue(agentMemoryView.status) ?? "observed",
+    latestMemoryRoot: stringValue(agentMemoryView.latestMemoryRoot),
+    sequence: stringValue(agentMemoryView.sequence),
+    action: stringValue(stepPreview.action),
+    reasonCode: stringValue(stepPreview.reasonCode),
+    previewHash: stringValue(stepPreview.previewHash),
+    actionReceiptId: stringValue(actionReceipt.actionReceiptId),
+    memoryDeltaId: stringValue(memoryDelta.memoryDeltaId),
+    verifierReportId: stringValue(verifierReport.verifierReportId),
+    localOnly: true,
+    source: "task-scout-fixture",
+  }];
 }
 
 function modelRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -1473,7 +1574,9 @@ function memoryCellRows(state: LoadedControlPlaneState): JsonObject[] {
   if (nativeCells.length > 0) {
     return nativeCells;
   }
-  return state.launchCore.rootfieldBundles.map((bundle) => ({
+  const taskScout = taskScoutFixtureObject(state);
+  const taskScoutCell = asJsonObject(taskScout?.memoryCell);
+  const projectedRows = state.launchCore.rootfieldBundles.map((bundle) => ({
     schema: "flowmemory.control_plane.memory_cell_row.v0",
     memoryCellId: bundle.rootfieldId,
     rootfieldId: bundle.rootfieldId,
@@ -1483,6 +1586,16 @@ function memoryCellRows(state: LoadedControlPlaneState): JsonObject[] {
     source: "launch-core-projection",
     localOnly: true,
   }));
+  return taskScoutCell === null ? projectedRows : [{
+    schema: "flowmemory.control_plane.memory_cell_row.v0",
+    memoryCellId: stringValue(taskScoutCell.memoryCellId),
+    rootfieldId: stringValue(taskScoutCell.rootfieldId),
+    status: stringValue(taskScoutCell.status) ?? "verified",
+    latestRoot: stringValue(taskScoutCell.newMemoryRoot),
+    memoryCell: taskScoutCell,
+    source: "base-agent-memory-fixture",
+    localOnly: true,
+  }, ...projectedRows];
 }
 
 function challengeRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -1498,6 +1611,45 @@ function challengeRows(state: LoadedControlPlaneState): JsonObject[] {
       localOnly: true,
     };
   }).sort((left, right) => String(left.challengeId).localeCompare(String(right.challengeId)));
+}
+
+function agentBondTaskRows(state: LoadedControlPlaneState): JsonObject[] {
+  const fixture = state.launchCore.agentBondFixture;
+  if (fixture === undefined) {
+    return [];
+  }
+  const task = asJsonObject(fixture.task as JsonValue);
+  const settlement = asJsonObject(fixture.settlement as JsonValue);
+  const verifierReport = asJsonObject(fixture.verifierReport as JsonValue);
+  const passport = asJsonObject(fixture.agentMemoryView as JsonValue);
+  const replay = asJsonObject(state.agentBondReplayReport);
+  const readiness = asJsonObject(state.agentBondReadinessReport);
+  const simulation = asJsonObject(state.agentBondEconomicReport);
+  if (task === null) {
+    return [];
+  }
+  return [{
+    schema: "flowmemory.control_plane.agent_bond_task_row.v1",
+    taskId: stringValue(task.taskId),
+    rootfieldId: stringValue(task.rootfieldId),
+    requester: stringValue(task.requester),
+    agent: stringValue(task.agent),
+    verifier: stringValue(task.verifier),
+    payout: stringValue(task.payout),
+    agentBond: stringValue(task.agentBond),
+    disputeBond: stringValue(task.disputeBond),
+    requiredConfirmations: task.requiredConfirmations ?? 0,
+    confirmedVerifierCount: task.confirmedVerifierCount ?? 0,
+    status: stringValue(task.status) ?? "unknown",
+    settlementStatus: stringValue(settlement?.status) ?? "unknown",
+    verifierStatus: stringValue(verifierReport?.status) ?? "unknown",
+    replayMatch: replay?.match ?? null,
+    readinessOk: readiness?.ok ?? null,
+    simulatedScenarioCount: Array.isArray(simulation?.scenarios) ? simulation.scenarios.length : 0,
+    passport,
+    source: "agent-bond-fixture",
+    localOnly: true,
+  }];
 }
 
 function finalityRows(state: LoadedControlPlaneState): JsonObject[] {
@@ -1646,6 +1798,73 @@ export const PUBLIC_RPC_METHOD_ALLOWLIST = new Set<ControlPlaneMethod>([
   "pilot_retry_status",
   "pilot_emergency_status",
   "pilot_lifecycle_record_list",
+  "agent_bond_task_get",
+  "agent_bond_task_list",
+  "agent_bond_readiness_get",
+  "agent_bond_replay_report_get",
+  "agent_bond_economic_report_get",
+  "agent_bond_public_launch_status_get",
+  "agent_bond_passport_get",
+  "agent_bond_passport_list",
+  "agent_bond_passport_validate",
+  "agent_bond_passport_capacity_get",
+  "agent_bond_envelope_quote",
+  "agent_bond_envelope_validate",
+  "agent_bond_envelope_hash",
+  "agent_bond_envelope_create_task_args",
+  "agent_bond_receipt_get",
+  "agent_bond_receipt_list",
+  "agent_bond_receipt_validate",
+  "agent_bond_receipt_reputation_delta_get",
+  "agent_bond_phase2_gate_get",
+  "agent_bond_a2a_agent_card_get",
+  "agent_bond_a2a_extension_get",
+  "agent_bond_a2a_message_validate",
+  "agent_bond_a2a_envelope_extract",
+  "agent_bond_mcp_tools_get",
+  "agent_bond_mcp_resource_get",
+  "agent_bond_mcp_prompt_get",
+  "agent_bond_x402_payment_intent_create",
+  "agent_bond_x402_payment_required_get",
+  "agent_bond_x402_payment_receipt_validate",
+  "agent_bond_x402_envelope_link_get",
+  "agent_bond_credit_score_get",
+  "agent_bond_credit_score_simulation_get",
+  "agent_bond_credit_score_attestation_validate",
+  "agent_bond_underwriter_pool_get",
+  "agent_bond_underwriter_pool_list",
+  "agent_bond_underwriter_capacity_quote",
+  "agent_bond_underwriter_loss_simulate",
+  "agent_bond_public_claim_get",
+  "agent_bond_public_claim_validate",
+  "agent_bond_public_claim_status_get",
+  "agent_bond_recourse_policy_get",
+  "agent_bond_recourse_decision_quote",
+  "agent_bond_failure_waterfall_get",
+  "agent_bond_recourse_policy_get",
+  "agent_bond_recourse_decision_quote",
+  "agent_bond_failure_waterfall_get",
+  "base_agent_memory_task_scout_get",
+  "base_agent_memory_task_scout_list",
+  "base_agent_memory_replay_get",
+  "public_agent_network_classes_list",
+  "public_agent_network_class_get",
+  "public_agent_network_tools_list",
+  "public_agent_network_tool_set_get",
+  "public_agent_launch_preview",
+  "public_agent_launch_intent_get",
+  "public_agent_launch_get",
+  "public_agent_discover",
+  "public_agent_launch_intent_get",
+  "public_agent_launch_get",
+  "public_agent_discover",
+  "public_swarm_classes_list",
+  "public_swarm_class_get",
+  "public_swarm_launch_preview",
+  "public_swarm_get",
+  "public_swarm_replay_get",
+  "public_swarm_get",
+  "public_swarm_replay_get",
   "wallet_balance_list",
   "wallet_transfer_history",
   "block_get",
@@ -1885,7 +2104,15 @@ function rpcMethodCategory(method: string): string {
   if (method.startsWith("account_") || method.startsWith("balance_") || method.startsWith("wallet_")) return "wallet";
   if (method.startsWith("token_") || method.startsWith("pool_") || method.startsWith("lp_") || method.startsWith("swap_")) return "assets-dex";
   if (method.startsWith("bridge_") || method.startsWith("withdrawal_") || method.startsWith("pilot_")) return "bridge";
-  if (method.startsWith("rootfield_") || method.startsWith("receipt_") || method.startsWith("work_") || method.startsWith("memory_")) return "flowmemory";
+  if (
+    method.startsWith("rootfield_")
+    || method.startsWith("receipt_")
+    || method.startsWith("work_")
+    || method.startsWith("memory_")
+    || method.startsWith("agent_bond_")
+    || method.startsWith("base_agent_memory_")
+    || method.startsWith("public_agent_")
+  ) return "flowmemory";
   if (method.startsWith("verifier_") || method.startsWith("challenge_") || method.startsWith("finality_")) return "verification";
   if (method.startsWith("artifact_")) return "storage";
   return "general";
@@ -2059,6 +2286,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       bridgeDeposits: bridgeDepositRows(state).length,
       bridgeCredits: bridgeCreditRows(state).length,
       withdrawals: withdrawalRows(state).length,
+      agentBondTasks: agentBondTaskRows(state).length,
       pilotStatus: 1,
       devnetBlocks: activeRuntimeBlocks.length > 0 ? activeRuntimeBlocks.length : devnetBlocks.length,
     },
@@ -2098,6 +2326,11 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "wallet_transfer_history_reads",
       "real_value_pilot_reads",
       "real_value_pilot_operator_steps",
+      "agent_bond_runtime_reads",
+      "agent_bond_public_launch_status_reads",
+      "base_agent_memory_runtime_reads",
+      "public_agent_network_launch_reads",
+      "public_swarm_network_reads",
       "devnet_handoff_reads",
       "no_secret_response_checks",
       "raw_json_reads",
@@ -3303,24 +3536,42 @@ function memoryCellGet(params: JsonValue | undefined, context: ControlPlaneConte
   });
   const bundle = state.launchCore.rootfieldBundles.find((candidate) => candidate.rootfieldId === rootfieldId);
   const agentView = state.launchCore.agentMemoryViews.find((view) => view.rootfieldId === rootfieldId) ?? null;
+  const taskScoutCell = asJsonObject(taskScoutFixtureObject(state)?.memoryCell);
+  const matchesTaskScoutCell = taskScoutCell !== null
+    && (
+      stringValue(taskScoutCell.memoryCellId) === key
+      || stringValue(taskScoutCell.rootfieldId) === key
+      || stringValue(taskScoutCell.rootfieldId) === rootfieldId
+    );
 
-  if (bundle === undefined && agentView === null && devnetCellEntry === undefined) {
+  if (bundle === undefined && agentView === null && devnetCellEntry === undefined && !matchesTaskScoutCell) {
     throw objectNotFound(`memory cell not found: ${key}`, { id: key });
   }
 
   const devnetCell = devnetCellEntry?.[1] as JsonObject | undefined;
   return {
     schema: "flowmemory.control_plane.memory_cell.v0",
-    memoryCellId: typeof devnetCell?.memoryCellId === "string" ? devnetCell.memoryCellId : rootfieldId,
-    rootfieldId: typeof devnetCell?.rootfieldId === "string" ? devnetCell.rootfieldId : rootfieldId,
-    status: typeof devnetCell?.status === "string" ? devnetCell.status : bundle?.status ?? agentView?.status ?? "observed",
-    latestRoot: typeof devnetCell?.currentRoot === "string" ? devnetCell.currentRoot : bundle?.latestRoot ?? agentView?.latestRoot ?? ZERO_ROOT,
+    memoryCellId: typeof devnetCell?.memoryCellId === "string"
+      ? devnetCell.memoryCellId
+      : stringValue(taskScoutCell?.memoryCellId) ?? rootfieldId,
+    rootfieldId: typeof devnetCell?.rootfieldId === "string"
+      ? devnetCell.rootfieldId
+      : stringValue(taskScoutCell?.rootfieldId) ?? rootfieldId,
+    status: typeof devnetCell?.status === "string"
+      ? devnetCell.status
+      : stringValue(taskScoutCell?.status) ?? bundle?.status ?? agentView?.status ?? "observed",
+    latestRoot: typeof devnetCell?.currentRoot === "string"
+      ? devnetCell.currentRoot
+      : stringValue(taskScoutCell?.newMemoryRoot) ?? bundle?.latestRoot ?? agentView?.latestRoot ?? ZERO_ROOT,
     devnetMemoryCell: devnetCell ?? null,
+    taskScoutMemoryCell: matchesTaskScoutCell ? taskScoutCell : null,
     rootfieldBundle: bundle ?? null,
     agentMemoryView: agentView,
-    extensionPoint: devnetCell === undefined
+    extensionPoint: devnetCell === undefined && !matchesTaskScoutCell
       ? "Native MemoryCell handoff files are not emitted yet; this V0 object is projected from RootfieldBundle and AgentMemoryView fixtures."
-      : "Loaded from local devnet memoryCells handoff.",
+      : devnetCell !== undefined
+        ? "Loaded from local devnet memoryCells handoff."
+        : "Loaded from base agent memory task scout fixture.",
     provenance: provenanceForObject(state, rootfieldId),
     localOnly: true,
   };
@@ -3345,6 +3596,301 @@ function memoryCellList(params: JsonValue | undefined, context: ControlPlaneCont
   };
 }
 
+function baseAgentMemoryTaskScoutList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "base_agent_memory_task_scout_list");
+  const limit = pageLimit(objectParams);
+  const agentId = optionalString(objectParams, "agentId");
+  const rootfieldId = optionalString(objectParams, "rootfieldId");
+  const status = optionalString(objectParams, "status");
+  const rows = baseAgentMemoryScoutRows(state)
+    .filter((row) => agentId === undefined || row.agentId === agentId || row.viewId === agentId)
+    .filter((row) => rootfieldId === undefined || row.rootfieldId === rootfieldId)
+    .filter((row) => status === undefined || row.status === status)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.base_agent_memory_scout_list.v1",
+    count: rows.length,
+    nextCursor: null,
+    scouts: rows,
+    localOnly: true,
+  };
+}
+
+function baseAgentMemoryTaskScoutGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "base_agent_memory_task_scout_get");
+  const key = requiredString(objectParams, ["agentId", "viewId", "rootfieldId"], "base_agent_memory_task_scout_get");
+  const scout = baseAgentMemoryScoutRows(state).find((row) => row.agentId === key || row.viewId === key || row.rootfieldId === key);
+  const fixture = taskScoutFixtureObject(state);
+  if (scout === undefined || fixture === null) {
+    throw objectNotFound(`base agent memory task scout not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.base_agent_memory_task_scout.v1",
+    scout,
+    fixture,
+    replayReport: taskScoutReplayReportObject(state),
+    provenance: provenanceForObject(state, String(scout.rootfieldId ?? key)),
+    localOnly: true,
+  };
+}
+
+function baseAgentMemoryReplayGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "base_agent_memory_replay_get");
+  const key = requiredString(objectParams, ["agentId", "viewId", "rootfieldId"], "base_agent_memory_replay_get");
+  const scout = baseAgentMemoryScoutRows(state).find((row) => row.agentId === key || row.viewId === key || row.rootfieldId === key);
+  const report = taskScoutReplayReportObject(state);
+  if (scout === undefined || report === null) {
+    throw objectNotFound(`base agent memory replay report not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.base_agent_memory_replay.v1",
+    agentId: scout.agentId,
+    rootfieldId: scout.rootfieldId,
+    report,
+    localOnly: true,
+  };
+}
+
+function publicAgentNetworkClassesList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_network_classes_list");
+  const limit = pageLimit(objectParams);
+  const classes = listPublicAgentClasses().slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.public_agent_class_list.v1",
+    count: classes.length,
+    nextCursor: null,
+    classes,
+    localOnly: true,
+  };
+}
+
+function publicAgentNetworkClassGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_network_class_get");
+  const classId = requiredString(objectParams, ["classId", "id"], "public_agent_network_class_get");
+  const config = getPublicAgentClass(classId);
+  if (config === null) {
+    throw objectNotFound(`public agent class not found: ${classId}`, { id: classId });
+  }
+  return {
+    schema: "flowmemory.control_plane.public_agent_class.v1",
+    class: config,
+    localOnly: true,
+  };
+}
+
+function publicAgentNetworkToolsList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_network_tools_list");
+  const limit = pageLimit(objectParams);
+  const tools = listPublicTools().slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.public_agent_tool_list.v1",
+    count: tools.length,
+    nextCursor: null,
+    tools,
+    localOnly: true,
+  };
+}
+
+function publicAgentNetworkToolSetGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_network_tool_set_get");
+  const toolSetRoot = requiredString(objectParams, ["toolSetRoot", "id"], "public_agent_network_tool_set_get");
+  const tools = getPublicToolSet(toolSetRoot);
+  if (tools.length == 0) {
+    throw objectNotFound(`public agent tool set not found: ${toolSetRoot}`, { id: toolSetRoot });
+  }
+  return {
+    schema: "flowmemory.control_plane.public_agent_tool_set.v1",
+    toolSetRoot,
+    tools,
+    localOnly: true,
+  };
+}
+
+function publicAgentLaunchPreview(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_launch_preview");
+  const owner = requiredString(objectParams, ["owner"], "public_agent_launch_preview");
+  const classId = requiredString(objectParams, ["classId"], "public_agent_launch_preview");
+  const objectiveText = requiredString(objectParams, ["objectiveText", "goal"], "public_agent_launch_preview");
+  const profileText = requiredString(objectParams, ["profileText", "profile"], "public_agent_launch_preview");
+  const toolSetRoot = requiredString(objectParams, ["toolSetRoot"], "public_agent_launch_preview");
+  const autonomyLevel = Number(objectParams.autonomyLevel ?? 0);
+  const riskLevel = Number(objectParams.riskLevel ?? 0);
+  const bondToken = requiredString(objectParams, ["bondToken"], "public_agent_launch_preview");
+  const bondAmount = requiredString(objectParams, ["bondAmount"], "public_agent_launch_preview");
+  const fuelToken = requiredString(objectParams, ["fuelToken"], "public_agent_launch_preview");
+  const initialFuelAmount = requiredString(objectParams, ["initialFuelAmount"], "public_agent_launch_preview");
+  const discoverable = optionalBoolean(objectParams, "discoverable");
+  const preview = buildPublicAgentLaunchPreview({
+    owner,
+    classId,
+    objectiveText,
+    profileText,
+    toolSetRoot,
+    autonomyLevel,
+    riskLevel,
+    bondToken,
+    bondAmount,
+    fuelToken,
+    initialFuelAmount,
+    discoverable,
+    parentAgentId: optionalString(objectParams, "parentAgentId"),
+    parentSwarmId: optionalString(objectParams, "parentSwarmId"),
+  });
+  return {
+    schema: "flowmemory.control_plane.public_agent_launch_preview.v1",
+    preview,
+    localOnly: true,
+  };
+}
+
+function publicAgentLaunchIntentGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_launch_intent_get");
+  const owner = requiredString(objectParams, ["owner"], "public_agent_launch_intent_get");
+  const classId = requiredString(objectParams, ["classId"], "public_agent_launch_intent_get");
+  const objectiveText = requiredString(objectParams, ["objectiveText", "goal"], "public_agent_launch_intent_get");
+  const profileText = requiredString(objectParams, ["profileText", "profile"], "public_agent_launch_intent_get");
+  const toolSetRoot = requiredString(objectParams, ["toolSetRoot"], "public_agent_launch_intent_get");
+  const intent = buildPublicAgentLaunchIntent({
+    owner,
+    classId,
+    objectiveText,
+    profileText,
+    toolSetRoot,
+    autonomyLevel: Number(objectParams.autonomyLevel ?? 0),
+    riskLevel: Number(objectParams.riskLevel ?? 0),
+    bondToken: requiredString(objectParams, ["bondToken"], "public_agent_launch_intent_get"),
+    bondAmount: requiredString(objectParams, ["bondAmount"], "public_agent_launch_intent_get"),
+    fuelToken: requiredString(objectParams, ["fuelToken"], "public_agent_launch_intent_get"),
+    initialFuelAmount: requiredString(objectParams, ["initialFuelAmount"], "public_agent_launch_intent_get"),
+    discoverable: optionalBoolean(objectParams, "discoverable"),
+    parentAgentId: optionalString(objectParams, "parentAgentId"),
+    parentSwarmId: optionalString(objectParams, "parentSwarmId"),
+  }, {
+    rootfieldId: requiredString(objectParams, ["rootfieldId"], "public_agent_launch_intent_get"),
+    validAfter: requiredString(objectParams, ["validAfter"], "public_agent_launch_intent_get"),
+    validUntil: requiredString(objectParams, ["validUntil"], "public_agent_launch_intent_get"),
+    nonce: requiredString(objectParams, ["nonce"], "public_agent_launch_intent_get"),
+    salt: requiredString(objectParams, ["salt"], "public_agent_launch_intent_get"),
+  });
+  return {
+    schema: "flowmemory.control_plane.public_agent_launch_intent.v1",
+    intent,
+    launchIntentHash: hashPublicAgentLaunchIntent(intent),
+    localOnly: true,
+  };
+}
+
+function publicAgentLaunchGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "public_agent_launch_get");
+  const launch = buildPrototypePublicAgentLaunchRecord();
+  return {
+    schema: "flowmemory.control_plane.public_agent_launch.v1",
+    launch,
+    localOnly: true,
+  };
+}
+
+function publicAgentDiscover(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_agent_discover");
+  const limit = pageLimit(objectParams);
+  const launches = [buildPrototypePublicAgentLaunchRecord()].slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.public_agent_discovery.v1",
+    count: launches.length,
+    nextCursor: null,
+    launches,
+    localOnly: true,
+  };
+}
+
+function publicSwarmClassesList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_swarm_classes_list");
+  const limit = pageLimit(objectParams);
+  const classes = listPublicSwarmClasses().slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.public_swarm_class_list.v1",
+    count: classes.length,
+    nextCursor: null,
+    classes,
+    localOnly: true,
+  };
+}
+
+function publicSwarmClassGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_swarm_class_get");
+  const swarmClass = requiredString(objectParams, ["swarmClass", "id"], "public_swarm_class_get");
+  const config = getPublicSwarmClass(swarmClass);
+  if (config === null) {
+    throw objectNotFound(`public swarm class not found: ${swarmClass}`, { id: swarmClass });
+  }
+  return {
+    schema: "flowmemory.control_plane.public_swarm_class.v1",
+    class: config,
+    localOnly: true,
+  };
+}
+
+function publicSwarmLaunchPreview(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "public_swarm_launch_preview");
+  const creator = requiredString(objectParams, ["creator", "owner"], "public_swarm_launch_preview");
+  const swarmClass = requiredString(objectParams, ["swarmClass", "classId"], "public_swarm_launch_preview");
+  const missionText = requiredString(objectParams, ["missionText", "goal"], "public_swarm_launch_preview");
+  const profileText = requiredString(objectParams, ["profileText", "profile"], "public_swarm_launch_preview");
+  const budgetAsset = requiredString(objectParams, ["budgetAsset"], "public_swarm_launch_preview");
+  const initialBudget = requiredString(objectParams, ["initialBudget"], "public_swarm_launch_preview");
+  const preview = buildPublicSwarmLaunchPreview({
+    creator,
+    swarmClass,
+    missionText,
+    profileText,
+    budgetAsset,
+    initialBudget,
+    parentSwarmId: optionalString(objectParams, "parentSwarmId"),
+  });
+  return {
+    schema: "flowmemory.control_plane.public_swarm_launch_preview.v1",
+    preview,
+    localOnly: true,
+  };
+}
+
+function publicSwarmGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "public_swarm_get");
+  const swarm = buildPrototypePublicSwarmRecord();
+  return {
+    schema: "flowmemory.control_plane.public_swarm.v1",
+    swarm,
+    localOnly: true,
+  };
+}
+
+function publicSwarmReplayGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "public_swarm_replay_get");
+  const swarm = buildPrototypePublicSwarmRecord();
+  const intent = buildPublicSwarmLaunchIntent({
+    creator: "0x1000000000000000000000000000000000000001",
+    swarmClass: swarm.swarmClass,
+    missionText: "Research a launch opportunity",
+    profileText: "Research swarm profile",
+    budgetAsset: swarm.budgetAsset,
+    initialBudget: swarm.initialBudget,
+  }, {
+    validAfter: "1",
+    validUntil: "2",
+    nonce: "0",
+    salt: keccak256Utf8("public-swarm.prototype"),
+  });
+  return {
+    schema: "flowmemory.control_plane.public_swarm_replay.v1",
+    swarmId: swarm.swarmId,
+    replayRoot: hashPublicSwarmLaunchIntent(intent),
+    localOnly: true,
+  };
+}
+
 function agentGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "agent_get");
@@ -3356,19 +3902,32 @@ function agentGet(params: JsonValue | undefined, context: ControlPlaneContext): 
   const view = state.launchCore.agentMemoryViews.find((candidate) => {
     return candidate.viewId === key || candidate.rootfieldId === key;
   });
+  const taskScout = taskScoutFixtureObject(state);
+  const taskScoutAgent = asJsonObject(taskScout?.agentConfig);
+  const taskScoutView = asJsonObject(taskScout?.agentMemoryView);
+  const matchesTaskScout = taskScoutAgent !== null
+    && (
+      stringValue(taskScoutAgent.agentId) === key
+      || stringValue(taskScoutAgent.rootfieldId) === key
+      || stringValue(taskScoutView?.viewId) === key
+    );
 
-  if (view === undefined && devnetAgentEntry === undefined) {
+  if (view === undefined && devnetAgentEntry === undefined && !matchesTaskScout) {
     throw objectNotFound(`agent memory view not found: ${key}`, { id: key });
   }
 
   const devnetAgent = devnetAgentEntry?.[1] as JsonObject | undefined;
   return {
     schema: "flowmemory.control_plane.agent.v0",
-    agentId: typeof devnetAgent?.agentId === "string" ? devnetAgent.agentId : view?.viewId ?? key,
-    agentAccount: devnetAgent ?? null,
-    agentMemoryView: view ?? null,
-    rootfieldBundle: view === undefined ? null : state.launchCore.rootfieldBundles.find((bundle) => bundle.rootfieldId === view.rootfieldId) ?? null,
-    provenance: provenanceForObject(state, view?.viewId ?? key),
+    agentId: typeof devnetAgent?.agentId === "string"
+      ? devnetAgent.agentId
+      : stringValue(taskScoutAgent?.agentId) ?? view?.viewId ?? key,
+    agentAccount: devnetAgent ?? taskScoutAgent ?? null,
+    agentMemoryView: matchesTaskScout ? taskScoutView : view ?? null,
+    rootfieldBundle: matchesTaskScout
+      ? state.launchCore.rootfieldBundles.find((bundle) => bundle.rootfieldId === stringValue(taskScoutAgent?.rootfieldId)) ?? null
+      : view === undefined ? null : state.launchCore.rootfieldBundles.find((bundle) => bundle.rootfieldId === view.rootfieldId) ?? null,
+    provenance: provenanceForObject(state, stringValue(taskScoutAgent?.rootfieldId) ?? view?.viewId ?? key),
     localOnly: true,
   };
 }
@@ -3484,6 +4043,168 @@ function challengeList(params: JsonValue | undefined, context: ControlPlaneConte
     extensionPoint: rows.length === 0
       ? "No challenge handoff fixture exists in V0; challenge_get can still return a stable not_opened placeholder for known local objects."
       : undefined,
+    localOnly: true,
+  };
+}
+
+function agentBondTaskList(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "agent_bond_task_list");
+  const limit = pageLimit(objectParams);
+  const status = optionalString(objectParams, "status");
+  const rootfieldId = optionalString(objectParams, "rootfieldId");
+  const rows = agentBondTaskRows(state)
+    .filter((task) => status === undefined || task.status === status)
+    .filter((task) => rootfieldId === undefined || task.rootfieldId === rootfieldId)
+    .slice(0, limit);
+  return {
+    schema: "flowmemory.control_plane.agent_bond_task_list.v1",
+    count: rows.length,
+    nextCursor: null,
+    tasks: rows,
+    localOnly: true,
+  };
+}
+
+function agentBondTaskGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  const objectParams = asObjectParams(params, "agent_bond_task_get");
+  const key = requiredString(objectParams, ["taskId", "rootfieldId", "agent"], "agent_bond_task_get");
+  const task = agentBondTaskRows(state).find((candidate) => candidate.taskId === key || candidate.rootfieldId === key || candidate.agent === key);
+  if (task === undefined) {
+    throw objectNotFound(`agent bond task not found: ${key}`, { id: key });
+  }
+  return {
+    schema: "flowmemory.control_plane.agent_bond_task.v1",
+    task,
+    fixture: state.launchCore.agentBondFixture ?? null,
+    replayReport: state.agentBondReplayReport,
+    economicReport: state.agentBondEconomicReport,
+    readinessReport: state.agentBondReadinessReport,
+    provenance: provenanceForObject(state, String(task.taskId)),
+    localOnly: true,
+  };
+}
+
+function agentBondReadinessGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  asObjectParams(params, "agent_bond_readiness_get");
+  return {
+    schema: "flowmemory.control_plane.agent_bond_readiness.v1",
+    taskCount: agentBondTaskRows(state).length,
+    replayReport: state.agentBondReplayReport,
+    economicReport: state.agentBondEconomicReport,
+    readinessReport: state.agentBondReadinessReport,
+    sources: {
+      agentBondFixture: state.paths.agentBondFixturePath,
+      replay: state.paths.agentBondReplayReportPath,
+      economics: state.paths.agentBondEconomicReportPath,
+      readiness: state.paths.agentBondReadinessReportPath,
+      launchApproval: state.paths.agentBondLaunchApprovalPath,
+    },
+    localOnly: true,
+  };
+}
+
+function agentBondPublicLaunchStatusGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  asObjectParams(params, "agent_bond_public_launch_status_get");
+  const approval = readJsonObjectIfPresent(state.paths.agentBondLaunchApprovalPath);
+  const isPendingValue = (value: JsonValue | undefined): boolean => typeof value === "string" && /PENDING|template/i.test(value);
+  if (approval === null) {
+    return {
+      schema: "flowmemory.control_plane.agent_bond_public_launch_status.v1",
+      status: "missing",
+      blockers: [`launch approval missing: ${state.paths.agentBondLaunchApprovalPath}`],
+      localOnly: true,
+    };
+  }
+  const blockers: string[] = [];
+  const externalReview = typeof approval.externalReview?.reportPath === "string"
+    ? readJsonObjectIfPresent(approval.externalReview.reportPath)
+    : null;
+  const operatorSeparation = typeof approval.operatorSeparation?.checklistPath === "string"
+    ? readJsonObjectIfPresent(approval.operatorSeparation.checklistPath)
+    : null;
+  const runtimeEvidence = typeof approval.runtimeEvidence?.evidencePath === "string"
+    ? readJsonObjectIfPresent(approval.runtimeEvidence.evidencePath)
+    : null;
+  const goNoGoDecision = typeof approval.goNoGoDecision?.decisionPath === "string"
+    ? readJsonObjectIfPresent(approval.goNoGoDecision.decisionPath)
+    : null;
+
+  if (approval.externalReview?.completed !== true) blockers.push("external review not completed");
+  if (approval.operatorSeparation?.completed !== true) blockers.push("operator separation not completed");
+  if (approval.runtimeEvidence?.multiOperatorRunCompleted !== true) blockers.push("multi-operator runtime evidence not completed");
+  if (approval.goNoGoDecision?.approved !== true) blockers.push("go/no-go approval not completed");
+
+  for (const value of [
+    approval.externalReview?.reviewer,
+    approval.externalReview?.completedAt,
+    approval.operatorSeparation?.signedBy,
+    approval.operatorSeparation?.completedAt,
+    approval.runtimeEvidence?.completedAt,
+    approval.goNoGoDecision?.decisionOwner,
+    approval.goNoGoDecision?.approvedAt,
+  ]) {
+    if (isPendingValue(value)) {
+      blockers.push(`placeholder launch-approval value present: ${String(value)}`);
+    }
+  }
+
+  for (const [label, artifact] of [
+    ["externalReview", externalReview],
+    ["operatorSeparation", operatorSeparation],
+    ["runtimeEvidence", runtimeEvidence],
+    ["goNoGoDecision", goNoGoDecision],
+  ] as const) {
+    if (artifact === null) {
+      blockers.push(`${label} artifact missing or unreadable`);
+      continue;
+    }
+    for (const value of Object.values(artifact)) {
+      if (isPendingValue(value as JsonValue | undefined)) {
+        blockers.push(`placeholder ${label} artifact value present: ${String(value)}`);
+      }
+    }
+  }
+
+  const readinessOk = asJsonObject(state.agentBondReadinessReport)?.ok === true;
+  if (!readinessOk) {
+    blockers.push("readiness report is not green");
+  }
+
+  return {
+    schema: "flowmemory.control_plane.agent_bond_public_launch_status.v1",
+    status: blockers.length === 0 ? "ready" : "blocked",
+    blockers,
+    launchApproval: approval,
+    externalReview,
+    operatorSeparation,
+    runtimeEvidence,
+    goNoGoDecision,
+    readinessReport: state.agentBondReadinessReport,
+    localOnly: true,
+  };
+}
+
+
+function agentBondReplayReportGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  asObjectParams(params, "agent_bond_replay_report_get");
+  return {
+    schema: "flowmemory.control_plane.agent_bond_replay_report.v1",
+    report: state.agentBondReplayReport,
+    localOnly: true,
+  };
+}
+
+function agentBondEconomicReportGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  const state = stateFor(context);
+  asObjectParams(params, "agent_bond_economic_report_get");
+  return {
+    schema: "flowmemory.control_plane.agent_bond_economic_report.v1",
+    report: state.agentBondEconomicReport,
     localOnly: true,
   };
 }
@@ -4288,6 +5009,10 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     bridgeObservations: bridgeObservationRows(state) as unknown as JsonValue,
     bridgeRuntimeHandoff: state.bridgeRuntimeHandoff,
     walletTransferProof: state.walletTransferProof,
+    agentBondFixture: state.launchCore.agentBondFixture as unknown as JsonValue,
+    agentBondReplayReport: state.agentBondReplayReport,
+    agentBondEconomicReport: state.agentBondEconomicReport,
+    agentBondReadinessReport: state.agentBondReadinessReport,
   };
 
   if (!Object.prototype.hasOwnProperty.call(allowed, source)) {
@@ -4309,6 +5034,277 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     localOnly: true,
   };
 }
+
+function agentBondPassportGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_passport_get");
+  const key = requiredString(objectParams, ["agentId", "passportId"], "agent_bond_passport_get");
+  const passport = getAgentBondPassport(key);
+  if (passport === null) throw objectNotFound(`agent bond passport not found: ${key}`, { id: key });
+  return { schema: "flowmemory.control_plane.agent_bond_passport.v1", passport, localOnly: true };
+}
+
+function agentBondPassportList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_passport_list");
+  const limit = pageLimit(objectParams);
+  const passports = listAgentBondPassports({ status: optionalString(objectParams, "status"), taskClass: optionalString(objectParams, "taskClass") }).slice(0, limit);
+  return { schema: "flowmemory.control_plane.agent_bond_passport_list.v1", count: passports.length, passports, nextCursor: null, localOnly: true };
+}
+
+function agentBondPassportValidateMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_passport_validate");
+  const passport = validateAgentBondPassport(objectParams.passport);
+  return { schema: "flowmemory.control_plane.agent_bond_passport_validation.v1", ok: true, passport, localOnly: true };
+}
+
+function agentBondPassportCapacityGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_passport_capacity_get");
+  const key = requiredString(objectParams, ["agentId", "passportId"], "agent_bond_passport_capacity_get");
+  return { schema: "flowmemory.control_plane.agent_bond_passport_capacity.v1", capacity: computePassportCapacityView(key), localOnly: true };
+}
+
+function agentBondEnvelopeQuoteMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_envelope_quote");
+  const quote = quoteBondedTaskEnvelope({ taskClass: optionalString(objectParams, "taskClass"), payoutUSDC: optionalString(objectParams, "payoutUSDC"), riskTier: typeof objectParams.riskTier === "number" ? objectParams.riskTier : undefined, fundingMode: optionalString(objectParams, "fundingMode") });
+  return { schema: "flowmemory.control_plane.agent_bond_envelope_quote.v1", quote, localOnly: true };
+}
+
+function agentBondEnvelopeValidateMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_envelope_validate");
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope);
+  return { schema: "flowmemory.control_plane.agent_bond_envelope_validation.v1", ok: true, envelope, localOnly: true };
+}
+
+function agentBondEnvelopeHashMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_envelope_hash");
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope);
+  return { schema: "flowmemory.control_plane.agent_bond_envelope_hash.v1", envelopeHash: computeEnvelopeHash(envelope), localOnly: true };
+}
+
+function agentBondEnvelopeCreateTaskArgsMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_envelope_create_task_args");
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope);
+  return { schema: "flowmemory.control_plane.agent_bond_envelope_create_task_args.v1", args: envelopeToAgentBondManagerCreateTaskArgs(envelope), localOnly: true };
+}
+
+function agentBondReceiptGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_receipt_get");
+  const key = requiredString(objectParams, ["agentId", "receiptId", "envelopeHash"], "agent_bond_receipt_get");
+  const receipt = listReceiptsForAgent(key)[0] ?? listReceiptsForEnvelope(key)[0];
+  if (receipt === undefined) throw objectNotFound(`agent bond receipt not found: ${key}`, { id: key });
+  return { schema: "flowmemory.control_plane.agent_bond_receipt.v1", receipt, localOnly: true };
+}
+
+function agentBondReceiptList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_receipt_list");
+  const limit = pageLimit(objectParams);
+  const agentId = optionalString(objectParams, "agentId");
+  const envelopeHash = optionalString(objectParams, "envelopeHash");
+  const receipts = agentId ? listReceiptsForAgent(agentId) : envelopeHash ? listReceiptsForEnvelope(envelopeHash) : listReceiptsForAgent("agent_code_001");
+  return { schema: "flowmemory.control_plane.agent_bond_receipt_list.v1", count: receipts.slice(0, limit).length, receipts: receipts.slice(0, limit), nextCursor: null, localOnly: true };
+}
+
+function agentBondReceiptValidateMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_receipt_validate");
+  const receipt = validateBondedExecutionReceipt(objectParams.receipt);
+  return { schema: "flowmemory.control_plane.agent_bond_receipt_validation.v1", ok: true, receipt, localOnly: true };
+}
+
+function agentBondReceiptReputationDeltaGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_receipt_reputation_delta_get");
+  const key = requiredString(objectParams, ["agentId", "receiptId", "envelopeHash"], "agent_bond_receipt_reputation_delta_get");
+  const receipt = listReceiptsForAgent(key)[0] ?? listReceiptsForEnvelope(key)[0];
+  if (receipt === undefined) throw objectNotFound(`agent bond receipt not found: ${key}`, { id: key });
+  return { schema: "flowmemory.control_plane.agent_bond_reputation_delta.v1", delta: receiptToPassportReputationDelta(receipt), localOnly: true };
+}
+
+function agentBondPhase2GateGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_phase2_gate_get");
+  return { schema: "flowmemory.control_plane.agent_bond_phase2_gate.v1", foundation: getAgentBondsFoundationReadiness(), gate: getAgentBondsPhase2Gate(), localOnly: true };
+}
+
+function agentBondA2aAgentCardGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_a2a_agent_card_get");
+  const key = requiredString(objectParams, ["agentId", "passportId"], "agent_bond_a2a_agent_card_get");
+  const passport = getAgentBondPassport(key);
+  if (passport === null) throw objectNotFound(`agent bond passport not found: ${key}`, { id: key });
+  return { schema: "flowmemory.control_plane.agent_bond_a2a_agent_card.v1", agentCard: buildA2AAgentCardFromPassport(passport), localOnly: true };
+}
+
+function agentBondA2aExtensionGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_a2a_extension_get");
+  const key = requiredString(objectParams, ["agentId", "passportId"], "agent_bond_a2a_extension_get");
+  const passport = getAgentBondPassport(key);
+  if (passport === null) throw objectNotFound(`agent bond passport not found: ${key}`, { id: key });
+  const extension = buildA2AAgentBondsExtension(passport);
+  validateA2AAgentBondsExtension(extension);
+  return { schema: "flowmemory.control_plane.agent_bond_a2a_extension.v1", extension, localOnly: true };
+}
+
+function agentBondA2aMessageValidate(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_a2a_message_validate");
+  const envelope = extractBondedTaskEnvelopeFromA2AMetadata(objectParams.message);
+  if (envelope === null) throw invalidParams("A2A message does not contain FlowMemory bonded task metadata");
+  return { schema: "flowmemory.control_plane.agent_bond_a2a_message_validation.v1", ok: true, envelope, localOnly: true };
+}
+
+function agentBondA2aEnvelopeExtract(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_a2a_envelope_extract");
+  const envelope = extractBondedTaskEnvelopeFromA2AMetadata(objectParams.message);
+  return { schema: "flowmemory.control_plane.agent_bond_a2a_envelope_extract.v1", envelope, localOnly: true };
+}
+
+function agentBondMcpToolsGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_mcp_tools_get");
+  return { schema: "flowmemory.control_plane.agent_bond_mcp_tools.v1", tools: listAgentBondMcpTools(), localOnly: true };
+}
+
+function agentBondMcpResourceGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_mcp_resource_get");
+  const uri = requiredString(objectParams, ["uri"], "agent_bond_mcp_resource_get");
+  const resource = getAgentBondMcpResource(uri);
+  if (resource === null) throw objectNotFound(`Agent Bonds MCP resource not found: ${uri}`, { uri });
+  return { schema: "flowmemory.control_plane.agent_bond_mcp_resource.v1", uri, resource, localOnly: true };
+}
+
+function agentBondMcpPromptGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_mcp_prompt_get");
+  const name = requiredString(objectParams, ["name"], "agent_bond_mcp_prompt_get");
+  return { schema: "flowmemory.control_plane.agent_bond_mcp_prompt.v1", prompt: getAgentBondMcpPrompt(name), localOnly: true };
+}
+
+function agentBondX402PaymentIntentCreate(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_x402_payment_intent_create");
+  const mode = optionalString(objectParams, "mode") ?? "service_payment";
+  const envelope = typeof objectParams.envelope === "object" && objectParams.envelope !== null && !Array.isArray(objectParams.envelope) ? validateBondedTaskEnvelope(objectParams.envelope) : null;
+  const intent = mode === "escrow_bridge" && envelope !== null ? createX402EscrowBridgeIntent(envelope) : createX402ServicePaymentIntent({ description: optionalString(objectParams, "description") ?? undefined, amountAtomic: optionalString(objectParams, "amountAtomic") ?? undefined, payTo: optionalString(objectParams, "payTo") ?? undefined });
+  return { schema: "flowmemory.control_plane.agent_bond_x402_payment_intent.v1", intent, localOnly: true };
+}
+
+function agentBondX402PaymentRequiredGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_x402_payment_required_get");
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope ?? readJsonObjectIfPresent("fixtures/agent-bonds/envelopes/bonded-task-envelope.x402-funded.template.json"));
+  const intent = createX402EscrowBridgeIntent(envelope);
+  return { schema: "flowmemory.control_plane.agent_bond_x402_payment_required.v1", intent, paymentRequired: buildX402PaymentRequiredPayload(intent), localOnly: true };
+}
+
+function agentBondX402PaymentReceiptValidate(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_x402_payment_receipt_validate");
+  return { schema: "flowmemory.control_plane.agent_bond_x402_payment_receipt_validation.v1", receipt: validateX402PaymentReceipt(objectParams.receipt), ok: true, localOnly: true };
+}
+
+function agentBondX402EnvelopeLinkGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_x402_envelope_link_get");
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope ?? readJsonObjectIfPresent("fixtures/agent-bonds/envelopes/bonded-task-envelope.x402-funded.template.json"));
+  const intent = createX402EscrowBridgeIntent(envelope);
+  return { schema: "flowmemory.control_plane.agent_bond_x402_envelope_link.v1", link: linkX402PaymentToEnvelope(intent, envelope), localOnly: true };
+}
+
+function agentBondCreditScoreGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_credit_score_get");
+  const agentId = optionalString(objectParams, "agentId") ?? "agent_code_001";
+  const score = computeAgentCreditScoreFromReceipts(agentId);
+  return { schema: "flowmemory.control_plane.agent_bond_credit_score.v1", score, attestationPreview: buildCreditScoreAttestation(score, "fixture-signer"), localOnly: true };
+}
+
+function agentBondCreditScoreSimulationGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_credit_score_simulation_get");
+  return { schema: "flowmemory.control_plane.agent_bond_credit_score_simulation.v1", report: readJsonObjectIfPresent("fixtures/agent-bonds/credit/credit-score-sim-report.json"), localOnly: true };
+}
+
+function agentBondCreditScoreAttestationValidateMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_credit_score_attestation_validate");
+  const attestation = validateCreditScoreAttestation(objectParams.attestation);
+  return { schema: "flowmemory.control_plane.agent_bond_credit_score_attestation_validation.v1", ok: true, attestation, localOnly: true };
+}
+
+function agentBondUnderwriterPoolGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_underwriter_pool_get");
+  const pool = sampleUnderwriterPool();
+  const key = optionalString(objectParams, "poolId");
+  if (key && pool.poolId !== key) throw objectNotFound(`underwriter pool not found: ${key}`, { id: key });
+  return { schema: "flowmemory.control_plane.agent_bond_underwriter_pool.v1", pool, localOnly: true };
+}
+
+function agentBondUnderwriterPoolList(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_underwriter_pool_list");
+  const pools = [validateUnderwriterPool(readJsonObjectIfPresent("fixtures/agent-bonds/underwriters/pool.stake-capacity.template.json")), validateUnderwriterPool(readJsonObjectIfPresent("fixtures/agent-bonds/underwriters/pool.usdc-recourse.template.json"))];
+  return { schema: "flowmemory.control_plane.agent_bond_underwriter_pool_list.v1", pools, count: pools.length, localOnly: true };
+}
+
+function agentBondUnderwriterCapacityQuote(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_underwriter_capacity_quote");
+  const pool = sampleUnderwriterPool();
+  const passport = getAgentBondPassport(optionalString(objectParams, "agentId") ?? "agent_code_001");
+  const allocation = allocatePoolCapacity({ pool, agentId: passport?.agentId ? String(passport.agentId) : "agent_code_001", taskClass: optionalString(objectParams, "taskClass") ?? "code.patch", allocatedCapacityUSDC: optionalString(objectParams, "allocatedCapacityUSDC") ?? "50000000" });
+  return { schema: "flowmemory.control_plane.agent_bond_underwriter_capacity_quote.v1", poolAvailableCapacity: computePoolAvailableCapacity(pool), allocation, passport: passport ? applyUnderwriterCapacityToPassport(passport, [allocation]) : null, localOnly: true };
+}
+
+function agentBondUnderwriterLossSimulate(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_underwriter_loss_simulate");
+  const pool = sampleUnderwriterPool();
+  const allocation = validateUnderwriterAllocation(readJsonObjectIfPresent("fixtures/agent-bonds/underwriters/allocation.code-agent.template.json"));
+  return { schema: "flowmemory.control_plane.agent_bond_underwriter_loss_simulation.v1", canBackEnvelope: canPoolBackEnvelope(pool, validateBondedTaskEnvelope(readJsonObjectIfPresent("fixtures/agent-bonds/envelopes/bonded-task-envelope.code-patch.template.json"))), lossEvent: simulateLossWaterfall({ pool, allocation, taskId: optionalString(objectParams, "taskId") ?? "task_fixture_001", receiptId: optionalString(objectParams, "receiptId") ?? "receipt_invalid_slash", reason: optionalString(objectParams, "reason") ?? "agent_invalid_submission", amountSlashed: optionalString(objectParams, "amountSlashed") ?? "10000000" }), localOnly: true };
+}
+
+function agentBondPublicClaimGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_public_claim_get");
+  const claimLevel = optionalString(objectParams, "claimLevel") ?? "integration_beta";
+  return { schema: "flowmemory.control_plane.agent_bond_public_claim.v1", claim: buildPublicClaimPackage({ claimLevel }), localOnly: true };
+}
+
+function agentBondPublicClaimValidateMethod(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_public_claim_validate");
+  const claim = validatePublicClaimPackage(objectParams.claim);
+  return { schema: "flowmemory.control_plane.agent_bond_public_claim_validation.v1", ok: true, claim, unsafeScan: scanUnsafeAgentBondClaims([String(claim.headline), String(claim.shortClaim), String(claim.longClaim)].join("\n")), localOnly: true };
+}
+
+function agentBondPublicClaimStatusGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_public_claim_status_get");
+  return { schema: "flowmemory.control_plane.agent_bond_public_claim_status.v1", status: getPublicClaimStatus(), localOnly: true };
+}
+
+function agentBondRecoursePolicyGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  asObjectParams(params, "agent_bond_recourse_policy_get");
+  return { schema: "flowmemory.control_plane.agent_bond_recourse_policy.v1", policy: sampleRecoursePolicy(), localOnly: true };
+}
+
+function agentBondRecourseDecisionQuote(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_recourse_decision_quote");
+  const defaultEnvelope = objectParams.envelope === undefined;
+  if (defaultEnvelope && (objectParams.agentId === undefined || objectParams.agentId === "agent_data_001")) {
+    return {
+      schema: "flowmemory.control_plane.agent_bond_recourse_decision_quote.v1",
+      decision: validateAgentBondsRecourseDecision(readJsonObjectIfPresent("fixtures/agent-bonds/recourse/recourse-decision.api-data.approved.json")),
+      localOnly: true,
+    };
+  }
+  const passport = getAgentBondPassport(optionalString(objectParams, "agentId") ?? "agent_data_001");
+  if (passport === null) throw objectNotFound("agent bond passport not found", { id: objectParams.agentId });
+  const envelope = validateBondedTaskEnvelope(objectParams.envelope ?? readJsonObjectIfPresent("fixtures/agent-bonds/envelopes/bonded-task-envelope.api-data-recourse.template.json"));
+  const pool = validateUnderwriterPool(readJsonObjectIfPresent("fixtures/agent-bonds/underwriters/pool.usdc-recourse.template.json"));
+  const score = computeAgentCreditScoreFromReceipts(String(passport.agentId));
+  return { schema: "flowmemory.control_plane.agent_bond_recourse_decision_quote.v1", decision: buildRecourseDecision({ policy: sampleRecoursePolicy(), envelope, passport, pool, score }), policyAttestationRequired: true, localOnly: true };
+}
+
+function agentBondFailureWaterfallGet(params: JsonValue | undefined, _context: ControlPlaneContext): JsonValue {
+  const objectParams = asObjectParams(params, "agent_bond_failure_waterfall_get");
+  const receipt = validateBondedExecutionReceipt(objectParams.receipt ?? readJsonObjectIfPresent("fixtures/agent-bonds/receipts/bonded-execution-receipt.invalid-slash.template.json"));
+  const decision = validateAgentBondsRecourseDecision(readJsonObjectIfPresent("fixtures/agent-bonds/recourse/recourse-decision.api-data.approved.json"));
+  return { schema: "flowmemory.control_plane.agent_bond_failure_waterfall.v1", waterfall: buildFailureWaterfall({ receipt, recourseDecision: decision }), localOnly: true };
+}
+
+function baseAgentMemoryTaskScoutGetMethod(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  return baseAgentMemoryTaskScoutGet(params, context);
+}
+
+function baseAgentMemoryTaskScoutListMethod(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  return baseAgentMemoryTaskScoutList(params, context);
+}
+
+function baseAgentMemoryReplayGetMethod(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+  return baseAgentMemoryReplayGet(params, context);
+}
+
 
 export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = {
   rpc_discover: rpcDiscover,
@@ -4372,8 +5368,67 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   verifier_report_list: verifierReportList,
   memory_cell_get: memoryCellGet,
   memory_cell_list: memoryCellList,
+  agent_bond_task_get: agentBondTaskGet,
+  agent_bond_task_list: agentBondTaskList,
+  agent_bond_readiness_get: agentBondReadinessGet,
+  agent_bond_replay_report_get: agentBondReplayReportGet,
+  agent_bond_economic_report_get: agentBondEconomicReportGet,
+  agent_bond_public_launch_status_get: agentBondPublicLaunchStatusGet,
+  agent_bond_passport_get: agentBondPassportGet,
+  agent_bond_passport_list: agentBondPassportList,
+  agent_bond_passport_validate: agentBondPassportValidateMethod,
+  agent_bond_passport_capacity_get: agentBondPassportCapacityGet,
+  agent_bond_envelope_quote: agentBondEnvelopeQuoteMethod,
+  agent_bond_envelope_validate: agentBondEnvelopeValidateMethod,
+  agent_bond_envelope_hash: agentBondEnvelopeHashMethod,
+  agent_bond_envelope_create_task_args: agentBondEnvelopeCreateTaskArgsMethod,
+  agent_bond_receipt_get: agentBondReceiptGet,
+  agent_bond_receipt_list: agentBondReceiptList,
+  agent_bond_receipt_validate: agentBondReceiptValidateMethod,
+  agent_bond_receipt_reputation_delta_get: agentBondReceiptReputationDeltaGet,
+  agent_bond_phase2_gate_get: agentBondPhase2GateGet,
+  agent_bond_a2a_agent_card_get: agentBondA2aAgentCardGet,
+  agent_bond_a2a_extension_get: agentBondA2aExtensionGet,
+  agent_bond_a2a_message_validate: agentBondA2aMessageValidate,
+  agent_bond_a2a_envelope_extract: agentBondA2aEnvelopeExtract,
+  agent_bond_mcp_tools_get: agentBondMcpToolsGet,
+  agent_bond_mcp_resource_get: agentBondMcpResourceGet,
+  agent_bond_mcp_prompt_get: agentBondMcpPromptGet,
+  agent_bond_x402_payment_intent_create: agentBondX402PaymentIntentCreate,
+  agent_bond_x402_payment_required_get: agentBondX402PaymentRequiredGet,
+  agent_bond_x402_payment_receipt_validate: agentBondX402PaymentReceiptValidate,
+  agent_bond_x402_envelope_link_get: agentBondX402EnvelopeLinkGet,
+  agent_bond_credit_score_get: agentBondCreditScoreGet,
+  agent_bond_credit_score_simulation_get: agentBondCreditScoreSimulationGet,
+  agent_bond_credit_score_attestation_validate: agentBondCreditScoreAttestationValidateMethod,
+  agent_bond_underwriter_pool_get: agentBondUnderwriterPoolGet,
+  agent_bond_underwriter_pool_list: agentBondUnderwriterPoolList,
+  agent_bond_underwriter_capacity_quote: agentBondUnderwriterCapacityQuote,
+  agent_bond_underwriter_loss_simulate: agentBondUnderwriterLossSimulate,
+  agent_bond_public_claim_get: agentBondPublicClaimGet,
+  agent_bond_public_claim_validate: agentBondPublicClaimValidateMethod,
+  agent_bond_public_claim_status_get: agentBondPublicClaimStatusGet,
+  agent_bond_recourse_policy_get: agentBondRecoursePolicyGet,
+  agent_bond_recourse_decision_quote: agentBondRecourseDecisionQuote,
+  agent_bond_failure_waterfall_get: agentBondFailureWaterfallGet,
   agent_get: agentGet,
+  public_agent_network_classes_list: publicAgentNetworkClassesList,
+  public_agent_network_class_get: publicAgentNetworkClassGet,
+  public_agent_network_tools_list: publicAgentNetworkToolsList,
+  public_agent_network_tool_set_get: publicAgentNetworkToolSetGet,
+  public_agent_launch_preview: publicAgentLaunchPreview,
+  public_agent_launch_intent_get: publicAgentLaunchIntentGet,
+  public_agent_launch_get: publicAgentLaunchGet,
+  public_agent_discover: publicAgentDiscover,
+  public_swarm_classes_list: publicSwarmClassesList,
+  public_swarm_class_get: publicSwarmClassGet,
+  public_swarm_launch_preview: publicSwarmLaunchPreview,
+  public_swarm_get: publicSwarmGet,
+  public_swarm_replay_get: publicSwarmReplayGet,
   agent_list: agentList,
+  base_agent_memory_task_scout_get: baseAgentMemoryTaskScoutGetMethod,
+  base_agent_memory_task_scout_list: baseAgentMemoryTaskScoutListMethod,
+  base_agent_memory_replay_get: baseAgentMemoryReplayGetMethod,
   model_get: modelGet,
   model_list: modelList,
   challenge_get: challengeGet,

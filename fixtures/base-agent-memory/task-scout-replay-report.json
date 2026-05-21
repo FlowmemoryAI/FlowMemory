@@ -1,0 +1,65 @@
+{
+  "schema": "flowmemory.base_agent_memory.replay_report.v1",
+  "verifierReportId": "0x125bd90aee047e7198e3b1f490de12ca233ce8550a5ccd2c1c47b1296504647b",
+  "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+  "observationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+  "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+  "memoryDeltaId": "0x5f55ed853123bbfc70f1dae7a0a56f33127a3ad52705738564830c1116babb55",
+  "parentMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+  "newMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+  "status": "verified",
+  "checks": [
+    {
+      "name": "agent-active",
+      "status": "pass",
+      "detail": "agent config is active"
+    },
+    {
+      "name": "observation-root",
+      "status": "pass",
+      "detail": "observation root matches canonical task fields"
+    },
+    {
+      "name": "preview-action",
+      "status": "pass",
+      "detail": "task scout accepts low-risk public docs-review task"
+    },
+    {
+      "name": "preview-hash",
+      "status": "pass",
+      "detail": "preview hash binds action, tool, observation, and memory delta"
+    },
+    {
+      "name": "receipt-preview",
+      "status": "pass",
+      "detail": "action receipt references preview hash"
+    },
+    {
+      "name": "receipt-action",
+      "status": "pass",
+      "detail": "action receipt action matches preview"
+    },
+    {
+      "name": "memory-parent",
+      "status": "pass",
+      "detail": "memory delta starts from current hot memory root"
+    },
+    {
+      "name": "memory-root",
+      "status": "pass",
+      "detail": "new memory root recomputes from parent, delta, receipt, and sequence"
+    },
+    {
+      "name": "transition-root",
+      "status": "pass",
+      "detail": "Rootflow transition points to memory delta output"
+    },
+    {
+      "name": "view-root",
+      "status": "pass",
+      "detail": "AgentMemoryView uses latest transition root"
+    }
+  ],
+  "reasonCodes": [],
+  "createdAt": "2026-05-21T00:00:00.000Z"
+}

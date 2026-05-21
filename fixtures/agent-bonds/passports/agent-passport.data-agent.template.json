@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "agent-bond-passport/v1",
+  "passportId": "passport_agent_data_001",
+  "agentId": "agent_data_001",
+  "operatorId": "operator_flowmemory_fixture",
+  "displayName": "Bonded Data Agent",
+  "description": "Fixture passport for bounded Agent Bonds Phase 2 architecture.",
+  "status": "active",
+  "chain": {
+    "chainId": 8453,
+    "caip2": "eip155:8453",
+    "name": "Base"
+  },
+  "wallets": {
+    "settlementWallet": "0x1000000000000000000000000000000000000a91",
+    "stakeWallet": "0x1000000000000000000000000000000000000a91",
+    "taskWallet": "0x1000000000000000000000000000000000000a91",
+    "signerWallet": "0x1000000000000000000000000000000000000a91"
+  },
+  "contracts": {
+    "manager": "0x3000000000000000000000000000000000000001",
+    "escrow": "0x3000000000000000000000000000000000000002",
+    "stakeRegistry": "0x3000000000000000000000000000000000000003",
+    "policyRegistry": "0x3000000000000000000000000000000000000004"
+  },
+  "stake": {
+    "stakeToken": "0x2000000000000000000000000000000000000001",
+    "minimumAgentStake": "1000000000000000000",
+    "currentAgentStake": "5000000000000000000",
+    "slashableStake": "3000000000000000000",
+    "stakeCapacityUSDC": "500000000"
+  },
+  "capacity": {
+    "maxTaskPayoutUSDC": "50000000",
+    "maxOpenExposureUSDC": "250000000",
+    "currentOpenExposureUSDC": "0",
+    "maxOpenTasks": 5,
+    "currentOpenTasks": 0,
+    "riskBand": "UNRATED"
+  },
+  "capabilities": [
+    {
+      "taskClass": "data.extract",
+      "title": "Bonded Data Agent capability",
+      "description": "Objective fixture capability with evidence commitments and verifier confirmation.",
+      "objectiveOnly": true,
+      "supportedEvidenceSchemas": [
+        "flowmemory.task_bond_evidence.v1"
+      ],
+      "supportedPolicyIds": [
+        "objective-code-low-risk-confirmed"
+      ],
+      "maxPayoutUSDC": "50000000",
+      "maxBondUSDC": "10000000",
+      "requiresHumanOversight": false
+    }
+  ],
+  "reputation": {
+    "completedTasks": 1,
+    "settledTasks": 1,
+    "challengedTasks": 0,
+    "upheldChallenges": 0,
+    "slashedTasks": 0,
+    "unsupportedTasks": 0,
+    "timeoutTasks": 0,
+    "totalSettledUSDC": "100000000",
+    "totalSlashedUSDC": "0",
+    "latestReceiptIds": [
+      "receipt_code_patch_success"
+    ]
+  },
+  "verification": {
+    "verifierIds": [
+      "verifier_ci_001"
+    ],
+    "confirmingVerifierRequired": true,
+    "verifierDiversityScore": 1
+  },
+  "integrations": {
+    "a2a": {
+      "agentCardUrl": "https://example.invalid/.well-known/agent-card.json",
+      "supportsFlowMemoryExtension": true
+    },
+    "mcp": {
+      "serverUrl": "https://example.invalid/mcp",
+      "tools": [
+        "agent_bond_envelope_quote",
+        "agent_bond_receipt_get"
+      ],
+      "resources": [
+        "flowmemory://agent-bonds/passports/agent_data_001"
+      ]
+    },
+    "x402": {
+      "acceptsX402": true,
+      "paymentEndpoint": "https://example.invalid/x402",
+      "supportedNetworks": [
+        "eip155:8453"
+      ],
+      "supportedAssets": [
+        "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+      ]
+    }
+  },
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "updatedAt": "2026-05-21T12:00:00.000Z"
+  },
+  "signatures": [
+    {
+      "signer": "0x1000000000000000000000000000000000000a91",
+      "algorithm": "fixture-ed25519",
+      "signature": "fixture-signature",
+      "signedAt": "2026-05-21T12:00:00.000Z"
+    }
+  ]
+}

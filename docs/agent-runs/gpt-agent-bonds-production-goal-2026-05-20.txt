@@ -1,0 +1,745 @@
+1. One-Sentence Product Thesis
+
+FlowMemory Agent Bonds is a verifiable coordination and settlement protocol where AI agents and humans perform bounded work offchain while onchain contracts enforce escrow, staking, receipts, challenge resolution, and deterministic state commitments for real-value task execution.
+
+2. Non-Negotiable Production Invariants
+Architecture Invariants
+
+Heavy AI artifacts remain offchain permanently.
+
+No prompts, embeddings, model weights, raw transcripts, or large execution traces onchain.
+
+Onchain stores only:
+
+commitments
+
+Merkle roots
+
+receipts
+
+deterministic hashes
+
+attestations
+
+proof references
+
+settlement state
+
+Deterministic replayability is mandatory.
+
+Every finalized task state must be reproducible from canonical inputs and referenced artifacts.
+
+Indexer outputs must be reproducible from chain + canonical storage.
+
+The protocol must remain operational if any single verifier/operator disappears.
+
+No hidden centralized coordinator dependency.
+
+Any authorized challenger must be able to reconstruct and dispute work.
+
+Escrow correctness is more important than throughput.
+
+Funds safety dominates UX speed.
+
+Conservative settlement windows are acceptable.
+
+Stable-value payouts use only USDC-like assets.
+
+Refunds, rewards, and escrow accounting are denominated in stable assets.
+
+Native token is never represented as stable purchasing power.
+
+Native token utility is strictly operational.
+
+stake
+
+challenge rights
+
+capacity allocation
+
+slash exposure
+
+governance-limited utility
+
+Never guaranteed yield.
+
+Never reflexive treasury promises.
+
+Never APY marketing.
+
+No unverifiable “AI correctness” claims.
+
+The protocol verifies:
+
+workflow compliance
+
+policy adherence
+
+commitment consistency
+
+receipt integrity
+
+deterministic execution boundaries
+
+The protocol does NOT claim to prove semantic truth of arbitrary AI outputs.
+
+Every state transition affecting funds must be challengeable.
+
+No irreversible privileged settlement path.
+
+Emergency admin paths must be timelocked and auditable.
+
+Production protocol state must be independently indexable.
+
+Third parties must be able to build explorers/verifiers without proprietary infrastructure.
+
+The system must degrade safely under adversarial conditions.
+
+Liveness failure acceptable.
+
+Silent corruption unacceptable.
+
+3. Phase List From Current State to Production
+
+Phase 0 — Protocol Specification Freeze
+
+Phase 1 — Deterministic Infrastructure Hardening
+
+Phase 2 — Economic Security + Challenge System
+
+Phase 3 — Trust-Minimized Verification
+
+Phase 4 — Adversarial Testnet Pilot
+
+Phase 5 — Capped Real-Value Mainnet Pilot
+
+Phase 6 — Production General Availability
+
+4. Phase Details
+Phase 0 — Protocol Specification Freeze
+Deliverables
+
+Canonical protocol specification.
+
+Formal state machine definitions for:
+
+task bonds
+
+escrow lifecycle
+
+settlement
+
+disputes
+
+slashing
+
+policy registry
+
+stake registry
+
+Commitment format specification.
+
+Receipt schema specification.
+
+Canonical hashing rules.
+
+Chain event schema.
+
+Deterministic indexing specification.
+
+Threat model document.
+
+Trust assumptions document.
+
+Explicit non-goals document.
+
+Upgradeability policy.
+
+Exit Criteria
+
+Every contract/event/state transition documented.
+
+Independent engineer can implement compatible indexer from spec only.
+
+No undocumented settlement behavior.
+
+No undefined edge-case state transitions.
+
+Blockers
+
+Undefined replay semantics.
+
+Mutable receipt formats.
+
+Ambiguous task lifecycle.
+
+Unclear challenge authority.
+
+Must NOT Claim Yet
+
+Trust minimization.
+
+Production readiness.
+
+Economic security.
+
+Decentralization.
+
+Reliable settlement guarantees.
+
+Phase 1 — Deterministic Infrastructure Hardening
+Deliverables
+
+Production-grade indexer.
+
+Deterministic verifier implementation.
+
+Canonical artifact packaging.
+
+Reproducible execution manifests.
+
+Content-addressed artifact storage.
+
+Multi-node replay validation.
+
+End-to-end invariant test suite.
+
+Event versioning strategy.
+
+Archive/recovery tooling.
+
+Structured observability:
+
+metrics
+
+tracing
+
+audit logs
+
+Key management system.
+
+CI/CD with reproducible builds.
+
+Exit Criteria
+
+Full replay from genesis produces identical state roots across environments.
+
+Independent verifier nodes agree on outputs.
+
+No nondeterministic settlement paths.
+
+Recovery from index corruption demonstrated.
+
+99.9% successful deterministic replay in stress testing.
+
+Blockers
+
+Hidden local state dependencies.
+
+Clock/time nondeterminism.
+
+Model-version drift.
+
+Artifact mutation risk.
+
+Implicit verifier assumptions.
+
+Must NOT Claim Yet
+
+Trustless verification.
+
+Economic finality.
+
+Mainnet-safe custody.
+
+Adversarial resilience.
+
+Phase 2 — Economic Security + Challenge System
+Deliverables
+
+Bond economics specification.
+
+Slashing rules.
+
+Challenge protocol.
+
+Fraud proof format.
+
+Escrow timeout system.
+
+Forced settlement logic.
+
+Stake-weighted participation rules.
+
+Rate limits.
+
+Sybil resistance assumptions.
+
+Treasury risk policy.
+
+Circuit breakers.
+
+Loss-cap controls.
+
+Insurance reserve policy if applicable.
+
+Exit Criteria
+
+All fund-moving actions challengeable.
+
+Slashing executable onchain.
+
+Economic attack simulations completed.
+
+Griefing cost exceeds expected exploit value.
+
+Max-loss exposure bounded mathematically.
+
+Blockers
+
+Cheap spam challenges.
+
+Infinite grief loops.
+
+Stake cartel dominance.
+
+Unbounded escrow lockups.
+
+Oracle dependence for settlement.
+
+Must NOT Claim Yet
+
+Fully decentralized governance.
+
+Byzantine fault tolerance.
+
+Institutional-grade safety.
+
+Sustainable token economics.
+
+Phase 3 — Trust-Minimized Verification
+Deliverables
+
+Replacement of trusted verifier dependency.
+
+Deterministic verification game or fraud-proof system.
+
+Canonical execution witness format.
+
+Verifier replication protocol.
+
+Multi-party attestation support.
+
+Independent challenger infrastructure.
+
+Cryptographic receipt inclusion proofs.
+
+Verifiable policy evaluation pipeline.
+
+Exit Criteria
+
+No single verifier can finalize invalid state uncontested.
+
+Third-party challengers can reproduce disputes independently.
+
+Fraud proof path tested on adversarial cases.
+
+Settlement correctness no longer depends on operator honesty.
+
+Blockers
+
+AI execution nondeterminism.
+
+Excessive proof costs.
+
+Data availability failures.
+
+Incomplete witness generation.
+
+Non-replayable offchain execution.
+
+Must NOT Claim Yet
+
+Fully trustless AI verification.
+
+Fully autonomous agents.
+
+Cryptographic proof of semantic correctness.
+
+Phase 4 — Adversarial Testnet Pilot
+Deliverables
+
+Public testnet deployment.
+
+Open challenge participation.
+
+Bug bounty.
+
+Chaos testing.
+
+Adversarial simulations.
+
+Economic stress testing.
+
+External security reviews.
+
+Load testing.
+
+Indexer diversity testing.
+
+Recovery drills.
+
+Exit Criteria
+
+No critical unresolved vulnerabilities.
+
+Successful challenge exercises.
+
+Stable operation under adversarial load.
+
+Independent node operators functioning.
+
+External audit findings resolved or accepted transparently.
+
+Blockers
+
+Settlement race conditions.
+
+Index divergence.
+
+Unbounded gas paths.
+
+Escrow deadlocks.
+
+Challenge griefing.
+
+Must NOT Claim Yet
+
+Safe for uncapped value.
+
+Governance maturity.
+
+Immutable protocol safety.
+
+Phase 5 — Capped Real-Value Mainnet Pilot
+Deliverables
+
+Mainnet deployment with hard caps.
+
+Whitelisted operators initially.
+
+Explicit risk disclosures.
+
+Emergency pause system.
+
+Treasury exposure caps.
+
+Settlement monitoring.
+
+Operational runbooks.
+
+Incident response procedures.
+
+Legal/compliance review.
+
+Production dashboards.
+
+Exit Criteria
+
+Real-value settlements processed successfully over sustained duration.
+
+No unresolved fund-loss incidents.
+
+Challenge system exercised in production.
+
+Mean-time-to-detect and recover within defined SLOs.
+
+Operational team can handle live incidents predictably.
+
+Blockers
+
+Operational key compromise.
+
+Liquidity insolvency.
+
+Governance capture.
+
+Production indexing failures.
+
+Unhandled chain reorg behavior.
+
+Must NOT Claim Yet
+
+Permissionless safety.
+
+Infinite scalability.
+
+Institutional custody equivalence.
+
+Phase 6 — Production General Availability
+Deliverables
+
+Permissionless participation path.
+
+Decentralized verifier/challenger ecosystem.
+
+Governance minimization.
+
+Immutable core contracts where possible.
+
+Formal verification on critical contracts.
+
+Long-term upgrade governance.
+
+Ecosystem SDKs.
+
+Independent ecosystem tooling.
+
+SLA-backed operator infrastructure.
+
+Exit Criteria
+
+No privileged operator required for normal settlement.
+
+Third-party ecosystem operational independently.
+
+Protocol survives operator churn.
+
+Sustainable fee economics without inflation subsidies.
+
+Multi-quarter stability under production load.
+
+Blockers
+
+Centralized sequencing dependencies.
+
+Governance deadlock.
+
+Long-tail economic exploits.
+
+Incentive collapse.
+
+Regulatory incompatibilities.
+
+Must NOT Claim Yet
+
+“Fully autonomous economy.”
+
+“Guaranteed AI correctness.”
+
+“Risk-free yield.”
+
+“Unhackable protocol.”
+
+5. Top 10 Highest-Risk Gaps
+1. Verifier Trust Assumption
+
+Current verifier path is trusted.
+This is the single largest architectural risk.
+
+Without a challengeable verification game:
+
+escrow integrity is social
+
+not cryptoeconomic
+
+2. AI Nondeterminism
+
+Different:
+
+models
+
+runtimes
+
+temperatures
+
+providers
+can produce divergent outputs.
+
+Unbounded AI nondeterminism breaks reproducibility.
+
+3. Artifact Availability
+
+If referenced artifacts disappear:
+
+proofs become unverifiable
+
+disputes fail
+
+settlements become socially resolved
+
+Need durable content-addressed storage strategy.
+
+4. Economic Griefing
+
+Challenge systems often fail because attackers can:
+
+delay settlement cheaply
+
+force expensive recomputation
+
+lock capital indefinitely
+
+5. Escrow State Complexity
+
+Task lifecycle complexity creates:
+
+stuck funds
+
+contradictory states
+
+replay ambiguity
+
+settlement races
+
+State machine simplicity matters more than feature richness.
+
+6. Indexer Divergence
+
+If independent indexers disagree:
+
+protocol reality forks socially
+
+dashboards become unreliable
+
+settlement confidence collapses
+
+7. Upgradeability Risk
+
+Admin-controlled upgrades undermine trust assumptions.
+Need:
+
+timelocks
+
+constrained authority
+
+explicit upgrade boundaries
+
+8. Native Token Misalignment
+
+If token value depends on speculative emissions:
+
+protocol drifts into reflexive Ponzi mechanics
+
+security assumptions collapse during drawdowns
+
+Token utility must remain operational, not financialized yield.
+
+9. Data Availability Costs
+
+Long-term storage/retrieval economics may become unsustainable if:
+
+artifacts are too large
+
+retention periods too long
+
+replication incentives weak
+
+10. False Marketing Claims
+
+Biggest reputational risk:
+claiming:
+
+“trustless AI”
+
+“verified intelligence”
+
+“provably correct agents”
+
+before actual cryptoeconomic guarantees exist.
+
+6. Final Build-Until-Done Operating Goal Prompt for an Autonomous Coding Agent
+
+You are building FlowMemory Agent Bonds from experimental local prototype into a production-grade cryptoeconomic coordination and settlement protocol.
+
+Primary objective:
+Create a boring, auditable, deterministic, adversarially resilient protocol for AI/human task escrow and settlement where heavy computation stays offchain and onchain state contains only compact commitments, receipts, roots, attestations, proofs, and settlement state.
+
+Core rules:
+
+Never optimize for hype over correctness.
+
+Never introduce unverifiable “AI truth” claims.
+
+Never rely on hidden trusted operators without explicitly labeling them.
+
+Never store heavy AI artifacts onchain.
+
+Never design reflexive or Ponzi token incentives.
+
+Never use native token for stable-value refunds or payouts.
+
+Prefer simple state machines over feature complexity.
+
+Prefer deterministic replayability over throughput.
+
+Prefer safety over liveness.
+
+Prefer explicit trust assumptions over implied decentralization.
+
+Mandatory production properties:
+
+deterministic replay
+
+independently reproducible indexing
+
+challengeable settlement
+
+slashable dishonest actors
+
+bounded financial risk
+
+recoverable infrastructure
+
+reproducible builds
+
+adversarial test coverage
+
+formalized state transitions
+
+observable operational metrics
+
+Economic rules:
+
+USDC-like assets handle escrow, payouts, refunds.
+
+Native token handles stake, challenge rights, capacity, and slash exposure only.
+
+No guaranteed yield mechanics.
+
+No inflation-dependent security assumptions.
+
+Verification roadmap:
+
+Current verifier is trusted.
+
+Do not represent it as trustless.
+
+Build toward fraud proofs, deterministic verification games, and independent challenger replication.
+
+Settlement correctness must eventually survive dishonest operators.
+
+Operational definition of “done”:
+The protocol is only considered production-grade when independent operators can:
+
+reproduce protocol state from chain + canonical artifacts,
+
+challenge invalid settlements permissionlessly,
+
+recover from failures without privileged intervention,
+
+safely process capped real-value escrow at sustained load,
+
+maintain bounded-loss guarantees under adversarial conditions.
+
+Until those conditions are met:
+
+continue hardening,
+
+continue reducing trust assumptions,
+
+continue simplifying failure modes,
+
+continue improving auditability,
+
+and do not market the system as trustless or fully decentralized.

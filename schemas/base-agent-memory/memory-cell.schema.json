@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.memory_cell.v1",
+  "title": "Base Agent Memory MemoryCell V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "memoryCellId", "agentId", "memoryType", "subject", "contentMode", "contentCommitment", "shortPublicSummary", "sourceObservationId", "sourceReceiptId", "parentMemoryRoot", "newMemoryRoot", "status"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.memory_cell.v1" },
+    "memoryCellId": { "$ref": "#/$defs/hex32" },
+    "agentId": { "$ref": "#/$defs/hex32" },
+    "memoryType": { "enum": ["episodic", "semantic", "procedural", "goal", "scar_tissue", "self_model"] },
+    "subject": { "$ref": "#/$defs/hex32" },
+    "contentMode": { "enum": ["PUBLIC_SHORT", "COMMITMENT_ONLY", "POINTER_COMMITMENT", "CONTRACT_PAGE", "EVENT_ONLY"] },
+    "contentCommitment": { "$ref": "#/$defs/hex32" },
+    "shortPublicSummary": { "type": "string" },
+    "sourceObservationId": { "$ref": "#/$defs/hex32" },
+    "sourceReceiptId": { "$ref": "#/$defs/hex32" },
+    "parentMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "newMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "$ref": "#/$defs/status" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "status": { "enum": ["pending", "verified", "failed", "unresolved", "unsupported", "reorged"] }
+  }
+}

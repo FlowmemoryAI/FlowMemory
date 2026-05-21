@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.hot_memory.v1",
+  "title": "Base Agent Memory HotMemory V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "agentId", "latestMemoryRoot", "activeGoal", "lastActionReceiptId", "lastVerifierReportId", "sequence", "failureCount", "spendUsedThisEpoch"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.hot_memory.v1" },
+    "agentId": { "$ref": "#/$defs/hex32" },
+    "latestMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "activeGoal": { "$ref": "#/$defs/hex32" },
+    "lastActionReceiptId": { "$ref": "#/$defs/hex32" },
+    "lastVerifierReportId": { "$ref": "#/$defs/hex32" },
+    "sequence": { "type": "string", "pattern": "^[0-9]+$" },
+    "failureCount": { "type": "integer", "minimum": 0 },
+    "spendUsedThisEpoch": { "type": "string", "pattern": "^[0-9]+$" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+  }
+}

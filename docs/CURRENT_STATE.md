@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-05-13
+Last updated: 2026-05-21
 
 This file is the beginner-friendly source of truth for what exists in FlowMemory right now. It should stay factual, dated, and conservative. GitHub issues, pull requests, and merged files remain the final project record.
 
@@ -12,7 +12,11 @@ second-computer validation.
 
 The bootstrap repository operating system, contracts V0 foundation, crypto V0 foundation, local indexer/verifier fixture package, dashboard V0, FlowRouter hardware POC, local no-value devnet prototype, launch-core contract-event spine, and pre-production hardening guardrails have merged into `main`. The launch-candidate work added swap-derived memory signals, stricter launch validation, and Base Sepolia testnet deploy/read commands.
 
+- A local/test Agent Bonds v1 accountability surface now exists for objective off-chain task escrow, verifier confirmation, challenge flow, capped pilot controls, evidence-availability windows, and timelocked multisig administration paths. It is documented as a capped-pilot / public-repo surface only and does not approve uncapped public value flow.
+- An additive Agent Bonds Phase 2 architecture layer now exists with Passport / Envelope / Receipt primitives, gated A2A/MCP/x402 integration scaffolds, deterministic credit-scoring scaffolds, signed recourse-policy quote attestations, requester API/data quote-create SDK helpers, and an optional onchain USDC recourse-pool path through `AgentUnderwriterPool`, `UnderwriterPoolRegistry`, and `AgentBondManager.openTaskWithRecourse(...)`. Recourse remains task-scoped and capped by policy, attestations, concentration limits, pool epoch loss caps, and withdrawal cooldown controls; this still does not approve broad public launch or promise reimbursement for every loss.
 On 2026-05-13 a small Base mainnet canary deployment was broadcast for V0 testing. It is documented in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`. A guarded Base mainnet canary reader now exists for those known canary addresses and small explicit block ranges. This is not a production launch and does not change the production/mainnet-readiness guardrails.
+
+On 2026-05-21 the repo gained a public-agent network local/test stack: shared `BaseOnchainAgentMemory` runtime integration, public agent class/tool/profile/lineage/fuel/bond/receipt contracts, `AgentFactory`, swarm policy/registry/budget/factory contracts, deterministic public launch helpers, control-plane and SDK/CLI discovery/preview methods, dashboard projection, Foundry tests, and a local Foundry e2e script. This is public for review and local experimentation only; it is not a production launch or audited network.
 
 The launch-core V0 stack now has a single runnable local command that connects contract fixtures, local indexing/verifier outputs, crypto schema vocabulary, Rootflow transitions, Flow Memory objects, generated dashboard state, local no-value devnet output, and hardware POC output without production deployment.
 
@@ -47,8 +51,9 @@ Contracts foundation:
 - `contracts/FlowMemoryAfterSwapHook.sol` is a PoolManager-gated Uniswap v4 `afterSwap` hook candidate for the real hook path. It emits FlowPulse without custody, fee override, or `txHash`/`logIndex` assumptions.
 - `contracts/FlowMemoryHookPlanner.sol` records the afterSwap-only permission flag, address-mining target, CREATE2 planning helpers, and Base Sepolia planning constants.
 - `contracts/ArtifactRegistry.sol`, `CursorRegistry.sol`, `ReceiptVerifier.sol`, `WorkerRegistry.sol`, `VerifierRegistry.sol`, `WorkReceiptRegistry.sol`, `VerifierReportRegistry.sol`, and `WorkDebtScheduler.sol` provide local/test skeleton surfaces for commitments, cursors, work receipts, verifier reports, and work state.
-- `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, and URI/log-data limitations.
-- Foundry tests currently cover the registry/hook/receipt surfaces, including afterSwap hook boundaries and CREATE2 planning.
+- `contracts/AgentBondManager.sol`, `TaskBondEscrow.sol`, `AgentStakeRegistry.sol`, `TaskPolicyRegistry.sol`, `AgentBondTimelockedMultisig.sol`, and `shared/TwoStepOwnable.sol` provide a local/test Agent Bonds accountability path with capped-pilot controls, independent verifier confirmation, evidence-availability windows, two-step ownership, and timelocked multisig administration.
+- `contracts/FLOWPULSE_SCHEMA.md` documents event fields, receipt boundaries, URI/log-data limitations, and the reserved Agent Bonds task lifecycle pulse types.
+- Foundry tests currently cover the registry/hook/receipt surfaces, including afterSwap hook boundaries, CREATE2 planning, Agent Bonds settlement/slash paths, and the timelocked multisig controls.
 - `tests/README.md` documents the current test command.
 - `contracts/STATIC_ANALYSIS.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, and `contracts/ACCESS_CONTROL_REVIEW.md` define the current hardening, deployment, and access-control boundaries.
 - `infra/scripts/contracts-static-analysis.ps1` and `infra/scripts/contracts-static-analysis.sh` run the contract hardening baseline. Slither is optional by default and required only when explicitly requested.
@@ -157,12 +162,12 @@ FlowChain private/local testnet snapshot:
 ## Conceptual Or Not Implemented Yet
 
 - Production protocol deployment.
-- Production ownership, upgrade, governance, fee, token, or incentive mechanics.
-- Dynamic fees or tokenomics.
+- Production ownership, upgrade, governance, fee, or uncapped public incentive mechanics.
+- Dynamic fees or public tokenomics.
 - Production Uniswap v4 hook deployment.
 - Production Rootflow runtime implementation.
 - Production Flow Memory runtime implementation.
-- Hosted launch-core services.
+- Hosted launch-core services or a public multi-operator Agent Bonds runtime.
 - Production indexer or verifier service runtime.
 - Production persistence layer, production live RPC reader, production APIs, or hosted services.
 - Broad Base mainnet reader.
@@ -235,9 +240,9 @@ Before assigning agents, check for dirty worktrees and avoid overlapping folders
 4. Keep improving the missing subsystem pieces behind the wrappers: long-running runtime behavior, LAN peer mode, encrypted local operator vault, workbench polish, and Base Sepolia hook deployment planning.
 5. Keep the guarded Base canary reader and dashboard canary artifacts fresh when canary smoke actions change.
 6. Exercise the Base Sepolia deploy/read path on explicit testnet contract addresses only.
-7. Continue contracts hardening without production mainnet deployment or token mechanics.
+7. Continue contracts hardening without production mainnet deployment or public tokenomics claims.
 8. Keep dashboard work fixture-backed until a production API is explicitly scoped.
-9. Keep production mainnet, public validator, tokenomics, audited-cryptography, and production bridge claims out of scope.
+9. Keep production mainnet, public validator, public tokenomics, audited-cryptography, and production bridge claims out of scope.
 
 ## Update Rule
 

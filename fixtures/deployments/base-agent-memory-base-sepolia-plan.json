@@ -1,0 +1,63 @@
+{
+  "schema": "flowmemory.base_agent_memory.base_sepolia_plan.v1",
+  "generatedAt": "2026-05-21T06:50:54.196Z",
+  "mode": "plan-only",
+  "productionReady": false,
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": "84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "environment": {
+    "BASE_SEPOLIA_RPC_URL": "<missing>",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX": "<missing>",
+    "BASE_SEPOLIA_BASESCAN_API_KEY": "<missing>",
+    "BASESCAN_API_KEY": "<missing>"
+  },
+  "requiredEnv": [
+    "BASE_SEPOLIA_RPC_URL",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+  ],
+  "optionalEnv": [
+    "BASE_SEPOLIA_BASESCAN_API_KEY",
+    "BASESCAN_API_KEY"
+  ],
+  "deploys": [
+    "BaseOnchainAgentMemory"
+  ],
+  "forgeCommand": {
+    "program": "forge",
+    "args": [
+      "script",
+      "script/DeployBaseAgentMemoryScout.s.sol:DeployBaseAgentMemoryScout",
+      "--rpc-url",
+      "$BASE_SEPOLIA_RPC_URL",
+      "--private-key",
+      "$BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+      "--chain-id",
+      "84532"
+    ],
+    "broadcast": false,
+    "note": "Dry run is default. Broadcast only after funded testnet operator approval."
+  },
+  "writeRehearsal": {
+    "registerAgent": [
+      "cast send <BaseOnchainAgentMemory> \"registerAgent(address,bytes32,bytes32,bytes32,bytes32,bytes32,uint64,bytes32,bytes32,string)\" <owner> <rootfieldId> <policyRoot> <toolAllowlistRoot> <initialMemoryRoot> <activeGoal> <autonomyLevel> <kernelClass> <salt> <uri> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+      "cast send <BaseOnchainAgentMemory> \"setToolPolicy(bytes32,bytes32,(address,bytes4,uint256,uint256,uint256,bool),string)\" <agentId> <toolId> \"(<target>,<selector>,<perActionCap>,<epochCap>,<maxTaskReward>,true)\" <uri> --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $BASE_SEPOLIA_DEPLOYER_KEY_HEX"
+    ]
+  },
+  "readRehearsal": {
+    "agentSmoke": "cast call <BaseOnchainAgentMemory> \"getAgent(bytes32)\" <agentId> --rpc-url $BASE_SEPOLIA_RPC_URL",
+    "hotMemorySmoke": "cast call <BaseOnchainAgentMemory> \"getHotMemory(bytes32)\" <agentId> --rpc-url $BASE_SEPOLIA_RPC_URL"
+  },
+  "verification": {
+    "apiKeyEnv": "BASE_SEPOLIA_BASESCAN_API_KEY or BASESCAN_API_KEY",
+    "command": "forge verify-contract --chain-id 84532 <address> BaseOnchainAgentMemory --etherscan-api-key $BASE_SEPOLIA_BASESCAN_API_KEY"
+  },
+  "boundaries": [
+    "Base Sepolia rehearsal only; not production mainnet readiness.",
+    "This deploys a bounded task-scout contract only.",
+    "No private keys, RPC URLs, or explorer API keys are written to artifacts.",
+    "Receipt metadata remains indexer-derived after execution."
+  ]
+}

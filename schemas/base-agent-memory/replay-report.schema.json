@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.base_agent_memory.replay_report.v1",
+  "title": "Base Agent Memory ReplayReport V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "verifierReportId", "agentId", "observationId", "actionReceiptId", "memoryDeltaId", "parentMemoryRoot", "newMemoryRoot", "status", "checks", "reasonCodes", "createdAt"],
+  "properties": {
+    "schema": { "const": "flowmemory.base_agent_memory.replay_report.v1" },
+    "verifierReportId": { "$ref": "#/$defs/hex32" },
+    "agentId": { "$ref": "#/$defs/hex32" },
+    "observationId": { "$ref": "#/$defs/hex32" },
+    "actionReceiptId": { "$ref": "#/$defs/hex32" },
+    "memoryDeltaId": { "$ref": "#/$defs/hex32" },
+    "parentMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "newMemoryRoot": { "$ref": "#/$defs/hex32" },
+    "status": { "$ref": "#/$defs/status" },
+    "checks": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "status", "detail"], "properties": { "name": { "type": "string" }, "status": { "enum": ["pass", "fail"] }, "detail": { "type": "string" } } } },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } },
+    "createdAt": { "type": "string" }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "status": { "enum": ["pending", "verified", "failed", "unresolved", "unsupported", "reorged"] }
+  }
+}

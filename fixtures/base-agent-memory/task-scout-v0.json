@@ -1,0 +1,283 @@
+{
+  "schema": "flowmemory.base_agent_memory.task_scout.fixture.v1",
+  "generatedAt": "2026-05-21T00:00:00.000Z",
+  "mode": "fixture",
+  "chainId": "84532",
+  "contracts": {
+    "agentMemory": "0x2000000000000000000000000000000000000002",
+    "taskTarget": "0x3000000000000000000000000000000000000003",
+    "flowPulse": "0x2000000000000000000000000000000000000002"
+  },
+  "agentConfig": {
+    "schema": "flowmemory.base_agent_memory.agent_config.v1",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "owner": "0x1000000000000000000000000000000000000001",
+    "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+    "kernelAddress": "0x2000000000000000000000000000000000000002",
+    "kernelClass": "0x4c46ee814081fc7ac88830d64b092a026d5f5beafec1aa9c01666c161d5e7393",
+    "policyRoot": "0x50dcf7f014d50ccb3324fa688ede408072c94bff403e66c1997730f9a1856741",
+    "toolAllowlistRoot": "0xde1a22d5f355e8faa236127e1605f4fac8266a7f4cd95d2c0dad5c3ffb63ed79",
+    "latestMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "sequence": "0",
+    "autonomyLevel": 2,
+    "status": "active"
+  },
+  "hotMemory": {
+    "schema": "flowmemory.base_agent_memory.hot_memory.v1",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "latestMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "activeGoal": "0x9796b4b91305ec497441a71a757c8ff900d156fd16373d0b9d834346a0070eba",
+    "lastActionReceiptId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "lastVerifierReportId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "sequence": "0",
+    "failureCount": 0,
+    "spendUsedThisEpoch": "0"
+  },
+  "taskObservation": {
+    "schema": "flowmemory.base_agent_memory.task_observation.v1",
+    "observationRoot": "0x5bb776f17dcc7c5471742445a391c76229e9745907cf26db983a6715186a27e0",
+    "observationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "taskContract": "0x3000000000000000000000000000000000000003",
+    "taskId": "0x939bceec9246a8c9ddb76aa07937b32d767f97ef91846c1ff28d6e96afdae9cd",
+    "taskKind": "0xc9e6d2fdcdd866ffc316ab98456f2ddaa565949a49c74b3866afccf3f8d96daa",
+    "taskKindName": "docs-review",
+    "evidenceRequirement": "0x26e2697356633bb0f5aede8e3740160536621b5f39c3fa17b0fbe3e8ebd40a34",
+    "evidenceRequirementName": "public",
+    "rewardToken": "0x0000000000000000000000000000000000000000",
+    "rewardAmount": "1000000000000000000",
+    "deadlineBlock": "18000000",
+    "taskStatus": "open",
+    "recentFailureCount": 0,
+    "humanReviewRequired": false
+  },
+  "stepPreview": {
+    "schema": "flowmemory.base_agent_memory.step_preview.v1",
+    "previewHash": "0x39c88ef87e370bb95dbe646adce9b793d7078478821249e8ff2c4db40bc3b23d",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "sequence": "0",
+    "observationRoot": "0x5bb776f17dcc7c5471742445a391c76229e9745907cf26db983a6715186a27e0",
+    "action": "ACCEPT_TASK",
+    "toolId": "0xa3c5beafe1b64fdc48140a660c6eb9960503234f18db4d722a02d3424eece605",
+    "target": "0x3000000000000000000000000000000000000003",
+    "selector": "0xb79f3f3a",
+    "callDataHash": "0x62d92d1161f29fe0f260486186881625719637ec4646189acb71db6a841b446d",
+    "memoryDeltaRoot": "0xba15493043c25494e6ff4bd6f2df16b4cedb935a4da4737731ec5aeb74e71a87",
+    "reasonCode": "TASK_KIND_ALLOWED",
+    "maxValue": "0"
+  },
+  "actionReceipt": {
+    "schema": "flowmemory.base_agent_memory.action_receipt.v1",
+    "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "sequence": "1",
+    "previewHash": "0x39c88ef87e370bb95dbe646adce9b793d7078478821249e8ff2c4db40bc3b23d",
+    "observationRoot": "0x5bb776f17dcc7c5471742445a391c76229e9745907cf26db983a6715186a27e0",
+    "action": "ACCEPT_TASK",
+    "target": "0x3000000000000000000000000000000000000003",
+    "selector": "0xb79f3f3a",
+    "success": true,
+    "valueSpent": "0",
+    "reasonCode": "TASK_KIND_ALLOWED"
+  },
+  "memoryCell": {
+    "schema": "flowmemory.base_agent_memory.memory_cell.v1",
+    "memoryCellId": "0x38c7cc62e2fd81b5a3f22c6bb09f9c26128eee941309b3c1db16206104ab6361",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "memoryType": "episodic",
+    "subject": "0x939bceec9246a8c9ddb76aa07937b32d767f97ef91846c1ff28d6e96afdae9cd",
+    "contentMode": "PUBLIC_SHORT",
+    "contentCommitment": "0xd3480d7691c4855728e112410afaa6a4bdc742030b535e659639aa73386e115f",
+    "shortPublicSummary": "Accepted low-risk public docs-review task because policy and memory allowed it.",
+    "sourceObservationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+    "sourceReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+    "parentMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "newMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+    "status": "verified"
+  },
+  "memoryDelta": {
+    "schema": "flowmemory.base_agent_memory.memory_delta.v1",
+    "memoryDeltaId": "0x5f55ed853123bbfc70f1dae7a0a56f33127a3ad52705738564830c1116babb55",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "sequence": "1",
+    "parentMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "deltaRoot": "0xba15493043c25494e6ff4bd6f2df16b4cedb935a4da4737731ec5aeb74e71a87",
+    "newMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+    "readSetRoot": "0x989bb5f25961f35fea69e14d90f31f843696ab9eb7be20e79ea843d2b1730440",
+    "writeSetRoot": "0x0954f594d00013dec4a3ef6ff79240121ce4d151038a3be2c9e966dd9784f9ae",
+    "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+    "sourceObservationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+    "memoryCellIds": [
+      "0x38c7cc62e2fd81b5a3f22c6bb09f9c26128eee941309b3c1db16206104ab6361"
+    ],
+    "status": "verified"
+  },
+  "flowPulses": [
+    {
+      "schema": "flowmemory.base_agent_memory.flowpulse_observation.v1",
+      "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "pulseType": "AGENT_STEP_COMMITTED",
+      "pulseTypeId": "16",
+      "subject": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+      "commitment": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "sequence": "1",
+      "occurredAt": "1780000000",
+      "uri": "fixture://base-agent-memory/task-scout/step",
+      "receiptLocator": {
+        "chainId": "84532",
+        "blockNumber": "17000001",
+        "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "0",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002"
+      }
+    },
+    {
+      "schema": "flowmemory.base_agent_memory.flowpulse_observation.v1",
+      "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "pulseType": "AGENT_MEMORY_COMMITTED",
+      "pulseTypeId": "18",
+      "subject": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "commitment": "0x3a893c086a35bd6ba12bb5d61566e1052325aa4ff5571dbe1974134011613fce",
+      "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "sequence": "2",
+      "occurredAt": "1780000000",
+      "uri": "fixture://base-agent-memory/task-scout/memory",
+      "receiptLocator": {
+        "chainId": "84532",
+        "blockNumber": "17000001",
+        "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "1",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002"
+      }
+    }
+  ],
+  "verifierReport": {
+    "schema": "flowmemory.base_agent_memory.replay_report.v1",
+    "verifierReportId": "0x125bd90aee047e7198e3b1f490de12ca233ce8550a5ccd2c1c47b1296504647b",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "observationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+    "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+    "memoryDeltaId": "0x5f55ed853123bbfc70f1dae7a0a56f33127a3ad52705738564830c1116babb55",
+    "parentMemoryRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "newMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+    "status": "verified",
+    "checks": [
+      {
+        "name": "agent-active",
+        "status": "pass",
+        "detail": "agent config is active"
+      },
+      {
+        "name": "observation-root",
+        "status": "pass",
+        "detail": "observation root matches canonical task fields"
+      },
+      {
+        "name": "preview-action",
+        "status": "pass",
+        "detail": "task scout accepts low-risk public docs-review task"
+      },
+      {
+        "name": "preview-hash",
+        "status": "pass",
+        "detail": "preview hash binds action, tool, observation, and memory delta"
+      },
+      {
+        "name": "receipt-preview",
+        "status": "pass",
+        "detail": "action receipt references preview hash"
+      },
+      {
+        "name": "receipt-action",
+        "status": "pass",
+        "detail": "action receipt action matches preview"
+      },
+      {
+        "name": "memory-parent",
+        "status": "pass",
+        "detail": "memory delta starts from current hot memory root"
+      },
+      {
+        "name": "memory-root",
+        "status": "pass",
+        "detail": "new memory root recomputes from parent, delta, receipt, and sequence"
+      },
+      {
+        "name": "transition-root",
+        "status": "pass",
+        "detail": "Rootflow transition points to memory delta output"
+      },
+      {
+        "name": "view-root",
+        "status": "pass",
+        "detail": "AgentMemoryView uses latest transition root"
+      }
+    ],
+    "reasonCodes": [],
+    "createdAt": "2026-05-21T00:00:00.000Z"
+  },
+  "rootflowTransition": {
+    "schema": "flowmemory.base_agent_memory.rootflow_transition.v1",
+    "transitionId": "0x10d0eb4a7c17e8ca74c25318344b01d6c3d9a16e570beeffc1fb233a17a7f1a5",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+    "sourceObservationId": "0x56f82f4225c52502a6652f93f2e86a7260bb2ec010bd023587b727dacee0f258",
+    "parentRoot": "0x6181384ab4df3523439b04f6df4f87df00bb58917dbfe2b7e44e9da2fb623b5c",
+    "newRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+    "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+    "status": "verified",
+    "sequence": "1",
+    "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+    "verifierReportId": "0x125bd90aee047e7198e3b1f490de12ca233ce8550a5ccd2c1c47b1296504647b",
+    "contractEventRef": {
+      "eventName": "FlowPulse",
+      "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "sourceContract": "0x2000000000000000000000000000000000000002",
+      "pulseTypeId": "18",
+      "pulseTypeName": "AGENT_MEMORY_COMMITTED",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "logIndex": "1"
+    }
+  },
+  "agentMemoryView": {
+    "schema": "flowmemory.base_agent_memory.agent_memory_view.v1",
+    "viewId": "0xf150393acc7a1a29b5653fbfb0e44e964c84c66697cd002e23afa708a08816f7",
+    "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+    "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+    "status": "verified",
+    "latestMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+    "sequence": "1",
+    "activeGoal": "0x9796b4b91305ec497441a71a757c8ff900d156fd16373d0b9d834346a0070eba",
+    "hotMemory": {
+      "schema": "flowmemory.base_agent_memory.hot_memory.v1",
+      "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+      "latestMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "activeGoal": "0x9796b4b91305ec497441a71a757c8ff900d156fd16373d0b9d834346a0070eba",
+      "lastActionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+      "lastVerifierReportId": "0x125bd90aee047e7198e3b1f490de12ca233ce8550a5ccd2c1c47b1296504647b",
+      "sequence": "1",
+      "failureCount": 0,
+      "spendUsedThisEpoch": "0"
+    },
+    "verifiedMemory": [
+      "0x38c7cc62e2fd81b5a3f22c6bb09f9c26128eee941309b3c1db16206104ab6361"
+    ],
+    "pendingMemory": [],
+    "failedOrCorrectedMemory": [],
+    "recentActions": [
+      "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466"
+    ],
+    "nextActionPreview": "0x39c88ef87e370bb95dbe646adce9b793d7078478821249e8ff2c4db40bc3b23d",
+    "replayWarnings": [],
+    "localOnly": true
+  }
+}

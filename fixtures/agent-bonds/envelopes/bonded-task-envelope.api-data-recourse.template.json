@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "bonded-task-envelope/v1",
+  "envelopeId": "env_api_data_recourse_001",
+  "envelopeHash": "0xe3f7fcd53d76db61b4470dc85de0de5000a1e42b2b1f0b35da6a58f96bb4b8f8",
+  "requesterId": "requester_fixture_001",
+  "agentId": "agent_data_001",
+  "verifierId": "verifier_ci_001",
+  "confirmingVerifierId": "verifier_confirming_001",
+  "task": {
+    "taskClass": "data.extract",
+    "title": "Fetch and normalize partner metrics",
+    "description": "Fetch a public API response, normalize it to a schema, include provenance, and return within the response budget.",
+    "objectiveOnly": true,
+    "deliverableType": "json_payload",
+    "expectedOutputSchema": "flowmemory.partner-metrics.v1",
+    "acceptedOutputModes": [
+      "json",
+      "receipt"
+    ]
+  },
+  "policy": {
+    "policyId": "objective-data-low-risk-confirmed",
+    "policyHash": "0x5a0b087d54f5c1d40ff2d515e44331a9cfb16065bb9f21b15f10d1fc0f04d90d",
+    "riskTier": 1,
+    "requiredConfirmations": 1,
+    "submissionWindowSeconds": 3600,
+    "disputeWindowSeconds": 3600,
+    "graceWindowSeconds": 600,
+    "evidenceAvailabilityWindowSeconds": 86400
+  },
+  "economics": {
+    "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "settlementTokenSymbol": "USDC",
+    "settlementChainId": 8453,
+    "payoutUSDC": "50000000",
+    "agentBondUSDC": "10000000",
+    "verifierFeeUSDC": "2500000",
+    "requesterCancelBondUSDC": "1000000",
+    "disputeBondUSDC": "5000000",
+    "protocolFeeUSDC": "0"
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "schema",
+      "type": "schema_valid",
+      "description": "Response validates against the declared schema.",
+      "required": true,
+      "verifierInstructions": "Validate the JSON document against the referenced schema and compare the source hash."
+    },
+    {
+      "id": "source",
+      "type": "api_receipt",
+      "description": "Response includes source URL, timestamp, and response digest.",
+      "required": true
+    }
+  ],
+  "evidence": {
+    "requiredEvidenceSchema": "flowmemory.task_bond_evidence.v1",
+    "acceptedEvidenceTypes": [
+      "api_response",
+      "schema_validation",
+      "source_receipt"
+    ],
+    "evidenceCommitmentRequired": true,
+    "availabilityProofRequired": true,
+    "redactionAllowed": true
+  },
+  "recourse": {
+    "noSubmission": "refund_and_slash",
+    "invalidSubmission": "refund_and_slash",
+    "unsupportedTask": "refund_without_slash",
+    "verifierError": "overturn_and_slash_verifier",
+    "requesterBadFaithChallenge": "slash_dispute_bond"
+  },
+  "payment": {
+    "fundingMode": "x402_escrow_bridge",
+    "x402": {
+      "paymentIntentId": "x402_intent_api_001",
+      "paymentRequiredPayloadHash": "0xdb68cb9de2c7f7f73c7c6bb721ce2262ad2d01910adf58e18bcf95f6af67d09f",
+      "facilitator": "fixture-facilitator",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    }
+  },
+  "a2a": {
+    "contextId": "ctx_api_001",
+    "taskId": "a2a_task_api_001",
+    "messageId": "msg_api_001",
+    "agentCardUrl": "https://example.invalid/.well-known/agent-card.json"
+  },
+  "mcp": {
+    "originServer": "https://example.invalid/mcp",
+    "originTool": "data.extract",
+    "toolCallId": "tool_call_api_001"
+  },
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "expiresAt": "2026-05-21T13:00:00.000Z"
+  },
+  "signatures": [
+    {
+      "signer": "0x1000000000000000000000000000000000000001",
+      "role": "requester",
+      "algorithm": "fixture-ed25519",
+      "signature": "fixture-signature",
+      "signedAt": "2026-05-21T12:00:00.000Z"
+    }
+  ]
+}

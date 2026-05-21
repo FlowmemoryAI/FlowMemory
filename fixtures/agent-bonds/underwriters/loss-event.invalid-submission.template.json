@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "underwriter-loss-event/v1",
+  "lossEventId": "loss_invalid_001",
+  "poolId": "pool_stake_code_001",
+  "allocationId": "allocation_code_agent_001",
+  "taskId": "task_fixture_001",
+  "receiptId": "receipt_invalid_slash",
+  "reason": "agent_invalid_submission",
+  "amountSlashed": "10000000",
+  "asset": "0x2000000000000000000000000000000000000001",
+  "waterfall": [
+    {
+      "source": "agent_bond",
+      "amount": "10000000"
+    },
+    {
+      "source": "underwriter_pool",
+      "amount": "0"
+    }
+  ],
+  "createdAt": "2026-05-21T12:00:00.000Z"
+}

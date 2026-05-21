@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_claim_substantiation.v1",
+  "title": "Agent Bonds Claim Substantiation V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "passportReady",
+    "envelopeReady",
+    "receiptReady",
+    "a2aReady",
+    "mcpReady",
+    "x402Ready",
+    "creditScoringReady",
+    "underwriterPoolsReady",
+    "unsafeClaimScanPassing",
+    "substantiationMatrixPresent"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-bonds-claim-substantiation/v1"
+    },
+    "passportReady": {
+      "type": "boolean"
+    },
+    "envelopeReady": {
+      "type": "boolean"
+    },
+    "receiptReady": {
+      "type": "boolean"
+    },
+    "a2aReady": {
+      "type": "boolean"
+    },
+    "mcpReady": {
+      "type": "boolean"
+    },
+    "x402Ready": {
+      "type": "boolean"
+    },
+    "creditScoringReady": {
+      "type": "boolean"
+    },
+    "underwriterPoolsReady": {
+      "type": "boolean"
+    },
+    "unsafeClaimScanPassing": {
+      "type": "boolean"
+    },
+    "substantiationMatrixPresent": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "hex32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

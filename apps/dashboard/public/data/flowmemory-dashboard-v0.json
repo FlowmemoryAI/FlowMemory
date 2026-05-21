@@ -10,7 +10,9 @@
       "indexer": "services/indexer/out/indexer-state.json",
       "verifier": "services/verifier/out/reports.json",
       "devnet": "fixtures/launch-core/generated/devnet/state.json",
-      "hardware": "hardware/fixtures/flowrouter_sample_seed42.json"
+      "hardware": "hardware/fixtures/flowrouter_sample_seed42.json",
+      "agentBondFixture": "fixtures/agent-bonds/agent-bonds-v1.json",
+      "agentMemoryFixture": "fixtures/base-agent-memory/task-scout-v0.json"
     }
   },
   "chain": {
@@ -18,7 +20,7 @@
     "name": "FlowMemory local V0 fixture stack",
     "environment": "local-devnet",
     "settlementContext": "Base-native fixture observations plus no-value local devnet handoff; not Base mainnet production data.",
-    "currentBlock": 123461,
+    "currentBlock": 17000001,
     "finalizedBlock": 123457,
     "source": "fixture",
     "lastUpdated": "2026-05-13T17:02:00.000Z"
@@ -279,6 +281,70 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "services/indexer/out/indexer-state.json"
       }
+    },
+    {
+      "id": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "blockNumber": "17000001",
+      "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "transactionIndex": "0",
+      "logIndex": "0",
+      "receiptStatus": "success",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "pulseType": "16",
+      "subject": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+      "commitment": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "sequence": "1",
+      "occurredAt": "2026-05-28T20:26:40.000Z",
+      "uri": "fixture://base-agent-memory/task-scout/step",
+      "summary": "agent step committed from generated indexer output",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/indexer/out/indexer-state.json"
+      }
+    },
+    {
+      "id": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "eventSignature": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+      "blockNumber": "17000001",
+      "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "transactionIndex": "0",
+      "logIndex": "1",
+      "receiptStatus": "success",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "pulseType": "18",
+      "subject": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "commitment": "0x3a893c086a35bd6ba12bb5d61566e1052325aa4ff5571dbe1974134011613fce",
+      "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "sequence": "2",
+      "occurredAt": "2026-05-28T20:26:40.000Z",
+      "uri": "fixture://base-agent-memory/task-scout/memory",
+      "summary": "agent memory committed from generated indexer output",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/indexer/out/indexer-state.json"
+      }
     }
   ],
   "rootfields": [
@@ -308,6 +374,33 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
       }
+    },
+    {
+      "id": "0xe7aa74104d9558e8474cf5fc2759125b5ffc28f94dd8c174a0c1f0ff924a4389",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "owner": "0x1000000000000000000000000000000000000001",
+      "schemaHash": "0x9b5a9081d2e4955065187f4d2a8e2db00880ad68915e7fe99dbc3a43e3f6858c",
+      "metadataHash": "0xc5ae9f4696b2d69eacb697c0768eb3d64d599fcc689c3cf6975a3cd5c35b6e3e",
+      "latestRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "latestObservationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "pulseCount": 2,
+      "workLaneIds": [
+        "MEMORY_REFRESH",
+        "FAILURE_DISCOVERY",
+        "FAILURE_REPAIR",
+        "EVAL_COUNTEREXAMPLE"
+      ],
+      "evidenceUri": "fixture://launch-core/rootfield-bundle",
+      "status": "observed",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
     }
   ],
   "workLanes": [
@@ -316,8 +409,8 @@
       "laneId": "MEMORY_REFRESH",
       "name": "Memory refresh",
       "queueDepth": 1,
-      "inflight": 0,
-      "completed24h": 4,
+      "inflight": 2,
+      "completed24h": 6,
       "p95LatencyMs": 640,
       "operator": "fixture-worker",
       "status": "pending",
@@ -535,6 +628,52 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "services/verifier/out/reports.json"
       }
+    },
+    {
+      "id": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "receiptId": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "laneId": "MEMORY_REFRESH",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "reportId": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "workType": "VERIFIER_REPORT_TO_MEMORY_RECEIPT",
+      "artifactUri": "fixture://base-agent-memory/task-scout/step",
+      "startedAt": "2026-05-13T17:02:00.000Z",
+      "completedAt": "2026-05-13T17:02:00.000Z",
+      "resultHash": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/verifier/out/reports.json"
+      }
+    },
+    {
+      "id": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "receiptId": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "laneId": "MEMORY_REFRESH",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "reportId": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "workType": "VERIFIER_REPORT_TO_MEMORY_RECEIPT",
+      "artifactUri": "fixture://base-agent-memory/task-scout/memory",
+      "startedAt": "2026-05-13T17:02:00.000Z",
+      "completedAt": "2026-05-13T17:02:00.000Z",
+      "resultHash": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/verifier/out/reports.json"
+      }
     }
   ],
   "verifierReports": [
@@ -712,6 +851,50 @@
       ],
       "reportHash": "0x61b984c1055654334a7a7a191887779c8f2be937b08590e8a90927ee645042f5",
       "status": "unsupported",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/verifier/out/reports.json"
+      }
+    },
+    {
+      "id": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "reportId": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+      "verifierSpecVersion": "0",
+      "checksPassed": 3,
+      "checksTotal": 3,
+      "reasonCodes": [],
+      "reportHash": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "services/verifier/out/reports.json"
+      }
+    },
+    {
+      "id": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "reportId": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+      "verifierSpecVersion": "0",
+      "checksPassed": 3,
+      "checksTotal": 3,
+      "reasonCodes": [],
+      "reportHash": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "status": "verified",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
         "subsystem": "verifier",
@@ -1002,6 +1185,86 @@
         "logIndex": "7"
       },
       "id": "0xdc9a57620b3309aceee35e858f62650b565e5f17ec6d9218ffd653ef5a633cdf",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/rootflow-transitions.json"
+      }
+    },
+    {
+      "schema": "flowmemory.rootflow_transition.v0",
+      "transitionId": "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "parentTransitionId": null,
+      "memorySignalId": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+      "memoryReceiptId": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "reportId": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "previousRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "attemptedRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "nextRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "status": "pending",
+      "blockNumber": "17000001",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "sequence": "1",
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "16",
+        "pulseTypeName": "AGENT_STEP_COMMITTED",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "0"
+      },
+      "id": "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/rootflow-transitions.json"
+      }
+    },
+    {
+      "schema": "flowmemory.rootflow_transition.v0",
+      "transitionId": "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+      "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "parentTransitionId": "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+      "memorySignalId": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+      "memoryReceiptId": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "reportId": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "previousRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "attemptedRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "nextRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "status": "pending",
+      "blockNumber": "17000001",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "sequence": "2",
+      "reasonCodes": [],
+      "contractEventRef": {
+        "signalId": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+        "eventName": "FlowPulse",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "18",
+        "pulseTypeName": "AGENT_MEMORY_COMMITTED",
+        "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+        "logIndex": "1"
+      },
+      "id": "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
         "subsystem": "indexer",
@@ -1613,6 +1876,156 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
       }
+    },
+    {
+      "schema": "flowmemory.memory_signal.v0",
+      "signalId": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "signalType": "agent_step_committed",
+      "status": "pending",
+      "chainId": "84532",
+      "emittingContract": "0x2000000000000000000000000000000000000002",
+      "blockNumber": "17000001",
+      "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "transactionIndex": "0",
+      "logIndex": "0",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "subject": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+      "commitment": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+      "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "sequence": "1",
+      "occurredAt": "2026-05-28T20:26:40.000Z",
+      "uri": "fixture://base-agent-memory/task-scout/step",
+      "summary": "agent step committed pulse 1",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "16",
+        "pulseTypeName": "AGENT_STEP_COMMITTED",
+        "indexed": {
+          "pulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+          "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+          "actor": "0x1000000000000000000000000000000000000001"
+        },
+        "payload": {
+          "subject": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+          "commitment": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+          "parentPulseId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "sequence": "1",
+          "occurredAt": "2026-05-28T20:26:40.000Z",
+          "uri": "fixture://base-agent-memory/task-scout/step"
+        },
+        "receiptLocator": {
+          "chainId": "84532",
+          "blockNumber": "17000001",
+          "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+          "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+          "transactionIndex": "0",
+          "logIndex": "0",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
+      "id": "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
+    },
+    {
+      "schema": "flowmemory.memory_signal.v0",
+      "signalId": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "signalType": "agent_memory_committed",
+      "status": "pending",
+      "chainId": "84532",
+      "emittingContract": "0x2000000000000000000000000000000000000002",
+      "blockNumber": "17000001",
+      "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+      "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+      "transactionIndex": "0",
+      "logIndex": "1",
+      "actor": "0x1000000000000000000000000000000000000001",
+      "subject": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "commitment": "0x3a893c086a35bd6ba12bb5d61566e1052325aa4ff5571dbe1974134011613fce",
+      "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+      "sequence": "2",
+      "occurredAt": "2026-05-28T20:26:40.000Z",
+      "uri": "fixture://base-agent-memory/task-scout/memory",
+      "summary": "agent memory committed pulse 2",
+      "contractEvent": {
+        "schema": "flowmemory.flowpulse_contract_event.v0",
+        "interfaceName": "IFlowPulse",
+        "eventName": "FlowPulse",
+        "eventSignatureText": "FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)",
+        "eventTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "expectedTopic0": "0x5d07190b9ae441b4d7b16259a48424acd451492b12f5f99a29f5bfd992c13e43",
+        "topicMatchesContract": true,
+        "sourceContract": "0x2000000000000000000000000000000000000002",
+        "pulseTypeId": "18",
+        "pulseTypeName": "AGENT_MEMORY_COMMITTED",
+        "indexed": {
+          "pulseId": "0xf1e227b3db7b41ba33bd399ef6b43c5e23f3910ab9d6cd28636b4da4f2a1bd03",
+          "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+          "actor": "0x1000000000000000000000000000000000000001"
+        },
+        "payload": {
+          "subject": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+          "commitment": "0x3a893c086a35bd6ba12bb5d61566e1052325aa4ff5571dbe1974134011613fce",
+          "parentPulseId": "0x49c132f12e75896cd6ec4fcccb2f4716e1a05b14bd9a75c00e95c58bb77e4486",
+          "sequence": "2",
+          "occurredAt": "2026-05-28T20:26:40.000Z",
+          "uri": "fixture://base-agent-memory/task-scout/memory"
+        },
+        "receiptLocator": {
+          "chainId": "84532",
+          "blockNumber": "17000001",
+          "blockHash": "0x735e1a33c4f1d6d121abd0052169ad09f8ef9855f8a506734b8d6469ee6d9cb3",
+          "txHash": "0xa4c53a16aae134ecaaf9cbcc320aa4d5901fd6f1b242b6a4a75e121f92beafae",
+          "transactionIndex": "0",
+          "logIndex": "1",
+          "receiptStatus": "success"
+        },
+        "receiptDerivedFields": [
+          "blockHash",
+          "txHash",
+          "transactionIndex",
+          "logIndex",
+          "receiptStatus"
+        ]
+      },
+      "id": "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
     }
   ],
   "memoryReceipts": [
@@ -1864,6 +2277,70 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
       }
+    },
+    {
+      "schema": "flowmemory.memory_receipt.v0",
+      "receiptId": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "reportId": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "reportDigest": "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+      "observationId": "0x0efe2d41ad5cbce2bb184ffc61c253d94482be83a55d84fe4d146d3862afb506",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "verifierStatus": "valid",
+      "flowMemoryStatus": "verified",
+      "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+      "verifierSpecVersion": "0",
+      "checksPassed": 3,
+      "checksTotal": 3,
+      "reasonCodes": [],
+      "evidenceRefs": [
+        {
+          "kind": "agent-step-commitment",
+          "uri": "fixture://base-agent-memory/task-scout/step"
+        }
+      ],
+      "id": "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
+    },
+    {
+      "schema": "flowmemory.memory_receipt.v0",
+      "receiptId": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "reportId": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "reportDigest": "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160",
+      "observationId": "0xb8ddbb806431605f5c7252322d25b89aca77e0529e26981b9c1217fa37457526",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "verifierStatus": "valid",
+      "flowMemoryStatus": "verified",
+      "resolverPolicyId": "flowmemory.resolver.policy.v0.fixture",
+      "verifierSpecVersion": "0",
+      "checksPassed": 3,
+      "checksTotal": 3,
+      "reasonCodes": [],
+      "evidenceRefs": [
+        {
+          "kind": "agent-memory-commitment",
+          "uri": "fixture://base-agent-memory/task-scout/memory"
+        }
+      ],
+      "id": "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "verifier",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
     }
   ],
   "rootfieldBundles": [
@@ -1933,6 +2410,50 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
       }
+    },
+    {
+      "schema": "flowmemory.rootfield_bundle.v0",
+      "bundleId": "0xe7aa74104d9558e8474cf5fc2759125b5ffc28f94dd8c174a0c1f0ff924a4389",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "latestRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "latestTransitionId": "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92",
+      "status": "pending",
+      "transitionIds": [
+        "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+        "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92"
+      ],
+      "memorySignalIds": [
+        "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+        "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc"
+      ],
+      "memoryReceiptIds": [
+        "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+        "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e"
+      ],
+      "verifierReportIds": [
+        "0xcdc811b5df42c675b4e4a90634c5864c8dad70da6dce12ef8e8beea7451249ec",
+        "0x317108968049fcb3a522338ae67c944d9deb152355e6a38a347451955b30c160"
+      ],
+      "counts": {
+        "observations": 2,
+        "transitions": 2,
+        "receipts": 2,
+        "verified": 0,
+        "failed": 0,
+        "unresolved": 0,
+        "unsupported": 0,
+        "reorged": 0
+      },
+      "id": "0xe7aa74104d9558e8474cf5fc2759125b5ffc28f94dd8c174a0c1f0ff924a4389",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "indexer",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
     }
   ],
   "agentMemoryViews": [
@@ -1989,6 +2510,1312 @@
         "capturedAt": "2026-05-13T17:02:00.000Z",
         "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
       }
+    },
+    {
+      "schema": "flowmemory.agent_memory_view.v0",
+      "viewId": "0x033f477db6ee42ee5eaaaf15d81c7a474d442c209a20aa38981c6e294452e248",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "status": "pending",
+      "latestRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "latestTransitionId": "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92",
+      "signalIds": [
+        "0x3186b0591ce46121d1c3769d7c7e4271c41e735aef8cdfba18a7e886a36620dd",
+        "0xa636f1959a31436a9b5301f2dd8c068e547f2cb9e906187c9f3e9d250a20dbbc"
+      ],
+      "receiptIds": [
+        "0xcabe0f79d69cffc440f264e51edf9b6d2dc4f03e6a22e479343d72d5e2d3bc10",
+        "0x0604599b0c35668eb626367445c4323e79921b2833caaa6b7fb94f23ce97157e"
+      ],
+      "transitionIds": [
+        "0x1d60bbada8ae8ecc708ddd80a1b0234c64d5370124fee708f12c66ffb5819483",
+        "0x8e661833df14ad35efc240d4298ef34cc53143fb897189a70b80813ed59a9a92"
+      ],
+      "warnings": [],
+      "localOnly": true,
+      "id": "0x033f477db6ee42ee5eaaaf15d81c7a474d442c209a20aa38981c6e294452e248",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/launch-core/flowmemory-launch-v0.json"
+      }
+    }
+  ],
+  "agentBondTasks": [
+    {
+      "id": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+      "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+      "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+      "requester": "0x0000000000000000000000000000000000000101",
+      "agent": "0x0000000000000000000000000000000000000a91",
+      "verifier": "0x0000000000000000000000000000000000000f11",
+      "payout": "100000000",
+      "agentBond": "25000000",
+      "disputeBond": "50000000",
+      "reportStatus": "valid",
+      "settlementStatus": "settled",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/agent-bonds-v1.json"
+      }
+    }
+  ],
+  "agentBondSettlements": [
+    {
+      "id": "0xe840c52ab8a5acdf1780cc67606b65f61c6e0efd71bc209754f28c433c9d65a9",
+      "settlementId": "0xe840c52ab8a5acdf1780cc67606b65f61c6e0efd71bc209754f28c433c9d65a9",
+      "taskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+      "settlementToken": "0x0000000000000000000000000000000000000c01",
+      "totalEscrowed": "160000000",
+      "totalReleased": "160000000",
+      "reserveAmount": "0",
+      "transferCount": 4,
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/agent-bonds-v1.json"
+      }
+    }
+  ],
+  "agentBondPassportViews": [
+    {
+      "id": "0x78fc0e4496e77499efd73a881599af5c9ec6717f709ecb9e7a07c6cfd8ba96b1",
+      "viewId": "0x78fc0e4496e77499efd73a881599af5c9ec6717f709ecb9e7a07c6cfd8ba96b1",
+      "agent": "0x0000000000000000000000000000000000000a91",
+      "rootfieldId": "0xa11aa95ab576566011e32a818a440f3a521a31286c1e80f49f6218b919f6761c",
+      "latestTaskId": "0x62c0928ee237b7dc5f8447f6f8d6674701bc11e388a1445c5e7ff7d0f853ea06",
+      "verifiedTaskCount": 1,
+      "failedTaskCount": 0,
+      "slashedTaskCount": 0,
+      "totalPayoutEarned": "100000000",
+      "totalBondAtRisk": "25000000",
+      "reputationScore": 0.22314355131420976,
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/agent-bonds-v1.json"
+      }
+    }
+  ],
+  "agentBondPassports": [
+    {
+      "id": "passport_agent_data_api_001",
+      "passportId": "passport_agent_data_api_001",
+      "agentId": "agent_data_001",
+      "operatorId": "operator_flowmemory_fixture",
+      "displayName": "Bonded Data API Agent",
+      "riskBand": "UNRATED",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/passports"
+      }
+    },
+    {
+      "id": "passport_agent_code_001",
+      "passportId": "passport_agent_code_001",
+      "agentId": "agent_code_001",
+      "operatorId": "operator_flowmemory_fixture",
+      "displayName": "Bonded Code Agent",
+      "riskBand": "UNRATED",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/passports"
+      }
+    },
+    {
+      "id": "passport_agent_data_001",
+      "passportId": "passport_agent_data_001",
+      "agentId": "agent_data_001",
+      "operatorId": "operator_flowmemory_fixture",
+      "displayName": "Bonded Data Agent",
+      "riskBand": "UNRATED",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/passports"
+      }
+    },
+    {
+      "id": "passport_agent_revoked_001",
+      "passportId": "passport_agent_revoked_001",
+      "agentId": "agent_revoked_001",
+      "operatorId": "operator_flowmemory_fixture",
+      "displayName": "Revoked Agent",
+      "riskBand": "UNRATED",
+      "status": "failed",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/passports"
+      }
+    },
+    {
+      "id": "passport_verifier_ci_001",
+      "passportId": "passport_verifier_ci_001",
+      "agentId": "verifier_ci_001",
+      "operatorId": "operator_flowmemory_fixture",
+      "displayName": "Bonded CI Verifier",
+      "riskBand": "UNRATED",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/passports"
+      }
+    }
+  ],
+  "bondedTaskEnvelopes": [
+    {
+      "id": "env_api_data_recourse_001",
+      "envelopeId": "env_api_data_recourse_001",
+      "envelopeHash": "0xe3f7fcd53d76db61b4470dc85de0de5000a1e42b2b1f0b35da6a58f96bb4b8f8",
+      "taskClass": "data.extract",
+      "payoutUSDC": "50000000",
+      "fundingMode": "x402_escrow_bridge",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    },
+    {
+      "id": "env_code_patch_001",
+      "envelopeId": "env_code_patch_001",
+      "envelopeHash": "0x155d061e3019da9ae3fd0052dd4d4916eb7991061c7f7eaa3891388c10f0f62c",
+      "taskClass": "code.patch",
+      "payoutUSDC": "50000000",
+      "fundingMode": "manual_fixture",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    },
+    {
+      "id": "env_data_extract_001",
+      "envelopeId": "env_data_extract_001",
+      "envelopeHash": "0x00ac5d80dfaa4a745a0bb62e009a7694f57d309d9476aabfedf8386aaaa7db39",
+      "taskClass": "data.extract",
+      "payoutUSDC": "50000000",
+      "fundingMode": "manual_fixture",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    },
+    {
+      "id": "env_invalid_no_policy",
+      "envelopeId": "env_invalid_no_policy",
+      "envelopeHash": "0xe1d224d717b70d18c7c1791cebd50ad102b50d1593ddeffad735f6cf51836318",
+      "taskClass": "code.patch",
+      "payoutUSDC": "50000000",
+      "fundingMode": "manual_fixture",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    },
+    {
+      "id": "env_onchain_intent_001",
+      "envelopeId": "env_onchain_intent_001",
+      "envelopeHash": "0x791dc28fcda68bb8ff3aa638160d69e468991fe4e919b4e221a10f97f439ce66",
+      "taskClass": "onchain.intent",
+      "payoutUSDC": "50000000",
+      "fundingMode": "manual_fixture",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    },
+    {
+      "id": "env_x402_code_001",
+      "envelopeId": "env_x402_code_001",
+      "envelopeHash": "0x2537d9dbda55d6e050e6b7fd942476f98de6841e8f3299209d9d49ef06de5544",
+      "taskClass": "code.patch",
+      "payoutUSDC": "50000000",
+      "fundingMode": "x402_escrow_bridge",
+      "status": "pending",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/envelopes"
+      }
+    }
+  ],
+  "bondedExecutionReceipts": [
+    {
+      "id": "bonded-execution-receipt.challenge-overturned",
+      "receiptId": "bonded-execution-receipt.challenge-overturned",
+      "terminalState": "challenge_upheld",
+      "agentId": "agent_code_001",
+      "envelopeId": "env_code_patch_001",
+      "slashedUSDC": "10000000",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/receipts"
+      }
+    },
+    {
+      "id": "bonded-execution-receipt.invalid-slash",
+      "receiptId": "bonded-execution-receipt.invalid-slash",
+      "terminalState": "slashed_invalid",
+      "agentId": "agent_code_001",
+      "envelopeId": "env_code_patch_001",
+      "slashedUSDC": "10000000",
+      "status": "failed",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/receipts"
+      }
+    },
+    {
+      "id": "bonded-execution-receipt.success",
+      "receiptId": "bonded-execution-receipt.success",
+      "terminalState": "settled_success",
+      "agentId": "agent_code_001",
+      "envelopeId": "env_code_patch_001",
+      "slashedUSDC": "0",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/receipts"
+      }
+    },
+    {
+      "id": "bonded-execution-receipt.timeout-slash",
+      "receiptId": "bonded-execution-receipt.timeout-slash",
+      "terminalState": "slashed_timeout",
+      "agentId": "agent_code_001",
+      "envelopeId": "env_code_patch_001",
+      "slashedUSDC": "10000000",
+      "status": "failed",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/receipts"
+      }
+    },
+    {
+      "id": "bonded-execution-receipt.unsupported-refund",
+      "receiptId": "bonded-execution-receipt.unsupported-refund",
+      "terminalState": "refunded_unsupported",
+      "agentId": "agent_code_001",
+      "envelopeId": "env_code_patch_001",
+      "slashedUSDC": "0",
+      "status": "unsupported",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/receipts"
+      }
+    }
+  ],
+  "agentBondPhase2Gate": {
+    "id": "agent-bond-phase2-gate",
+    "schemaVersion": "agent-bonds-phase2-gate/v1",
+    "foundationReady": true,
+    "passportReady": true,
+    "envelopeReady": true,
+    "receiptReady": true,
+    "integrationsAllowed": {
+      "a2a": true,
+      "mcp": true,
+      "x402": true
+    },
+    "advancedEconomicsAllowed": {
+      "dynamicCreditScoring": true,
+      "underwriterPools": true
+    },
+    "publicLaunchClaimAllowed": true,
+    "blockers": [],
+    "status": "verified",
+    "lastUpdated": "2026-05-13T17:02:00.000Z",
+    "provenance": {
+      "subsystem": "worker",
+      "origin": "fixture",
+      "chainContext": "flowmemory-local-v0",
+      "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+      "capturedAt": "2026-05-13T17:02:00.000Z",
+      "localPathHint": "devnet/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"
+    }
+  },
+  "agentBondA2A": {
+    "agentCards": [
+      {
+        "name": "Bonded Code Agent",
+        "description": "Fixture A2A card with FlowMemory Agent Bonds extension.",
+        "skills": [
+          {
+            "id": "code.patch",
+            "name": "Code patch",
+            "description": "Objective code patch tasks with CI evidence."
+          }
+        ],
+        "capabilities": {
+          "streaming": false
+        },
+        "extensions": [
+          {
+            "uri": "https://flowmemory.ai/a2a/extensions/agent-bonds/v1",
+            "description": "FlowMemory Agent Bonds passport/envelope/receipt extension for bonded work discovery.",
+            "required": false,
+            "params": {
+              "passportUrl": "https://example.invalid/agent-bonds/passports/agent_code_001",
+              "envelopeSchemaUrl": "https://flowmemory.ai/schemas/bonded-task-envelope/v1",
+              "receiptSchemaUrl": "https://flowmemory.ai/schemas/bonded-execution-receipt/v1",
+              "supportedTaskClasses": [
+                "code.patch"
+              ],
+              "settlement": {
+                "chainId": 8453,
+                "caip2": "eip155:8453",
+                "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "settlementTokenSymbol": "USDC"
+              },
+              "bonding": {
+                "supportsAgentBond": true,
+                "supportsRequesterBond": true,
+                "supportsVerifierFee": true,
+                "supportsDisputeBond": true
+              },
+              "verification": {
+                "supportsVerifierReport": true,
+                "supportsConfirmingVerifier": true,
+                "supportsChallenge": true
+              },
+              "x402": {
+                "supported": true,
+                "paymentEndpoint": "https://example.invalid/x402"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Bonded Data Agent",
+        "description": "Fixture A2A card with FlowMemory Agent Bonds extension.",
+        "skills": [
+          {
+            "id": "data.extract",
+            "name": "Code patch",
+            "description": "Objective code patch tasks with CI evidence."
+          }
+        ],
+        "capabilities": {
+          "streaming": false
+        },
+        "extensions": [
+          {
+            "uri": "https://flowmemory.ai/a2a/extensions/agent-bonds/v1",
+            "description": "FlowMemory Agent Bonds passport/envelope/receipt extension for bonded work discovery.",
+            "required": false,
+            "params": {
+              "passportUrl": "https://example.invalid/agent-bonds/passports/agent_code_001",
+              "envelopeSchemaUrl": "https://flowmemory.ai/schemas/bonded-task-envelope/v1",
+              "receiptSchemaUrl": "https://flowmemory.ai/schemas/bonded-execution-receipt/v1",
+              "supportedTaskClasses": [
+                "data.extract"
+              ],
+              "settlement": {
+                "chainId": 8453,
+                "caip2": "eip155:8453",
+                "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "settlementTokenSymbol": "USDC"
+              },
+              "bonding": {
+                "supportsAgentBond": true,
+                "supportsRequesterBond": true,
+                "supportsVerifierFee": true,
+                "supportsDisputeBond": true
+              },
+              "verification": {
+                "supportsVerifierReport": true,
+                "supportsConfirmingVerifier": true,
+                "supportsChallenge": true
+              },
+              "x402": {
+                "supported": true,
+                "paymentEndpoint": "https://example.invalid/x402"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "extensions": [
+      {
+        "uri": "https://flowmemory.ai/a2a/extensions/agent-bonds/v1",
+        "description": "FlowMemory Agent Bonds passport/envelope/receipt extension for bonded work discovery.",
+        "required": false,
+        "params": {
+          "passportUrl": "https://example.invalid/agent-bonds/passports/agent_code_001",
+          "envelopeSchemaUrl": "https://flowmemory.ai/schemas/bonded-task-envelope/v1",
+          "receiptSchemaUrl": "https://flowmemory.ai/schemas/bonded-execution-receipt/v1",
+          "supportedTaskClasses": [
+            "code.patch"
+          ],
+          "settlement": {
+            "chainId": 8453,
+            "caip2": "eip155:8453",
+            "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "settlementTokenSymbol": "USDC"
+          },
+          "bonding": {
+            "supportsAgentBond": true,
+            "supportsRequesterBond": true,
+            "supportsVerifierFee": true,
+            "supportsDisputeBond": true
+          },
+          "verification": {
+            "supportsVerifierReport": true,
+            "supportsConfirmingVerifier": true,
+            "supportsChallenge": true
+          },
+          "x402": {
+            "supported": true,
+            "paymentEndpoint": "https://example.invalid/x402"
+          }
+        }
+      }
+    ]
+  },
+  "agentBondMcp": {
+    "tools": [
+      {
+        "name": "agent_bond_passport_get",
+        "description": "Agent Bonds agent bond passport get",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_passport_list",
+        "description": "Agent Bonds agent bond passport list",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_envelope_quote",
+        "description": "Agent Bonds agent bond envelope quote",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_envelope_validate",
+        "description": "Agent Bonds agent bond envelope validate",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_task_create",
+        "description": "Agent Bonds agent bond task create",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": false,
+        "requiresSettlement": true,
+        "mutatesChainState": true,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_task_accept",
+        "description": "Agent Bonds agent bond task accept",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": false,
+        "requiresSettlement": false,
+        "mutatesChainState": true,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_evidence_submit",
+        "description": "Agent Bonds agent bond evidence submit",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": false,
+        "requiresSettlement": false,
+        "mutatesChainState": true,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_verifier_report_submit",
+        "description": "Agent Bonds agent bond verifier report submit",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": false,
+        "requiresSettlement": false,
+        "mutatesChainState": true,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_task_challenge",
+        "description": "Agent Bonds agent bond task challenge",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": false,
+        "requiresSettlement": false,
+        "mutatesChainState": true,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_receipt_get",
+        "description": "Agent Bonds agent bond receipt get",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_receipt_list",
+        "description": "Agent Bonds agent bond receipt list",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_credit_score_get",
+        "description": "Agent Bonds agent bond credit score get",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      },
+      {
+        "name": "agent_bond_x402_quote_get",
+        "description": "Agent Bonds agent bond x402 quote get",
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "readOnly": true,
+        "requiresSettlement": false,
+        "mutatesChainState": false,
+        "riskNotes": [
+          "Mutating calls return previews unless explicit execution is separately configured."
+        ]
+      }
+    ],
+    "resources": [
+      "flowmemory://agent-bonds/passports/{agentId}",
+      "flowmemory://agent-bonds/envelopes/{envelopeHash}",
+      "flowmemory://agent-bonds/receipts/{receiptHash}",
+      "flowmemory://agent-bonds/tasks/{taskId}",
+      "flowmemory://agent-bonds/policies/{policyId}",
+      "flowmemory://agent-bonds/phase2-gate",
+      "flowmemory://agent-bonds/public-claim-status"
+    ],
+    "prompts": [
+      "agent_bonds_create_objective_task",
+      "agent_bonds_select_bonded_agent",
+      "agent_bonds_evaluate_task_evidence",
+      "agent_bonds_prepare_verifier_report",
+      "agent_bonds_explain_receipt"
+    ]
+  },
+  "agentBondX402": {
+    "paymentIntents": [
+      {
+        "schemaVersion": "x402-agent-bonds-payment-intent/v1",
+        "paymentIntentId": "x402_intent_001",
+        "mode": "escrow_bridge",
+        "envelopeId": "env_x402_code_001",
+        "envelopeHash": "0xceb92e595abe7c920a79532613a736251975a70cd20da986fdd1820fc7194378",
+        "network": {
+          "chainId": 8453,
+          "caip2": "eip155:8453"
+        },
+        "asset": {
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "symbol": "USDC",
+          "decimals": 6
+        },
+        "amount": {
+          "atomic": "67500000",
+          "display": "67.50",
+          "currency": "USDC"
+        },
+        "payTo": "0x3000000000000000000000000000000000000002",
+        "description": "Fund bonded task envelope env_x402_code_001",
+        "x402": {
+          "paymentRequiredPayloadHash": "0x242ca5506b1a94cc24877fdc8f74c6bcf4872132bea2b6914e5f2a9160e5c37f",
+          "facilitator": "fixture-facilitator"
+        },
+        "status": "payment_required",
+        "timestamps": {
+          "createdAt": "2026-05-21T12:00:00.000Z",
+          "expiresAt": "2026-05-22T12:00:00.000Z"
+        }
+      },
+      {
+        "schemaVersion": "x402-agent-bonds-payment-intent/v1",
+        "paymentIntentId": "x402_service_001",
+        "mode": "service_payment",
+        "network": {
+          "chainId": 8453,
+          "caip2": "eip155:8453"
+        },
+        "asset": {
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "symbol": "USDC",
+          "decimals": 6
+        },
+        "amount": {
+          "atomic": "250000",
+          "display": "0.25",
+          "currency": "USDC"
+        },
+        "payTo": "0x3000000000000000000000000000000000000002",
+        "description": "Pay for quote generation.",
+        "x402": {
+          "paymentRequiredPayloadHash": "0x242ca5506b1a94cc24877fdc8f74c6bcf4872132bea2b6914e5f2a9160e5c37f",
+          "facilitator": "fixture-facilitator"
+        },
+        "status": "payment_required",
+        "timestamps": {
+          "createdAt": "2026-05-21T12:00:00.000Z",
+          "expiresAt": "2026-05-22T12:00:00.000Z"
+        }
+      }
+    ]
+  },
+  "agentBondCredit": {
+    "scores": [
+      {
+        "schemaVersion": "agent-credit-score/v1",
+        "agentId": "agent_code_001",
+        "operatorId": "operator_flowmemory_fixture",
+        "score": 875,
+        "riskBand": "A",
+        "computedAt": "2026-05-21T12:00:00.000Z",
+        "expiresAt": "2026-06-20T12:00:00.000Z",
+        "inputs": {
+          "completedTasks": 10,
+          "settledTasks": 10,
+          "challengedTasks": 0,
+          "upheldChallenges": 0,
+          "slashedTasks": 0,
+          "timeoutTasks": 0,
+          "unsupportedTasks": 0,
+          "totalSettledUSDC": "1000000000",
+          "totalSlashedUSDC": "0",
+          "uniqueVerifierCount": 3,
+          "recentReceiptCount": 5
+        },
+        "components": {
+          "successLowerBound": 0.8,
+          "valueWeightedExperience": 20,
+          "verifierDiversity": 25,
+          "slashPenalty": 0,
+          "timeoutPenalty": 0,
+          "challengePenalty": 0,
+          "evidencePenalty": 0,
+          "recencyAdjustment": 0
+        },
+        "outputs": {
+          "bondBpsMultiplier": 1,
+          "maxOpenExposureUSDC": "500000000",
+          "maxTaskPayoutUSDC": "50000000",
+          "confirmingVerifierRequired": false,
+          "underwriterEligible": true,
+          "publicLabel": "A"
+        },
+        "reasonCodes": [
+          "FIXTURE_SCORE"
+        ]
+      },
+      {
+        "schemaVersion": "agent-credit-score/v1",
+        "agentId": "agent_code_001",
+        "operatorId": "operator_flowmemory_fixture",
+        "score": 625,
+        "riskBand": "C",
+        "computedAt": "2026-05-21T12:00:00.000Z",
+        "expiresAt": "2026-06-20T12:00:00.000Z",
+        "inputs": {
+          "completedTasks": 10,
+          "settledTasks": 10,
+          "challengedTasks": 0,
+          "upheldChallenges": 0,
+          "slashedTasks": 0,
+          "timeoutTasks": 0,
+          "unsupportedTasks": 0,
+          "totalSettledUSDC": "1000000000",
+          "totalSlashedUSDC": "0",
+          "uniqueVerifierCount": 3,
+          "recentReceiptCount": 5
+        },
+        "components": {
+          "successLowerBound": 0.8,
+          "valueWeightedExperience": 20,
+          "verifierDiversity": 25,
+          "slashPenalty": 0,
+          "timeoutPenalty": 0,
+          "challengePenalty": 0,
+          "evidencePenalty": 0,
+          "recencyAdjustment": 0
+        },
+        "outputs": {
+          "bondBpsMultiplier": 1,
+          "maxOpenExposureUSDC": "500000000",
+          "maxTaskPayoutUSDC": "50000000",
+          "confirmingVerifierRequired": true,
+          "underwriterEligible": true,
+          "publicLabel": "C"
+        },
+        "reasonCodes": [
+          "FIXTURE_SCORE"
+        ]
+      },
+      {
+        "schemaVersion": "agent-credit-score/v1",
+        "agentId": "agent_code_001",
+        "operatorId": "operator_flowmemory_fixture",
+        "score": 250,
+        "riskBand": "E",
+        "computedAt": "2026-05-21T12:00:00.000Z",
+        "expiresAt": "2026-06-20T12:00:00.000Z",
+        "inputs": {
+          "completedTasks": 10,
+          "settledTasks": 10,
+          "challengedTasks": 0,
+          "upheldChallenges": 0,
+          "slashedTasks": 2,
+          "timeoutTasks": 0,
+          "unsupportedTasks": 0,
+          "totalSettledUSDC": "1000000000",
+          "totalSlashedUSDC": "0",
+          "uniqueVerifierCount": 3,
+          "recentReceiptCount": 5
+        },
+        "components": {
+          "successLowerBound": 0.8,
+          "valueWeightedExperience": 20,
+          "verifierDiversity": 25,
+          "slashPenalty": 0,
+          "timeoutPenalty": 0,
+          "challengePenalty": 0,
+          "evidencePenalty": 0,
+          "recencyAdjustment": 0
+        },
+        "outputs": {
+          "bondBpsMultiplier": 1,
+          "maxOpenExposureUSDC": "500000000",
+          "maxTaskPayoutUSDC": "50000000",
+          "confirmingVerifierRequired": true,
+          "underwriterEligible": false,
+          "publicLabel": "E"
+        },
+        "reasonCodes": [
+          "FIXTURE_SCORE"
+        ]
+      },
+      {
+        "schemaVersion": "agent-credit-score/v1",
+        "agentId": "agent_code_001",
+        "operatorId": "operator_flowmemory_fixture",
+        "score": 0,
+        "riskBand": "UNRATED",
+        "computedAt": "2026-05-21T12:00:00.000Z",
+        "expiresAt": "2026-06-20T12:00:00.000Z",
+        "inputs": {
+          "completedTasks": 0,
+          "settledTasks": 0,
+          "challengedTasks": 0,
+          "upheldChallenges": 0,
+          "slashedTasks": 2,
+          "timeoutTasks": 0,
+          "unsupportedTasks": 0,
+          "totalSettledUSDC": "0",
+          "totalSlashedUSDC": "0",
+          "uniqueVerifierCount": 3,
+          "recentReceiptCount": 5
+        },
+        "components": {
+          "successLowerBound": 0,
+          "valueWeightedExperience": 20,
+          "verifierDiversity": 25,
+          "slashPenalty": 0,
+          "timeoutPenalty": 0,
+          "challengePenalty": 0,
+          "evidencePenalty": 0,
+          "recencyAdjustment": 0
+        },
+        "outputs": {
+          "bondBpsMultiplier": 1,
+          "maxOpenExposureUSDC": "500000000",
+          "maxTaskPayoutUSDC": "50000000",
+          "confirmingVerifierRequired": true,
+          "underwriterEligible": false,
+          "publicLabel": "UNRATED"
+        },
+        "reasonCodes": [
+          "FIXTURE_SCORE"
+        ]
+      }
+    ]
+  },
+  "agentBondUnderwriters": {
+    "pools": [
+      {
+        "schemaVersion": "underwriter-pool/v1",
+        "poolId": "pool_stake_code_001",
+        "poolType": "stake_capacity_pool",
+        "status": "active",
+        "operatorId": "underwriter_operator_001",
+        "asset": {
+          "tokenAddress": "0x2000000000000000000000000000000000000001",
+          "tokenSymbol": "FLOW",
+          "decimals": 18
+        },
+        "scope": {
+          "agentIds": [
+            "agent_code_001"
+          ],
+          "taskClasses": [
+            "code.patch"
+          ],
+          "maxRiskTier": 2
+        },
+        "capacity": {
+          "totalDeposited": "1000000000000000000000",
+          "totalAllocated": "500000000",
+          "totalLocked": "0",
+          "totalAvailable": "500000000",
+          "maxPerAgentUSDC": "500000000",
+          "maxPerTaskUSDC": "50000000",
+          "maxOpenExposureUSDC": "500000000"
+        },
+        "economics": {
+          "feeShareBps": 1000,
+          "slashPriority": "after_agent_stake",
+          "cooldownSeconds": 604800,
+          "epochSeconds": 86400
+        },
+        "lossHistory": {
+          "totalLossEvents": 0,
+          "totalSlashed": "0"
+        },
+        "timestamps": {
+          "createdAt": "2026-05-21T12:00:00.000Z",
+          "updatedAt": "2026-05-21T12:00:00.000Z"
+        }
+      },
+      {
+        "schemaVersion": "underwriter-pool/v1",
+        "poolId": "pool_usdc_recourse_001",
+        "poolType": "usdc_recourse_pool",
+        "status": "active",
+        "operatorId": "underwriter_operator_001",
+        "asset": {
+          "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "tokenSymbol": "USDC",
+          "decimals": 6
+        },
+        "scope": {
+          "agentIds": [
+            "agent_code_001"
+          ],
+          "taskClasses": [
+            "code.patch"
+          ],
+          "maxRiskTier": 2
+        },
+        "capacity": {
+          "totalDeposited": "1000000000000000000000",
+          "totalAllocated": "500000000",
+          "totalLocked": "0",
+          "totalAvailable": "500000000",
+          "maxPerAgentUSDC": "500000000",
+          "maxPerTaskUSDC": "50000000",
+          "maxOpenExposureUSDC": "500000000"
+        },
+        "economics": {
+          "feeShareBps": 1000,
+          "slashPriority": "after_agent_stake",
+          "cooldownSeconds": 604800,
+          "epochSeconds": 86400
+        },
+        "lossHistory": {
+          "totalLossEvents": 0,
+          "totalSlashed": "0"
+        },
+        "timestamps": {
+          "createdAt": "2026-05-21T12:00:00.000Z",
+          "updatedAt": "2026-05-21T12:00:00.000Z"
+        }
+      }
+    ],
+    "allocations": [
+      {
+        "schemaVersion": "underwriter-allocation/v1",
+        "allocationId": "allocation_code_agent_001",
+        "poolId": "pool_stake_code_001",
+        "agentId": "agent_code_001",
+        "taskClass": "code.patch",
+        "allocatedCapacityUSDC": "500000000",
+        "lockedCapacityUSDC": "0",
+        "availableCapacityUSDC": "500000000",
+        "validFrom": "2026-05-21T12:00:00.000Z",
+        "validUntil": "2026-06-20T12:00:00.000Z",
+        "status": "active"
+      }
+    ]
+  },
+  "agentBondRecoursePolicies": [
+    {
+      "id": "recourse-api-data-low-risk-v1",
+      "policyId": "recourse-api-data-low-risk-v1",
+      "statusLabel": "active",
+      "taskClasses": [
+        "data.extract",
+        "api.call"
+      ],
+      "maxCoveragePerTaskUSDC": "25000000",
+      "maxRiskTier": 1,
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/recourse"
+      }
+    }
+  ],
+  "agentBondRecourseDecisions": [
+    {
+      "id": "decision_api_data_001",
+      "decisionId": "decision_api_data_001",
+      "policyId": "recourse-api-data-low-risk-v1",
+      "envelopeId": "env_api_data_recourse_001",
+      "decisionStatus": "approved",
+      "approvedCoverageUSDC": "25000000",
+      "premiumUSDC": "375000",
+      "reasonCodes": [
+        "TASK_CLASS_ALLOWED",
+        "RISK_TIER_ALLOWED",
+        "OBJECTIVE_ACCEPTANCE_CONFIRMED",
+        "STAKE_RATIO_SUFFICIENT"
+      ],
+      "policyAttestationId": "0xc8484c2e045fa38c4202d549cf1bfd26660c2f3c4958d8d1b6818648c0b38112",
+      "policyAttestationSignerId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "verified",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/recourse"
+      }
+    }
+  ],
+  "agentBondFailureWaterfalls": [
+    {
+      "id": "waterfall_api_invalid_001",
+      "waterfallId": "waterfall_api_invalid_001",
+      "receiptId": "receipt_api_data_invalid",
+      "terminalState": "slashed_invalid",
+      "toRequesterUSDC": "83500000",
+      "recourseUSDC": "25000000",
+      "slashedUSDC": "10000000",
+      "status": "failed",
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/agent-bonds/recourse"
+      }
+    }
+  ],
+  "agentBondPublicClaim": {
+    "schemaVersion": "agent-bonds-public-claim/v1",
+    "claimLevel": "integration_beta",
+    "enabled": true,
+    "headline": "FlowMemory Agent Bonds accountability architecture",
+    "shortClaim": "FlowMemory Agent Bonds exposes bounded accountability primitives for agent work.",
+    "longClaim": "FlowMemory Agent Bonds lets agents publish passports, accept bonded task envelopes, produce execution receipts, attach signed recourse-policy attestations to requester quotes, and build machine-readable reputation without enabling broad public launch claims by default.",
+    "allowedClaims": [
+      "capped pilot architecture",
+      "passport envelope receipt primitives",
+      "machine-readable recourse records",
+      "signed recourse decision attestations",
+      "pool loss caps and withdrawal cooldown controls"
+    ],
+    "disallowedClaims": [
+      "risk-free",
+      "guaranteed safe",
+      "insured",
+      "fully insured",
+      "guaranteed payout",
+      "guaranteed reimbursement",
+      "cannot fail",
+      "prevents hallucinations",
+      "first ever",
+      "only protocol",
+      "audit-approved",
+      "production safe",
+      "unlimited public launch",
+      "uncapped",
+      "regulator-approved"
+    ],
+    "substantiation": {
+      "passportReady": true,
+      "envelopeReady": true,
+      "receiptReady": true,
+      "a2aReady": true,
+      "mcpReady": true,
+      "x402Ready": true,
+      "creditScoringReady": true,
+      "underwriterPoolsReady": true,
+      "unsafeClaimScanPassing": true,
+      "substantiationMatrixPresent": true
+    },
+    "blockers": [],
+    "generatedAt": "2026-05-13T17:02:00.000Z",
+    "status": "verified",
+    "lastUpdated": "2026-05-13T17:02:00.000Z",
+    "provenance": {
+      "subsystem": "worker",
+      "origin": "fixture",
+      "chainContext": "flowmemory-local-v0",
+      "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+      "capturedAt": "2026-05-13T17:02:00.000Z",
+      "localPathHint": "fixtures/agent-bonds/claims"
+    }
+  },
+  "baseAgentMemoryScouts": [
+    {
+      "id": "0xf150393acc7a1a29b5653fbfb0e44e964c84c66697cd002e23afa708a08816f7",
+      "viewId": "0xf150393acc7a1a29b5653fbfb0e44e964c84c66697cd002e23afa708a08816f7",
+      "agentId": "0x54b047dd7daa6ef87caefa5e0ad8e38051c899bff154438d77bd1d02545512f9",
+      "rootfieldId": "0xc8e3c5475cc3a355e04433129458d54076dc8700cd25af46019f441f6dbf1e6b",
+      "latestMemoryRoot": "0xc7f71e9dee85ce8b4082505cb0fb9ef16f488a6b2edc6d4565659d283fe80811",
+      "sequence": "1",
+      "status": "verified",
+      "action": "ACCEPT_TASK",
+      "reasonCode": "TASK_KIND_ALLOWED",
+      "previewHash": "0x39c88ef87e370bb95dbe646adce9b793d7078478821249e8ff2c4db40bc3b23d",
+      "actionReceiptId": "0x7016e0bfa305eb653236b3e9b83b7d2f55cf12ebc9c12b50b05321e357a7c466",
+      "memoryDeltaId": "0x5f55ed853123bbfc70f1dae7a0a56f33127a3ad52705738564830c1116babb55",
+      "verifierReportId": "0x125bd90aee047e7198e3b1f490de12ca233ce8550a5ccd2c1c47b1296504647b",
+      "checksPassed": 10,
+      "checksTotal": 10,
+      "verifiedMemoryCount": 1,
+      "pendingMemoryCount": 0,
+      "failedMemoryCount": 0,
+      "replayWarnings": [],
+      "localOnly": true,
+      "lastUpdated": "2026-05-13T17:02:00.000Z",
+      "provenance": {
+        "subsystem": "worker",
+        "origin": "fixture",
+        "chainContext": "flowmemory-local-v0",
+        "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
+        "capturedAt": "2026-05-13T17:02:00.000Z",
+        "localPathHint": "fixtures/base-agent-memory/task-scout-v0.json"
+      }
     }
   ],
   "devnetBlocks": [
@@ -2000,9 +3827,9 @@
       "stateRoot": "0x7e50021bc0dd2537f9ecfd7973f9799b6ffdffcfd427e3bb059f4dfd1253b947",
       "receiptsRoot": "0x2f98caf4b28b2209cdf1f9beb1c23f8732c538657cc7a1d8855878b5400efabd",
       "timestamp": "2026-05-13T16:00:00.000Z",
-      "observationCount": 8,
-      "reportCount": 8,
-      "finalityDistance": 123460,
+      "observationCount": 10,
+      "reportCount": 10,
+      "finalityDistance": 17000000,
       "status": "stale",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
@@ -2022,9 +3849,9 @@
       "stateRoot": "0xb3c4344483c7be8c0660d49d465d033a88ae26d6a7c1cbe096a2447d32c5648c",
       "receiptsRoot": "0xa0407b9a8a55106d549e0f19b92fceaa7f7a25697e94ebf8a1fa74af7b9168f4",
       "timestamp": "2026-05-13T16:00:01.000Z",
-      "observationCount": 8,
-      "reportCount": 8,
-      "finalityDistance": 123459,
+      "observationCount": 10,
+      "reportCount": 10,
+      "finalityDistance": 16999999,
       "status": "finalized",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.task_bond_settlement.v1",
+  "title": "FlowMemory TaskBond Settlement V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "settlementId",
+    "taskId",
+    "status",
+    "settledAt",
+    "settlementToken",
+    "totalEscrowed",
+    "totalReleased",
+    "reserveAmount",
+    "transfers"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.task_bond_settlement.v1" },
+    "settlementId": { "$ref": "#/$defs/hex32" },
+    "taskId": { "$ref": "#/$defs/hex32" },
+    "status": { "enum": ["settled", "refunded", "slashed"] },
+    "settledAt": { "type": "string", "format": "date-time" },
+    "settlementToken": { "$ref": "#/$defs/address" },
+    "totalEscrowed": { "$ref": "#/$defs/uintString" },
+    "totalReleased": { "$ref": "#/$defs/uintString" },
+    "reserveAmount": { "$ref": "#/$defs/uintString" },
+    "transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["to", "amount", "reason"],
+        "properties": {
+          "to": { "$ref": "#/$defs/address" },
+          "amount": { "$ref": "#/$defs/uintString" },
+          "reason": { "enum": ["agent_payout", "agent_bond_return", "requester_cancel_bond_return", "requester_refund", "requester_slash_share", "verifier_fee", "verifier_slash_share", "challenger_share", "reserve"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" }
+  }
+}

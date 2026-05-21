@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.task_bond_verifier_report.v1",
+  "title": "FlowMemory TaskBond VerifierReport V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "reportId",
+    "taskId",
+    "verifier",
+    "status",
+    "reportDigest",
+    "evidenceCommitment",
+    "policyId",
+    "confirmationsRequired",
+    "confirmedBy",
+    "submittedAt",
+    "reasonCodes",
+    "checks"
+  ],
+  "properties": {
+    "schema": { "const": "flowmemory.task_bond_verifier_report.v1" },
+    "reportId": { "$ref": "#/$defs/hex32" },
+    "taskId": { "$ref": "#/$defs/hex32" },
+    "verifier": { "$ref": "#/$defs/address" },
+    "status": { "enum": ["valid", "invalid", "unresolved", "unsupported", "reorged"] },
+    "reportDigest": { "$ref": "#/$defs/hex32" },
+    "evidenceCommitment": { "$ref": "#/$defs/hex32" },
+    "policyId": { "$ref": "#/$defs/hex32" },
+    "confirmationsRequired": { "type": "integer", "minimum": 0 },
+    "confirmedBy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/address" }
+    },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "passed"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }
+  }
+}

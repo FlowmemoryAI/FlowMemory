@@ -6,8 +6,14 @@
     "generate": "node src/generate-launch-core.ts",
     "generate:canary-dashboard": "node src/generate-canary-dashboard.ts",
     "launch:v0": "node src/launch-v0.ts",
+    "agent-bonds:v1": "node src/agent-bonds.ts",
+    "agent-bonds:replay": "node src/agent-bonds-replay.ts",
+    "agent-bonds:simulate": "node src/agent-bonds-simulate.ts",
+    "agent-memory:local": "node src/agent-memory.ts",
+    "agent-memory:e2e": "node src/agent-memory-local-e2e.ts",
     "validate": "node src/validate-launch-core.ts",
     "fixtures:check": "node src/check-fixture-drift.ts",
-    "test": "node --test test/*.test.ts"
+    "test": "node --test --test-concurrency=1 test/*.test.ts",
+    "test:agent-bonds": "node --test --test-concurrency=1 test/agent-bonds-validation.test.ts test/agent-bonds-packager.test.ts test/agent-bonds-phase2.test.ts test/flowmemory.test.ts"
   }
 }

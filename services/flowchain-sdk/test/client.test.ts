@@ -110,6 +110,95 @@ test("wraps explorer, wallet, finality, and bridge read methods", async () => {
   assert.deepEqual(calls[9]?.params, { creditId: "credit:1" });
 });
 
+test("wraps base agent memory control-plane methods", async () => {
+  const calls: { method: string; params: unknown }[] = [];
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
+      calls.push({ method: body.method, params: body.params });
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: "ok", result: { schema: body.method } }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  await client.baseAgentMemoryScoutList({ limit: 2 });
+  await client.baseAgentMemoryScoutGet({ agentId: "agent:fixture" });
+  await client.baseAgentMemoryReplayGet({ agentId: "agent:fixture" });
+
+  assert.deepEqual(calls.map((call) => call.method), [
+    "base_agent_memory_task_scout_list",
+    "base_agent_memory_task_scout_get",
+    "base_agent_memory_replay_get",
+  ]);
+  assert.deepEqual(calls[1]?.params, { agentId: "agent:fixture" });
+});
+
+test("wraps public agent network discovery and preview methods", async () => {
+  const calls: { method: string; params: unknown }[] = [];
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
+      calls.push({ method: body.method, params: body.params });
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: "ok", result: { schema: body.method } }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  await client.publicAgentNetworkClassesList({ limit: 5 });
+  await client.publicAgentNetworkClassGet({ classId: "class:task-scout" });
+  await client.publicAgentNetworkToolsList({ limit: 5 });
+  await client.publicAgentNetworkToolSetGet({ toolSetRoot: "toolset:task-scout" });
+  await client.publicAgentLaunchPreview({ owner: "0x1", classId: "0x2", objectiveText: "goal", profileText: "profile", toolSetRoot: "0x3", autonomyLevel: 2, riskLevel: 1, bondToken: "0x0", bondAmount: "0", fuelToken: "0x0", initialFuelAmount: "0", discoverable: true });
+
+  assert.deepEqual(calls.map((call) => call.method), [
+    "public_agent_network_classes_list",
+    "public_agent_network_class_get",
+    "public_agent_network_tools_list",
+    "public_agent_network_tool_set_get",
+    "public_agent_launch_preview",
+  ]);
+});
+
+test("wraps public agent launch intent, discovery, and swarm replay methods", async () => {
+  const calls: { method: string; params: unknown }[] = [];
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
+      calls.push({ method: body.method, params: body.params });
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: "ok", result: { schema: body.method } }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  await client.publicAgentLaunchIntentGet({ owner: "0x1", classId: "0x2", objectiveText: "goal", profileText: "profile", toolSetRoot: "0x3", autonomyLevel: 2, riskLevel: 1, bondToken: "0x0", bondAmount: "0", fuelToken: "0x0", initialFuelAmount: "0", discoverable: true, rootfieldId: "0x4", validAfter: "1", validUntil: "2", nonce: "0", salt: "0x5" });
+  await client.publicAgentLaunchGet({});
+  await client.publicAgentDiscover({ limit: 5 });
+  await client.publicSwarmGet({});
+  await client.publicSwarmReplayGet({});
+  assert.deepEqual(calls.map((call) => call.method), [
+    "public_agent_launch_intent_get",
+    "public_agent_launch_get",
+    "public_agent_discover",
+    "public_swarm_get",
+    "public_swarm_replay_get",
+  ]);
+});
+test("wraps public swarm discovery and preview methods", async () => {
+  const calls: { method: string; params: unknown }[] = [];
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
+      calls.push({ method: body.method, params: body.params });
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: "ok", result: { schema: body.method } }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  await client.publicSwarmClassesList({ limit: 5 });
+  await client.publicSwarmClassGet({ swarmClass: "class:research-swarm" });
+  await client.publicSwarmLaunchPreview({ creator: "0x1", swarmClass: "0x2", missionText: "mission", profileText: "profile", budgetAsset: "0x3", initialBudget: "10" });
+  assert.deepEqual(calls.map((call) => call.method), [
+    "public_swarm_classes_list",
+    "public_swarm_class_get",
+    "public_swarm_launch_preview",
+  ]);
+});
 test("redacts secret-shaped diagnostics", () => {
   const text = redactFlowChainText("private_key=abc123 account=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   assert.equal(text.includes("abc123"), false);

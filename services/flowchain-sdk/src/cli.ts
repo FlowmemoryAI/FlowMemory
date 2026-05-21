@@ -61,6 +61,22 @@ const COMMANDS = new Set([
   "withdrawal",
   "wallet-send",
   "diagnostics",
+  "base-agent-scouts",
+  "base-agent-scout",
+  "base-agent-replay",
+  "public-agent-classes",
+  "public-agent-class",
+  "public-agent-tools",
+  "public-agent-toolset",
+  "public-agent-launch-preview",
+  "public-agent-launch-intent",
+  "public-agent-launch",
+  "public-agent-discover",
+  "public-swarm-classes",
+  "public-swarm-class",
+  "public-swarm-launch-preview",
+  "public-swarm",
+  "public-swarm-replay",
   "help",
 ]);
 
@@ -160,6 +176,22 @@ Commands:
   finality          List finality rows
   finality-get      Get finality by --object or --id
   wallet-send       Submit a local wallet send through the real control-plane wallet path
+  base-agent-scouts  List Base agent-memory task-scout records
+  base-agent-scout   Get Base agent-memory task-scout by --account, --object, or --id
+  base-agent-replay  Get Base agent-memory replay report by --account, --object, or --id
+  public-agent-classes List public agent classes
+  public-agent-class  Get public agent class by --id
+  public-agent-tools  List public agent tools
+  public-agent-toolset Get public agent tool set by --id
+  public-agent-launch-preview Preview roots and warnings using --account, --status (classId), and --object (toolSetRoot)
+  public-agent-launch-intent Build public launch typed intent roots using --account, --status (classId), and --object (toolSetRoot)
+  public-agent-launch Get the prototype/latest public launch projection
+  public-agent-discover Discover public launch projections
+  public-swarm-classes List public swarm classes
+  public-swarm-class  Get public swarm class by --id
+  public-swarm-launch-preview Preview a public swarm launch using --account, --status (swarmClass), and --memo
+  public-swarm       Get the prototype/latest public swarm projection
+  public-swarm-replay Get deterministic public swarm replay projection
   bridge-readiness  Print bridge live readiness
   bridge-status     Print bridge status
   bridge-deposits   List bridge deposits
@@ -346,6 +378,76 @@ async function run(argv = process.argv.slice(2)) {
         return client.withdrawalList(listParams(options));
       case "withdrawal":
         return client.withdrawalGet(withdrawalParams(options));
+      case "base-agent-scouts":
+        return client.baseAgentMemoryScoutList(listParams(options));
+      case "base-agent-scout":
+        return client.baseAgentMemoryScoutGet({ agentId: requiredValue(options, ["accountId", "objectId", "id"], "--account, --object, or --id") });
+      case "base-agent-replay":
+        return client.baseAgentMemoryReplayGet({ agentId: requiredValue(options, ["accountId", "objectId", "id"], "--account, --object, or --id") });
+      case "public-agent-classes":
+        return client.publicAgentNetworkClassesList(listParams(options));
+      case "public-agent-class":
+        return client.publicAgentNetworkClassGet({ classId: requiredValue(options, ["id"], "--id") });
+      case "public-agent-tools":
+        return client.publicAgentNetworkToolsList(listParams(options));
+      case "public-agent-toolset":
+        return client.publicAgentNetworkToolSetGet({ toolSetRoot: requiredValue(options, ["id"], "--id") });
+      case "public-agent-launch-preview":
+        return client.publicAgentLaunchPreview({
+          owner: requiredValue(options, ["accountId", "id"], "--account or --id"),
+          classId: requiredValue(options, ["status"], "--status used as classId"),
+          objectiveText: options.memo ?? "public launch objective",
+          profileText: options.memo ?? "public launch profile",
+          toolSetRoot: requiredValue(options, ["objectId"], "--object used as toolSetRoot"),
+          autonomyLevel: 2,
+          riskLevel: 1,
+          bondToken: "0x0000000000000000000000000000000000000000",
+          bondAmount: "0",
+          fuelToken: "0x0000000000000000000000000000000000000000",
+          initialFuelAmount: "0",
+          discoverable: true,
+        });
+      case "public-agent-launch-intent":
+        return client.publicAgentLaunchIntentGet({
+          owner: requiredValue(options, ["accountId", "id"], "--account or --id"),
+          classId: requiredValue(options, ["status"], "--status used as classId"),
+          objectiveText: options.memo ?? "public launch objective",
+          profileText: options.memo ?? "public launch profile",
+          toolSetRoot: requiredValue(options, ["objectId"], "--object used as toolSetRoot"),
+          autonomyLevel: 2,
+          riskLevel: 1,
+          bondToken: "0x2000000000000000000000000000000000000001",
+          bondAmount: "10000000000000000000",
+          fuelToken: "0x2000000000000000000000000000000000000001",
+          initialFuelAmount: "5000000000000000000",
+          discoverable: true,
+          rootfieldId: "0x1111111111111111111111111111111111111111111111111111111111111111",
+          validAfter: "1",
+          validUntil: "2",
+          nonce: "0",
+          salt: "0x2222222222222222222222222222222222222222222222222222222222222222",
+        });
+      case "public-agent-launch":
+        return client.publicAgentLaunchGet(options.id === undefined ? {} : { launchId: options.id });
+      case "public-agent-discover":
+        return client.publicAgentDiscover(listParams(options));
+      case "public-swarm-classes":
+        return client.publicSwarmClassesList(listParams(options));
+      case "public-swarm-class":
+        return client.publicSwarmClassGet({ swarmClass: requiredValue(options, ["id"], "--id") });
+      case "public-swarm-launch-preview":
+        return client.publicSwarmLaunchPreview({
+          creator: requiredValue(options, ["accountId", "id"], "--account or --id"),
+          swarmClass: requiredValue(options, ["status"], "--status used as swarmClass"),
+          missionText: options.memo ?? "public swarm mission",
+          profileText: options.memo ?? "public swarm profile",
+          budgetAsset: requiredValue(options, ["objectId"], "--object used as budgetAsset"),
+          initialBudget: options.amountUnits ?? "0",
+        });
+      case "public-swarm":
+        return client.publicSwarmGet(options.id === undefined ? {} : { swarmId: options.id });
+      case "public-swarm-replay":
+        return client.publicSwarmReplayGet(options.id === undefined ? {} : { swarmId: options.id });
       case "wallet-send":
         if (options.fromAccountId === undefined || options.toAccountId === undefined || options.amountUnits === undefined) {
           throw new Error("wallet-send requires --from, --to, and --amount-units");

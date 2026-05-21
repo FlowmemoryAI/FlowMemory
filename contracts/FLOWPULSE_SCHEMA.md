@@ -59,3 +59,26 @@ FlowPulse does not include `txHash` or `logIndex`. Those values are not availabl
 | `2` | `ROOT_COMMITTED` | committed root | `keccak256(abi.encode(root, artifactCommitment))` |
 | `3` | `ROOTFIELD_STATUS_CHANGED` | `rootfieldId` | type-specific status or ownership commitment |
 | `4` | `SWAP_MEMORY_SIGNAL` | Uniswap pool id | swap-memory artifact commitment checked by the V0 verifier fixture policy |
+| `5` | `TASK_OPENED` | task id | task terms, payout, fee, and requester-bond commitment |
+| `6` | `TASK_ACCEPTED` | task id | agent, task-bond, and deadline commitment |
+| `7` | `TASK_STARTED` | task id | agent start commitment |
+| `8` | `TASK_EVIDENCE_COMMITTED` | task id | content-addressed evidence commitment |
+| `9` | `TASK_VERIFIED` | task id | verifier report digest for an accepted objective task |
+| `10` | `TASK_FAILED` | task id | verifier report digest for a failed objective task |
+| `11` | `TASK_CHALLENGED` | task id | dispute or appeal commitment |
+| `12` | `TASK_SETTLED` | task id | final settlement commitment |
+| `13` | `TASK_SLASHED` | task id | final slash distribution commitment |
+| `20` | `AGENT_BOND_PASSPORT_CREATED` | passport id | initial passport commitment |
+| `21` | `AGENT_BOND_PASSPORT_UPDATED` | passport id | updated passport commitment |
+| `22` | `AGENT_BOND_ENVELOPE_QUOTED` | envelope id | quoted bonded task envelope hash |
+| `23` | `AGENT_BOND_ENVELOPE_SIGNED` | envelope id | signed bonded task envelope hash |
+| `24` | `AGENT_BOND_RECEIPT_EMITTED` | receipt id | bonded execution receipt hash |
+| `25` | `AGENT_BOND_CREDIT_SCORE_UPDATED` | agent id | credit score attestation hash |
+| `26` | `AGENT_BOND_UNDERWRITER_CAPACITY_ALLOCATED` | allocation id | underwriter allocation commitment |
+| `27` | `AGENT_BOND_UNDERWRITER_CAPACITY_LOCKED` | task id | underwriter lock commitment |
+| `28` | `AGENT_BOND_UNDERWRITER_LOSS_EVENT` | loss event id | underwriter loss waterfall commitment |
+| `29` | `AGENT_BOND_A2A_TASK_LINKED` | task id | A2A linkage commitment |
+| `30` | `AGENT_BOND_MCP_TOOL_LINKED` | task id | MCP linkage commitment |
+| `31` | `AGENT_BOND_X402_PAYMENT_LINKED` | payment intent id | x402 linkage commitment |
+| `32` | `AGENT_BOND_PUBLIC_CLAIM_GENERATED` | claim package id | generated public-claim package hash |
+| `33` | `AGENT_BOND_PUBLIC_CLAIM_BLOCKED` | claim package id | blocked public-claim package hash |

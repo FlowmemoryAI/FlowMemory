@@ -161,6 +161,20 @@ operator separation, multisig or comparable account-control decisions,
 key-rotation/recovery, verifier signing policy, PoolManager hook wiring, and a
 recorded go/no-go decision are required before any production claim.
 
+
+### Agent Bonds Capped Pilot Controls
+
+Agent Bonds now includes a production-shaped local/test control surface:
+
+- two-step ownership on escrow, policy, stake, and manager contracts
+- a timelocked multisig controller contract for owner-path administration
+- a separate pause guardian for immediate stop of new exposure
+- capped pilot controls for requester, agent, verifier, payout, open exposure, and open task count
+- evidence-availability commitments and minimum retention windows
+- optional independent verifier confirmation before settlement
+
+These changes reduce trust assumptions for objective-task pilots, but they do not make dispute resolution fully trustless. `resolutionAuthority` remains an explicit trust assumption for challenged outcomes.
+
 ### Launch-Candidate Boundary Review
 
 The 2026-05-13 launch-candidate security boundary review lives in

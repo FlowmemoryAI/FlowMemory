@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "x402-agent-bonds-payment-intent/v1",
+  "paymentIntentId": "x402_intent_001",
+  "mode": "escrow_bridge",
+  "envelopeId": "env_x402_code_001",
+  "envelopeHash": "0xceb92e595abe7c920a79532613a736251975a70cd20da986fdd1820fc7194378",
+  "network": {
+    "chainId": 8453,
+    "caip2": "eip155:8453"
+  },
+  "asset": {
+    "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "symbol": "USDC",
+    "decimals": 6
+  },
+  "amount": {
+    "atomic": "67500000",
+    "display": "67.50",
+    "currency": "USDC"
+  },
+  "payTo": "0x3000000000000000000000000000000000000002",
+  "description": "Fund bonded task envelope env_x402_code_001",
+  "x402": {
+    "paymentRequiredPayloadHash": "0x242ca5506b1a94cc24877fdc8f74c6bcf4872132bea2b6914e5f2a9160e5c37f",
+    "facilitator": "fixture-facilitator"
+  },
+  "status": "payment_required",
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "expiresAt": "2026-05-22T12:00:00.000Z"
+  }
+}

@@ -2,6 +2,7 @@ import {
   VERIFIER_REPORT_SCHEMA,
   deriveReportId,
   encodeBytes32,
+  encodeUint256,
   keccak256Hex,
   normalizeBytes32,
   type VerifierReportCore,
@@ -50,7 +51,27 @@ export interface SwapMemorySignalArtifact {
   memoryRoot: string;
 }
 
-export type VerifierArtifact = RootfieldRegistrationArtifact | RootCommitmentArtifact | SwapMemorySignalArtifact;
+export interface AgentStepCommitmentArtifact {
+  kind: "agent-step-commitment";
+  actionReceiptId: string;
+}
+
+export interface AgentMemoryCommitmentArtifact {
+  kind: "agent-memory-commitment";
+  parentRoot: string;
+  deltaRoot: string;
+  newRoot: string;
+  actionReceiptId: string;
+  actionSucceeded: boolean;
+}
+
+
+export type VerifierArtifact =
+  | RootfieldRegistrationArtifact
+  | RootCommitmentArtifact
+  | SwapMemorySignalArtifact
+  | AgentStepCommitmentArtifact
+  | AgentMemoryCommitmentArtifact;
 
 export interface ArtifactResolverFixture {
   resolverPolicyId: string;
@@ -93,6 +114,16 @@ export function swapMemorySignalCommitment(artifact: SwapMemorySignalArtifact): 
     encodeBytes32(artifact.poolId),
     encodeBytes32(artifact.hookDataHash),
     encodeBytes32(artifact.memoryRoot),
+  ]));
+}
+
+export function agentMemoryCommitment(artifact: AgentMemoryCommitmentArtifact): `0x${string}` {
+  return keccak256Hex(concatBytes([
+    encodeBytes32(artifact.parentRoot),
+    encodeBytes32(artifact.deltaRoot),
+    encodeBytes32(artifact.newRoot),
+    encodeBytes32(artifact.actionReceiptId),
+    encodeUint256(artifact.actionSucceeded ? 1 : 0),
   ]));
 }
 
@@ -166,7 +197,13 @@ export function verifyObservation(
     return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "reorged", checks, evidenceRefs, reasonCodes));
   }
 
-  if (observation.pulseType !== "1" && observation.pulseType !== "2" && observation.pulseType !== "4") {
+  if (
+    observation.pulseType !== "1"
+    && observation.pulseType !== "2"
+    && observation.pulseType !== "4"
+    && observation.pulseType !== "16"
+    && observation.pulseType !== "18"
+  ) {
     reasonCodes.push("pulse.type.unsupported");
     return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "unsupported", checks, evidenceRefs, reasonCodes));
   }
@@ -260,6 +297,51 @@ export function verifyObservation(
       reasonCodes.push("commitment.mismatch");
     }
 
+    return finalizeReport(baseReportCore(
+      observation,
+      resolver.resolverPolicyId,
+      reasonCodes.length === 0 ? "valid" : "invalid",
+      checks,
+      evidenceRefs,
+      reasonCodes,
+    ));
+  }
+
+  if (observation.pulseType === "16") {
+    if (artifact.kind !== "agent-step-commitment") {
+      reasonCodes.push("artifact.schema_mismatch");
+      return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "invalid", checks, evidenceRefs, reasonCodes));
+    }
+
+    const subjectMatches = observation.subject !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const commitmentMatches = normalizeBytes32(observation.commitment) === normalizeBytes32(artifact.actionReceiptId);
+    checks.push({ id: "subject.agent_step_subject_nonzero", passed: subjectMatches });
+    checks.push({ id: "commitment.agent_step_receipt", passed: commitmentMatches });
+    if (!subjectMatches) reasonCodes.push("subject.mismatch");
+    if (!commitmentMatches) reasonCodes.push("commitment.mismatch");
+    return finalizeReport(baseReportCore(
+      observation,
+      resolver.resolverPolicyId,
+      reasonCodes.length === 0 ? "valid" : "invalid",
+      checks,
+      evidenceRefs,
+      reasonCodes,
+    ));
+  }
+
+  if (observation.pulseType === "18") {
+    if (artifact.kind !== "agent-memory-commitment") {
+      reasonCodes.push("artifact.schema_mismatch");
+      return finalizeReport(baseReportCore(observation, resolver.resolverPolicyId, "invalid", checks, evidenceRefs, reasonCodes));
+    }
+
+    const expectedCommitment = agentMemoryCommitment(artifact);
+    const subjectMatches = normalizeBytes32(observation.subject) === normalizeBytes32(artifact.newRoot);
+    const commitmentMatches = normalizeBytes32(observation.commitment) === expectedCommitment;
+    checks.push({ id: "subject.agent_memory_root_matches", passed: subjectMatches });
+    checks.push({ id: "commitment.agent_memory_commitment", passed: commitmentMatches });
+    if (!subjectMatches) reasonCodes.push("subject.mismatch");
+    if (!commitmentMatches) reasonCodes.push("commitment.mismatch");
     return finalizeReport(baseReportCore(
       observation,
       resolver.resolverPolicyId,

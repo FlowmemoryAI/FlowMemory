@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "agent-bonds-failure-waterfall/v1",
+  "waterfallId": "waterfall_api_invalid_001",
+  "receiptId": "receipt_api_data_invalid",
+  "taskId": "task_api_data_001",
+  "terminalState": "slashed_invalid",
+  "components": [
+    {
+      "source": "requester_escrow",
+      "amountUSDC": "50000000",
+      "kind": "refund"
+    },
+    {
+      "source": "agent_bond",
+      "amountUSDC": "8500000",
+      "kind": "slash"
+    },
+    {
+      "source": "protocol_reserve",
+      "amountUSDC": "500000",
+      "kind": "reserve"
+    },
+    {
+      "source": "recourse_pool",
+      "amountUSDC": "25000000",
+      "kind": "recourse"
+    }
+  ],
+  "totals": {
+    "toRequesterUSDC": "83500000",
+    "toVerifierUSDC": "2500000",
+    "slashedUSDC": "10000000",
+    "recourseUSDC": "25000000"
+  },
+  "createdAt": "2026-05-21T12:00:00.000Z"
+}

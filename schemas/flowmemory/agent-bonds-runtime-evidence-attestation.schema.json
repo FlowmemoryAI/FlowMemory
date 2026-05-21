@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_runtime_evidence_attestation.v1",
+  "title": "FlowMemory Agent Bonds Runtime Evidence Attestation V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "multiOperatorRunCompleted", "evidencePath", "docPath", "completedAt"],
+  "properties": {
+    "schema": { "const": "flowmemory.agent_bonds_runtime_evidence_attestation.v1" },
+    "multiOperatorRunCompleted": { "type": "boolean" },
+    "evidencePath": { "type": "string", "minLength": 1 },
+    "docPath": { "type": "string", "minLength": 1 },
+    "completedAt": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}

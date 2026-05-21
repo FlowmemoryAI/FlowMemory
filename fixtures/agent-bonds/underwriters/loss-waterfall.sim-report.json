@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "underwriter-loss-waterfall-sim-report/v1",
+  "generatedAt": "2026-05-21T21:40:52.819Z",
+  "pool": {
+    "schemaVersion": "underwriter-pool/v1",
+    "poolId": "pool_stake_code_001",
+    "poolType": "stake_capacity_pool",
+    "status": "active",
+    "operatorId": "underwriter_operator_001",
+    "asset": {
+      "tokenAddress": "0x2000000000000000000000000000000000000001",
+      "tokenSymbol": "FLOW",
+      "decimals": 18
+    },
+    "scope": {
+      "agentIds": [
+        "agent_code_001"
+      ],
+      "taskClasses": [
+        "code.patch"
+      ],
+      "maxRiskTier": 2
+    },
+    "capacity": {
+      "totalDeposited": "1000000000000000000000",
+      "totalAllocated": "500000000",
+      "totalLocked": "0",
+      "totalAvailable": "500000000",
+      "maxPerAgentUSDC": "500000000",
+      "maxPerTaskUSDC": "50000000",
+      "maxOpenExposureUSDC": "500000000"
+    },
+    "economics": {
+      "feeShareBps": 1000,
+      "slashPriority": "after_agent_stake",
+      "cooldownSeconds": 604800,
+      "epochSeconds": 86400
+    },
+    "lossHistory": {
+      "totalLossEvents": 0,
+      "totalSlashed": "0"
+    },
+    "timestamps": {
+      "createdAt": "2026-05-21T12:00:00.000Z",
+      "updatedAt": "2026-05-21T12:00:00.000Z"
+    }
+  },
+  "allocation": {
+    "schemaVersion": "underwriter-allocation/v1",
+    "allocationId": "allocation_agent_code_001_code.patch",
+    "poolId": "pool_stake_code_001",
+    "agentId": "agent_code_001",
+    "taskClass": "code.patch",
+    "allocatedCapacityUSDC": "50000000",
+    "lockedCapacityUSDC": "0",
+    "availableCapacityUSDC": "50000000",
+    "validFrom": "2026-05-21T21:40:52.665Z",
+    "validUntil": "2026-06-20T21:40:52.666Z",
+    "status": "active"
+  },
+  "lossEvent": {
+    "schemaVersion": "underwriter-loss-event/v1",
+    "lossEventId": "loss_task_fixture_001",
+    "poolId": "pool_stake_code_001",
+    "allocationId": "allocation_agent_code_001_code.patch",
+    "taskId": "task_fixture_001",
+    "receiptId": "receipt_invalid_slash",
+    "reason": "agent_invalid_submission",
+    "amountSlashed": "10000000",
+    "asset": "0x2000000000000000000000000000000000000001",
+    "waterfall": [
+      {
+        "source": "agent_bond",
+        "amount": "10000000"
+      },
+      {
+        "source": "underwriter_pool",
+        "amount": "0"
+      }
+    ],
+    "createdAt": "2026-05-21T21:40:52.770Z"
+  },
+  "notes": [
+    "Underwriter pools are capacity or recourse backing, not insurance."
+  ]
+}

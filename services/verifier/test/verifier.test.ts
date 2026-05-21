@@ -74,7 +74,7 @@ test("generates all verifier statuses from receipt fixtures", () => {
     reorged: 1,
     unresolved: 1,
     unsupported: 1,
-    valid: 4,
+    valid: 6,
   });
 });
 
@@ -115,7 +115,7 @@ test("persists deterministic verifier report JSON", () => {
 
     assert.equal(firstWrite, secondWrite);
     assert.equal(persisted.schema, "flowmemory.verifier.persistence.v0");
-    assert.equal(persisted.reports.length, 8);
+    assert.equal(persisted.reports.length, 10);
     assert.equal("createdAt" in persisted.reports[0].reportCore, false);
   } finally {
     rmSync(dir, { recursive: true, force: true });

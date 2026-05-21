@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "bonded-execution-receipt/v1",
+  "receiptId": "bonded-execution-receipt.timeout-slash",
+  "receiptHash": "0x867c0ac54a5293f57009760166706cb5de3eb008b78c04e6166bef26f80a7118",
+  "taskId": "task_fixture_001",
+  "envelopeId": "env_code_patch_001",
+  "envelopeHash": "0xe1d224d717b70d18c7c1791cebd50ad102b50d1593ddeffad735f6cf51836318",
+  "participants": {
+    "requesterId": "requester_fixture_001",
+    "agentId": "agent_code_001",
+    "verifierId": "verifier_ci_001",
+    "confirmingVerifierId": "verifier_confirming_001",
+    "resolutionAuthorityId": "resolution_fixture"
+  },
+  "lifecycle": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "acceptedAt": "2026-05-21T12:01:00.000Z",
+    "submittedAt": "2026-05-21T12:10:00.000Z",
+    "reportedAt": "2026-05-21T12:20:00.000Z",
+    "confirmedAt": "2026-05-21T12:30:00.000Z",
+    "settledAt": "2026-05-22T12:00:00.000Z",
+    "terminalState": "slashed_timeout"
+  },
+  "evidence": {
+    "evidenceHash": "0x120d165e32d62c7c5885241f9cce064e6b961c558f410e8a01f8cc8f6403d3ad",
+    "evidenceUri": "fixture://agent-bonds/evidence/bonded-execution-receipt.timeout-slash.json",
+    "evidenceSchema": "flowmemory.task_bond_evidence.v1",
+    "availabilityProofHash": "0x3fd2467d15af8595016093b01e9b0803f72c2a8b16eb05847722f17a7b66db8d",
+    "redacted": true
+  },
+  "verifierReport": {
+    "reportHash": "0x96c9311842be9f94277a56b48bb9d65534cacb7b84f57224e2c81a1522558fd6",
+    "result": "invalid",
+    "reasonCode": "OBJECTIVE_TASK_FAILED"
+  },
+  "settlement": {
+    "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "settlementChainId": 8453,
+    "payoutUSDC": "50000000",
+    "agentBondUSDC": "10000000",
+    "verifierFeeUSDC": "2500000",
+    "requesterRefundUSDC": "50000000",
+    "agentPayoutUSDC": "0",
+    "verifierPayoutUSDC": "2500000",
+    "slashedUSDC": "10000000",
+    "protocolFeeUSDC": "0",
+    "transactionHashes": [
+      "0x48a29f17271db442f266f1d728033c473af7d7e8e0849e9083e10be3598c27c6"
+    ]
+  },
+  "reputationDelta": {
+    "agent": {
+      "completedDelta": 1,
+      "settledDelta": 0,
+      "challengedDelta": 0,
+      "slashedDelta": 1,
+      "timeoutDelta": 1,
+      "scoreImpactHint": "severe_negative"
+    },
+    "verifier": {
+      "reportsDelta": 1,
+      "overturnedDelta": 0,
+      "slashedDelta": 0,
+      "scoreImpactHint": "negative"
+    }
+  },
+  "flowPulse": {
+    "pulseIds": [
+      "0xd27f7cbc3ca2fc0e2b11730cf3bbf7679cf43c02add14b180277c8a5d7eff2a9",
+      "0xb530943e45f6669977e61d361d3ac9c00508bf64d21802af7011caecf94fa323"
+    ],
+    "lifecycleRecordHashes": [
+      "0x049bd573ce44ad2adf034762409b64d27758c0199ebb98fa87bb526e7dfebed6"
+    ]
+  },
+  "integrations": {
+    "a2a": {
+      "contextId": "ctx_fixture_001",
+      "taskId": "a2a_task_001",
+      "artifactIds": [
+        "artifact_receipt_001"
+      ]
+    },
+    "mcp": {
+      "toolCallId": "tool_call_001",
+      "server": "https://example.invalid/mcp",
+      "resourceUri": "flowmemory://agent-bonds/receipts/bonded-execution-receipt.timeout-slash"
+    },
+    "x402": {
+      "paymentIntentId": "x402_intent_001",
+      "paymentTransactionHash": "0x45ec64f34cc658841a82bf5e1676104221b9b8acbdcf72626b8ac95bdc14ac9e"
+    }
+  },
+  "signatures": [
+    {
+      "signer": "0x1000000000000000000000000000000000000f11",
+      "role": "verifier",
+      "algorithm": "fixture-ed25519",
+      "signature": "fixture-signature",
+      "signedAt": "2026-05-21T12:00:00.000Z"
+    }
+  ]
+}

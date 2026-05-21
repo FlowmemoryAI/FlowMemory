@@ -207,6 +207,37 @@ Launch risk to watch:
 
 - open submission is acceptable for V0 commitments only if docs and demos treat outputs as untrusted until off-chain verifier reports exist.
 
+
+## Agent Bonds Production-Shaped Controls
+
+Contracts:
+
+- `AgentBondManager`
+- `TaskBondEscrow`
+- `AgentStakeRegistry`
+- `TaskPolicyRegistry`
+- `AgentBondTimelockedMultisig`
+
+Owner model:
+
+- two-step ownership for escrow, stake, policy, and manager controls
+- optional owner-path transfer to `AgentBondTimelockedMultisig`
+- separate `pauseGuardian` for immediate stop of new exposure
+
+Current protections:
+
+- capped pilot controls for requester, agent, verifier, payout, open exposure, and open task count
+- independent verifier confirmation can be required by policy before settlement
+- evidence availability commitment and retention window are required before report acceptance
+- challenge bond is isolated from task payout and task bond
+- settlement uses pull-withdrawals and explicit slash splits
+
+Launch risk to watch:
+
+- challenged outcomes still depend on explicit `resolutionAuthority`
+- owner and guardian roles are safer than the earlier direct-EOA model but still require real operator separation and key management in deployment
+- allowlists and caps are governance controls, not decentralization guarantees
+
 ## Required Review Before Expanding
 
 Before adding rewards, staking, slashing, custody, dynamic fees, production hook permissions, or appchain/L1 settlement:

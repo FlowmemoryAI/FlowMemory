@@ -74,8 +74,67 @@ export type ControlPlaneMethod =
   | "verifier_report_list"
   | "memory_cell_get"
   | "memory_cell_list"
+  | "agent_bond_task_get"
+  | "agent_bond_task_list"
+  | "agent_bond_readiness_get"
+  | "agent_bond_replay_report_get"
+  | "agent_bond_public_launch_status_get"
+  | "agent_bond_economic_report_get"
+  | "agent_bond_passport_get"
+  | "agent_bond_passport_list"
+  | "agent_bond_passport_validate"
+  | "agent_bond_passport_capacity_get"
+  | "agent_bond_envelope_quote"
+  | "agent_bond_envelope_validate"
+  | "agent_bond_envelope_hash"
+  | "agent_bond_envelope_create_task_args"
+  | "agent_bond_receipt_get"
+  | "agent_bond_receipt_list"
+  | "agent_bond_receipt_validate"
+  | "agent_bond_receipt_reputation_delta_get"
+  | "agent_bond_phase2_gate_get"
+  | "agent_bond_a2a_agent_card_get"
+  | "agent_bond_a2a_extension_get"
+  | "agent_bond_a2a_message_validate"
+  | "agent_bond_a2a_envelope_extract"
+  | "agent_bond_mcp_tools_get"
+  | "agent_bond_mcp_resource_get"
+  | "agent_bond_mcp_prompt_get"
+  | "agent_bond_x402_payment_intent_create"
+  | "agent_bond_x402_payment_required_get"
+  | "agent_bond_x402_payment_receipt_validate"
+  | "agent_bond_x402_envelope_link_get"
+  | "agent_bond_credit_score_get"
+  | "agent_bond_credit_score_simulation_get"
+  | "agent_bond_credit_score_attestation_validate"
+  | "agent_bond_underwriter_pool_get"
+  | "agent_bond_underwriter_pool_list"
+  | "agent_bond_underwriter_capacity_quote"
+  | "agent_bond_underwriter_loss_simulate"
+  | "agent_bond_public_claim_get"
+  | "agent_bond_public_claim_validate"
+  | "agent_bond_public_claim_status_get"
+  | "agent_bond_recourse_policy_get"
+  | "agent_bond_recourse_decision_quote"
+  | "agent_bond_failure_waterfall_get"
+  | "public_agent_network_classes_list"
+  | "public_agent_network_class_get"
+  | "public_agent_network_tools_list"
+  | "public_agent_network_tool_set_get"
+  | "public_agent_launch_preview"
+  | "public_agent_launch_intent_get"
+  | "public_agent_launch_get"
+  | "public_agent_discover"
+  | "public_swarm_classes_list"
+  | "public_swarm_class_get"
+  | "public_swarm_launch_preview"
+  | "public_swarm_get"
+  | "public_swarm_replay_get"
   | "agent_get"
   | "agent_list"
+  | "base_agent_memory_task_scout_get"
+  | "base_agent_memory_task_scout_list"
+  | "base_agent_memory_replay_get"
   | "model_get"
   | "model_list"
   | "challenge_get"
@@ -115,6 +174,18 @@ export interface ControlPlanePaths {
   bridgeObservationIntakePath: string;
   walletTransferProofPath: string;
   walletPublicMetadataPath: string;
+  agentBondFixturePath: string;
+  agentBondReplayReportPath: string;
+  agentBondEconomicReportPath: string;
+  agentBondReadinessReportPath: string;
+  agentBondLaunchApprovalPath: string;
+  agentBondPassportDir: string;
+  agentBondEnvelopeDir: string;
+  agentBondReceiptDir: string;
+  agentBondClaimDir: string;
+  taskScoutFixturePath: string;
+  taskScoutViewPath: string;
+  taskScoutReplayPath: string;
 }
 
 export interface DataSourceRecord {
@@ -142,6 +213,11 @@ export interface LoadedControlPlaneState {
   bridgeRuntimeHandoff: JsonObject | null;
   walletTransferProof: JsonObject | null;
   walletPublicMetadata: JsonObject | null;
+  agentBondReplayReport: JsonObject | null;
+  agentBondEconomicReport: JsonObject | null;
+  agentBondReadinessReport: JsonObject | null;
+  taskScoutFixture: JsonObject | null;
+  taskScoutReplayReport: JsonObject | null;
   paths: ControlPlanePaths;
   sources: Record<string, DataSourceRecord>;
 }

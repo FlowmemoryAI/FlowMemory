@@ -460,6 +460,15 @@ function pulseTypeName(pulseType: string): string {
   if (pulseType === "2") return "ROOT_COMMITTED";
   if (pulseType === "3") return "ROOTFIELD_STATUS_CHANGED";
   if (pulseType === "4") return "SWAP_MEMORY_SIGNAL";
+  if (pulseType === "5") return "TASK_OPENED";
+  if (pulseType === "6") return "TASK_ACCEPTED";
+  if (pulseType === "7") return "TASK_STARTED";
+  if (pulseType === "8") return "TASK_EVIDENCE_COMMITTED";
+  if (pulseType === "9") return "TASK_VERIFIED";
+  if (pulseType === "10") return "TASK_FAILED";
+  if (pulseType === "11") return "TASK_CHALLENGED";
+  if (pulseType === "12") return "TASK_SETTLED";
+  if (pulseType === "13") return "TASK_SLASHED";
   return `FLOWPULSE_${pulseType}`;
 }
 

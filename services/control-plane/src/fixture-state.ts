@@ -17,6 +17,7 @@ import {
   type ArtifactResolverFixture,
   type PersistedVerifierReports,
 } from "../../verifier/src/index.ts";
+import { buildTaskScoutFixture, replayTaskScoutFixture, type TaskScoutFixtureEnvelope } from "../../flowmemory/src/agent-memory.ts";
 import { makeObservation, validateDeposit } from "../../bridge-relayer/src/observe-base-lockbox.ts";
 import type {
   ControlPlanePaths,
@@ -46,6 +47,18 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
   walletTransferProofPath: "devnet/local/production-l1-wallet/wallet-e2e/wallet-e2e-proof.json",
   walletPublicMetadataPath: "devnet/local/wallet/flowchain-operator/flowchain-operator-public-metadata.json",
+  agentBondFixturePath: "fixtures/agent-bonds/agent-bonds-v1.json",
+  agentBondReplayReportPath: "fixtures/agent-bonds/replay-report.json",
+  agentBondEconomicReportPath: "fixtures/agent-bonds/economic-sim-report.json",
+  agentBondReadinessReportPath: "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json",
+  agentBondLaunchApprovalPath: "fixtures/agent-bonds/launch-approval.template.json",
+  agentBondPassportDir: "fixtures/agent-bonds/passports",
+  agentBondEnvelopeDir: "fixtures/agent-bonds/envelopes",
+  agentBondReceiptDir: "fixtures/agent-bonds/receipts",
+  agentBondClaimDir: "fixtures/agent-bonds/claims",
+  taskScoutFixturePath: "fixtures/base-agent-memory/task-scout-v0.json",
+  taskScoutViewPath: "fixtures/base-agent-memory/task-scout-agent-memory-view.json",
+  taskScoutReplayPath: "fixtures/base-agent-memory/task-scout-replay-report.json",
 };
 
 export function resolveControlPlanePath(path: string): string {
@@ -219,6 +232,10 @@ function launchPaths(paths: ControlPlanePaths): LaunchCorePaths {
     transitionsOutPath: "fixtures/launch-core/rootflow-transitions.json",
     dashboardOutPath: "fixtures/dashboard/flowmemory-dashboard-v0.json",
     dashboardRuntimePath: "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
+    agentBondFixturePath: paths.agentBondFixturePath,
+    agentMemoryFixturePath: paths.taskScoutFixturePath,
+    agentMemoryViewPath: paths.taskScoutViewPath,
+    agentMemoryReplayPath: paths.taskScoutReplayPath,
   };
 }
 
@@ -228,6 +245,15 @@ function loadOrBuildLaunchCore(
   verifier: PersistedVerifierReports,
   sources: Record<string, DataSourceRecord>,
 ): LaunchCoreOutput {
+  const taskScoutFixtureRecord = readJsonFile<TaskScoutFixtureEnvelope>(paths.taskScoutFixturePath);
+  const taskScoutFixture = taskScoutFixtureRecord.status === "loaded" ? taskScoutFixtureRecord.value : buildTaskScoutFixture();
+  if (taskScoutFixtureRecord.status === "loaded") {
+    sources.taskScoutFixture = sourceRecord("taskScoutFixture", paths.taskScoutFixturePath, "loaded");
+  } else if (taskScoutFixtureRecord.status === "degraded") {
+    sources.taskScoutFixture = sourceRecord("taskScoutFixture", paths.taskScoutFixturePath, "degraded", `${taskScoutFixtureRecord.recovery}; rebuilt in memory from services/flowmemory/src/agent-memory.ts`);
+  } else {
+    sources.taskScoutFixture = sourceRecord("taskScoutFixture", paths.taskScoutFixturePath, "recovered", "rebuilt in memory from services/flowmemory/src/agent-memory.ts");
+  }
   if (existsSync(resolveControlPlanePath(paths.launchCorePath))) {
     const launchCore = readJsonFile<LaunchCoreOutput>(paths.launchCorePath);
     if (launchCore.status === "loaded") {
@@ -241,11 +267,11 @@ function loadOrBuildLaunchCore(
       "degraded",
       `${launchCore.recovery}; built in memory from indexer and verifier state`,
     );
-    return buildLaunchCore(indexer, verifier, launchPaths(paths));
+    return buildLaunchCore(indexer, verifier, launchPaths(paths), readJson(paths.agentBondFixturePath), taskScoutFixture);
   }
 
   sources.launchCore = sourceRecord("launchCore", paths.launchCorePath, "recovered", "built in memory from indexer and verifier state");
-  return buildLaunchCore(indexer, verifier, launchPaths(paths));
+  return buildLaunchCore(indexer, verifier, launchPaths(paths), readJson(paths.agentBondFixturePath), taskScoutFixture);
 }
 
 function loadOptionalSource(
@@ -375,6 +401,15 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const bridgeRuntimeHandoff = loadOptionalSource("bridgeRuntimeHandoff", paths.bridgeRuntimeHandoffPath, sources);
   const walletTransferProof = loadOptionalSource("walletTransferProof", paths.walletTransferProofPath, sources);
   const walletPublicMetadata = loadOptionalSource("walletPublicMetadata", paths.walletPublicMetadataPath, sources);
+  const agentBondReplayReport = loadOptionalSource("agentBondReplayReport", paths.agentBondReplayReportPath, sources);
+  const agentBondEconomicReport = loadOptionalSource("agentBondEconomicReport", paths.agentBondEconomicReportPath, sources);
+  const agentBondReadinessReport = loadOptionalSource("agentBondReadinessReport", paths.agentBondReadinessReportPath, sources);
+  const taskScoutFixture = loadOptionalSource("taskScoutFixture", paths.taskScoutFixturePath, sources);
+  const taskScoutReplayReport = loadOptionalSource("taskScoutReplayReport", paths.taskScoutReplayPath, sources)
+    ?? (() => {
+      const fixture = taskScoutFixture as TaskScoutFixtureEnvelope | null;
+      return fixture === null ? null : replayTaskScoutFixture(fixture);
+    })();
 
   return {
     schema: "flowmemory.control_plane.state.v0",
@@ -393,6 +428,11 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     bridgeRuntimeHandoff,
     walletTransferProof,
     walletPublicMetadata,
+    agentBondReplayReport,
+    agentBondEconomicReport,
+    agentBondReadinessReport,
+    taskScoutFixture,
+    taskScoutReplayReport,
     paths,
     sources,
   };

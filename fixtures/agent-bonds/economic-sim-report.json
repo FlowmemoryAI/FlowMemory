@@ -1,0 +1,89 @@
+{
+  "schema": "flowmemory.agent_bonds.economic_sim_report.v1",
+  "generatedAt": "2026-05-21T20:18:21.146Z",
+  "assumptions": {
+    "payout": "100000000",
+    "agentBond": "25000000",
+    "verifierFee": "10000000",
+    "requesterCancelBond": "25000000",
+    "disputeBond": "50000000",
+    "totalEscrowed": "160000000",
+    "slashSplitBps": {
+      "requester": 8500,
+      "verifier": 1000,
+      "reserve": 500
+    }
+  },
+  "scenarios": [
+    {
+      "name": "verified_settlement",
+      "outputs": {
+        "agent": "125000000",
+        "requester": "25000000",
+        "verifier": "10000000",
+        "reserve": "0"
+      },
+      "invariant": true
+    },
+    {
+      "name": "invalid_report_slash",
+      "outputs": {
+        "requester": "146250000",
+        "verifier": "12500000",
+        "reserve": "1250000"
+      },
+      "invariant": true
+    },
+    {
+      "name": "challenged_overturn",
+      "outputs": {
+        "requester": "196250000",
+        "verifier": "12500000",
+        "reserve": "1250000"
+      },
+      "notes": [
+        "challenge bond is recoverable when challenger wins",
+        "verifier stake slash is additional non-USDC punishment"
+      ],
+      "invariant": true
+    },
+    {
+      "name": "spam_challenge_cost_floor",
+      "outputs": {
+        "disputeBond": "50000000",
+        "verifierFee": "10000000",
+        "challengeToFeeRatioBps": 50000
+      },
+      "notes": [
+        "spurious challenges must tie up more capital than a single verifier fee",
+        "losing a dispute is more expensive than waiting through one objective-task verification cycle"
+      ],
+      "invariant": true
+    },
+    {
+      "name": "pilot_exposure_cap",
+      "outputs": {
+        "maxOpenExposure": "160000000",
+        "firstTaskExposure": "160000000",
+        "secondTaskExposureAttempt": "320000000"
+      },
+      "notes": [
+        "a second equal-sized task is blocked when maxOpenExposure is 160 USDC",
+        "bounded loss is enforced before a second task can be opened or accepted"
+      ],
+      "invariant": true
+    },
+    {
+      "name": "independent_confirmation_requirement",
+      "outputs": {
+        "requiredConfirmations": 1,
+        "independentVerifiersNeeded": 2
+      },
+      "notes": [
+        "primary verifier alone cannot settle a confirmed-policy task",
+        "settlement requires one additional eligible confirmer or a challenge-resolution path"
+      ],
+      "invariant": true
+    }
+  ]
+}

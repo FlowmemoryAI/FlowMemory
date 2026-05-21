@@ -1,0 +1,21 @@
+{
+  "x402Version": "1",
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "maxAmountRequired": "67500000",
+      "resource": "https://api.flowmemory.ai/agent-bonds/tasks",
+      "description": "Fund bonded task envelope env_x402_code_001",
+      "payTo": "0x3000000000000000000000000000000000000002"
+    }
+  ],
+  "flowmemoryAgentBonds": {
+    "schemaVersion": "x402-agent-bonds/v1",
+    "mode": "escrow_bridge",
+    "envelopeId": "env_x402_code_001",
+    "envelopeHash": "0xceb92e595abe7c920a79532613a736251975a70cd20da986fdd1820fc7194378",
+    "expectedReceipt": true
+  }
+}

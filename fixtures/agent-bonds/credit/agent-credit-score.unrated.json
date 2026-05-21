@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "agent-credit-score/v1",
+  "agentId": "agent_code_001",
+  "operatorId": "operator_flowmemory_fixture",
+  "score": 0,
+  "riskBand": "UNRATED",
+  "computedAt": "2026-05-21T12:00:00.000Z",
+  "expiresAt": "2026-06-20T12:00:00.000Z",
+  "inputs": {
+    "completedTasks": 0,
+    "settledTasks": 0,
+    "challengedTasks": 0,
+    "upheldChallenges": 0,
+    "slashedTasks": 2,
+    "timeoutTasks": 0,
+    "unsupportedTasks": 0,
+    "totalSettledUSDC": "0",
+    "totalSlashedUSDC": "0",
+    "uniqueVerifierCount": 3,
+    "recentReceiptCount": 5
+  },
+  "components": {
+    "successLowerBound": 0,
+    "valueWeightedExperience": 20,
+    "verifierDiversity": 25,
+    "slashPenalty": 0,
+    "timeoutPenalty": 0,
+    "challengePenalty": 0,
+    "evidencePenalty": 0,
+    "recencyAdjustment": 0
+  },
+  "outputs": {
+    "bondBpsMultiplier": 1,
+    "maxOpenExposureUSDC": "500000000",
+    "maxTaskPayoutUSDC": "50000000",
+    "confirmingVerifierRequired": true,
+    "underwriterEligible": false,
+    "publicLabel": "UNRATED"
+  },
+  "reasonCodes": [
+    "FIXTURE_SCORE"
+  ]
+}

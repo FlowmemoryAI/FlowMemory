@@ -4,6 +4,8 @@ FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentraliz
 
 This repository contains the FlowMemory V0 foundation: project operating docs, local/test contracts, fixture-first services, Rootflow and Flow Memory launch-core generation, a fixture-backed dashboard, crypto helpers, a local no-value devnet prototype, and FlowRouter hardware POC materials. Do not treat the current repo as containing production product features yet.
 
+Public release status and open gaps are tracked in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` and `docs/PUBLIC_RELEASE_GAPS.md`.
+
 ## What FlowMemory Is Exploring
 
 - Base and future Uniswap v4 hook integrations
@@ -18,6 +20,28 @@ This repository contains the FlowMemory V0 foundation: project operating docs, l
 - Cryptographic receipts, attestations, roots, and proofs
 - Future FlowMemory appchain/L1 research
 
+## Base On-Chain Agent Memory Workstream
+
+The professional product and architecture package for the Base-native agent memory workstream lives at `docs/base-onchain-agent-memory/README.md`.
+
+This workstream defines the proposed On-Chain Task Scout: a bounded autonomous agent that reads task state and public memory, previews a deterministic next step, commits only allowed actions, writes compact memory deltas, emits FlowPulse, and exposes replayable Rootflow transitions and `AgentMemoryView` output.
+
+This does not change the current repository boundary: heavy AI/model/memory artifacts stay off-chain by default, and the current repo should not be described as containing finished public product features.
+
+
+## Public Agent Network Workstream
+
+The public agent network stack now has local/test contracts, deterministic helpers, control-plane methods, SDK/CLI wrappers, dashboard projection, swarm support, and a local Foundry e2e script.
+
+Key commands:
+
+```powershell
+npm run public-agent-network:contracts
+npm run public-agent-network:local-e2e
+```
+
+This workstream is public for review and local experimentation. It is not a production agent network, not an audited deployment, and not a mainnet-readiness claim.
+
 ## Important Boundaries
 
 - AI does not run on-chain.
@@ -30,18 +54,31 @@ This repository contains the FlowMemory V0 foundation: project operating docs, l
 - `metadataURI` and `evidenceURI` values are emitted as on-chain log bytes and are not contract-enforced as short pointers.
 - Meshtastic and LoRa are low-bandwidth control signaling paths, not normal internet bandwidth.
 
+## Agent Bonds Experimental Surface
+
+The repo now includes an experimental Agent Bonds v1 surface for bounded off-chain agent work:
+
+- task-scoped escrow and settlement
+- stake-gated agents and verifiers
+- challenge bonds and slash paths
+- evidence-availability commitments
+- optional independent verifier confirmation before settlement
+- capped-pilot controls, emergency stop, and timelocked multisig administration paths
+- optional USDC recourse pools with signed quote attestations, concentration caps, epoch loss caps, and withdrawal cooldown controls
+
+Do not describe this as an uncapped public launch or a trustless verifier network. The public boundary is documented in `docs/AGENT_BONDS_PUBLIC_LAUNCH_BOUNDARY.md`, the capped operator path is documented in `docs/OPERATIONS/AGENT_BONDS_CAPPED_PILOT_RUNBOOK.md`, and the internal review is in `docs/reviews/AGENT_BONDS_V1_SECURITY_REVIEW.md`.
+
+Public GitHub publication is allowed as a capped-pilot / integration-beta repository surface when these guardrails stay in place. The safe public claim is **bounded agent-work accountability with task-scoped, capital-backed recourse records**. Do not describe this as insurance, an uncapped public launch, a trustless verifier network, or a guarantee of reimbursement.
+
+
 ## Start Here
 
-For a second computer or a non-technical local test, use the private-repo
-Windows bootstrap path. It installs Git and GitHub CLI, signs into GitHub,
-clones the repo, then runs the beginner installer:
+For a second computer or local test, install Git and clone the public repository:
 
 ```powershell
 winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
-winget install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
 $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
-gh auth login
-gh repo clone FlowmemoryAI/FlowMemory "$env:USERPROFILE\FlowMemory\FlowMemory"
+git clone https://github.com/FlowmemoryAI/FlowMemory.git "$env:USERPROFILE\FlowMemory\FlowMemory"
 cd "$env:USERPROFILE\FlowMemory\FlowMemory"
 powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
 ```

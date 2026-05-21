@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { DEFAULT_LAUNCH_CORE_PATHS, generateLaunchCore } from "./generate-launch-core.ts";
+import { writeAgentBondFixture } from "./agent-bonds.ts";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -60,7 +61,10 @@ export function runLaunchV0(): void {
     DEFAULT_LAUNCH_CORE_PATHS.hardwarePath,
   ]);
 
-  console.log("\n[launch:v0] generate Rootflow and Flow Memory V0 state");
+  console.log("\n[launch:v0] generate Agent Bonds v1 fixture");
+  writeAgentBondFixture();
+
+  console.log("\n[launch:v0] generate Rootflow, Flow Memory, and Base agent-memory task scout state");
   const { launchCore } = generateLaunchCore(DEFAULT_LAUNCH_CORE_PATHS);
 
   console.log(JSON.stringify({
@@ -73,6 +77,9 @@ export function runLaunchV0(): void {
     memoryReceipts: launchCore.memoryReceipts.length,
     rootfieldBundles: launchCore.rootfieldBundles.length,
     agentMemoryViews: launchCore.agentMemoryViews.length,
+    taskScoutFixture: DEFAULT_LAUNCH_CORE_PATHS.agentMemoryFixturePath,
+    taskScoutView: DEFAULT_LAUNCH_CORE_PATHS.agentMemoryViewPath,
+    taskScoutReplay: DEFAULT_LAUNCH_CORE_PATHS.agentMemoryReplayPath,
     dashboardFixture: DEFAULT_LAUNCH_CORE_PATHS.dashboardOutPath,
     dashboardRuntimeData: DEFAULT_LAUNCH_CORE_PATHS.dashboardRuntimePath,
     localOnly: true,

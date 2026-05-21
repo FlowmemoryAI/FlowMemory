@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flowmemory.agent_bonds_failure_waterfall.v1",
+  "title": "FlowMemory Agent Bonds Failure Waterfall V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "waterfallId",
+    "receiptId",
+    "taskId",
+    "terminalState",
+    "components",
+    "totals",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "agent-bonds-failure-waterfall/v1"
+    },
+    "waterfallId": {
+      "type": "string"
+    },
+    "receiptId": {
+      "type": "string"
+    },
+    "taskId": {
+      "type": "string"
+    },
+    "terminalState": {
+      "type": "string"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "amountUSDC",
+          "kind"
+        ],
+        "properties": {
+          "source": {
+            "enum": [
+              "requester_escrow",
+              "agent_bond",
+              "agent_stake",
+              "recourse_pool",
+              "dispute_bond",
+              "protocol_reserve"
+            ]
+          },
+          "amountUSDC": {
+            "$ref": "#/$defs/uintString"
+          },
+          "kind": {
+            "enum": [
+              "refund",
+              "slash",
+              "recourse",
+              "fee",
+              "reserve"
+            ]
+          }
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toRequesterUSDC",
+        "toVerifierUSDC",
+        "slashedUSDC",
+        "recourseUSDC"
+      ],
+      "properties": {
+        "toRequesterUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "toVerifierUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "slashedUSDC": {
+          "$ref": "#/$defs/uintString"
+        },
+        "recourseUSDC": {
+          "$ref": "#/$defs/uintString"
+        }
+      }
+    },
+    "createdAt": {
+      "$ref": "#/$defs/dateTime"
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "uintString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

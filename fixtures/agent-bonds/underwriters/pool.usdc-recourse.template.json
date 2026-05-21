@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "underwriter-pool/v1",
+  "poolId": "pool_usdc_recourse_001",
+  "poolType": "usdc_recourse_pool",
+  "status": "active",
+  "operatorId": "underwriter_operator_001",
+  "asset": {
+    "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "tokenSymbol": "USDC",
+    "decimals": 6
+  },
+  "scope": {
+    "agentIds": [
+      "agent_code_001"
+    ],
+    "taskClasses": [
+      "code.patch"
+    ],
+    "maxRiskTier": 2
+  },
+  "capacity": {
+    "totalDeposited": "1000000000000000000000",
+    "totalAllocated": "500000000",
+    "totalLocked": "0",
+    "totalAvailable": "500000000",
+    "maxPerAgentUSDC": "500000000",
+    "maxPerTaskUSDC": "50000000",
+    "maxOpenExposureUSDC": "500000000"
+  },
+  "economics": {
+    "feeShareBps": 1000,
+    "slashPriority": "after_agent_stake",
+    "cooldownSeconds": 604800,
+    "epochSeconds": 86400
+  },
+  "lossHistory": {
+    "totalLossEvents": 0,
+    "totalSlashed": "0"
+  },
+  "timestamps": {
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "updatedAt": "2026-05-21T12:00:00.000Z"
+  }
+}

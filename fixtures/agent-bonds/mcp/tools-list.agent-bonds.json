@@ -1,0 +1,229 @@
+{
+  "schemaVersion": "mcp-agent-bonds-tools/v1",
+  "tools": [
+    {
+      "name": "agent_bond_passport_get",
+      "description": "Agent Bonds agent bond passport get",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_passport_list",
+      "description": "Agent Bonds agent bond passport list",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_envelope_quote",
+      "description": "Agent Bonds agent bond envelope quote",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_envelope_validate",
+      "description": "Agent Bonds agent bond envelope validate",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_task_create",
+      "description": "Agent Bonds agent bond task create",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": false,
+      "requiresSettlement": true,
+      "mutatesChainState": true,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_task_accept",
+      "description": "Agent Bonds agent bond task accept",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": false,
+      "requiresSettlement": false,
+      "mutatesChainState": true,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_evidence_submit",
+      "description": "Agent Bonds agent bond evidence submit",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": false,
+      "requiresSettlement": false,
+      "mutatesChainState": true,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_verifier_report_submit",
+      "description": "Agent Bonds agent bond verifier report submit",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": false,
+      "requiresSettlement": false,
+      "mutatesChainState": true,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_task_challenge",
+      "description": "Agent Bonds agent bond task challenge",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": false,
+      "requiresSettlement": false,
+      "mutatesChainState": true,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_receipt_get",
+      "description": "Agent Bonds agent bond receipt get",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_receipt_list",
+      "description": "Agent Bonds agent bond receipt list",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_credit_score_get",
+      "description": "Agent Bonds agent bond credit score get",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    },
+    {
+      "name": "agent_bond_x402_quote_get",
+      "description": "Agent Bonds agent bond x402 quote get",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      },
+      "readOnly": true,
+      "requiresSettlement": false,
+      "mutatesChainState": false,
+      "riskNotes": [
+        "Mutating calls return previews unless explicit execution is separately configured."
+      ]
+    }
+  ],
+  "resources": [
+    "flowmemory://agent-bonds/passports/{agentId}",
+    "flowmemory://agent-bonds/envelopes/{envelopeHash}",
+    "flowmemory://agent-bonds/receipts/{receiptHash}",
+    "flowmemory://agent-bonds/tasks/{taskId}",
+    "flowmemory://agent-bonds/policies/{policyId}",
+    "flowmemory://agent-bonds/phase2-gate",
+    "flowmemory://agent-bonds/public-claim-status"
+  ],
+  "prompts": [
+    "agent_bonds_create_objective_task",
+    "agent_bonds_select_bonded_agent",
+    "agent_bonds_evaluate_task_evidence",
+    "agent_bonds_prepare_verifier_report",
+    "agent_bonds_explain_receipt"
+  ]
+}

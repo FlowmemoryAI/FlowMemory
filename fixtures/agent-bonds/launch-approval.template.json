@@ -1,0 +1,33 @@
+{
+  "schema": "flowmemory.agent_bonds_launch_approval.v1",
+  "network": {
+    "chainId": 8453,
+    "networkName": "base-mainnet-capped-pilot"
+  },
+  "pilotConfigPath": "fixtures/agent-bonds/pilot-config.template.json",
+  "readinessReportPath": "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json",
+  "operatorBundlePath": "out/agent-bonds-operator-bundle",
+  "externalReview": {
+    "completed": false,
+    "reviewer": "PENDING_EXTERNAL_REVIEWER",
+    "reportPath": "fixtures/agent-bonds/approvals/external-review.template.json",
+    "completedAt": "PENDING"
+  },
+  "operatorSeparation": {
+    "completed": false,
+    "checklistPath": "fixtures/agent-bonds/approvals/operator-separation.template.json",
+    "signedBy": "PENDING_OWNER_SIGNOFF",
+    "completedAt": "PENDING"
+  },
+  "runtimeEvidence": {
+    "multiOperatorRunCompleted": false,
+    "evidencePath": "fixtures/agent-bonds/approvals/runtime-evidence.template.json",
+    "completedAt": "PENDING"
+  },
+  "goNoGoDecision": {
+    "approved": false,
+    "decisionOwner": "PENDING_OWNER",
+    "decisionPath": "fixtures/agent-bonds/approvals/go-no-go.template.json",
+    "approvedAt": "PENDING"
+  }
+}
