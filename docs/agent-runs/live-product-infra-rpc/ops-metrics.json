@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-20T23:38:23.2185453Z",
+    "generatedAt":  "2026-05-21T00:17:45.4695658Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -35,19 +35,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  107467
+                        "value":  107707
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  107467
+                        "value":  107707
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  2
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -89,7 +89,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  8982.929
+                        "value":  11346.223
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -449,6 +449,42 @@
                         "name":  "flowchain_public_rpc_command_plan_no_secret_scan",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes no-secret scan verification.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_plan_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation includes a complete owner-host apply plan.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_artifacts_hashed",
+                        "type":  "gauge",
+                        "help":  "One when public RPC owner-host rendered artifacts have SHA256 hashes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_install_targets_mapped",
+                        "type":  "gauge",
+                        "help":  "One when public RPC owner-host artifacts map to install targets.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_systemd_install_command",
+                        "type":  "gauge",
+                        "help":  "One when public RPC owner-host apply plan includes the systemd install command.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_nginx_reload_command",
+                        "type":  "gauge",
+                        "help":  "One when public RPC owner-host apply plan includes Nginx reload and rollback reload commands.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_post_deploy_evidence",
+                        "type":  "gauge",
+                        "help":  "One when public RPC owner-host apply plan lists post-deploy evidence reports.",
                         "value":  1
                     },
                     {
@@ -1676,7 +1712,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  274,
+    "metricCount":  280,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

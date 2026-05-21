@@ -443,6 +443,16 @@ $publicRpcDeploymentAutomationRollbackReady = ((Get-OpsProp -Object $publicRpcDe
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
+$publicRpcDeploymentAutomationApplyPlanReady = ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingEdgePhase" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasReadOnlyProofPhase" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdInstallCommand" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdUninstallRollback" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesNginxReload" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true)
 $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
@@ -462,6 +472,7 @@ $publicRpcEdgeHardeningReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
     -and ($publicRpcDeploymentAutomationWalletCutoverProofReady -eq $true) `
     -and ($publicRpcDeploymentAutomationRollbackReady -eq $true) `
+    -and ($publicRpcDeploymentAutomationApplyPlanReady -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
@@ -1247,6 +1258,12 @@ $report = [ordered]@{
         publicRpcCommandPlanCutoverRehearsal = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false
         publicRpcCommandPlanTruthTable = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false
         publicRpcCommandPlanNoSecretScan = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false
+        publicRpcOwnerHostApplyPlanReady = $publicRpcDeploymentAutomationApplyPlanReady
+        publicRpcOwnerHostApplyPlanArtifactsHashed = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false
+        publicRpcOwnerHostApplyPlanInstallTargetsMapped = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false
+        publicRpcOwnerHostApplyPlanInstallPhase = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false
+        publicRpcOwnerHostApplyPlanEdgePhase = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingEdgePhase" -Default $false
+        publicRpcOwnerHostApplyPlanPostDeployEvidence = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false
         publicRpcRollbackDrillReady = $publicRpcDeploymentAutomationRollbackReady
         publicRpcRollbackDrillPerformed = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false
         publicRpcRollbackRestoredPrevious = Get-OpsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false

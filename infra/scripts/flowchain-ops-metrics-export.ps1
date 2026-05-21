@@ -386,6 +386,16 @@ $publicRpcDeploymentAutomationRollbackReady = ((Get-MetricsProp -Object $publicR
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillNoSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true)
+$publicRpcDeploymentAutomationApplyPlanReady = ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingEdgePhase" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasReadOnlyProofPhase" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdInstallCommand" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdUninstallRollback" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesNginxReload" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true)
 $backupRestoreValidationChecks = Get-MetricsProp -Object $backupRestoreValidation -Name "checks"
 $backupRestoreValidationFailedChecks = @((Get-MetricsProp -Object $backupRestoreValidation -Name "failedChecks" -Default @()))
 $backupRestoreValidationSecretFindings = @((Get-MetricsProp -Object $backupRestoreValidation -Name "secretMarkerFindings" -Default @()))
@@ -597,6 +607,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_synth
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_cutover_rehearsal" -Help "One when public RPC deployment automation includes live cutover rehearsal." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_truth_table" -Help "One when public RPC deployment automation includes production truth table verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_plan_no_secret_scan" -Help "One when public RPC deployment automation includes no-secret scan verification." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_apply_plan_ready" -Help "One when public RPC deployment automation includes a complete owner-host apply plan." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentAutomationApplyPlanReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_artifacts_hashed" -Help "One when public RPC owner-host rendered artifacts have SHA256 hashes." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_install_targets_mapped" -Help "One when public RPC owner-host artifacts map to install targets." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_systemd_install_command" -Help "One when public RPC owner-host apply plan includes the systemd install command." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesSystemdInstallCommand" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_nginx_reload_command" -Help "One when public RPC owner-host apply plan includes Nginx reload and rollback reload commands." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesNginxReload" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_owner_host_post_deploy_evidence" -Help "One when public RPC owner-host apply plan lists post-deploy evidence reports." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_drill_ready" -Help "One when public RPC deployment automation proves a no-mutation rollback drill." -Value (ConvertTo-MetricBool -Value $publicRpcDeploymentAutomationRollbackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_drill_performed" -Help "One when public RPC deployment automation performed the rollback drill." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_rollback_restored_previous" -Help "One when public RPC deployment automation restored rendered config from the previous config during rollback drill." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false))
@@ -918,6 +934,12 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_command_plan_cutover_rehearsal",
     "flowchain_public_rpc_command_plan_truth_table",
     "flowchain_public_rpc_command_plan_no_secret_scan",
+    "flowchain_public_rpc_owner_host_apply_plan_ready",
+    "flowchain_public_rpc_owner_host_artifacts_hashed",
+    "flowchain_public_rpc_owner_host_install_targets_mapped",
+    "flowchain_public_rpc_owner_host_systemd_install_command",
+    "flowchain_public_rpc_owner_host_nginx_reload_command",
+    "flowchain_public_rpc_owner_host_post_deploy_evidence",
     "flowchain_public_rpc_rollback_drill_ready",
     "flowchain_public_rpc_rollback_drill_performed",
     "flowchain_public_rpc_rollback_restored_previous",
@@ -1318,6 +1340,12 @@ $checks = [ordered]@{
         "flowchain_public_rpc_command_plan_cutover_rehearsal",
         "flowchain_public_rpc_command_plan_truth_table",
         "flowchain_public_rpc_command_plan_no_secret_scan",
+        "flowchain_public_rpc_owner_host_apply_plan_ready",
+        "flowchain_public_rpc_owner_host_artifacts_hashed",
+        "flowchain_public_rpc_owner_host_install_targets_mapped",
+        "flowchain_public_rpc_owner_host_systemd_install_command",
+        "flowchain_public_rpc_owner_host_nginx_reload_command",
+        "flowchain_public_rpc_owner_host_post_deploy_evidence",
         "flowchain_public_rpc_rollback_drill_ready",
         "flowchain_public_rpc_rollback_drill_performed",
         "flowchain_public_rpc_rollback_restored_previous",
@@ -1334,6 +1362,14 @@ $checks = [ordered]@{
         "flowchain_public_rpc_rollback_artifacts_scoped",
         "flowchain_public_rpc_rollback_no_secrets",
         "flowchain_public_rpc_rollback_no_broadcasts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    publicRpcOwnerHostApplyPlanMetricsPresent = @(
+        "flowchain_public_rpc_owner_host_apply_plan_ready",
+        "flowchain_public_rpc_owner_host_artifacts_hashed",
+        "flowchain_public_rpc_owner_host_install_targets_mapped",
+        "flowchain_public_rpc_owner_host_systemd_install_command",
+        "flowchain_public_rpc_owner_host_nginx_reload_command",
+        "flowchain_public_rpc_owner_host_post_deploy_evidence"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicTesterGatewayMetricsPresent = @(
         "flowchain_public_tester_gateway_e2e_ready",

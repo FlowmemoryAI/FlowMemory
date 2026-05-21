@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-20T23:38:23.7141288Z
+Generated: 2026-05-21T00:17:45.8464344Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 274
+- Metric count: 280
 
 ## Required Metrics
 
@@ -71,6 +71,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_rpc_command_plan_cutover_rehearsal: present
 - flowchain_public_rpc_command_plan_truth_table: present
 - flowchain_public_rpc_command_plan_no_secret_scan: present
+- flowchain_public_rpc_owner_host_apply_plan_ready: present
+- flowchain_public_rpc_owner_host_artifacts_hashed: present
+- flowchain_public_rpc_owner_host_install_targets_mapped: present
+- flowchain_public_rpc_owner_host_systemd_install_command: present
+- flowchain_public_rpc_owner_host_nginx_reload_command: present
+- flowchain_public_rpc_owner_host_post_deploy_evidence: present
 - flowchain_public_rpc_rollback_drill_ready: present
 - flowchain_public_rpc_rollback_drill_performed: present
 - flowchain_public_rpc_rollback_restored_previous: present
@@ -315,6 +321,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | bridgeRelayerLoopValidationMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
 | publicRpcRollbackDrillMetricsPresent | True |
+| publicRpcOwnerHostApplyPlanMetricsPresent | True |
 | publicTesterGatewayMetricsPresent | True |
 | externalTesterClientMetricsPresent | True |
 | transactionIntakeMetricsPresent | True |

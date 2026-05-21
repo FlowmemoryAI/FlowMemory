@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-20T20:21:25.8762420Z
+Generated: 2026-05-21T00:08:52.4694960Z
 Status: passed
 Action: Validate
 
@@ -68,6 +68,29 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedReportSummaryNoSecrets: True
 - renderedReportSummaryBroadcastsFalse: True
 - renderedReportSummaryOwnerPathsOutsideRepo: True
+- ownerHostApplyPlanPresent: True
+- ownerHostApplyPlanSchema: True
+- ownerHostApplyPlanRepoOwned: True
+- ownerHostApplyPlanPrivateOrigin: True
+- ownerHostApplyPlanArtifactManifestCount: True
+- ownerHostApplyPlanAllArtifactsListed: True
+- ownerHostApplyPlanArtifactsExist: True
+- ownerHostApplyPlanArtifactsHaveSha256: True
+- ownerHostApplyPlanInstallTargetsMapped: True
+- ownerHostApplyPlanPhaseCount: True
+- ownerHostApplyPlanAllPhasesPresent: True
+- ownerHostApplyPlanHasMutatingInstallPhase: True
+- ownerHostApplyPlanHasMutatingEdgePhase: True
+- ownerHostApplyPlanHasReadOnlyProofPhase: True
+- ownerHostApplyPlanIncludesSystemdInstallCommand: True
+- ownerHostApplyPlanIncludesSystemdStatusCommand: True
+- ownerHostApplyPlanIncludesSystemdUninstallRollback: True
+- ownerHostApplyPlanIncludesNginxReload: True
+- ownerHostApplyPlanIncludesPostDeployEvidence: True
+- ownerHostApplyPlanValuesPrintedFalse: True
+- ownerHostApplyPlanEnvValuesPrintedFalse: True
+- ownerHostApplyPlanNoSecrets: True
+- ownerHostApplyPlanBroadcastsFalse: True
 - rollbackDrillPerformed: True
 - rollbackRenderedConfigExists: True
 - rollbackPreviousConfigWritten: True
@@ -112,3 +135,21 @@ This validator proves the owner-host public RPC deployment path can render concr
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
 - npm run flowchain:truth-table -- -AllowBlocked
 - npm run flowchain:no-secret:scan
+
+## Rendered Artifact Manifest
+
+- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=279fb60b8ceadfc6dc9888debb4492773ae2692bca6dba104cde98f7654ffcc4
+- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=3e02caf2c1ff3325d6b351eff8a94a6c695d6bad884c8b78cebf4f23931b7895
+- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=81ba0770c62323e5e8f8ba595d94a8151bbb61c41b13ad6f93f96bf5a64a5ea5
+- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=39fcd66f89cd0fd4ba95123b3fab830e152da1f3c53fb2b855b4253d6ed4b60e
+- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=9ab77bbcf540fb492e425f500577de983a5ef04ffb9a3cb73fd314acca0d2713
+- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=7861664c3aa249126f43056eeb47a58c2f9eda40f7e2404a4def73d1af44c30a
+
+## Owner Host Apply Phases
+
+- render-owner-files: mutatesHost=False
+- preflight-rendered-artifacts: mutatesHost=False
+- install-systemd-services: mutatesHost=True
+- publish-nginx-edge: mutatesHost=True
+- post-deploy-proof: mutatesHost=False
+- rollback-ready: mutatesHost=False

@@ -350,7 +350,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
         signal = "Public RPC edge deployment hardening evidence is missing or failed."
-        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, or rollback drill proof"
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, install/edge apply phases, post-deploy evidence, or rollback drill proof"
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
@@ -444,6 +444,11 @@ $publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRule.Cou
 $publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("drill", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
+$publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("owner-host apply plan", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("install/edge apply phases", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("post-deploy evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
 $backupRestoreValidationRule = @($rules | Where-Object { $_.id -eq "backup-restore-validation-failed" } | Select-Object -First 1)
 $backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRule.Count -eq 1 `
@@ -558,6 +563,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
+    publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan
     backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRuleCoversSafety
     backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls

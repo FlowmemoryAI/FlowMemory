@@ -36,6 +36,9 @@ function Get-DeployProp {
         [object] $Default = $null
     )
 
+    if ($null -ne $Object -and $Object -is [System.Collections.IDictionary] -and $Object.Contains($Name)) {
+        return $Object[$Name]
+    }
     if ($null -ne $Object -and $Object.PSObject.Properties.Name -contains $Name) {
         return $Object.$Name
     }
@@ -106,6 +109,16 @@ function Get-DeploymentChecksPassed {
     return $true
 }
 
+function Get-DeploymentFileSha256 {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return ""
+    }
+
+    return ([string](Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash).ToLowerInvariant()
+}
+
 function New-DeploymentRenderReportSummary {
     param(
         [AllowNull()][object] $Report,
@@ -135,6 +148,303 @@ function New-DeploymentRenderReportSummary {
         envValuesPrinted = [bool](Get-DeployProp -Object $Report -Name "envValuesPrinted" -Default $true)
         noSecrets = [bool](Get-DeployProp -Object $Report -Name "noSecrets" -Default $false)
         broadcasts = [bool](Get-DeployProp -Object $Report -Name "broadcasts" -Default $true)
+    }
+}
+
+function New-RenderedArtifactManifest {
+    param([Parameter(Mandatory = $true)][string] $TargetRenderDir)
+
+    $artifactDefinitions = @(
+        [ordered]@{
+            fileName = "nginx-flowchain-rpc.conf"
+            role = "public-rpc-nginx-edge"
+            installRequired = $true
+            installTarget = "/etc/nginx/conf.d/flowchain-rpc.conf"
+            installCommand = "install -m 0644 <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-flowchain-rpc.conf /etc/nginx/conf.d/flowchain-rpc.conf"
+            verifyCommand = "nginx -t"
+            rollbackCommand = "cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> /etc/nginx/conf.d/flowchain-rpc.conf"
+        },
+        [ordered]@{
+            fileName = "flowchain-live.service"
+            role = "block-producer-systemd-unit"
+            installRequired = $true
+            installTarget = "/etc/systemd/system/flowchain-live.service"
+            installCommand = "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"
+            verifyCommand = "systemd-analyze verify <FLOWCHAIN_DEPLOY_RENDER_DIR>/flowchain-live.service"
+            rollbackCommand = "systemctl stop flowchain-live.service"
+        },
+        [ordered]@{
+            fileName = "flowchain-supervisor.service"
+            role = "autorecovery-supervisor-systemd-unit"
+            installRequired = $true
+            installTarget = "/etc/systemd/system/flowchain-supervisor.service"
+            installCommand = "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"
+            verifyCommand = "systemd-analyze verify <FLOWCHAIN_DEPLOY_RENDER_DIR>/flowchain-supervisor.service"
+            rollbackCommand = "systemctl stop flowchain-supervisor.service"
+        },
+        [ordered]@{
+            fileName = "nginx-preflight.sh"
+            role = "linux-public-rpc-preflight"
+            installRequired = $false
+            installTarget = "<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh"
+            installCommand = "chmod 0750 <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh"
+            verifyCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh"
+            rollbackCommand = ""
+        },
+        [ordered]@{
+            fileName = "nginx-preflight.ps1"
+            role = "windows-public-rpc-preflight"
+            installRequired = $false
+            installTarget = "<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1"
+            installCommand = ""
+            verifyCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1"
+            rollbackCommand = ""
+        },
+        [ordered]@{
+            fileName = "public-rpc-render-report.json"
+            role = "render-evidence"
+            installRequired = $false
+            installTarget = "<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json"
+            installCommand = "retain <FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json as owner-host evidence"
+            verifyCommand = "npm run flowchain:public-rpc:deployment:automation"
+            rollbackCommand = ""
+        }
+    )
+
+    $manifest = New-Object System.Collections.ArrayList
+    foreach ($definition in $artifactDefinitions) {
+        $artifactPath = Join-Path $TargetRenderDir $definition.fileName
+        $exists = Test-Path -LiteralPath $artifactPath
+        $item = [ordered]@{
+            fileName = $definition.fileName
+            relativePath = $definition.fileName
+            role = $definition.role
+            installRequired = [bool]$definition.installRequired
+            installTarget = $definition.installTarget
+            installCommand = $definition.installCommand
+            verifyCommand = $definition.verifyCommand
+            rollbackCommand = $definition.rollbackCommand
+            exists = $exists
+            sizeBytes = if ($exists) { [int64](Get-Item -LiteralPath $artifactPath).Length } else { 0 }
+            sha256 = Get-DeploymentFileSha256 -Path $artifactPath
+        }
+        [void]$manifest.Add($item)
+    }
+    return @($manifest)
+}
+
+function New-OwnerHostApplyPlan {
+    param(
+        [AllowEmptyCollection()][object[]] $ArtifactManifest = @(),
+        [AllowEmptyCollection()][string[]] $CommandPlan = @()
+    )
+
+    $expectedReportPaths = @(
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-render-report-snapshot.json",
+        "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
+        "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
+        "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
+        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+    )
+    $systemdInstallCommand = "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"
+    $systemdStatusCommand = "npm run flowchain:service:install:systemd -- -Action Status"
+    $systemdRollbackCommand = "npm run flowchain:service:install:systemd -- -Action Uninstall"
+    $nginxReloadCommand = "systemctl reload nginx"
+    $rollbackCommands = @(
+        "npm run flowchain:ops:snapshot -- -AllowBlocked",
+        "npm run flowchain:service:status",
+        "systemctl stop flowchain-supervisor.service",
+        "systemctl stop flowchain-live.service",
+        $systemdRollbackCommand,
+        "cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> /etc/nginx/conf.d/flowchain-rpc.conf",
+        "nginx -t",
+        $nginxReloadCommand,
+        "systemctl restart flowchain-live.service",
+        "systemctl restart flowchain-supervisor.service",
+        "npm run flowchain:emergency:stop-local"
+    )
+
+    return [ordered]@{
+        schema = "flowchain.public_rpc_owner_host_apply_plan.v1"
+        flowChainRpcIsRepoOwned = $true
+        privateOrigin = "127.0.0.1:8787"
+        ownerSuppliedInputs = @(
+            "FLOWCHAIN_RPC_PUBLIC_URL",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+            "FLOWCHAIN_RPC_TLS_TERMINATED",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        )
+        artifactManifest = @($ArtifactManifest)
+        installPhases = @(
+            [ordered]@{
+                id = "render-owner-files"
+                mutatesHost = $false
+                commands = @($CommandPlan | Where-Object { $_ -match "deployment-automation.ps1 -Action Render" })
+                expectedArtifacts = @($ArtifactManifest | ForEach-Object { $_.fileName })
+            },
+            [ordered]@{
+                id = "preflight-rendered-artifacts"
+                mutatesHost = $false
+                commands = @(
+                    "npm run flowchain:service:install:systemd:validate",
+                    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+                    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
+                    "systemd-analyze verify <FLOWCHAIN_DEPLOY_RENDER_DIR>/flowchain-live.service",
+                    "systemd-analyze verify <FLOWCHAIN_DEPLOY_RENDER_DIR>/flowchain-supervisor.service",
+                    "nginx -t",
+                    "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh",
+                    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1"
+                )
+                expectedReportPaths = @("docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json")
+            },
+            [ordered]@{
+                id = "install-systemd-services"
+                mutatesHost = $true
+                commands = @(
+                    $systemdInstallCommand,
+                    $systemdStatusCommand,
+                    "npm run flowchain:service:status",
+                    "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                )
+                rollbackCommands = @(
+                    "systemctl stop flowchain-supervisor.service",
+                    "systemctl stop flowchain-live.service",
+                    $systemdRollbackCommand
+                )
+                expectedReportPaths = @("docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json")
+            },
+            [ordered]@{
+                id = "publish-nginx-edge"
+                mutatesHost = $true
+                commands = @(
+                    "install -m 0644 <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-flowchain-rpc.conf /etc/nginx/conf.d/flowchain-rpc.conf",
+                    "nginx -t",
+                    $nginxReloadCommand,
+                    "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh"
+                )
+                rollbackCommands = @(
+                    "cp <PREVIOUS_FLOWCHAIN_RPC_NGINX_CONF> /etc/nginx/conf.d/flowchain-rpc.conf",
+                    "nginx -t",
+                    $nginxReloadCommand
+                )
+            },
+            [ordered]@{
+                id = "post-deploy-proof"
+                mutatesHost = $false
+                commands = @(
+                    "npm run flowchain:public-rpc:validate",
+                    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                    "npm run flowchain:public-rpc:abuse-test",
+                    "npm run flowchain:tester:gateway:e2e",
+                    "npm run flowchain:wallet:live-tester:e2e",
+                    "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+                    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+                    "npm run flowchain:truth-table -- -AllowBlocked",
+                    "npm run flowchain:no-secret:scan"
+                )
+                expectedReportPaths = @($expectedReportPaths)
+            },
+            [ordered]@{
+                id = "rollback-ready"
+                mutatesHost = $false
+                commands = @("npm run flowchain:ops:snapshot -- -AllowBlocked")
+                rollbackCommands = @($rollbackCommands)
+            }
+        )
+        expectedReportPaths = @($expectedReportPaths)
+        rollbackCommands = @($rollbackCommands)
+        valuesPrinted = $false
+        envValuesPrinted = $false
+        noSecrets = $true
+        broadcasts = $false
+    }
+}
+
+function Test-OwnerHostApplyPlan {
+    param([AllowNull()][object] $Plan)
+
+    if ($null -eq $Plan) {
+        return [ordered]@{
+            ownerHostApplyPlanPresent = $false
+        }
+    }
+
+    $artifacts = @((Get-DeployProp -Object $Plan -Name "artifactManifest" -Default @()))
+    $phases = @((Get-DeployProp -Object $Plan -Name "installPhases" -Default @()))
+    $commands = @($phases | ForEach-Object { @((Get-DeployProp -Object $_ -Name "commands" -Default @())) } | ForEach-Object { "$_" })
+    $rollbackCommands = @((Get-DeployProp -Object $Plan -Name "rollbackCommands" -Default @()) | ForEach-Object { "$_" })
+    $systemdInstallCommand = "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"
+    $systemdStatusCommand = "npm run flowchain:service:install:systemd -- -Action Status"
+    $systemdRollbackCommand = "npm run flowchain:service:install:systemd -- -Action Uninstall"
+    $nginxReloadCommand = "systemctl reload nginx"
+    $expectedReports = @((Get-DeployProp -Object $Plan -Name "expectedReportPaths" -Default @()) | ForEach-Object { "$_" })
+    $artifactNames = @($artifacts | ForEach-Object { "$($_.fileName)" })
+    $artifactHashes = @($artifacts | ForEach-Object { "$($_.sha256)" })
+    $installRequiredArtifacts = @($artifacts | Where-Object { $_.installRequired -eq $true })
+    $requiredArtifactNames = @(
+        "nginx-flowchain-rpc.conf",
+        "flowchain-live.service",
+        "flowchain-supervisor.service",
+        "nginx-preflight.sh",
+        "nginx-preflight.ps1",
+        "public-rpc-render-report.json"
+    )
+    $requiredPhaseIds = @(
+        "render-owner-files",
+        "preflight-rendered-artifacts",
+        "install-systemd-services",
+        "publish-nginx-edge",
+        "post-deploy-proof",
+        "rollback-ready"
+    )
+    $requiredEvidence = @(
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
+        "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
+        "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
+        "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+    )
+    $mutatingPhaseIds = @($phases | Where-Object { $_.mutatesHost -eq $true } | ForEach-Object { "$($_.id)" })
+    $readOnlyProofPhase = @($phases | Where-Object { "$($_.id)" -eq "post-deploy-proof" -and $_.mutatesHost -eq $false }).Count -eq 1
+
+    return [ordered]@{
+        ownerHostApplyPlanPresent = $true
+        ownerHostApplyPlanSchema = [string](Get-DeployProp -Object $Plan -Name "schema" -Default "") -eq "flowchain.public_rpc_owner_host_apply_plan.v1"
+        ownerHostApplyPlanRepoOwned = (Get-DeployProp -Object $Plan -Name "flowChainRpcIsRepoOwned" -Default $false) -eq $true
+        ownerHostApplyPlanPrivateOrigin = [string](Get-DeployProp -Object $Plan -Name "privateOrigin" -Default "") -eq "127.0.0.1:8787"
+        ownerHostApplyPlanArtifactManifestCount = $artifacts.Count -eq 6
+        ownerHostApplyPlanAllArtifactsListed = @($requiredArtifactNames | Where-Object { $_ -notin $artifactNames }).Count -eq 0
+        ownerHostApplyPlanArtifactsExist = @($artifacts | Where-Object { $_.exists -ne $true }).Count -eq 0
+        ownerHostApplyPlanArtifactsHaveSha256 = @($artifactHashes | Where-Object { $_ -notmatch '^[a-f0-9]{64}$' }).Count -eq 0
+        ownerHostApplyPlanInstallTargetsMapped = @($installRequiredArtifacts | Where-Object { [string]::IsNullOrWhiteSpace("$($_.installTarget)") -or [string]::IsNullOrWhiteSpace("$($_.installCommand)") }).Count -eq 0
+        ownerHostApplyPlanPhaseCount = $phases.Count -eq 6
+        ownerHostApplyPlanAllPhasesPresent = @($requiredPhaseIds | Where-Object { $phaseId = $_; @($phases | Where-Object { "$($_.id)" -eq $phaseId }).Count -eq 0 }).Count -eq 0
+        ownerHostApplyPlanHasMutatingInstallPhase = "install-systemd-services" -in $mutatingPhaseIds
+        ownerHostApplyPlanHasMutatingEdgePhase = "publish-nginx-edge" -in $mutatingPhaseIds
+        ownerHostApplyPlanHasReadOnlyProofPhase = $readOnlyProofPhase
+        ownerHostApplyPlanIncludesSystemdInstallCommand = $systemdInstallCommand -in $commands
+        ownerHostApplyPlanIncludesSystemdStatusCommand = $systemdStatusCommand -in $commands
+        ownerHostApplyPlanIncludesSystemdUninstallRollback = $systemdRollbackCommand -in $rollbackCommands
+        ownerHostApplyPlanIncludesNginxReload = $nginxReloadCommand -in $commands -and $nginxReloadCommand -in $rollbackCommands
+        ownerHostApplyPlanIncludesPostDeployEvidence = @($requiredEvidence | Where-Object { $_ -notin $expectedReports }).Count -eq 0
+        ownerHostApplyPlanValuesPrintedFalse = (Get-DeployProp -Object $Plan -Name "valuesPrinted" -Default $true) -eq $false
+        ownerHostApplyPlanEnvValuesPrintedFalse = (Get-DeployProp -Object $Plan -Name "envValuesPrinted" -Default $true) -eq $false
+        ownerHostApplyPlanNoSecrets = (Get-DeployProp -Object $Plan -Name "noSecrets" -Default $false) -eq $true
+        ownerHostApplyPlanBroadcastsFalse = (Get-DeployProp -Object $Plan -Name "broadcasts" -Default $true) -eq $false
     }
 }
 
@@ -292,6 +602,7 @@ function Test-RenderedDeployment {
     return [ordered]@{
         checks = $checks
         renderedFileNames = @($renderedPaths | ForEach-Object { Split-Path -Leaf $_ })
+        artifactManifest = @(New-RenderedArtifactManifest -TargetRenderDir $TargetRenderDir)
         renderedReportPath = $renderedReportPath
         renderedReport = $renderReport
         renderedReportSummary = New-DeploymentRenderReportSummary -Report $renderReport -RenderedFileNames @($renderedPaths | ForEach-Object { Split-Path -Leaf $_ })
@@ -435,6 +746,7 @@ $scenario = [ordered]@{
 $rendered = [ordered]@{
     checks = [ordered]@{}
     renderedFileNames = @()
+    artifactManifest = @()
     renderedReportPath = ""
     renderedReport = $null
     renderedReportSummary = $null
@@ -443,6 +755,7 @@ $rollbackDrill = [ordered]@{
     checks = [ordered]@{}
     artifacts = @()
 }
+$ownerHostApplyPlan = $null
 $problem = ""
 $cleanupAttempted = $false
 $ownerPathsOutsideRepo = $true
@@ -540,6 +853,11 @@ if ($Action -eq "Validate" -or $Action -eq "Render") {
     $checks.renderedReportSummaryNoSecrets = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.noSecrets -eq $true -and $rendered.renderedReportSummary.envValuesPrinted -eq $false
     $checks.renderedReportSummaryBroadcastsFalse = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.broadcasts -eq $false
     $checks.renderedReportSummaryOwnerPathsOutsideRepo = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.renderDirInsideRepo -eq $false -and $rendered.renderedReportSummary.ownerEnvFileInsideRepo -eq $false
+    $ownerHostApplyPlan = New-OwnerHostApplyPlan -ArtifactManifest @($rendered.artifactManifest) -CommandPlan @($commandPlan)
+    $ownerHostApplyPlanChecks = Test-OwnerHostApplyPlan -Plan $ownerHostApplyPlan
+    foreach ($entry in $ownerHostApplyPlanChecks.GetEnumerator()) {
+        $checks[$entry.Key] = $entry.Value
+    }
     if ($Action -eq "Validate") {
         foreach ($entry in $rollbackDrill.checks.GetEnumerator()) {
             $checks[$entry.Key] = $entry.Value
@@ -581,9 +899,11 @@ $report = [ordered]@{
     scenario = $scenario
     rollbackDrill = $rollbackDrill
     renderedFileNames = @($rendered.renderedFileNames)
+    renderedArtifactManifest = @($rendered.artifactManifest)
     renderedReportPath = if ($Action -eq "Render") { $rendered.renderedReportPath } else { "" }
     renderedReportSnapshotPath = if ($Action -eq "Validate") { $renderReportSnapshotFullPath } else { "" }
     renderedReportSummary = $rendered.renderedReportSummary
+    ownerHostApplyPlan = $ownerHostApplyPlan
     ownerInputsRequired = @(
         "FLOWCHAIN_RPC_PUBLIC_URL",
         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -655,6 +975,20 @@ $markdownLines.Add("## Commands")
 $markdownLines.Add("")
 foreach ($command in @($report.commands)) {
     $markdownLines.Add("- $command")
+}
+if ($null -ne $ownerHostApplyPlan) {
+    $markdownLines.Add("")
+    $markdownLines.Add("## Rendered Artifact Manifest")
+    $markdownLines.Add("")
+    foreach ($artifact in @($ownerHostApplyPlan.artifactManifest)) {
+        $markdownLines.Add("- $($artifact.fileName): role=$($artifact.role), target=$($artifact.installTarget), sha256=$($artifact.sha256)")
+    }
+    $markdownLines.Add("")
+    $markdownLines.Add("## Owner Host Apply Phases")
+    $markdownLines.Add("")
+    foreach ($phase in @($ownerHostApplyPlan.installPhases)) {
+        $markdownLines.Add("- $($phase.id): mutatesHost=$($phase.mutatesHost)")
+    }
 }
 if (-not [string]::IsNullOrWhiteSpace($problem)) {
     $markdownLines.Add("")

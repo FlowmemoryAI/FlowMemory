@@ -1150,7 +1150,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
-        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, hashed artifact manifest, install/edge apply phases, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         command = "npm run flowchain:public-rpc:deployment:automation"
         productionGate = $true
@@ -1188,6 +1188,29 @@ $definitions = @(
             "renderedReportKeepsOwnerPathsOutsideRepo",
             "renderedReportNoSecrets",
             "renderedReportBroadcastsFalse",
+            "ownerHostApplyPlanPresent",
+            "ownerHostApplyPlanSchema",
+            "ownerHostApplyPlanRepoOwned",
+            "ownerHostApplyPlanPrivateOrigin",
+            "ownerHostApplyPlanArtifactManifestCount",
+            "ownerHostApplyPlanAllArtifactsListed",
+            "ownerHostApplyPlanArtifactsExist",
+            "ownerHostApplyPlanArtifactsHaveSha256",
+            "ownerHostApplyPlanInstallTargetsMapped",
+            "ownerHostApplyPlanPhaseCount",
+            "ownerHostApplyPlanAllPhasesPresent",
+            "ownerHostApplyPlanHasMutatingInstallPhase",
+            "ownerHostApplyPlanHasMutatingEdgePhase",
+            "ownerHostApplyPlanHasReadOnlyProofPhase",
+            "ownerHostApplyPlanIncludesSystemdInstallCommand",
+            "ownerHostApplyPlanIncludesSystemdStatusCommand",
+            "ownerHostApplyPlanIncludesSystemdUninstallRollback",
+            "ownerHostApplyPlanIncludesNginxReload",
+            "ownerHostApplyPlanIncludesPostDeployEvidence",
+            "ownerHostApplyPlanValuesPrintedFalse",
+            "ownerHostApplyPlanEnvValuesPrintedFalse",
+            "ownerHostApplyPlanNoSecrets",
+            "ownerHostApplyPlanBroadcastsFalse",
             "rollbackDrillPerformed",
             "rollbackRenderedConfigExists",
             "rollbackPreviousConfigWritten",
@@ -2168,6 +2191,7 @@ $definitions = @(
             "commandsAvoidInlineEnvAssignment",
             "commandsAvoidUrls",
             "publicRpcEdgeHardeningRuleCoversRollbackDrill",
+            "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan",
             "backupRestoreValidationRuleCoversSafety",
             "backupOwnerPathDryRunRuleCoversOwnerPath",
             "bridgeDeployControlRuleCoversDeploymentControls",
@@ -2237,6 +2261,7 @@ $definitions = @(
             "backupOwnerPathDryRunLoaded",
             "backupOwnerPathDryRunMetricsPresent",
             "publicRpcRollbackDrillMetricsPresent",
+            "publicRpcOwnerHostApplyPlanMetricsPresent",
             "bridgeDeployControlMetricsPresent",
             "serviceInstallValidationMetricsPresent",
             "externalTesterEvidenceMetricsPresent",

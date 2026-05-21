@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-20T23:38:22.1005177Z",
+    "generatedAt":  "2026-05-21T00:16:46.2865357Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -107,6 +107,7 @@
                    "publicRpcEdgeHardeningRuleCoversSecurityHeaders":  true,
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "publicRpcEdgeHardeningRuleCoversRollbackDrill":  true,
+                   "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan":  true,
                    "backupRestoreValidationRuleCoversSafety":  true,
                    "backupOwnerPathDryRunRuleCoversOwnerPath":  true,
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
@@ -590,7 +591,7 @@
                                            "public-rpc-edge-hardening-failed"
                                        ],
                       "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
-                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, or rollback drill proof",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, install/edge apply phases, post-deploy evidence, or rollback drill proof",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",

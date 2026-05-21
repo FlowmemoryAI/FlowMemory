@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-20T23:38:23.7141288Z",
+    "generatedAt":  "2026-05-21T00:17:45.8464344Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -47,7 +47,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  274,
+    "metricCount":  280,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -109,6 +109,12 @@
                                 "flowchain_public_rpc_command_plan_cutover_rehearsal",
                                 "flowchain_public_rpc_command_plan_truth_table",
                                 "flowchain_public_rpc_command_plan_no_secret_scan",
+                                "flowchain_public_rpc_owner_host_apply_plan_ready",
+                                "flowchain_public_rpc_owner_host_artifacts_hashed",
+                                "flowchain_public_rpc_owner_host_install_targets_mapped",
+                                "flowchain_public_rpc_owner_host_systemd_install_command",
+                                "flowchain_public_rpc_owner_host_nginx_reload_command",
+                                "flowchain_public_rpc_owner_host_post_deploy_evidence",
                                 "flowchain_public_rpc_rollback_drill_ready",
                                 "flowchain_public_rpc_rollback_drill_performed",
                                 "flowchain_public_rpc_rollback_restored_previous",
@@ -353,6 +359,7 @@
                    "bridgeRelayerLoopValidationMetricsPresent":  true,
                    "publicRpcEdgeMetricsPresent":  true,
                    "publicRpcRollbackDrillMetricsPresent":  true,
+                   "publicRpcOwnerHostApplyPlanMetricsPresent":  true,
                    "publicTesterGatewayMetricsPresent":  true,
                    "externalTesterClientMetricsPresent":  true,
                    "transactionIntakeMetricsPresent":  true,

@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 107467
+flowchain_latest_height 107707
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 107467
+flowchain_finalized_height 107707
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 2
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 8982.929
+flowchain_transaction_intake_file_age_seconds 11346.223
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -208,6 +208,24 @@ flowchain_public_rpc_command_plan_truth_table 1
 # HELP flowchain_public_rpc_command_plan_no_secret_scan One when public RPC deployment automation includes no-secret scan verification.
 # TYPE flowchain_public_rpc_command_plan_no_secret_scan gauge
 flowchain_public_rpc_command_plan_no_secret_scan 1
+# HELP flowchain_public_rpc_owner_host_apply_plan_ready One when public RPC deployment automation includes a complete owner-host apply plan.
+# TYPE flowchain_public_rpc_owner_host_apply_plan_ready gauge
+flowchain_public_rpc_owner_host_apply_plan_ready 1
+# HELP flowchain_public_rpc_owner_host_artifacts_hashed One when public RPC owner-host rendered artifacts have SHA256 hashes.
+# TYPE flowchain_public_rpc_owner_host_artifacts_hashed gauge
+flowchain_public_rpc_owner_host_artifacts_hashed 1
+# HELP flowchain_public_rpc_owner_host_install_targets_mapped One when public RPC owner-host artifacts map to install targets.
+# TYPE flowchain_public_rpc_owner_host_install_targets_mapped gauge
+flowchain_public_rpc_owner_host_install_targets_mapped 1
+# HELP flowchain_public_rpc_owner_host_systemd_install_command One when public RPC owner-host apply plan includes the systemd install command.
+# TYPE flowchain_public_rpc_owner_host_systemd_install_command gauge
+flowchain_public_rpc_owner_host_systemd_install_command 1
+# HELP flowchain_public_rpc_owner_host_nginx_reload_command One when public RPC owner-host apply plan includes Nginx reload and rollback reload commands.
+# TYPE flowchain_public_rpc_owner_host_nginx_reload_command gauge
+flowchain_public_rpc_owner_host_nginx_reload_command 1
+# HELP flowchain_public_rpc_owner_host_post_deploy_evidence One when public RPC owner-host apply plan lists post-deploy evidence reports.
+# TYPE flowchain_public_rpc_owner_host_post_deploy_evidence gauge
+flowchain_public_rpc_owner_host_post_deploy_evidence 1
 # HELP flowchain_public_rpc_rollback_drill_ready One when public RPC deployment automation proves a no-mutation rollback drill.
 # TYPE flowchain_public_rpc_rollback_drill_ready gauge
 flowchain_public_rpc_rollback_drill_ready 1
