@@ -908,12 +908,14 @@ function Test-RenderedDeployment {
         renderedNginxHasCorsForwarding = $renderedAllText.Contains('proxy_set_header Origin $http_origin;')
         renderedNginxHasRateLimit = $renderedAllText.Contains("limit_req_zone") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
         renderedNginxHasSecurityHeaders = Test-DeploymentTextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
+        renderedNginxHasTimeoutGuardrails = Test-DeploymentTextContainsAllTokens -Text $renderedAllText -Tokens @("client_max_body_size 256k;", "client_body_timeout 10s;", "proxy_connect_timeout 5s;", "proxy_send_timeout 30s;", "proxy_read_timeout 60s;", "send_timeout 30s;")
         renderedNginxAuthorizationForwardingScoped = ([regex]::Matches($renderedAllText, 'proxy_set_header\s+Authorization\s+\$http_authorization;')).Count -eq 1
         renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$TargetOwnerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$TargetOwnerEnvFile")
         renderedPreflightHasReadinessProbe = $renderedAllText.Contains("/rpc/readiness") -and $renderedAllText.Contains("rpc_readiness")
         renderedPreflightHasTesterUnauthProbe = $renderedAllText.Contains("/tester/status") -and $renderedAllText.Contains("/tester/wallets/create") -and $renderedAllText.Contains("flowmemory.control_plane.tester_write_auth_required.v0")
         renderedPreflightHasDisallowedOriginProbe = $renderedAllText.Contains("blocked-origin.flowchain.example") -and $renderedAllText.Contains("403")
         renderedPreflightChecksSecurityHeaders = $renderedAllText.Contains("add_header Strict-Transport-Security") -and $renderedAllText.Contains("add_header Content-Security-Policy")
+        renderedPreflightChecksTimeoutGuardrails = $renderedAllText.Contains("client_body_timeout 10s") -and $renderedAllText.Contains("proxy_connect_timeout 5s")
         renderedPreflightHasMethodRejectionProbes = $renderedAllText.Contains('test "${rpc_get_status}" = "405"') -and $renderedAllText.Contains('test "${readonly_post_status}" = "405"') -and $renderedAllText.Contains("RPC endpoint GET preflight did not return HTTP 405.") -and $renderedAllText.Contains("Read-only RPC readiness POST preflight did not return HTTP 405.")
         renderedPreflightBlocksBroadStatePath = $renderedAllText.Contains("/devnet/local/state.json") -and $renderedAllText.Contains("404")
         renderedPreflightBlocksPrivateWalletCreate = $renderedAllText.Contains("/wallets/create") -and $renderedAllText.Contains("404")

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-21T10:56:48.0741764Z
+Generated: 2026-05-21T12:55:28.3476019Z
 Status: passed
 Action: Validate
 
@@ -56,12 +56,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 - renderedNginxHasCorsForwarding: True
 - renderedNginxHasRateLimit: True
 - renderedNginxHasSecurityHeaders: True
+- renderedNginxHasTimeoutGuardrails: True
 - renderedNginxAuthorizationForwardingScoped: True
 - renderedSystemdUsesOwnerEnv: True
 - renderedPreflightHasReadinessProbe: True
 - renderedPreflightHasTesterUnauthProbe: True
 - renderedPreflightHasDisallowedOriginProbe: True
 - renderedPreflightChecksSecurityHeaders: True
+- renderedPreflightChecksTimeoutGuardrails: True
 - renderedPreflightHasMethodRejectionProbes: True
 - renderedPreflightBlocksBroadStatePath: True
 - renderedPreflightBlocksPrivateWalletCreate: True
@@ -151,14 +153,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 
 ## Rendered Artifact Manifest
 
-- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=ab79fdb1133525e70a1c20884e6b6b8e3b0eb6c7ca937e7837253063516c326d
-- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=5283636fcf4293475fb13b3d72bcc0c4a02ba82709e80bc4d1c1da400656e252
-- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=62505c2aa33b60fdcb9d07b173e73b0c8962b7d503ac62d726b7254ce4688c00
-- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=c3048160bcf6767592e1510a5353080637f7cb6f34f84f173c5da0678375d41d
-- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=fb2d44d4c77e48211976264f2ccff8c3e4cf5c211c3c9257ad1fbde1de42d5fe
-- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=c3546861d097613abc8a1d3cefed387d13b9c3070e774b0ec87ad504e92f4aff
-- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=ceca83af90e9e2fb03768aebc9f390da45d0ee7d9d8b14c5416b1a1006a3a163
-- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=f02842d6654b65edf009113a6dfbbc04e2d28b5afaac4e504b9b18c06971ae38
+- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=03449e5914c06d74123482c6846deee56ffa43dae947ba1f27d99c89190cef9b
+- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=ec6ff9bcad8e9be287fd08be57763b86c1d8287b19856a9b1662950a1e3802e2
+- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=edbebbe9e3e421e8ff0c852db00d5e9bd0a35dfa279e9e276b2b4a89db971059
+- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=7399fdee7ff3865be56342e6e361411c2585bd2e2c3e297f09706358f2443b70
+- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=bcc10d075c939b3fac137c18198154bb43b8c8a81defb5ae59773a1240d7d9b7
+- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=48aed769773b4608697fc4d9faf0c3ca1f0afdd21257156fa138b8b3d58038c8
+- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=b44f9754c6d757a54559638ab16a11514e356c9eeb034c34689878caf2fef3f1
+- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=d74d93a6bdf0289752099b53760d1845541b51d71f7dccdcda8dcc083b0d9460
 
 ## Owner Host Apply Phases
 

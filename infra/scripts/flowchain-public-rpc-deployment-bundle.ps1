@@ -230,6 +230,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.renderedNginxHasHttpsHost = $renderedAllText.Contains("server_name rpc.flowchain.example;") -and $renderedAllText.Contains("https://rpc.flowchain.example")
         $checks.renderedNginxHasRateLimit = $renderedAllText.Contains("rate=60r/m") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
         $checks.renderedNginxHasSecurityHeaders = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
+        $checks.renderedNginxHasTimeoutGuardrails = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcTimeoutGuardrailTokens
         $checks.renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$ownerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$ownerEnvFile")
         $checks.renderedPreflightsUsePublicUrl = $renderedAllText.Contains("https://rpc.flowchain.example") -and $renderedAllText.Contains("https://wallet.flowchain.example")
         $checks.renderedPreflightsRejectWrongMethods = $renderedAllText.Contains('test "${rpc_get_status}" = "405"') -and $renderedAllText.Contains('test "${readonly_post_status}" = "405"') -and $renderedAllText.Contains('$rpcGetStatusCode -ne 405') -and $renderedAllText.Contains('$readOnlyPostStatusCode -ne 405')
@@ -495,6 +496,15 @@ $publicRpcSecurityHeaderTokens = @(
     "add_header Content-Security-Policy `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'`" always;"
 )
 
+$publicRpcTimeoutGuardrailTokens = @(
+    "client_max_body_size 256k;",
+    "client_body_timeout 10s;",
+    "send_timeout 30s;",
+    "proxy_connect_timeout 5s;",
+    "proxy_send_timeout 30s;",
+    "proxy_read_timeout 60s;"
+)
+
 $nginxRequiredTokens = @(
     "server_name <FLOWCHAIN_RPC_PUBLIC_HOST>;",
     "ssl_certificate <PATH_TO_TLS_CERTIFICATE>;",
@@ -508,7 +518,7 @@ $nginxRequiredTokens = @(
     'proxy_set_header X-Forwarded-Proto https;',
     'proxy_set_header X-Forwarded-For $remote_addr;',
     '/tester/(faucet|wallets/(create|send))'
-) + $publicRpcSecurityHeaderTokens
+) + $publicRpcSecurityHeaderTokens + $publicRpcTimeoutGuardrailTokens
 
 $systemdRequiredTokens = @(
     "[Unit]",
@@ -552,6 +562,8 @@ $preflightRequiredTokens = @(
     'allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
     'disallowed_origin="<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     'grep -Fq "proxy_pass http://127.0.0.1:8787;" "${rendered_conf}"',
+    'grep -Fq "client_body_timeout 10s;" "${rendered_conf}"',
+    'grep -Fq "proxy_connect_timeout 5s;" "${rendered_conf}"',
     "grep -Eq '<(FLOWCHAIN_|PATH_TO_TLS_)' `"`${rendered_conf}`"",
     "nginx -t",
     'curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null',
@@ -581,6 +593,8 @@ $windowsPreflightRequiredTokens = @(
     '[string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
     '[string] $DisallowedOrigin = "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     'proxy_pass http://127.0.0.1:8787;',
+    'client_body_timeout 10s;',
+    'proxy_connect_timeout 5s;',
     'proxy_set_header Origin $http_origin;',
     'proxy_set_header X-Forwarded-Proto https;',
     '& $NginxExe -t',
@@ -758,6 +772,12 @@ $nginxPreflightScriptLines = @(
     'grep -Fq "proxy_pass http://127.0.0.1:8787;" "${rendered_conf}"',
     'grep -Fq "limit_req_zone" "${rendered_conf}"',
     'grep -Fq "limit_req zone=flowchain_rpc_per_ip" "${rendered_conf}"',
+    'grep -Fq "client_max_body_size 256k;" "${rendered_conf}"',
+    'grep -Fq "client_body_timeout 10s;" "${rendered_conf}"',
+    'grep -Fq "proxy_connect_timeout 5s;" "${rendered_conf}"',
+    'grep -Fq "proxy_send_timeout 30s;" "${rendered_conf}"',
+    'grep -Fq "proxy_read_timeout 60s;" "${rendered_conf}"',
+    'grep -Fq "send_timeout 30s;" "${rendered_conf}"',
     'grep -Fq "ssl_certificate " "${rendered_conf}"',
     'grep -Fq "ssl_certificate_key " "${rendered_conf}"',
     'grep -Fq "server_tokens off;" "${rendered_conf}"',
@@ -811,7 +831,7 @@ $nginxPreflightChecklistLines = @(
     '- Render the Nginx template to `<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>`.',
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
-    "- Confirm TLS, rate limiting, Origin forwarding, X-Forwarded headers, and defensive response headers are present.",
+    "- Confirm TLS, rate limiting, timeout guardrails, Origin forwarding, X-Forwarded headers, and defensive response headers are present.",
     '- Run `nginx -t` before every reload.',
     '- Run `bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
@@ -843,6 +863,12 @@ $windowsNginxPreflightScriptLines = @(
     '    "proxy_pass http://127.0.0.1:8787;",',
     '    "limit_req_zone",',
     '    "limit_req zone=flowchain_rpc_per_ip",',
+    '    "client_max_body_size 256k;",',
+    '    "client_body_timeout 10s;",',
+    '    "proxy_connect_timeout 5s;",',
+    '    "proxy_send_timeout 30s;",',
+    '    "proxy_read_timeout 60s;",',
+    '    "send_timeout 30s;",',
     '    "ssl_certificate ",',
     '    "ssl_certificate_key ",',
     '    "server_tokens off;",',
@@ -951,7 +977,7 @@ $windowsNginxPreflightChecklistLines = @(
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Set `<FLOWCHAIN_NGINX_EXE>` to the local `nginx.exe` path.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
-    '- Confirm TLS, rate limiting, Origin forwarding, X-Forwarded headers, and defensive response headers are present.',
+    '- Confirm TLS, rate limiting, timeout guardrails, Origin forwarding, X-Forwarded headers, and defensive response headers are present.',
     '- Run `powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
     "The PowerShell preflight uses local health and public read/readiness requests only. It does not send live transactions."
@@ -1382,6 +1408,7 @@ $checks = [ordered]@{
     ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
     ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
     ownerRenderIncludesSecurityHeaders = ($renderValidation.checks.renderedNginxHasSecurityHeaders -eq $true)
+    ownerRenderIncludesTimeoutGuardrails = ($renderValidation.checks.renderedNginxHasTimeoutGuardrails -eq $true)
     ownerRenderPreflightsRejectWrongMethods = ($renderValidation.checks.renderedPreflightsRejectWrongMethods -eq $true)
     ownerRenderRejectsPublicUrlPath = ($renderValidation.checks.publicUrlPathRenderRejected -eq $true)
     ownerRenderPublicUrlPathRejectOutputNoSecrets = ($renderValidation.checks.publicUrlPathRenderOutputNoSecrets -eq $true)
@@ -1389,7 +1416,9 @@ $checks = [ordered]@{
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
     includesSecurityHeaders = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcSecurityHeaderTokens
+    includesTimeoutGuardrails = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcTimeoutGuardrailTokens
     preflightsCheckSecurityHeaders = ($nginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $nginxPreflightScriptText.Contains("add_header Content-Security-Policy") -and $windowsNginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $windowsNginxPreflightScriptText.Contains("add_header Content-Security-Policy"))
+    preflightsCheckTimeoutGuardrails = ($nginxPreflightScriptText.Contains("client_body_timeout 10s") -and $nginxPreflightScriptText.Contains("proxy_connect_timeout 5s") -and $windowsNginxPreflightScriptText.Contains("client_body_timeout 10s") -and $windowsNginxPreflightScriptText.Contains("proxy_connect_timeout 5s"))
     includesMethodRejectionPreflight = ($nginxPreflightScriptText.Contains('test "${rpc_get_status}" = "405"') -and $nginxPreflightScriptText.Contains('test "${readonly_post_status}" = "405"') -and $windowsNginxPreflightScriptText.Contains("RPC endpoint GET preflight did not return HTTP 405.") -and $windowsNginxPreflightScriptText.Contains("Read-only RPC readiness POST preflight did not return HTTP 405."))
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     publicStateMirrorExcluded = (-not $nginxText.Contains("|state|")) -and (-not $nginxText.Contains("/state")) -and (-not @($edgeTemplateReport.publicReadMirrorPaths).Contains("/state"))

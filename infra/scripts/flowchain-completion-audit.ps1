@@ -1539,6 +1539,7 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "ownerRenderDoesNotPrintTokenHash",
     "ownerRenderFilesDoNotContainTokenHash",
     "ownerRenderIncludesSecurityHeaders",
+    "ownerRenderIncludesTimeoutGuardrails",
     "ownerRenderPreflightsRejectWrongMethods",
     "ownerRenderRejectsPublicUrlPath",
     "ownerRenderPublicUrlPathRejectOutputNoSecrets",
@@ -1546,7 +1547,9 @@ $publicRpcDeploymentBundleRequiredChecks = @(
     "includesRateLimitPlaceholder",
     "includesTlsPlaceholders",
     "includesSecurityHeaders",
+    "includesTimeoutGuardrails",
     "preflightsCheckSecurityHeaders",
+    "preflightsCheckTimeoutGuardrails",
     "includesMethodRejectionPreflight",
     "includesCorsOriginForwarding",
     "publicStateMirrorExcluded",
@@ -1597,9 +1600,12 @@ $publicRpcDeploymentBundlePassed = $publicRpcDeploymentBundleExitCode -eq 0 `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderIncludesTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "ownerRenderPreflightsRejectWrongMethods" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "preflightsCheckTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "envExampleHasAllRequiredNames" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentBundleChecks -Name "secretMarkerFindingsEmpty" -Default $false) -eq $true) `
@@ -1638,11 +1644,13 @@ $publicRpcDeploymentAutomationRequiredChecks = @(
     "renderedNginxHasCorsForwarding",
     "renderedNginxHasRateLimit",
     "renderedNginxHasSecurityHeaders",
+    "renderedNginxHasTimeoutGuardrails",
     "renderedSystemdUsesOwnerEnv",
     "renderedPreflightHasReadinessProbe",
     "renderedPreflightHasTesterUnauthProbe",
     "renderedPreflightHasDisallowedOriginProbe",
     "renderedPreflightChecksSecurityHeaders",
+    "renderedPreflightChecksTimeoutGuardrails",
     "renderedPreflightHasMethodRejectionProbes",
     "renderedPreflightBlocksBroadStatePath",
     "renderedPreflightBlocksPrivateWalletCreate",
@@ -1729,10 +1737,12 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxHasTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightChecksTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryPassed" -Default $false) -eq $true) `

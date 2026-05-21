@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T12:41:53.8945840Z",
+    "generatedAt":  "2026-05-21T12:59:10.2457775Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -102,7 +102,7 @@
                       "id":  "public-rpc-edge-template",
                       "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, timeoutGuardrails=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
@@ -115,7 +115,7 @@
                       "id":  "public-rpc-deployment-automation",
                       "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, timeoutGuardrails=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -127,7 +127,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=112814, finalizedHeight=112814",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=112900, finalizedHeight=112900",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],

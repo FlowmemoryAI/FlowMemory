@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_checks.v2",
-    "generatedAt":  "2026-05-21T10:56:43.4040875Z",
+    "generatedAt":  "2026-05-21T12:55:17.8393402Z",
     "status":  "passed",
     "requiredPlaceholders":  [
                                  "\u003cFLOWCHAIN_RPC_PUBLIC_HOST\u003e",
@@ -68,6 +68,7 @@
                    "ownerRenderDoesNotPrintTokenHash":  true,
                    "ownerRenderFilesDoNotContainTokenHash":  true,
                    "ownerRenderIncludesSecurityHeaders":  true,
+                   "ownerRenderIncludesTimeoutGuardrails":  true,
                    "ownerRenderPreflightsRejectWrongMethods":  true,
                    "ownerRenderRejectsPublicUrlPath":  true,
                    "ownerRenderPublicUrlPathRejectOutputNoSecrets":  true,
@@ -75,7 +76,9 @@
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
                    "includesSecurityHeaders":  true,
+                   "includesTimeoutGuardrails":  true,
                    "preflightsCheckSecurityHeaders":  true,
+                   "preflightsCheckTimeoutGuardrails":  true,
                    "includesMethodRejectionPreflight":  true,
                    "includesCorsOriginForwarding":  true,
                    "publicStateMirrorExcluded":  true,
