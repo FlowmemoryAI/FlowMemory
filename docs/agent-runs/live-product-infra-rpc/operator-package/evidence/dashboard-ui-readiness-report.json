@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T17:42:27.9612563+00:00",
+    "generatedAt":  "2026-05-21T02:53:53.3969190+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -21,6 +21,9 @@
                    "bridgeRuntimeCreditProofCovered":  true,
                    "realValuePilotAggregateProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
+                   "ownerHostApplyPlanProofCovered":  true,
+                   "ownerHostApplyExecutionProofCovered":  true,
+                   "ownerHostApplyRollbackProofCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
                    "dashboardUnitTestsPassed":  true,
@@ -56,7 +59,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  31,
+                         "durationSeconds":  36,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  28
                      },
@@ -76,7 +79,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  218,
+                         "durationSeconds":  288,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -97,7 +100,10 @@
                       ],
     "coveredProofs":  [
                           "base8453-bridge-runtime-credit-proof",
-                          "real-value-pilot-aggregate-proof"
+                          "real-value-pilot-aggregate-proof",
+                          "owner-host-apply-plan",
+                          "owner-host-apply-execution",
+                          "owner-host-apply-rollback"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
