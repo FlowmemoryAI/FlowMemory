@@ -75,6 +75,7 @@ const liveReadinessReportCopies = [
   "owner-inputs-report.json",
   "owner-activation-plan-report.json",
   "owner-go-live-handoff-report.json",
+  "owner-needs-now-report.json",
   "no-secret-scan-report.json",
 ];
 
@@ -241,6 +242,7 @@ function writeLiveReadinessSummary() {
   const ownerInputs = reports["owner-inputs-report.json"];
   const ownerActivationPlan = reports["owner-activation-plan-report.json"];
   const ownerGoLiveHandoff = reports["owner-go-live-handoff-report.json"];
+  const ownerNeedsNow = reports["owner-needs-now-report.json"];
   const noSecretScan = reports["no-secret-scan-report.json"];
   const gates = [...liveReadinessGateLabels.keys()].map((id) => gateFromContractItem(contract, id));
   const activeRuleIds = asArray(opsAlertRules?.activeRuleIds).map((id) => sanitizeText(id));
@@ -302,10 +304,27 @@ function writeLiveReadinessSummary() {
     expectedReportPaths: uniqueTexts(step?.expectedReportPaths).slice(0, 14),
     stopOnFailure: step?.stopOnFailure === true,
   });
+  const toOwnerNeedGroup = (group) => ({
+    id: sanitizeText(group?.id),
+    title: sanitizeText(group?.title),
+    status: sanitizeText(group?.status),
+    ready: group?.ready === true,
+    whyNeeded: sanitizeText(group?.whyNeeded),
+    ownerAction: sanitizeText(group?.ownerAction),
+    envNames: uniqueTexts(group?.envNames),
+    missingEnvNames: uniqueTexts(group?.missingEnvNames),
+    invalidEnvNames: uniqueTexts(group?.invalidEnvNames),
+    unknownEnvNames: uniqueTexts(group?.unknownEnvNames),
+    validationCommands: commandList(group?.validationCommands, 6),
+    doNotSend: uniqueTexts(group?.doNotSend),
+  });
   const activationStages = asArray(ownerActivationPlan?.stages).map(toActivationStage);
   const goLiveStages = asArray(ownerGoLiveHandoff?.stages).map(toActivationStage);
   const goLiveLaunchSequence = asArray(ownerGoLiveHandoff?.launchSequence).map(toLaunchStep);
   const goLiveRollbackCommands = commandList(ownerGoLiveHandoff?.rollbackCommands, 12);
+  const ownerNeedGroups = asArray(ownerNeedsNow?.groups).map(toOwnerNeedGroup);
+  const ownerNeededNowGroups = asArray(ownerNeedsNow?.neededNowGroups).map(toOwnerNeedGroup);
+  const ownerReadyGroups = asArray(ownerNeedsNow?.readyGroups).map(toOwnerNeedGroup);
   const activationForbiddenItems = uniqueTexts(activationStages.flatMap((stage) => stage.ownerMustNotSend));
   const goLiveForbiddenItems = uniqueTexts(ownerGoLiveHandoff?.mustNotSend ?? goLiveStages.flatMap((stage) => stage.ownerMustNotSend));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
@@ -434,6 +453,10 @@ function writeLiveReadinessSummary() {
       ownerGoLiveLaunchSequenceCommandCount: asText(ownerGoLiveHandoff?.launchSequenceCommandCount, "0"),
       ownerGoLiveExpectedReportPathCount: asText(ownerGoLiveHandoff?.launchSequenceExpectedReportPathCount, "0"),
       ownerGoLiveRollbackCommandCount: asText(ownerGoLiveHandoff?.rollbackCommandCount, String(goLiveRollbackCommands.length)),
+      ownerNeedsNowStatus: asText(ownerNeedsNow?.status, "not recorded"),
+      ownerNeedsNowGroupCount: asText(ownerNeedsNow?.groupCount, String(ownerNeedGroups.length)),
+      ownerNeedsNowNeededGroupCount: asText(ownerNeedsNow?.neededNowGroupCount, String(ownerNeededNowGroups.length)),
+      ownerNeedsNowReadyGroupCount: asText(ownerNeedsNow?.readyGroupCount, String(ownerReadyGroups.length)),
       ownerHostApplyPlanCovered: ownerGoLiveHandoff?.checks?.launchSequenceCoversOwnerHostApplyPlan === true,
       ownerHostApplyExecutionCovered: ownerGoLiveHandoff?.checks?.launchSequenceCoversOwnerHostApplyExecution === true,
       ownerHostApplyRollbackCovered: ownerGoLiveHandoff?.checks?.rollbackCoversOwnerHostApplyRollback === true,
@@ -627,6 +650,31 @@ function writeLiveReadinessSummary() {
       noSecrets: ownerGoLiveHandoff?.noSecrets === true,
       broadcasts: ownerGoLiveHandoff?.broadcasts === true,
       envValuesPrinted: ownerGoLiveHandoff?.envValuesPrinted === true,
+    },
+    ownerNeedsNow: {
+      status: asText(ownerNeedsNow?.status, "not recorded"),
+      launchReadinessStatus: asText(ownerNeedsNow?.launchReadinessStatus, "not recorded"),
+      releaseReady: ownerNeedsNow?.releaseReady === true,
+      deploymentReady: ownerNeedsNow?.deploymentReady === true,
+      packetShareable: ownerNeedsNow?.packetShareable === true,
+      completionReady: ownerNeedsNow?.completionReady === true,
+      latestHeight: asText(ownerNeedsNow?.latestHeight, latestHeight),
+      finalizedHeight: asText(ownerNeedsNow?.finalizedHeight, finalizedHeight),
+      groupCount: asText(ownerNeedsNow?.groupCount, String(ownerNeedGroups.length)),
+      neededNowGroupCount: asText(ownerNeedsNow?.neededNowGroupCount, String(ownerNeededNowGroups.length)),
+      readyGroupCount: asText(ownerNeedsNow?.readyGroupCount, String(ownerReadyGroups.length)),
+      nextOwnerInputNames: uniqueTexts(ownerNeedsNow?.nextOwnerInputNames),
+      missingRequiredEnvNames: uniqueTexts(ownerNeedsNow?.missingRequiredEnvNames),
+      missingOptionalEnvNames: uniqueTexts(ownerNeedsNow?.missingOptionalEnvNames),
+      invalidEnvNames: uniqueTexts(ownerNeedsNow?.invalidEnvNames),
+      groups: ownerNeedGroups,
+      neededNowGroups: ownerNeededNowGroups,
+      readyGroups: ownerReadyGroups,
+      checks: ownerNeedsNow?.checks ?? {},
+      failedChecks: uniqueTexts(ownerNeedsNow?.failedChecks),
+      noSecrets: ownerNeedsNow?.noSecrets === true,
+      broadcasts: ownerNeedsNow?.broadcasts === true,
+      envValuesPrinted: ownerNeedsNow?.envValuesPrinted === true,
     },
     testerLaunch: {
       status: asText(externalTesterPacket?.status ?? externalTesterReadiness?.status, "not recorded"),

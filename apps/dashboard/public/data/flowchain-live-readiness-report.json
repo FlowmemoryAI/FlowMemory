@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T09:39:53.7545366Z",
+  "generatedAt": "2026-05-21T10:03:18.8812040Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "111585",
-    "finalizedHeight": "111585",
+    "latestHeight": "111767",
+    "finalizedHeight": "111767",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -110,6 +110,10 @@
     "ownerGoLiveLaunchSequenceCommandCount": "44",
     "ownerGoLiveExpectedReportPathCount": "45",
     "ownerGoLiveRollbackCommandCount": "9",
+    "ownerNeedsNowStatus": "passed",
+    "ownerNeedsNowGroupCount": "4",
+    "ownerNeedsNowNeededGroupCount": "3",
+    "ownerNeedsNowReadyGroupCount": "1",
     "ownerHostApplyPlanCovered": true,
     "ownerHostApplyExecutionCovered": true,
     "ownerHostApplyRollbackCovered": true,
@@ -2059,6 +2063,346 @@
     "broadcasts": false,
     "envValuesPrinted": false
   },
+  "ownerNeedsNow": {
+    "status": "passed",
+    "launchReadinessStatus": "blocked-owner-input",
+    "releaseReady": false,
+    "deploymentReady": false,
+    "packetShareable": false,
+    "completionReady": false,
+    "latestHeight": "111367",
+    "finalizedHeight": "111367",
+    "groupCount": "4",
+    "neededNowGroupCount": "3",
+    "readyGroupCount": "1",
+    "nextOwnerInputNames": [
+      "FLOWCHAIN_RPC_PUBLIC_URL",
+      "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+      "FLOWCHAIN_RPC_TLS_TERMINATED",
+      "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "FLOWCHAIN_BASE8453_RPC_URL",
+      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+      "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+      "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+      "FLOWCHAIN_PILOT_CONFIRMATIONS"
+    ],
+    "missingRequiredEnvNames": [
+      "FLOWCHAIN_RPC_PUBLIC_URL",
+      "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+      "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+      "FLOWCHAIN_RPC_TLS_TERMINATED",
+      "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "FLOWCHAIN_BASE8453_RPC_URL",
+      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+      "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+      "FLOWCHAIN_BASE8453_FROM_BLOCK",
+      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+      "FLOWCHAIN_PILOT_CONFIRMATIONS"
+    ],
+    "missingOptionalEnvNames": [
+      "FLOWCHAIN_BASE8453_TO_BLOCK"
+    ],
+    "invalidEnvNames": [],
+    "groups": [
+      {
+        "id": "public-rpc-edge",
+        "title": "Public RPC edge",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "Friends and family need a public HTTPS RPC endpoint that proxies to the private FlowChain origin without exposing local-only paths.",
+        "ownerAction": "Pick the public RPC URL, configure TLS termination, set exact HTTPS browser origins, and choose a positive per-minute rate limit.",
+        "envNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:public-rpc:check -- -AllowBlocked",
+          "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "provider dashboard password",
+          "TLS private key",
+          "tunnel token",
+          "origin wildcard"
+        ]
+      },
+      {
+        "id": "backup-storage",
+        "title": "Backup storage",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "The public launch must prove the live state can be snapshotted, restored, and tamper-checked from persistent storage.",
+        "ownerAction": "Create an existing writable backup directory on the always-on host and point the owner env file at it.",
+        "envNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:backup:owner-path:dry-run",
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "cloud storage secret",
+          "backup provider account password",
+          "private backup credentials"
+        ]
+      },
+      {
+        "id": "tester-write-gateway",
+        "title": "Tester write gateway",
+        "status": "ready",
+        "ready": true,
+        "whyNeeded": "External testers need capped wallet create/faucet/send access without putting the raw bearer token in GitHub or chat.",
+        "ownerAction": "Keep tester writes enabled, store only the SHA-256 token digest in the ignored owner env file, and maintain a small per-send cap.",
+        "envNames": [
+          "FLOWCHAIN_TESTER_WRITE_ENABLED",
+          "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+          "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        ],
+        "missingEnvNames": [],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:tester:token:setup",
+          "npm run flowchain:tester:gateway:e2e",
+          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "raw tester bearer token",
+          "owner env file contents",
+          "token hash together with the raw token"
+        ]
+      },
+      {
+        "id": "base8453-bridge",
+        "title": "Base 8453 bridge",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "Bridge-funded testing stays closed until the Base 8453 observer, lockbox, asset, block range, pilot caps, and confirmations are configured.",
+        "ownerAction": "Provide the Base RPC endpoint, lockbox and supported token addresses, asset decimals, start block, capped pilot acknowledgement, deposit cap, total cap, and confirmation depth.",
+        "envNames": [
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:bridge:live:check -- -AllowBlocked",
+          "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:reconciliation"
+        ],
+        "doNotSend": [
+          "wallet seed words",
+          "deployer private key",
+          "provider API secret pasted in chat",
+          "unbounded pilot caps"
+        ]
+      }
+    ],
+    "neededNowGroups": [
+      {
+        "id": "public-rpc-edge",
+        "title": "Public RPC edge",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "Friends and family need a public HTTPS RPC endpoint that proxies to the private FlowChain origin without exposing local-only paths.",
+        "ownerAction": "Pick the public RPC URL, configure TLS termination, set exact HTTPS browser origins, and choose a positive per-minute rate limit.",
+        "envNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_RPC_PUBLIC_URL",
+          "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+          "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+          "FLOWCHAIN_RPC_TLS_TERMINATED"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:public-rpc:check -- -AllowBlocked",
+          "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+          "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "provider dashboard password",
+          "TLS private key",
+          "tunnel token",
+          "origin wildcard"
+        ]
+      },
+      {
+        "id": "backup-storage",
+        "title": "Backup storage",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "The public launch must prove the live state can be snapshotted, restored, and tamper-checked from persistent storage.",
+        "ownerAction": "Create an existing writable backup directory on the always-on host and point the owner env file at it.",
+        "envNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:backup:owner-path:dry-run",
+          "npm run flowchain:backup:restore:validate",
+          "npm run flowchain:backup:check -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "cloud storage secret",
+          "backup provider account password",
+          "private backup credentials"
+        ]
+      },
+      {
+        "id": "base8453-bridge",
+        "title": "Base 8453 bridge",
+        "status": "needs-owner-input",
+        "ready": false,
+        "whyNeeded": "Bridge-funded testing stays closed until the Base 8453 observer, lockbox, asset, block range, pilot caps, and confirmations are configured.",
+        "ownerAction": "Provide the Base RPC endpoint, lockbox and supported token addresses, asset decimals, start block, capped pilot acknowledgement, deposit cap, total cap, and confirmation depth.",
+        "envNames": [
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "missingEnvNames": [
+          "FLOWCHAIN_PILOT_OPERATOR_ACK",
+          "FLOWCHAIN_BASE8453_RPC_URL",
+          "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+          "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+          "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+          "FLOWCHAIN_BASE8453_FROM_BLOCK",
+          "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+          "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+          "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        ],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:bridge:live:check -- -AllowBlocked",
+          "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+          "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+          "npm run flowchain:bridge:reconciliation"
+        ],
+        "doNotSend": [
+          "wallet seed words",
+          "deployer private key",
+          "provider API secret pasted in chat",
+          "unbounded pilot caps"
+        ]
+      }
+    ],
+    "readyGroups": [
+      {
+        "id": "tester-write-gateway",
+        "title": "Tester write gateway",
+        "status": "ready",
+        "ready": true,
+        "whyNeeded": "External testers need capped wallet create/faucet/send access without putting the raw bearer token in GitHub or chat.",
+        "ownerAction": "Keep tester writes enabled, store only the SHA-256 token digest in the ignored owner env file, and maintain a small per-send cap.",
+        "envNames": [
+          "FLOWCHAIN_TESTER_WRITE_ENABLED",
+          "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+          "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        ],
+        "missingEnvNames": [],
+        "invalidEnvNames": [],
+        "unknownEnvNames": [],
+        "validationCommands": [
+          "npm run flowchain:tester:token:setup",
+          "npm run flowchain:tester:gateway:e2e",
+          "npm run flowchain:external-tester:packet -- -AllowBlocked"
+        ],
+        "doNotSend": [
+          "raw tester bearer token",
+          "owner env file contents",
+          "token hash together with the raw token"
+        ]
+      }
+    ],
+    "checks": {
+      "packageScriptPresent": true,
+      "ownerInputsLoaded": true,
+      "ownerGoLiveHandoffLoaded": true,
+      "activationPlanLoaded": true,
+      "truthTableLoaded": true,
+      "reportStatusDeckPresent": true,
+      "groupCountMinimumMet": true,
+      "requiredEnvCoverageComplete": true,
+      "groupCommandsPresent": true,
+      "groupDoNotSendPresent": true,
+      "knownNeededNowOwnerInputsOnly": true,
+      "optionalOwnerInputsExcludedFromNeededNow": true,
+      "nextOwnerInputsPresentWhenBlocked": true,
+      "neededNowGroupsPresentWhenBlocked": true,
+      "readyTesterGatewayCaptured": true,
+      "noReleaseReadyClaimWhileBlocked": true,
+      "publicSharingBlockedUntilReady": true,
+      "envValuesPrintedFalse": true,
+      "noSecrets": true,
+      "broadcastsFalse": true,
+      "secretMarkerFindingsEmpty": true
+    },
+    "failedChecks": [],
+    "noSecrets": true,
+    "broadcasts": false,
+    "envValuesPrinted": false
+  },
   "testerLaunch": {
     "status": "blocked",
     "readinessStatus": "blocked",
@@ -2259,7 +2603,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=111559, finalizedHeight=111559",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=111727, finalizedHeight=111727",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2511,19 +2855,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:39:53.7545366Z"
+      "generatedAt": "2026-05-21T10:03:18.8812040Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:48.3038640Z"
+      "generatedAt": "2026-05-21T10:08:02.9826246Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T09:42:36.5596810Z"
+      "generatedAt": "2026-05-21T10:07:50.3314147Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -2565,7 +2909,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:29.7066559Z"
+      "generatedAt": "2026-05-21T10:07:43.3765457Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -2583,7 +2927,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:41.1668993Z"
+      "generatedAt": "2026-05-21T10:07:54.9041976Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2607,7 +2951,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:45.8376709Z"
+      "generatedAt": "2026-05-21T10:08:00.0053822Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2643,25 +2987,25 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:50.6091166Z"
+      "generatedAt": "2026-05-21T10:08:06.0765585Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:50.6091166Z"
+      "generatedAt": "2026-05-21T10:08:06.0765585Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:48.9773988Z"
+      "generatedAt": "2026-05-21T10:08:03.9546963Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T09:23:11.4614118Z"
+      "generatedAt": "2026-05-21T10:07:28.5980520Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
@@ -2703,7 +3047,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T09:42:50.0074519Z"
+      "generatedAt": "2026-05-21T10:08:05.3342671Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2718,10 +3062,16 @@
       "generatedAt": "2026-05-21T06:00:32.9112705Z"
     },
     {
+      "fileName": "owner-needs-now-report.json",
+      "schema": "flowchain.owner_needs_now_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-21T09:17:35.9757558Z"
+    },
+    {
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T09:54:08.9644978Z"
+      "generatedAt": "2026-05-21T10:09:53.0028735Z"
     }
   ],
   "envValuesPrinted": false,

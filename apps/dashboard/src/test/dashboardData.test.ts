@@ -552,8 +552,13 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Needed now");
     expect(html).toContain("Owner setup groups");
     expect(html).toContain("Public RPC edge");
+    expect(html).toContain("Pick the public RPC URL");
+    expect(html).toContain("Friends and family need a public HTTPS RPC endpoint");
+    expect(html).toContain("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked");
     expect(html).toContain("Backup storage");
     expect(html).toContain("Base 8453 bridge");
+    expect(html).toContain("Ready groups");
+    expect(html).toContain("Tester write gateway");
     expect(html).toContain("blocked by");
     expect(html).toContain("Owner inputs");
     expect(html).toContain("Next commands");

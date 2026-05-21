@@ -353,8 +353,11 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("L1 activation status")).toContainText("Release");
     await expect(page.getByRole("heading", { name: "Needed now" })).toBeVisible();
     await expect(page.getByLabel("Owner setup groups")).toContainText("Public RPC edge");
+    await expect(page.getByLabel("Owner setup groups")).toContainText("Pick the public RPC URL");
+    await expect(page.getByLabel("Public RPC edge validation commands")).toContainText("flowchain:public-rpc:synthetic-canary");
     await expect(page.getByLabel("Owner setup groups")).toContainText("Backup storage");
     await expect(page.getByLabel("Owner setup groups")).toContainText("Base 8453 bridge");
+    await expect(page.getByLabel("Ready setup groups")).toContainText("Tester write gateway");
     await expect(page.getByRole("heading", { name: "Host apply sequence" })).toBeVisible();
     await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh plan");
     await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh apply");

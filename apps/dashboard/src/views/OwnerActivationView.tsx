@@ -54,6 +54,12 @@ interface OwnerInputGroup {
   detail: string;
   command: string;
   names: string[];
+  status?: string;
+  ready?: boolean;
+  whyNeeded?: string;
+  ownerAction?: string;
+  validationCommands?: string[];
+  doNotSend?: string[];
 }
 
 const OWNER_INPUT_GROUPS = [
@@ -161,6 +167,33 @@ function parseLaunchStep(value: unknown, index: number): ActivationLaunchStep | 
   };
 }
 
+function parseOwnerNeedGroup(value: unknown): OwnerInputGroup | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const validationCommands = stringList(value.validationCommands);
+  const missingNames = stringList(value.missingEnvNames);
+  const invalidNames = stringList(value.invalidEnvNames);
+  const unknownNames = stringList(value.unknownEnvNames);
+  const envNames = stringList(value.envNames);
+  const names = [...new Set([...missingNames, ...invalidNames, ...unknownNames, ...envNames])];
+
+  return {
+    id: text(value.id, "owner-need"),
+    title: text(value.title, "Owner setup group"),
+    detail: text(value.ownerAction ?? value.whyNeeded, "Owner-provided launch input group."),
+    command: validationCommands[0] ?? "npm run flowchain:owner:needs-now",
+    names,
+    status: text(value.status, "not recorded"),
+    ready: value.ready === true,
+    whyNeeded: text(value.whyNeeded, ""),
+    ownerAction: text(value.ownerAction, ""),
+    validationCommands,
+    doNotSend: stringList(value.doNotSend),
+  };
+}
+
 function stageIcon(id: string) {
   if (id.includes("public-rpc")) return Server;
   if (id.includes("backup")) return HardDrive;
@@ -201,11 +234,18 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const metrics = isRecord(liveReadiness?.metrics) ? liveReadiness.metrics : {};
   const activation = isRecord(liveReadiness?.ownerActivation) ? liveReadiness.ownerActivation : null;
   const handoff = isRecord(liveReadiness?.ownerGoLiveHandoff) ? liveReadiness.ownerGoLiveHandoff : null;
+  const ownerNeedsNow = isRecord(liveReadiness?.ownerNeedsNow) ? liveReadiness.ownerNeedsNow : null;
   const stageSource = handoff ?? activation;
   const stages = asArray(stageSource?.stages).map(parseStage).filter((stage): stage is ActivationStage => stage !== null);
+  const needsNowGroups = asArray(ownerNeedsNow?.neededNowGroups)
+    .map(parseOwnerNeedGroup)
+    .filter((group): group is OwnerInputGroup => group !== null);
+  const readyOwnerGroups = asArray(ownerNeedsNow?.readyGroups)
+    .map(parseOwnerNeedGroup)
+    .filter((group): group is OwnerInputGroup => group !== null);
   const missingEnvNames = stringList(handoff?.missingEnvNames ?? activation?.missingEnvNames);
   const invalidEnvNames = stringList(handoff?.invalidEnvNames ?? activation?.invalidEnvNames);
-  const nextOwnerInputNames = stringList(handoff?.nextOwnerInputNames ?? activation?.nextOwnerInputNames);
+  const nextOwnerInputNames = stringList(ownerNeedsNow?.nextOwnerInputNames ?? handoff?.nextOwnerInputNames ?? activation?.nextOwnerInputNames);
   const requiredOwnerEnvNames = stringList(handoff?.requiredOwnerEnvNames ?? activation?.requiredOwnerEnvNames);
   const optionalOwnerEnvNames = stringList(handoff?.optionalOwnerEnvNames ?? activation?.optionalOwnerEnvNames);
   const nextCommands = stringList(handoff?.nextCommands ?? activation?.nextCommands);
@@ -257,7 +297,10 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const noSecrets = (handoff ?? activation)?.noSecrets === true;
   const envValuesPrinted = (handoff ?? activation)?.envValuesPrinted === true;
   const broadcasts = (handoff ?? activation)?.broadcasts === true;
-  const ownerInputGroups = groupOwnerInputs(nextOwnerInputNames.length > 0 ? nextOwnerInputNames : missingEnvNames);
+  const ownerInputGroups = needsNowGroups.length > 0 ? needsNowGroups : groupOwnerInputs(nextOwnerInputNames.length > 0 ? nextOwnerInputNames : missingEnvNames);
+  const ownerNeedsNowStatus = text(ownerNeedsNow?.status ?? metrics.ownerNeedsNowStatus, "not recorded");
+  const ownerNeedsNowNeededGroupCount = text(ownerNeedsNow?.neededNowGroupCount ?? metrics.ownerNeedsNowNeededGroupCount, String(ownerInputGroups.length));
+  const ownerNeedsNowReadyGroupCount = text(ownerNeedsNow?.readyGroupCount ?? metrics.ownerNeedsNowReadyGroupCount, String(readyOwnerGroups.length));
 
   return (
     <div className="view-stack activation-view">
@@ -301,8 +344,8 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
         </div>
         <div>
           <span>Needed now</span>
-          <strong>{nextOwnerInputNames.length}</strong>
-          <small>missing {missingEnvNames.length} / invalid {invalidEnvNames.length}</small>
+          <strong>{ownerNeedsNowNeededGroupCount}</strong>
+          <small>report {ownerNeedsNowStatus} / inputs {nextOwnerInputNames.length} / ready groups {ownerNeedsNowReadyGroupCount}</small>
         </div>
         <div>
           <span>Chain head</span>
@@ -479,10 +522,15 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
                   <article key={group.id} className="activation-need-group">
                     <div>
                       <strong>{group.title}</strong>
-                      <span>{group.names.length} input{group.names.length === 1 ? "" : "s"}</span>
+                      <span>{group.status ?? `${group.names.length} input${group.names.length === 1 ? "" : "s"}`}</span>
                     </div>
-                    <p>{group.detail}</p>
-                    <code>{group.command}</code>
+                    <p>{group.ownerAction || group.detail}</p>
+                    {group.whyNeeded ? <small>{group.whyNeeded}</small> : null}
+                    <div className="activation-command-list" aria-label={`${group.title} validation commands`}>
+                      {(group.validationCommands && group.validationCommands.length > 0 ? group.validationCommands : [group.command]).slice(0, 3).map((command) => (
+                        <code key={`${group.id}:command:${command}`}>{command}</code>
+                      ))}
+                    </div>
                     <div>
                       {group.names.map((name) => (
                         <code key={`${group.id}:${name}`}>{name}</code>
@@ -494,6 +542,14 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
                 <small>No owner-input blockers are reported.</small>
               )}
             </div>
+            {readyOwnerGroups.length > 0 ? (
+              <div className="activation-ready-groups" aria-label="Ready setup groups">
+                <strong>Ready groups</strong>
+                {readyOwnerGroups.map((group) => (
+                  <span key={`ready:${group.id}`}>{group.title}</span>
+                ))}
+              </div>
+            ) : null}
           </article>
 
           <article className="panel activation-inputs">

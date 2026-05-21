@@ -4579,14 +4579,39 @@ code {
 }
 
 .activation-need-group span,
-.activation-need-group p {
+.activation-need-group p,
+.activation-need-group small,
+.activation-ready-groups span {
   color: var(--muted);
   font-size: 0.78rem;
 }
 
-.activation-need-group p {
+.activation-need-group p,
+.activation-need-group small {
   margin: 0;
   line-height: 1.4;
+}
+
+.activation-ready-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.activation-ready-groups strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.activation-ready-groups span {
+  padding: 5px 7px;
+  border: 1px solid #b9cec4;
+  border-radius: 7px;
+  background: #f1faf5;
 }
 
 .activation-inputs details {
