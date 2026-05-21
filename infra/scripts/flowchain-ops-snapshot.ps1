@@ -74,6 +74,7 @@ $paths = [ordered]@{
     ownerInputsValidation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerGoLiveHandoff = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+    ownerNeedsNow = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
     publicDeployment = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     truthTable = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -1031,6 +1032,24 @@ $ownerGoLiveHandoffReady = $ownerGoLiveHandoffStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
+$ownerNeedsNowStatus = Get-OpsStatus -Report $reports.ownerNeedsNow
+$ownerNeedsNowFailedChecks = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "failedChecks" -Default @()))
+$ownerNeedsNowSecretFindings = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "secretMarkerFindings" -Default @()))
+$ownerNeedsNowMissingRequiredInputs = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "missingRequiredEnvNames" -Default @()))
+$ownerNeedsNowNextInputs = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "nextOwnerInputNames" -Default @()))
+$ownerNeedsNowNeededGroups = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "neededNowGroups" -Default @()))
+$ownerNeedsNowReadyGroups = @((Get-OpsProp -Object $reports.ownerNeedsNow -Name "readyGroups" -Default @()))
+$ownerNeedsNowChecks = Get-OpsProp -Object $reports.ownerNeedsNow -Name "checks"
+$ownerNeedsNowReady = $ownerNeedsNowStatus -eq "passed" `
+    -and $ownerNeedsNowFailedChecks.Count -eq 0 `
+    -and $ownerNeedsNowSecretFindings.Count -eq 0 `
+    -and ((Get-OpsProp -Object $ownerNeedsNowChecks -Name "requiredEnvCoverageComplete" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerNeedsNowChecks -Name "knownNeededNowOwnerInputsOnly" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerNeedsNowChecks -Name "optionalOwnerInputsExcludedFromNeededNow" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $ownerNeedsNowChecks -Name "publicSharingBlockedUntilReady" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.ownerNeedsNow -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.ownerNeedsNow -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.ownerNeedsNow -Name "broadcasts" -Default $true) -eq $false)
 $deploymentStatus = Get-OpsStatus -Report $reports.publicDeployment
 $deploymentRefresh = Get-OpsProp -Object $reports.publicDeployment -Name "dependencyRefresh"
 $deploymentRefreshAborted = (Get-OpsProp -Object $deploymentRefresh -Name "aborted" -Default $false) -eq $true
@@ -1154,6 +1173,9 @@ if (-not $ownerInputsValidationReady) {
 }
 if (-not $ownerGoLiveHandoffReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-go-live-handoff-failed" -Message "Owner go-live handoff is missing or unsafe; the operator needs a no-secret stage deck, ordered launch sequence, rollback commands, next-input list, validation commands, and release-ready guardrail before public launch." -Commands @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
+}
+if (-not $ownerNeedsNowReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "owner-needs-now-failed" -Message "Owner needs-now report is missing or unsafe; operators need grouped owner-input blockers, validation commands, and public-sharing guardrails before launch." -Commands @("npm run flowchain:owner:needs-now", "npm run flowchain:owner:go-live-handoff", "npm run flowchain:truth-table -- -AllowBlocked")
 }
 if ($deploymentRefreshUnsafe) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "deployment-refresh-aborted" -Message "Public deployment dependency refresh aborted or skipped dependency gates." -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
@@ -1570,6 +1592,16 @@ $report = [ordered]@{
         ownerGoLiveNextInputCount = $ownerGoLiveHandoffNextInputs.Count
         ownerGoLiveFailedChecks = $ownerGoLiveHandoffFailedChecks.Count
         ownerGoLiveSecretFindings = $ownerGoLiveHandoffSecretFindings.Count
+        ownerNeedsNow = $ownerNeedsNowStatus
+        ownerNeedsNowReady = $ownerNeedsNowReady
+        ownerNeedsNowLaunchReadinessStatus = Get-OpsProp -Object $reports.ownerNeedsNow -Name "launchReadinessStatus" -Default ""
+        ownerNeedsNowGroupCount = [int](Get-OpsProp -Object $reports.ownerNeedsNow -Name "groupCount" -Default 0)
+        ownerNeedsNowNeededGroupCount = [int](Get-OpsProp -Object $reports.ownerNeedsNow -Name "neededNowGroupCount" -Default $ownerNeedsNowNeededGroups.Count)
+        ownerNeedsNowReadyGroupCount = [int](Get-OpsProp -Object $reports.ownerNeedsNow -Name "readyGroupCount" -Default $ownerNeedsNowReadyGroups.Count)
+        ownerNeedsNowNextInputCount = $ownerNeedsNowNextInputs.Count
+        ownerNeedsNowMissingRequiredInputCount = $ownerNeedsNowMissingRequiredInputs.Count
+        ownerNeedsNowFailedChecks = $ownerNeedsNowFailedChecks.Count
+        ownerNeedsNowPublicSharingBlockedUntilReady = Get-OpsProp -Object $ownerNeedsNowChecks -Name "publicSharingBlockedUntilReady" -Default $false
         publicDeployment = $deploymentStatus
         deploymentRefreshAborted = $deploymentRefreshAborted
         deploymentRefreshAbortStep = $deploymentRefreshAbortStep

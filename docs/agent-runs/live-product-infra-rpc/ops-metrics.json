@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T06:00:44.5891558Z",
+    "generatedAt":  "2026-05-21T09:17:24.7784162Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -28,6 +28,7 @@
                           "ownerInputsValidationStatus":  "passed",
                           "ownerActivationPlanStatus":  "passed",
                           "ownerGoLiveHandoffStatus":  "passed",
+                          "ownerNeedsNowStatus":  "passed",
                           "liveCutoverStatus":  "blocked",
                           "truthTableStatus":  "blocked-owner-input",
                           "noSecretStatus":  "passed"
@@ -37,25 +38,25 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  109783
+                        "value":  111367
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  109783
+                        "value":  111367
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  4
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
                         "type":  "gauge",
                         "help":  "Service monitor samples recorded in the current ops snapshot.",
-                        "value":  2
+                        "value":  3
                     },
                     {
                         "name":  "flowchain_height_advanced",
@@ -91,7 +92,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  31923.499
+                        "value":  43725.979
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -121,13 +122,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  41
+                        "value":  42
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  34
+                        "value":  35
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -1777,13 +1778,13 @@
                         "name":  "flowchain_owner_go_live_launch_sequence_commands",
                         "type":  "gauge",
                         "help":  "Ordered owner go-live launch sequence command count.",
-                        "value":  43
+                        "value":  44
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_evidence_reports",
                         "type":  "gauge",
                         "help":  "Expected evidence report path count in the owner go-live launch sequence.",
-                        "value":  44
+                        "value":  45
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_invalid_evidence_reports",
@@ -1852,6 +1853,60 @@
                         "value":  0
                     },
                     {
+                        "name":  "flowchain_owner_needs_now_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner needs-now report is passed, no-secret, and safe to use.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_launch_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner needs-now report says public launch readiness is ready.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_groups_total",
+                        "type":  "gauge",
+                        "help":  "Owner needs-now setup group count.",
+                        "value":  4
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_blocked_groups",
+                        "type":  "gauge",
+                        "help":  "Owner needs-now groups still blocked by missing or invalid owner inputs.",
+                        "value":  3
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_ready_groups",
+                        "type":  "gauge",
+                        "help":  "Owner needs-now groups already ready.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_next_inputs_total",
+                        "type":  "gauge",
+                        "help":  "Owner input names still listed as needed now.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_missing_required_inputs",
+                        "type":  "gauge",
+                        "help":  "Required owner input names still missing in the owner needs-now report.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in the owner needs-now report.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_needs_now_public_sharing_blocked_until_ready",
+                        "type":  "gauge",
+                        "help":  "One when the owner needs-now report proves public sharing remains blocked until release readiness is clear.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_deployment_ready",
                         "type":  "gauge",
                         "help":  "One when public deployment contract is passed.",
@@ -1891,13 +1946,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  65
+                        "value":  69
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  48
+                        "value":  52
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -1924,7 +1979,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  315,
+    "metricCount":  324,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

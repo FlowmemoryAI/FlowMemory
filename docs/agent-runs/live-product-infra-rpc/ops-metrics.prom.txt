@@ -1,15 +1,15 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 109783
+flowchain_latest_height 111367
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 109783
+flowchain_finalized_height 111367
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 4
+flowchain_state_file_age_seconds 1
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
-flowchain_monitor_samples_total 2
+flowchain_monitor_samples_total 3
 # HELP flowchain_height_advanced One when service monitor proved advancing block height.
 # TYPE flowchain_height_advanced gauge
 flowchain_height_advanced 1
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 31923.499
+flowchain_transaction_intake_file_age_seconds 43725.979
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 41
+flowchain_ops_alert_rules_total 42
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 34
+flowchain_ops_alert_rules_critical 35
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -870,10 +870,10 @@ flowchain_owner_go_live_launch_sequence_ready 1
 flowchain_owner_go_live_launch_sequence_steps 10
 # HELP flowchain_owner_go_live_launch_sequence_commands Ordered owner go-live launch sequence command count.
 # TYPE flowchain_owner_go_live_launch_sequence_commands gauge
-flowchain_owner_go_live_launch_sequence_commands 43
+flowchain_owner_go_live_launch_sequence_commands 44
 # HELP flowchain_owner_go_live_launch_evidence_reports Expected evidence report path count in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_evidence_reports gauge
-flowchain_owner_go_live_launch_evidence_reports 44
+flowchain_owner_go_live_launch_evidence_reports 45
 # HELP flowchain_owner_go_live_launch_invalid_evidence_reports Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_invalid_evidence_reports gauge
 flowchain_owner_go_live_launch_invalid_evidence_reports 0
@@ -907,6 +907,33 @@ flowchain_owner_go_live_rollback_commands 9
 # HELP flowchain_owner_go_live_rollback_missing_package_scripts Missing package scripts referenced by owner go-live rollback npm commands.
 # TYPE flowchain_owner_go_live_rollback_missing_package_scripts gauge
 flowchain_owner_go_live_rollback_missing_package_scripts 0
+# HELP flowchain_owner_needs_now_ready One when the owner needs-now report is passed, no-secret, and safe to use.
+# TYPE flowchain_owner_needs_now_ready gauge
+flowchain_owner_needs_now_ready 1
+# HELP flowchain_owner_needs_now_launch_ready One when the owner needs-now report says public launch readiness is ready.
+# TYPE flowchain_owner_needs_now_launch_ready gauge
+flowchain_owner_needs_now_launch_ready 0
+# HELP flowchain_owner_needs_now_groups_total Owner needs-now setup group count.
+# TYPE flowchain_owner_needs_now_groups_total gauge
+flowchain_owner_needs_now_groups_total 4
+# HELP flowchain_owner_needs_now_blocked_groups Owner needs-now groups still blocked by missing or invalid owner inputs.
+# TYPE flowchain_owner_needs_now_blocked_groups gauge
+flowchain_owner_needs_now_blocked_groups 3
+# HELP flowchain_owner_needs_now_ready_groups Owner needs-now groups already ready.
+# TYPE flowchain_owner_needs_now_ready_groups gauge
+flowchain_owner_needs_now_ready_groups 1
+# HELP flowchain_owner_needs_now_next_inputs_total Owner input names still listed as needed now.
+# TYPE flowchain_owner_needs_now_next_inputs_total gauge
+flowchain_owner_needs_now_next_inputs_total 14
+# HELP flowchain_owner_needs_now_missing_required_inputs Required owner input names still missing in the owner needs-now report.
+# TYPE flowchain_owner_needs_now_missing_required_inputs gauge
+flowchain_owner_needs_now_missing_required_inputs 14
+# HELP flowchain_owner_needs_now_failed_checks Failed checks in the owner needs-now report.
+# TYPE flowchain_owner_needs_now_failed_checks gauge
+flowchain_owner_needs_now_failed_checks 0
+# HELP flowchain_owner_needs_now_public_sharing_blocked_until_ready One when the owner needs-now report proves public sharing remains blocked until release readiness is clear.
+# TYPE flowchain_owner_needs_now_public_sharing_blocked_until_ready gauge
+flowchain_owner_needs_now_public_sharing_blocked_until_ready 1
 # HELP flowchain_public_deployment_ready One when public deployment contract is passed.
 # TYPE flowchain_public_deployment_ready gauge
 flowchain_public_deployment_ready 0
@@ -927,10 +954,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 65
+flowchain_truth_gates_total 69
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 48
+flowchain_truth_gates_passed 52
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 17

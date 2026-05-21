@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-21T06:00:45.1431730Z
+Generated: 2026-05-21T09:17:25.2297514Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 315
+- Metric count: 324
 
 ## Required Metrics
 
@@ -297,6 +297,15 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_owner_go_live_rollback_ready: present
 - flowchain_owner_go_live_rollback_commands: present
 - flowchain_owner_go_live_rollback_missing_package_scripts: present
+- flowchain_owner_needs_now_ready: present
+- flowchain_owner_needs_now_launch_ready: present
+- flowchain_owner_needs_now_groups_total: present
+- flowchain_owner_needs_now_blocked_groups: present
+- flowchain_owner_needs_now_ready_groups: present
+- flowchain_owner_needs_now_next_inputs_total: present
+- flowchain_owner_needs_now_missing_required_inputs: present
+- flowchain_owner_needs_now_failed_checks: present
+- flowchain_owner_needs_now_public_sharing_blocked_until_ready: present
 - flowchain_public_deployment_ready: present
 - flowchain_live_cutover_ready: present
 - flowchain_live_cutover_tester_network_e2e_passed: present
@@ -336,6 +345,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
 | ownerGoLiveHandoffLoaded | True |
+| ownerNeedsNowLoaded | True |
 | publicRpcCommandMatrixLoaded | True |
 | liveCutoverLoaded | True |
 | truthTableLoaded | True |
@@ -370,6 +380,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | ownerInputsValidationMetricsPresent | True |
 | ownerActivationPlanMetricsPresent | True |
 | ownerGoLiveHandoffMetricsPresent | True |
+| ownerNeedsNowMetricsPresent | True |
 | liveCutoverMetricsPresent | True |
 | supervisorNodeRecoveryMetricsPresent | True |
 | prometheusHasHelpAndType | True |

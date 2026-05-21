@@ -354,6 +354,14 @@ $rules = @(
         commands = @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
     },
     [ordered]@{
+        id = "owner-needs-now-failed"
+        severity = "critical"
+        findingCodes = @("owner-needs-now-failed")
+        signal = "Owner needs-now launch blocker report is missing or unsafe."
+        threshold = "needs-now report is not passed, has failedChecks or secretMarkerFindings, lacks grouped owner-input blockers, lacks validation commands, lets optional owner inputs leak into Needed Now, fails public-sharing blocked-until-ready guardrails, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:owner:needs-now", "npm run flowchain:owner:go-live-handoff", "npm run flowchain:truth-table -- -AllowBlocked")
+    },
+    [ordered]@{
         id = "public-rpc-edge-hardening-failed"
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
@@ -575,6 +583,12 @@ $ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRule.Count -
 $ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRule.Count -eq 1 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("required and optional owner inputs", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("Needed Now", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$ownerNeedsNowRule = @($rules | Where-Object { $_.id -eq "owner-needs-now-failed" } | Select-Object -First 1)
+$ownerNeedsNowRuleCoversGroupsAndSharing = $ownerNeedsNowRule.Count -eq 1 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("grouped owner-input blockers", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("validation commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("public-sharing", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($ownerNeedsNowRule[0].commands) -contains "npm run flowchain:owner:needs-now")
 $devPackRule = @($rules | Where-Object { $_.id -eq "developer-dev-pack-readiness-failed" } | Select-Object -First 1)
 $devPackRuleCoversBrowserStarter = $devPackRule.Count -eq 1 `
     -and ([string]$devPackRule[0].threshold).IndexOf("Vite/React", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -620,6 +634,7 @@ $checks = [ordered]@{
     ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
     ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRuleCoversLaunchAndRollback
     ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRuleCoversInputSeparation
+    ownerNeedsNowRuleCoversGroupsAndSharing = $ownerNeedsNowRuleCoversGroupsAndSharing
     devPackRuleCoversBrowserStarter = $devPackRuleCoversBrowserStarter
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true

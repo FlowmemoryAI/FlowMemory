@@ -53,6 +53,7 @@ $paths = [ordered]@{
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     ownerActivationPlan = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
     ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+    ownerNeedsNow = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"
     publicDeployment = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
     liveCutover = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
@@ -243,6 +244,7 @@ $devPack = $reports.devPack
 $ownerInputsValidation = $reports.ownerInputsValidation
 $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$ownerNeedsNow = $reports.ownerNeedsNow
 $bridgeCommandMatrix = $reports.bridgeCommandMatrix
 $bridgeDeployControl = $reports.bridgeDeployControl
 $bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
@@ -377,6 +379,19 @@ $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
+$ownerNeedsNowFailedChecks = @((Get-MetricsProp -Object $ownerNeedsNow -Name "failedChecks" -Default @()))
+$ownerNeedsNowSecretFindings = @((Get-MetricsProp -Object $ownerNeedsNow -Name "secretMarkerFindings" -Default @()))
+$ownerNeedsNowChecks = Get-MetricsProp -Object $ownerNeedsNow -Name "checks"
+$ownerNeedsNowReady = (Get-MetricsStatus -Report $ownerNeedsNow) -eq "passed" `
+    -and $ownerNeedsNowFailedChecks.Count -eq 0 `
+    -and $ownerNeedsNowSecretFindings.Count -eq 0 `
+    -and ((Get-MetricsProp -Object $ownerNeedsNowChecks -Name "requiredEnvCoverageComplete" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNowChecks -Name "knownNeededNowOwnerInputsOnly" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNowChecks -Name "optionalOwnerInputsExcludedFromNeededNow" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNowChecks -Name "publicSharingBlockedUntilReady" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNow -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNow -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerNeedsNow -Name "broadcasts" -Default $true) -eq $false)
 $externalTesterLocalRehearsalReady = (Get-MetricsProp -Object $externalTester -Name "localTesterRehearsalReady" -Default $false) -eq $true
 $externalTesterExternalSharingReady = (Get-MetricsProp -Object $externalTester -Name "externalSharingReady" -Default $false) -eq $true
 $externalTesterMissingEnvNames = @((Get-MetricsProp -Object $externalTester -Name "missingEnvNames" -Default @()))
@@ -910,6 +925,15 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_windows_owner_h
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_ready" -Help "One when owner go-live rollback commands cover ops snapshot, local service stop, and bridge emergency stop." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffRollbackReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_commands" -Help "Owner go-live rollback command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveRollbackCommandCount" -Default $ownerGoLiveHandoffRollbackCommandCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_rollback_missing_package_scripts" -Help "Missing package scripts referenced by owner go-live rollback npm commands." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveMissingRollbackPackageScripts" -Default $ownerGoLiveHandoffMissingRollbackPackageScripts.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_ready" -Help "One when the owner needs-now report is passed, no-secret, and safe to use." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowReady" -Default $ownerNeedsNowReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_launch_ready" -Help "One when the owner needs-now report says public launch readiness is ready." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $ownerNeedsNow -Name "launchReadinessStatus" -Default "") -eq "ready"))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_groups_total" -Help "Owner needs-now setup group count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowGroupCount" -Default (Get-MetricsProp -Object $ownerNeedsNow -Name "groupCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_blocked_groups" -Help "Owner needs-now groups still blocked by missing or invalid owner inputs." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowNeededGroupCount" -Default (Get-MetricsProp -Object $ownerNeedsNow -Name "neededNowGroupCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_ready_groups" -Help "Owner needs-now groups already ready." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowReadyGroupCount" -Default (Get-MetricsProp -Object $ownerNeedsNow -Name "readyGroupCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_next_inputs_total" -Help "Owner input names still listed as needed now." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowNextInputCount" -Default @((Get-MetricsProp -Object $ownerNeedsNow -Name "nextOwnerInputNames" -Default @())).Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_missing_required_inputs" -Help "Required owner input names still missing in the owner needs-now report." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowMissingRequiredInputCount" -Default @((Get-MetricsProp -Object $ownerNeedsNow -Name "missingRequiredEnvNames" -Default @())).Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_failed_checks" -Help "Failed checks in the owner needs-now report." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowFailedChecks" -Default $ownerNeedsNowFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_needs_now_public_sharing_blocked_until_ready" -Help "One when the owner needs-now report proves public sharing remains blocked until release readiness is clear." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerNeedsNowPublicSharingBlockedUntilReady" -Default (Get-MetricsProp -Object $ownerNeedsNowChecks -Name "publicSharingBlockedUntilReady" -Default $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_deployment_ready" -Help "One when public deployment contract is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsProp -Object $reportStatuses -Name "publicDeployment"))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_ready" -Help "One when the live cutover rehearsal is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $liveCutover))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_live_cutover_tester_network_e2e_passed" -Help "One when live cutover rehearsal directly ran the local tester wallet network E2E." -Value (ConvertTo-MetricBool -Value (Get-MetricsPathProp -Object $liveCutover -Path "ready.testerNetworkE2ePassed" -Default $false))
@@ -959,6 +983,7 @@ $metricsJson = [ordered]@{
         ownerInputsValidationStatus = Get-MetricsStatus -Report $ownerInputsValidation
         ownerActivationPlanStatus = Get-MetricsStatus -Report $ownerActivationPlan
         ownerGoLiveHandoffStatus = Get-MetricsStatus -Report $ownerGoLiveHandoff
+        ownerNeedsNowStatus = Get-MetricsStatus -Report $ownerNeedsNow
         liveCutoverStatus = Get-MetricsStatus -Report $liveCutover
         truthTableStatus = Get-MetricsStatus -Report $truthTable
         noSecretStatus = Get-MetricsStatus -Report $noSecret
@@ -1267,6 +1292,15 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_rollback_ready",
     "flowchain_owner_go_live_rollback_commands",
     "flowchain_owner_go_live_rollback_missing_package_scripts",
+    "flowchain_owner_needs_now_ready",
+    "flowchain_owner_needs_now_launch_ready",
+    "flowchain_owner_needs_now_groups_total",
+    "flowchain_owner_needs_now_blocked_groups",
+    "flowchain_owner_needs_now_ready_groups",
+    "flowchain_owner_needs_now_next_inputs_total",
+    "flowchain_owner_needs_now_missing_required_inputs",
+    "flowchain_owner_needs_now_failed_checks",
+    "flowchain_owner_needs_now_public_sharing_blocked_until_ready",
     "flowchain_public_deployment_ready",
     "flowchain_live_cutover_ready",
     "flowchain_live_cutover_tester_network_e2e_passed",
@@ -1307,6 +1341,7 @@ $checks = [ordered]@{
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
     ownerGoLiveHandoffLoaded = $null -ne $ownerGoLiveHandoff
+    ownerNeedsNowLoaded = $null -ne $ownerNeedsNow
     publicRpcCommandMatrixLoaded = $null -ne $publicRpcCommandMatrix
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
@@ -1660,6 +1695,17 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_rollback_ready",
         "flowchain_owner_go_live_rollback_commands",
         "flowchain_owner_go_live_rollback_missing_package_scripts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    ownerNeedsNowMetricsPresent = @(
+        "flowchain_owner_needs_now_ready",
+        "flowchain_owner_needs_now_launch_ready",
+        "flowchain_owner_needs_now_groups_total",
+        "flowchain_owner_needs_now_blocked_groups",
+        "flowchain_owner_needs_now_ready_groups",
+        "flowchain_owner_needs_now_next_inputs_total",
+        "flowchain_owner_needs_now_missing_required_inputs",
+        "flowchain_owner_needs_now_failed_checks",
+        "flowchain_owner_needs_now_public_sharing_blocked_until_ready"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     liveCutoverMetricsPresent = @(
         "flowchain_live_cutover_ready",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T06:00:43.6013782Z",
+    "generatedAt":  "2026-05-21T09:17:24.2710168Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  42,
-    "criticalRuleCount":  35,
+    "ruleCount":  43,
+    "criticalRuleCount":  36,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -64,6 +64,7 @@
                                 "developer-dev-pack-readiness-failed",
                                 "owner-inputs-validation-failed",
                                 "owner-go-live-handoff-failed",
+                                "owner-needs-now-failed",
                                 "public-rpc-edge-hardening-failed",
                                 "public-rpc-command-matrix-failed",
                                 "public-rpc-synthetic-canary-failed",
@@ -126,6 +127,7 @@
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
                    "ownerGoLiveHandoffRuleCoversLaunchAndRollback":  true,
                    "ownerGoLiveHandoffRuleCoversInputSeparation":  true,
+                   "ownerNeedsNowRuleCoversGroupsAndSharing":  true,
                    "devPackRuleCoversBrowserStarter":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
@@ -600,6 +602,20 @@
                       "commands":  [
                                        "npm run flowchain:owner:go-live-handoff",
                                        "npm run flowchain:owner:activation-plan",
+                                       "npm run flowchain:truth-table -- -AllowBlocked"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-needs-now-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "owner-needs-now-failed"
+                                       ],
+                      "signal":  "Owner needs-now launch blocker report is missing or unsafe.",
+                      "threshold":  "needs-now report is not passed, has failedChecks or secretMarkerFindings, lacks grouped owner-input blockers, lacks validation commands, lets optional owner inputs leak into Needed Now, fails public-sharing blocked-until-ready guardrails, prints env values, broadcasts, or reports secrets",
+                      "commands":  [
+                                       "npm run flowchain:owner:needs-now",
+                                       "npm run flowchain:owner:go-live-handoff",
                                        "npm run flowchain:truth-table -- -AllowBlocked"
                                    ]
                   },
