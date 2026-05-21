@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T10:21:46.3045576+00:00",
+    "generatedAt":  "2026-05-21T10:34:23.3900858+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -31,6 +31,10 @@
                    "ownerHostApplyPlanProofCovered":  true,
                    "ownerHostApplyExecutionProofCovered":  true,
                    "ownerHostApplyRollbackProofCovered":  true,
+                   "ownerNeedsNowReportCopied":  true,
+                   "ownerNeedsNowGroupsCovered":  true,
+                   "ownerNeedsNowActionsCovered":  true,
+                   "ownerNeedsNowReadyGroupCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
                    "dashboardUnitTestsPassed":  true,
@@ -56,7 +60,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  4,
+                         "durationSeconds":  5,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -66,7 +70,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  31,
+                         "durationSeconds":  33,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  32
                      },
@@ -86,7 +90,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  244,
+                         "durationSeconds":  232,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -113,6 +117,7 @@
                           "base8453-bridge-reconciliation-schedule-proof",
                           "real-value-pilot-aggregate-proof",
                           "public-rpc-command-matrix-proof",
+                          "owner-needs-now-groups",
                           "owner-host-apply-plan",
                           "owner-host-apply-execution",
                           "owner-host-apply-rollback",
