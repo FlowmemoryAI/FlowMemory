@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T06:31:33.1387900+00:00",
+    "generatedAt":  "2026-05-21T06:56:18.0442309+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -21,6 +21,7 @@
                    "bridgeRuntimeCreditProofCovered":  true,
                    "realValuePilotAggregateProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
+                   "publicRpcCommandMatrixProofCovered":  true,
                    "ownerHostApplyPlanProofCovered":  true,
                    "ownerHostApplyExecutionProofCovered":  true,
                    "ownerHostApplyRollbackProofCovered":  true,
@@ -59,7 +60,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  37,
+                         "durationSeconds":  49,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  28
                      },
@@ -69,7 +70,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  4,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
                      },
@@ -79,7 +80,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  302,
+                         "durationSeconds":  255,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -101,6 +102,7 @@
     "coveredProofs":  [
                           "base8453-bridge-runtime-credit-proof",
                           "real-value-pilot-aggregate-proof",
+                          "public-rpc-command-matrix-proof",
                           "owner-host-apply-plan",
                           "owner-host-apply-execution",
                           "owner-host-apply-rollback"
