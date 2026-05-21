@@ -12,7 +12,8 @@ This guide is for people who want to try something real in the public repo and r
 | Public-agent contracts | Agent class/tool registries, launch factory, shell factory, swarms, budget vault | Foundry | `npm run public:test:contracts` |
 | Local public-agent e2e | Full local public-agent + swarm script path | Foundry | `npm run public:test:e2e` |
 | Dashboard workbench | React dashboard views and production build | Node.js + npm | `npm run public:test:dashboard` |
-| Full public local pass | All public tester lanes plus claim guardrails | Node.js + npm + Foundry | `npm run public:test:all` |
+| Public hardening gate | Public docs, scripts, issue-template, and CI wiring | Node.js + npm | `npm run public:hardening` |
+| Full public local pass | All public tester lanes plus hardening and claim guardrails | Node.js + npm + Foundry | `npm run public:test:all` |
 
 If you only have Node.js, run the quick JS smoke first. If you also have Foundry, run the contract and e2e lanes.
 
@@ -32,6 +33,12 @@ forge --version
 ```
 
 Do not create or commit `.env` files for these tests. The public tester lanes use deterministic local/test data and do not require live private keys or RPC credentials.
+
+Before reporting a public docs or setup problem, you can run the static public hardening gate:
+
+```powershell
+npm run public:hardening
+```
 
 To generate a paste-ready local report for GitHub:
 

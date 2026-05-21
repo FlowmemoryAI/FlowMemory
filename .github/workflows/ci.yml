@@ -95,6 +95,34 @@ jobs:
       - name: Check launch claim guardrails
         run: node infra/scripts/check-unsafe-claims.mjs
 
+  public-readiness:
+    name: Public repository readiness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install dashboard dependencies
+        run: npm ci --prefix apps/dashboard
+
+      - name: Check public repository hardening
+        run: npm run public:hardening
+
+      - name: Run public tester suite
+        run: npm run public:test:all
+
   contracts:
     name: Contracts
     runs-on: ubuntu-latest

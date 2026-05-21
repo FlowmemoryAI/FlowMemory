@@ -83,6 +83,12 @@ Generate a paste-ready public tester report:
 npm run public:test:report
 ```
 
+Check the public docs/scripts/CI wiring without running every lane:
+
+```powershell
+npm run public:hardening
+```
+
 See `docs/PUBLIC_TESTER_GUIDE.md` for expected results, CLI/control-plane commands, dashboard review prompts, and the tester-report template.
 
 ## Verification Commands

@@ -121,12 +121,24 @@ Generate a paste-ready GitHub tester report:
 npm run public:test:report
 ```
 
+Run the public hardening gate that checks docs, scripts, CI, and issue-template wiring:
+
+```powershell
+npm run public:hardening
+```
+
 Run the core public checks if you also have Foundry and dashboard dependencies:
 
 ```powershell
 npm run public:test:contracts
 npm run public:test:e2e
 npm run public:test:dashboard
+```
+
+Run every public tester lane plus the hardening and claim guards:
+
+```powershell
+npm run public:test:all
 ```
 
 Run the full local launch/readiness gate:

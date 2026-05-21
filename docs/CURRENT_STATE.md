@@ -37,7 +37,7 @@ Repository operating system:
 - `AGENTS.md` with shared agent instructions.
 - `docs/START_HERE.md` with required reading order and local multi-agent worktree workflow.
 - Source-of-truth docs for context, roadmap, architecture, security model, project charter, agent roles, and current state.
-- Public-reader documentation now starts at `docs/PUBLIC_REPO_GUIDE.md`, with tester lanes in `docs/PUBLIC_TESTER_GUIDE.md`, public-agent implementation details in `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md`, release status in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`, and tracked public gaps in `docs/PUBLIC_RELEASE_GAPS.md`.
+- Public-reader documentation now starts at `docs/PUBLIC_REPO_GUIDE.md`, with tester lanes in `docs/PUBLIC_TESTER_GUIDE.md`, public-agent implementation details in `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md`, release status in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`, tracked public gaps in `docs/PUBLIC_RELEASE_GAPS.md`, and a `public:hardening` gate that checks public docs, scripts, CI wiring, and tester-report templates.
 - `docs/DECISIONS/` for durable decision records.
 - GitHub issue and pull request templates.
 - Conservative repository hygiene CI.
