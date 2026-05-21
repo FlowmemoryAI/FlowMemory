@@ -332,6 +332,7 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json"; target = "evidence/upgrade-rehearsal-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"; target = "evidence/service-install-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"; target = "evidence/systemd-service-install-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json"; target = "evidence/systemd-service-install-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"; target = "evidence/second-computer-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"; target = "evidence/owner-onboarding-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"; target = "evidence/owner-signup-checklist-report.json"; required = $true },

@@ -251,7 +251,8 @@ $launchSequence = @(
         commands = @(
             "npm run flowchain:public-rpc:deployment-bundle",
             "npm run flowchain:public-rpc:deployment:automation",
-            "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>"
+            "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>",
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -268,10 +269,34 @@ $launchSequence = @(
         commands = @(
             "npm run flowchain:service:install:systemd:validate",
             "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
-            "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"
+            "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
+        )
+    },
+    [ordered]@{
+        id = "owner-host-apply"
+        phase = "public-rpc"
+        title = "Apply owner-host public RPC edge"
+        expectedStatuses = @("passed")
+        ownerInputBlockedAllowedBeforeInputs = $false
+        stopOnFailure = $true
+        commands = @(
+            "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply"
+        )
+        expectedReportPaths = @(
+            "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
+            "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
+            "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
+            "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+            "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+            "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
         )
     },
     [ordered]@{
@@ -406,6 +431,7 @@ $rollbackCommands = @(
     "npm run flowchain:service:status",
     "npm run flowchain:service:restart -- -LiveProfile",
     "npm run flowchain:service:stop",
+    "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback",
     "npm run flowchain:emergency:stop-local",
     "npm run flowchain:bridge:emergency-stop",
     "npm run flowchain:public-deployment:contract -- -AllowBlocked"
@@ -478,6 +504,8 @@ $checks = [ordered]@{
     launchSequenceEveryStepStopsOnFailure = @($launchSequence | Where-Object { $_.stopOnFailure -ne $true }).Count -eq 0
     launchSequenceCoversOwnerEnvReadiness = $launchSequenceCommandText.Contains("flowchain:owner-env:readiness")
     launchSequenceCoversPublicRpcRender = $launchSequenceCommandText.Contains("flowchain-public-rpc-deployment-automation.ps1 -Action Render")
+    launchSequenceCoversOwnerHostApplyPlan = $launchSequenceCommandText.Contains("owner-host-apply.sh plan")
+    launchSequenceCoversOwnerHostApplyExecution = $launchSequenceCommandText.Contains("owner-host-apply.sh apply")
     launchSequenceCoversSystemdInstallPlan = $launchSequenceCommandText.Contains("flowchain:service:install:systemd -- -Action Plan")
     launchSequenceCoversServiceMonitor = $launchSequenceCommandText.Contains("flowchain:service:monitor")
     launchSequenceCoversPublicRpcCanary = $launchSequenceCommandText.Contains("flowchain:public-rpc:synthetic-canary")
@@ -493,6 +521,7 @@ $checks = [ordered]@{
     rollbackCoversLocalStop = $rollbackCommandText.Contains("flowchain:service:stop") -and $rollbackCommandText.Contains("flowchain:emergency:stop-local")
     rollbackCoversBridgeEmergencyStop = $rollbackCommandText.Contains("flowchain:bridge:emergency-stop")
     rollbackCoversOpsSnapshot = $rollbackCommandText.Contains("flowchain:ops:snapshot")
+    rollbackCoversOwnerHostApplyRollback = $rollbackCommandText.Contains("owner-host-apply.sh rollback")
     rollbackPackageScriptsPresent = $missingRollbackPackageScriptNames.Count -eq 0
     releaseClaimBlockedUntilTruthPassed = $releaseReady -or (-not $truthTableClear)
     packetShareBlockedUntilReady = $packetShareable -or (-not $releaseReady)

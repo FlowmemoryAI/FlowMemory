@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-21T02:19:26.4857550Z",
+    "generatedAt":  "2026-05-21T02:28:23.2516530Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -30,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=108548, finalizedHeight=108548",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=108595, finalizedHeight=108595",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -471,9 +471,9 @@
                   {
                       "id":  "owner-go-live-launch-boundary",
                       "layer":  "Deployment/governance",
-                      "requirement":  "Owner go-live handoff sequences owner inputs, public RPC render, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary.",
+                      "requirement":  "Owner go-live handoff sequences owner inputs, public RPC render, owner-host apply, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary.",
                       "status":  "passed",
-                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=9, launchCommands=36, evidenceReports=33, invalidEvidenceReports=0, missingRequiredInputs=14, missingOptionalInputs=1, neededNowOptionalInputs=0, missingLaunchScripts=0, rollbackCommands=7, missingRollbackScripts=0, failedChecks=0, secretFindings=0",
+                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=10, launchCommands=39, evidenceReports=43, applyPlan=True, applyExecution=True, applyRollback=True, invalidEvidenceReports=0, missingRequiredInputs=14, missingOptionalInputs=1, neededNowOptionalInputs=0, missingLaunchScripts=0, rollbackCommands=8, missingRollbackScripts=0, failedChecks=0, secretFindings=0",
                       "files":  [
                                     "infra/scripts/flowchain-owner-go-live-handoff.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md"

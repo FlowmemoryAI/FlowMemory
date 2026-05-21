@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.owner_go_live_handoff_report.v0",
-    "generatedAt":  "2026-05-21T00:43:23.4676365Z",
+    "generatedAt":  "2026-05-21T02:28:01.7322742Z",
     "status":  "passed",
     "releaseReady":  false,
     "activationReady":  false,
@@ -36,6 +36,8 @@
                    "launchSequenceEveryStepStopsOnFailure":  true,
                    "launchSequenceCoversOwnerEnvReadiness":  true,
                    "launchSequenceCoversPublicRpcRender":  true,
+                   "launchSequenceCoversOwnerHostApplyPlan":  true,
+                   "launchSequenceCoversOwnerHostApplyExecution":  true,
                    "launchSequenceCoversSystemdInstallPlan":  true,
                    "launchSequenceCoversServiceMonitor":  true,
                    "launchSequenceCoversPublicRpcCanary":  true,
@@ -51,6 +53,7 @@
                    "rollbackCoversLocalStop":  true,
                    "rollbackCoversBridgeEmergencyStop":  true,
                    "rollbackCoversOpsSnapshot":  true,
+                   "rollbackCoversOwnerHostApplyRollback":  true,
                    "rollbackPackageScriptsPresent":  true,
                    "releaseClaimBlockedUntilTruthPassed":  true,
                    "packetShareBlockedUntilReady":  true,
@@ -162,9 +165,9 @@
     "readyStageCount":  1,
     "blockedStageCount":  7,
     "nextCommandCount":  62,
-    "launchSequenceCount":  9,
-    "launchSequenceCommandCount":  36,
-    "launchSequenceExpectedReportPathCount":  33,
+    "launchSequenceCount":  10,
+    "launchSequenceCommandCount":  39,
+    "launchSequenceExpectedReportPathCount":  43,
     "invalidLaunchSequenceExpectedReportPaths":  [
 
                                                  ],
@@ -172,7 +175,7 @@
     "missingLaunchSequencePackageScriptNames":  [
 
                                                 ],
-    "rollbackCommandCount":  7,
+    "rollbackCommandCount":  8,
     "rollbackPackageScriptCount":  7,
     "missingRollbackPackageScriptNames":  [
 
@@ -620,7 +623,8 @@
                                "commands":  [
                                                 "npm run flowchain:public-rpc:deployment-bundle",
                                                 "npm run flowchain:public-rpc:deployment:automation",
-                                                "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e"
+                                                "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e",
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan"
                                             ],
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -639,10 +643,36 @@
                                "commands":  [
                                                 "npm run flowchain:service:install:systemd:validate",
                                                 "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
-                                                "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop"
+                                                "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan"
                                             ],
                                "expectedReportPaths":  [
                                                            "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
+                                                       ]
+                           },
+                           {
+                               "id":  "owner-host-apply",
+                               "phase":  "public-rpc",
+                               "title":  "Apply owner-host public RPC edge",
+                               "expectedStatuses":  [
+                                                        "passed"
+                                                    ],
+                               "ownerInputBlockedAllowedBeforeInputs":  false,
+                               "stopOnFailure":  true,
+                               "commands":  [
+                                                "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh apply"
+                                            ],
+                               "expectedReportPaths":  [
+                                                           "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
                                                        ]
                            },
                            {
@@ -789,6 +819,7 @@
                              "npm run flowchain:service:status",
                              "npm run flowchain:service:restart -- -LiveProfile",
                              "npm run flowchain:service:stop",
+                             "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
                              "npm run flowchain:emergency:stop-local",
                              "npm run flowchain:bridge:emergency-stop",
                              "npm run flowchain:public-deployment:contract -- -AllowBlocked"

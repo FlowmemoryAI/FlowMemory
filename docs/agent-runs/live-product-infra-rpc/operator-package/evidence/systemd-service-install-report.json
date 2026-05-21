@@ -1,0 +1,132 @@
+{
+    "schema":  "flowchain.service_install_systemd_report.v0",
+    "generatedAt":  "2026-05-19T09:40:47.1783539Z",
+    "status":  "passed",
+    "action":  "Plan",
+    "sourceMode":  "template-plan",
+    "renderDir":  "",
+    "systemdUnitDir":  "/etc/systemd/system",
+    "liveServiceName":  "flowchain-live.service",
+    "supervisorServiceName":  "flowchain-supervisor.service",
+    "sourcePaths":  {
+                        "live":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-live.service.template",
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle\\flowchain-supervisor.service.template"
+                    },
+    "targetPaths":  {
+                        "live":  "/etc/systemd/system/flowchain-live.service",
+                        "supervisor":  "/etc/systemd/system/flowchain-supervisor.service"
+                    },
+    "host":  {
+                 "isWindows":  true,
+                 "canQuerySystemd":  false,
+                 "systemctl":  {
+                                   "name":  "systemctl",
+                                   "available":  false,
+                                   "source":  ""
+                               },
+                 "systemdAnalyze":  {
+                                        "name":  "systemd-analyze",
+                                        "available":  false,
+                                        "source":  ""
+                                    },
+                 "journalctl":  {
+                                    "name":  "journalctl",
+                                    "available":  false,
+                                    "source":  ""
+                                }
+             },
+    "before":  {
+                   "live":  {
+                                "name":  "flowchain-live.service",
+                                "canQuery":  false,
+                                "active":  "",
+                                "enabled":  "",
+                                "exists":  false,
+                                "queryError":  "systemctl is not available on this host."
+                            },
+                   "supervisor":  {
+                                      "name":  "flowchain-supervisor.service",
+                                      "canQuery":  false,
+                                      "active":  "",
+                                      "enabled":  "",
+                                      "exists":  false,
+                                      "queryError":  "systemctl is not available on this host."
+                                  }
+               },
+    "after":  {
+                  "live":  {
+                               "name":  "flowchain-live.service",
+                               "canQuery":  false,
+                               "active":  "",
+                               "enabled":  "",
+                               "exists":  false,
+                               "queryError":  "systemctl is not available on this host."
+                           },
+                  "supervisor":  {
+                                     "name":  "flowchain-supervisor.service",
+                                     "canQuery":  false,
+                                     "active":  "",
+                                     "enabled":  "",
+                                     "exists":  false,
+                                     "queryError":  "systemctl is not available on this host."
+                                 }
+              },
+    "commands":  {
+                     "render":  "npm run flowchain:public-rpc:deployment:automation -- -Action Render -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -OwnerEnvFile \u003cFLOWCHAIN_OWNER_ENV_FILE\u003e -TlsCertificatePath \u003cPATH_TO_TLS_CERTIFICATE\u003e -TlsCertificateKeyPath \u003cPATH_TO_TLS_CERTIFICATE_KEY\u003e -NginxExe \u003cFLOWCHAIN_NGINX_EXE\u003e",
+                     "verifyLive":  "systemd-analyze verify \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/flowchain-live.service",
+                     "verifySupervisor":  "systemd-analyze verify \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/flowchain-supervisor.service",
+                     "plan":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                     "install":  "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                     "status":  "npm run flowchain:service:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:service:install:systemd -- -Action Uninstall",
+                     "serviceStatus":  "npm run flowchain:service:status",
+                     "serviceMonitor":  "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                 },
+    "mutationCommands":  [
+
+                         ],
+    "checks":  {
+                   "bundleDirExists":  true,
+                   "unitNamesValid":  true,
+                   "renderDirProvided":  null,
+                   "sourceModeRenderedWhenProvided":  null,
+                   "liveSourceExists":  true,
+                   "supervisorSourceExists":  true,
+                   "liveServiceUsesLiveProfile":  true,
+                   "liveServiceRunsStatusAfterStart":  true,
+                   "liveServiceStopPreservesState":  true,
+                   "liveServiceRestartOnFailure":  true,
+                   "supervisorUsesAutorecoveryLoop":  true,
+                   "supervisorRestartAlways":  true,
+                   "bridgeRelayerDefaultOff":  true,
+                   "ownerEnvFileUsed":  true,
+                   "repoWorkingDirectoryUsed":  true,
+                   "leastPrivilegeHardeningPresent":  true,
+                   "writePathsScoped":  true,
+                   "installTargetPresent":  true,
+                   "planActionReadOnly":  true,
+                   "statusActionReadOnly":  true,
+                   "installRequiresRenderedUnits":  true,
+                   "installRequiresSystemdHost":  true,
+                   "uninstallRequiresSystemdHost":  true,
+                   "systemctlAvailable":  null,
+                   "systemdAnalyzeAvailable":  null,
+                   "journalctlAvailable":  null,
+                   "commandPlanPresent":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "actionErrorRedacted":  "",
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "secretMarkerFindings":  [
+
+                             ]
+}
