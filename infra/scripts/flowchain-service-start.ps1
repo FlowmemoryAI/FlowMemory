@@ -195,10 +195,10 @@ if ($StartBridgeRelayerLoop) {
         $relayerOnceScript = Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"
         $loopCommand = @"
 while (`$true) {
-  try {
-    & "$relayerOnceScript" -StatePath "$StatePath" -NodeDir "$NodeDir" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json" -RunDir "devnet/local/bridge-relayer-loop" -AllowBlocked
-  } catch {
-    Write-Error `$_.Exception.Message
+  & powershell -NoProfile -ExecutionPolicy Bypass -File "$relayerOnceScript" -StatePath "$StatePath" -NodeDir "$NodeDir" -ReportPath "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json" -RunDir "devnet/local/bridge-relayer-loop" -AllowBlocked
+  `$relayerExitCode = if (`$null -eq `$LASTEXITCODE) { 0 } else { [int]`$LASTEXITCODE }
+  if (`$relayerExitCode -ne 0) {
+    Write-Error "Bridge relayer one-shot exited with code `$relayerExitCode; continuing after poll interval." -ErrorAction Continue
   }
   Start-Sleep -Seconds $BridgePollSeconds
 }
@@ -252,6 +252,8 @@ $report = [ordered]@{
         pollSeconds = $BridgePollSeconds
         cursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
         queuesRuntimeHandoffs = $true
+        oneShotIsolatedProcess = $true
+        continuesAfterOneShotFailure = $true
     }
     controlPlaneCargoWarmup = [ordered]@{
         targetDir = $controlPlaneCargoTargetDir

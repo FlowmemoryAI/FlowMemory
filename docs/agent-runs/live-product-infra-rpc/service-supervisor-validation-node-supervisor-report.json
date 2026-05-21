@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_report.v0",
-    "generatedAt":  "2026-05-21T10:51:46.6441776Z",
+    "generatedAt":  "2026-05-21T13:50:30.1109856Z",
     "status":  "passed",
     "once":  true,
     "dryRun":  false,
@@ -30,7 +30,7 @@
                     },
     "iterations":  [
                        {
-                           "sampledAt":  "2026-05-21T10:50:29.7341669Z",
+                           "sampledAt":  "2026-05-21T13:48:13.5728883Z",
                            "restartReasons":  [
                                                   "service-status-not-passed",
                                                   "node-not-running"
@@ -42,9 +42,9 @@
                                           "reportStatus":  "failed",
                                           "nodeStatus":  "stopped",
                                           "controlPlaneStatus":  "running",
-                                          "latestHeight":  "15527",
-                                          "finalizedHeight":  "15527",
-                                          "stateFileLastWriteAgeSeconds":  14,
+                                          "latestHeight":  "15621",
+                                          "finalizedHeight":  "15621",
+                                          "stateFileLastWriteAgeSeconds":  16,
                                           "liveProfile":  true,
                                           "maxBlocks":  0,
                                           "bridgeRelayerLoopStatus":  "stopped",
@@ -55,17 +55,17 @@
                                       },
                            "restart":  {
                                            "exitCode":  0,
-                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521055035388-71280-da058e50.stdout.log",
-                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521055035388-71280-da058e50.stderr.log"
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521084819835-80956-06e43b27.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521084819835-80956-06e43b27.stderr.log"
                                        },
                            "after":  {
                                          "exitCode":  0,
                                          "reportStatus":  "passed",
                                          "nodeStatus":  "running",
                                          "controlPlaneStatus":  "running",
-                                         "latestHeight":  "15532",
-                                         "finalizedHeight":  "15532",
-                                         "stateFileLastWriteAgeSeconds":  2,
+                                         "latestHeight":  "15627",
+                                         "finalizedHeight":  "15627",
+                                         "stateFileLastWriteAgeSeconds":  1,
                                          "liveProfile":  true,
                                          "maxBlocks":  0,
                                          "bridgeRelayerLoopStatus":  "stopped",

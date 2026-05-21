@@ -1,19 +1,19 @@
 # FlowChain Production Truth Table
 
-Generated: 2026-05-21T13:36:13.9486701+00:00
-Status: blocked-owner-input
+Generated: 2026-05-21T13:56:44.2326985+00:00
+Status: stale
 Completion ready: False
-Blocked only on known owner inputs: True
+Blocked only on known owner inputs: False
 
 ## Classification Counts
 
 | Classification | Count |
 | --- | ---: |
-| passed | 53 |
-| blocked-owner-input | 17 |
+| passed | 49 |
+| blocked-owner-input | 14 |
 | blocked-repo-work | 0 |
 | failed | 0 |
-| stale | 0 |
+| stale | 7 |
 
 ## Missing Required Owner Inputs
 
@@ -40,8 +40,20 @@ These names are accepted owner-provided overrides, but they are not required for
 
 ## Next Repo-Owned Tasks
 
-- owner-inputs: blocked-owner-input - Only known owner-input blockers remain in the current truth table.
-  Command: npm run flowchain:owner-inputs -- -AllowBlocked
+- upgrade-rehearsal: stale - older-than-24-hours
+  Command: npm run flowchain:upgrade:rehearse
+- install-check: stale - older-than-24-hours
+  Command: npm run flowchain:install:check
+- live-product-e2e: stale - older-than-24-hours
+  Command: npm run flowchain:live-product:e2e -- -AllowBlocked
+- wallet-live-service-e2e: stale - older-than-24-hours
+  Command: npm run flowchain:wallet:live-service:e2e
+- base-tx-diagnostic-fail-closed: stale - older-than-24-hours
+  Command: npm run flowchain:bridge:diagnose:tx
+- live-cutover-rehearsal: stale - older-than-public-deployment-contract,older-than-completion-audit
+  Command: npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
+- completion-audit: stale - older-than-public-deployment-contract
+  Command: npm run flowchain:completion:audit -- -AllowBlocked
 
 ## Gate Table
 
@@ -53,11 +65,11 @@ These names are accepted owner-provided overrides, but they are not required for
 | service-supervisor-validation | passed | passed | status=passed; restartAttempts=1; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:service:supervisor:validate` |
 | service-install-validation | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; packageScriptsPresent=True; planDidNotMutate=True; statusDidNotMutate=True; planCommandPassed=True; schedulerCmdletsAvailable=True; actionUsesSupervisor=True; liveProfileDefault=True; bridgeRelayerOptInStartsLoop=True; failedChecksCount=0 | `npm run flowchain:service:install:validate` |
 | systemd-service-install-validation | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; bridgeRelayerOptInStartsLoop=True; failedChecksCount=0 | `npm run flowchain:service:install:systemd:validate` |
-| upgrade-rehearsal | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:upgrade:rehearse` |
-| install-check | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:install:check` |
-| live-product-e2e | blocked-owner-input | blocked | status=blocked; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:live-product:e2e -- -AllowBlocked` |
+| upgrade-rehearsal | stale | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:upgrade:rehearse` |
+| install-check | stale | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:install:check` |
+| live-product-e2e | stale | blocked | status=blocked; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:live-product:e2e -- -AllowBlocked` |
 | live-infra-check | blocked-owner-input | blocked | status=blocked; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:live-infra:check -- -AllowBlocked` |
-| wallet-live-service-e2e | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:wallet:live-service:e2e` |
+| wallet-live-service-e2e | stale | passed | status=passed; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:wallet:live-service:e2e` |
 | tester-network-e2e | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:wallet:live-tester:e2e` |
 | owner-inputs | blocked-owner-input | blocked | status=blocked; ownerInputReady=False; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:owner-inputs -- -AllowBlocked` |
 | owner-onboarding | passed | passed | status=passed; ownerInputsStatus=blocked; flowChainRpcIsOurs=True; thirdPartyFlowChainRpcProviderNeeded=False; publicRpcRequiresOwnerPublicEdge=True; base8453RpcIsExternalChainDependency=True; localEnvFileSupported=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:owner:onboarding` |
@@ -90,7 +102,7 @@ These names are accepted owner-provided overrides, but they are not required for
 | bridge-infra-readiness | blocked-owner-input | blocked | status=blocked; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:bridge:infra:check -- -AllowBlocked` |
 | bridge-command-matrix | passed | passed | status=passed; commandCount=20; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0; commandsWithInlineEnvAssignmentCount=0; commandsWithUrlsCount=0 | `npm run flowchain:bridge:command-matrix` |
 | bridge-no-secret-audit | passed | passed | status=passed; printsEnvValues=False; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:bridge:no-secret-audit` |
-| base-tx-diagnostic-fail-closed | passed | blocked | status=blocked; safeReasonCode=missing-env; printsEnvValues=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_TX_HASH,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI | `npm run flowchain:bridge:diagnose:tx` |
+| base-tx-diagnostic-fail-closed | stale | blocked | status=blocked; safeReasonCode=missing-env; printsEnvValues=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_TX_HASH,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI | `npm run flowchain:bridge:diagnose:tx` |
 | bridge-deploy-control-validation | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:bridge:deploy:control:validate` |
 | bridge-relayer-guardrail-validation | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:bridge:relayer:guardrail:validate` |
 | bridge-relayer-loop-validation | passed | passed | status=passed; bridgePollSeconds=5; settleSeconds=5; envValuesPrinted=False; noSecrets=True; broadcasts=False; statusRelayerReportHealthy=True; statusAfterStopNotRunning=True; relayerPidFileRemovedAfterStop=True; noValidationRelayerProcessAfterStop=True; failedChecksCount=0 | `npm run flowchain:bridge:relayer:loop:validate` |
@@ -113,11 +125,11 @@ These names are accepted owner-provided overrides, but they are not required for
 | ops-escalation-dry-run | passed | passed | status=passed; dryRunEventCount=6; opsSnapshotStatus=blocked; opsAlertRulesStatus=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; packageScriptsPresent=True; opsSnapshotLoaded=True; opsAlertRulesLoaded=True; opsAlertRulesPassed=True; everyCurrentFindingMapped=True; everyCurrentFindingHasCommands=True; dryRunEventsDoNotSend=True; dryRunEventsStoreNoCredentials=True; failedChecksCount=0; activeRuleIdsMissingFromManifestCount=0; activeRuleIdsWithoutCommandsCount=0; commandsWithInlineEnvAssignmentCount=0; commandsWithUrlsCount=0; findingsWithoutCommandsCount=0; unmappedFindingCodesCount=0 | `npm run flowchain:ops:escalation:dry-run -- -NoRefresh` |
 | incident-drill | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; failedChecksCount=0 | `npm run flowchain:ops:incident-drill` |
 | public-deployment-contract | blocked-owner-input | blocked | status=blocked; deploymentReady=False; packetShareable=False; blockedOnlyOnKnownExternalOwnerInputs=True; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:public-deployment:contract -- -AllowBlocked` |
-| live-cutover-rehearsal | blocked-owner-input | blocked | status=blocked; blockedOnlyOnKnownExternalOwnerInputs=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:live:cutover:rehearsal -- -AllowBlocked` |
+| live-cutover-rehearsal | stale | blocked | status=blocked; blockedOnlyOnKnownExternalOwnerInputs=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; failedChecksCount=0; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS | `npm run flowchain:live:cutover:rehearsal -- -AllowBlocked` |
 | architecture-audit | blocked-owner-input | blocked | status=blocked; blockedOnlyOnKnownExternalOwnerInputs=True; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:architecture:audit -- -AllowBlocked` |
-| completion-audit | blocked-owner-input | blocked | status=blocked; latestHeight=113073; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:completion:audit -- -AllowBlocked` |
+| completion-audit | stale | blocked | status=blocked; latestHeight=113073; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH | `npm run flowchain:completion:audit -- -AllowBlocked` |
 | no-secret-scan | passed | passed | status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; scansGeneratedDevPackReports=True; scansGeneratedSdkDocs=True; failedChecksCount=0 | `npm run flowchain:no-secret:scan` |
 
 ## Release Decision
 
-Do not claim public production readiness yet. The current tracked blockers are known owner inputs.
+Do not claim public production readiness yet. At least one required report is stale or missing.

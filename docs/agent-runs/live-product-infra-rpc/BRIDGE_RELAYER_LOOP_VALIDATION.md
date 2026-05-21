@@ -1,9 +1,9 @@
 ﻿# FlowChain Bridge Relayer Loop Validation
 
-Generated: 2026-05-21T11:06:58.4213415Z
+Generated: 2026-05-21T13:43:07.5387180Z
 Status: passed
 
-This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running, then stops the service and confirms the relayer loop is not left running, its PID file is removed, and no validation relayer process remains.
+This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running with isolated one-shot child execution, then stops the service and confirms the relayer loop is not left running, its PID file is removed, and no validation relayer process remains.
 
 ## Checks
 
@@ -15,6 +15,8 @@ This validation starts an isolated live service with the bridge relayer loop ena
 - relayerPidRecorded: True
 - relayerPollSecondsRecorded: True
 - relayerQueuesRuntimeHandoffs: True
+- relayerUsesIsolatedOneShotChildProcess: True
+- relayerContinuesAfterOneShotFailure: True
 - statusCommandPassed: True
 - statusReportsRelayerRunning: True
 - statusRelayerCommandLineMatched: True

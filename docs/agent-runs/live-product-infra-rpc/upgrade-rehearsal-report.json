@@ -1,23 +1,23 @@
 {
     "schema":  "flowchain.upgrade_rehearsal_report.v0",
-    "generatedAt":  "2026-05-20T13:49:15.6956902Z",
+    "generatedAt":  "2026-05-21T13:57:53.8837476Z",
     "status":  "passed",
     "runDir":  "retained under ignored local temp path until operator cleanup",
     "source":  {
                    "statePath":  "devnet/local/state.json",
-                   "stateHash":  "609d89134a102386d9e3e6c43e39bc071d497dc37172513dcbdcbed7d9b63af0",
+                   "stateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
                    "chainId":  "flowmemory-local-devnet-v0",
                    "genesisHash":  "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
-                   "nextBlockNumber":  102600,
-                   "packageHash":  "c99756cb7e925c05b9b7676a7e2e48248792610f7f6855e95693808fb3efcd0d",
-                   "packageLockHash":  "39e2f5e0cf0c99184bb2662a92ba81443232541449e2f241d234aba58ca71c68"
+                   "nextBlockNumber":  113187,
+                   "packageHash":  "1bf0e16969ae2e4e8ab4939c6c499f79c67ad64d62449c955bbc2d7249d8680a",
+                   "packageLockHash":  "0255ae4e3249d24f660ee7c67641726a6243ffd882d9da2948d649c3fd78bf63"
                },
     "rehearsal":  {
-                      "previousStateHash":  "609d89134a102386d9e3e6c43e39bc071d497dc37172513dcbdcbed7d9b63af0",
-                      "nextStateHash":  "609d89134a102386d9e3e6c43e39bc071d497dc37172513dcbdcbed7d9b63af0",
-                      "rollbackStateHash":  "609d89134a102386d9e3e6c43e39bc071d497dc37172513dcbdcbed7d9b63af0",
-                      "migrationManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260520T134843295Z-2708\\next-release\\MIGRATION_MANIFEST.json",
-                      "rollbackManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260520T134843295Z-2708\\rollback-restore\\ROLLBACK_MANIFEST.json"
+                      "previousStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "nextStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "rollbackStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "migrationManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260521T135713957Z-23052\\next-release\\MIGRATION_MANIFEST.json",
+                      "rollbackManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260521T135713957Z-23052\\rollback-restore\\ROLLBACK_MANIFEST.json"
                   },
     "commands":  {
                      "preflight":  "npm run flowchain:install:check",

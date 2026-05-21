@@ -1,6 +1,6 @@
 ﻿# FlowChain Install Upgrade Rollback
 
-Generated: 2026-05-20T13:49:15.6956902Z
+Generated: 2026-05-21T13:57:53.8837476Z
 Status: passed
 
 This runbook and report prove the local upgrade path preserves FlowChain state by copying the current state into a previous-release backup, applying a next-release rehearsal, and restoring rollback state with matching hashes. It does not mutate the owner host.
