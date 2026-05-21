@@ -1,20 +1,11 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-21T05:11:55.3698188Z",
+    "generatedAt":  "2026-05-21T06:00:45.1431730Z",
     "status":  "passed",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "ops-snapshot",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  },
-                                  {
-                                      "name":  "ops-alerts",
-                                      "exitCode":  0,
-                                      "outputLineCount":  5
-                                  }
+
                               ]
                 },
     "reportPaths":  {
@@ -28,6 +19,7 @@
                         "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
+                        "publicRpcCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-command-matrix-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",
@@ -57,7 +49,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  307,
+    "metricCount":  315,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -103,6 +95,14 @@
                                 "flowchain_public_rpc_security_header_policy_ready",
                                 "flowchain_public_rpc_deployment_bundle_ready",
                                 "flowchain_public_rpc_deployment_automation_ready",
+                                "flowchain_public_rpc_command_matrix_ready",
+                                "flowchain_public_rpc_command_matrix_commands_total",
+                                "flowchain_public_rpc_command_matrix_owner_host_commands",
+                                "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+                                "flowchain_public_rpc_command_matrix_missing_scripts",
+                                "flowchain_public_rpc_command_matrix_phase_gaps",
+                                "flowchain_public_rpc_command_matrix_rollback_coverage",
+                                "flowchain_public_rpc_command_matrix_no_secrets",
                                 "flowchain_public_rpc_disallowed_origin_preflight",
                                 "flowchain_public_rpc_broad_state_blocked_preflight",
                                 "flowchain_public_rpc_private_wallet_create_blocked_preflight",
@@ -376,6 +376,7 @@
                    "ownerInputsValidationLoaded":  true,
                    "ownerActivationPlanLoaded":  true,
                    "ownerGoLiveHandoffLoaded":  true,
+                   "publicRpcCommandMatrixLoaded":  true,
                    "liveCutoverLoaded":  true,
                    "truthTableLoaded":  true,
                    "noSecretLoaded":  true,
@@ -397,6 +398,7 @@
                    "realValuePilotAggregateMetricsPresent":  true,
                    "bridgeRelayerLoopValidationMetricsPresent":  true,
                    "publicRpcEdgeMetricsPresent":  true,
+                   "publicRpcCommandMatrixMetricsPresent":  true,
                    "publicRpcRollbackDrillMetricsPresent":  true,
                    "publicRpcOwnerHostApplyPlanMetricsPresent":  true,
                    "publicTesterGatewayMetricsPresent":  true,

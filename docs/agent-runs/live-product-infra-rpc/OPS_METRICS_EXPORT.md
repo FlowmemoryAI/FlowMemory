@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-21T05:11:55.3698188Z
+Generated: 2026-05-21T06:00:45.1431730Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 307
+- Metric count: 315
 
 ## Required Metrics
 
@@ -55,6 +55,14 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_public_rpc_security_header_policy_ready: present
 - flowchain_public_rpc_deployment_bundle_ready: present
 - flowchain_public_rpc_deployment_automation_ready: present
+- flowchain_public_rpc_command_matrix_ready: present
+- flowchain_public_rpc_command_matrix_commands_total: present
+- flowchain_public_rpc_command_matrix_owner_host_commands: present
+- flowchain_public_rpc_command_matrix_mutating_owner_host_commands: present
+- flowchain_public_rpc_command_matrix_missing_scripts: present
+- flowchain_public_rpc_command_matrix_phase_gaps: present
+- flowchain_public_rpc_command_matrix_rollback_coverage: present
+- flowchain_public_rpc_command_matrix_no_secrets: present
 - flowchain_public_rpc_disallowed_origin_preflight: present
 - flowchain_public_rpc_broad_state_blocked_preflight: present
 - flowchain_public_rpc_private_wallet_create_blocked_preflight: present
@@ -328,6 +336,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | ownerInputsValidationLoaded | True |
 | ownerActivationPlanLoaded | True |
 | ownerGoLiveHandoffLoaded | True |
+| publicRpcCommandMatrixLoaded | True |
 | liveCutoverLoaded | True |
 | truthTableLoaded | True |
 | noSecretLoaded | True |
@@ -349,6 +358,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | realValuePilotAggregateMetricsPresent | True |
 | bridgeRelayerLoopValidationMetricsPresent | True |
 | publicRpcEdgeMetricsPresent | True |
+| publicRpcCommandMatrixMetricsPresent | True |
 | publicRpcRollbackDrillMetricsPresent | True |
 | publicRpcOwnerHostApplyPlanMetricsPresent | True |
 | publicTesterGatewayMetricsPresent | True |

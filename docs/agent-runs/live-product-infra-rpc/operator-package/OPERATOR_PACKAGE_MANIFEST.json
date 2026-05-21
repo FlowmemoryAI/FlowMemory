@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_package_manifest.v0",
-    "generatedAt":  "2026-05-21T05:33:41.9190027Z",
+    "generatedAt":  "2026-05-21T06:01:15.0951023Z",
     "packageDir":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package",
     "flowChainRpcIsRepoOwned":  true,
     "thirdPartyFlowChainRpcProviderNeeded":  false,
@@ -53,6 +53,7 @@
                             "flowchain:owner-inputs:validate",
                             "flowchain:public-rpc:deployment-bundle",
                             "flowchain:public-rpc:deployment:automation",
+                            "flowchain:public-rpc:command-matrix",
                             "flowchain:public-rpc:validate",
                             "flowchain:public-rpc:synthetic-canary",
                             "flowchain:public-rpc:abuse-test",
@@ -221,6 +222,11 @@
                               "phase":  "public-rpc",
                               "command":  "npm run flowchain:public-rpc:deployment:automation",
                               "purpose":  "Validate render, preflight, verify, and rollback phases."
+                          },
+                          {
+                              "phase":  "public-rpc",
+                              "command":  "npm run flowchain:public-rpc:command-matrix",
+                              "purpose":  "Map public RPC launch commands to owner inputs, mutation risk, rollback coverage, and evidence paths."
                           },
                           {
                               "phase":  "public-rpc",
@@ -568,12 +574,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "31a2cfb4a0927d48a9e515e90705b4c19ff72371873bf3c5491e113e80f3ccdd",
-                         "destinationSha256":  "31a2cfb4a0927d48a9e515e90705b4c19ff72371873bf3c5491e113e80f3ccdd",
+                         "sourceSha256":  "de1f185d5863f7c48d1a8a1fc13db717199a3d9b687dd5cfda9d9ef5fad29fb4",
+                         "destinationSha256":  "de1f185d5863f7c48d1a8a1fc13db717199a3d9b687dd5cfda9d9ef5fad29fb4",
                          "contentHashMatches":  true,
-                         "byteLength":  15942,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:08:44.4657823Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:08:44.4657823Z"
+                         "byteLength":  16112,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:33.1609958Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:33.1609958Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/OWNER_ENV_TEMPLATE.md",
@@ -594,12 +600,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "4d7c8b78fbd941434d81919b10fd69b474609fc32332bfc6d20ae934aa36b763",
-                         "destinationSha256":  "4d7c8b78fbd941434d81919b10fd69b474609fc32332bfc6d20ae934aa36b763",
+                         "sourceSha256":  "53065bf9604a465276c0c133fc1518937eb19e56e75281c0470bf3d0163131ca",
+                         "destinationSha256":  "53065bf9604a465276c0c133fc1518937eb19e56e75281c0470bf3d0163131ca",
                          "contentHashMatches":  true,
                          "byteLength":  2572,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:26:18.1525433Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:26:18.1525433Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:35:16.3131384Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:35:16.3131384Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md",
@@ -613,6 +619,19 @@
                          "byteLength":  6440,
                          "sourceLastWriteTimeUtc":  "2026-05-21T02:05:49.2894328Z",
                          "destinationLastWriteTimeUtc":  "2026-05-21T02:05:49.2894328Z"
+                     },
+                     {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md",
+                         "destination":  "runbooks/PUBLIC_RPC_COMMAND_MATRIX.md",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied",
+                         "sourceSha256":  "346a99cd25a5ec549be69ee7f7e20303f51cf65d380dbcf026a2903e33ebff9f",
+                         "destinationSha256":  "346a99cd25a5ec549be69ee7f7e20303f51cf65d380dbcf026a2903e33ebff9f",
+                         "contentHashMatches":  true,
+                         "byteLength":  5797,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:23.4406992Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:23.4406992Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_SYNTHETIC_CANARY.md",
@@ -763,12 +782,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "42b8ad9d09f1d0941276c033e163b09afc669c6a50b0928d486a13466fc3a5ac",
-                         "destinationSha256":  "42b8ad9d09f1d0941276c033e163b09afc669c6a50b0928d486a13466fc3a5ac",
+                         "sourceSha256":  "f9d77f9b759da2635e0903065c0110c4aff6f795c3f00b2feebce7b3eeeb84b1",
+                         "destinationSha256":  "f9d77f9b759da2635e0903065c0110c4aff6f795c3f00b2feebce7b3eeeb84b1",
                          "contentHashMatches":  true,
-                         "byteLength":  19958,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:55.4348212Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:55.4348212Z"
+                         "byteLength":  20558,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:45.1971694Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:45.1971694Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/WINDOWS_METRICS_INSTALL.md",
@@ -906,12 +925,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "be5ac8e13eb8362501e3742f3d2fc435f3ee535f631283f7edf7f2fb90e7ec8f",
-                         "destinationSha256":  "be5ac8e13eb8362501e3742f3d2fc435f3ee535f631283f7edf7f2fb90e7ec8f",
+                         "sourceSha256":  "4815c10ef0bb14820434239eb70877d32978c41604a01b650670327472fb4a5d",
+                         "destinationSha256":  "4815c10ef0bb14820434239eb70877d32978c41604a01b650670327472fb4a5d",
                          "contentHashMatches":  true,
                          "byteLength":  4022,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:14.7945950Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:14.7945950Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:14.6714611Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:14.6714611Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md",
@@ -919,12 +938,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "2eba90cf838c1ab91b61368751a60722e333c5e590c3bafc459621b484a0eefa",
-                         "destinationSha256":  "2eba90cf838c1ab91b61368751a60722e333c5e590c3bafc459621b484a0eefa",
+                         "sourceSha256":  "bbb64f8d0c12846ded1ea0de3b6d70fba1457212876cf2ec49f0ab7c3e509cee",
+                         "destinationSha256":  "bbb64f8d0c12846ded1ea0de3b6d70fba1457212876cf2ec49f0ab7c3e509cee",
                          "contentHashMatches":  true,
                          "byteLength":  2424,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:15.6476164Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:15.6476164Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:15.6004801Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:15.6004801Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_CLIENT_VALIDATION.md",
@@ -932,12 +951,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "4ef1e7afc5c1f6545a8a4e781fb8250c95f7cfdbf7013e35e9cba5a26fbb2d96",
-                         "destinationSha256":  "4ef1e7afc5c1f6545a8a4e781fb8250c95f7cfdbf7013e35e9cba5a26fbb2d96",
+                         "sourceSha256":  "756d434085f4637ab2b9b3c389c14b29a5546f257ea70049534b210864246967",
+                         "destinationSha256":  "756d434085f4637ab2b9b3c389c14b29a5546f257ea70049534b210864246967",
                          "contentHashMatches":  true,
                          "byteLength":  631,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:17.7954067Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:17.7954067Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:17.8838276Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:17.8838276Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md",
@@ -958,12 +977,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "456592a81f7fc8466ce736ada5823cf1d5f15549f57243cc6cfd03394d50c272",
-                         "destinationSha256":  "456592a81f7fc8466ce736ada5823cf1d5f15549f57243cc6cfd03394d50c272",
+                         "sourceSha256":  "37a7736037ef9eaf18cc927128f31a66323b7e14623bf88486d965f2a6fbb136",
+                         "destinationSha256":  "37a7736037ef9eaf18cc927128f31a66323b7e14623bf88486d965f2a6fbb136",
                          "contentHashMatches":  true,
                          "byteLength":  3929,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:31:23.7270848Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:31:23.7270848Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:41:17.7736188Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:41:17.7736188Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md",
@@ -1025,12 +1044,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "5c62641911351aa2a11005200d6b2fc33be4bf769231b3304b24604f21de0061",
-                         "destinationSha256":  "5c62641911351aa2a11005200d6b2fc33be4bf769231b3304b24604f21de0061",
+                         "sourceSha256":  "e6111bee707f0a9c76f5380d830b6fbcd3a1155be5747d009490444df49e661a",
+                         "destinationSha256":  "e6111bee707f0a9c76f5380d830b6fbcd3a1155be5747d009490444df49e661a",
                          "contentHashMatches":  true,
-                         "byteLength":  4626,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:29:53.8434706Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:29:53.8434706Z"
+                         "byteLength":  4624,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:39:48.1540107Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:39:48.1540107Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
@@ -1038,12 +1057,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "b0cdafc2607a604d35a4804e5fea8ef86d0bf09192f5e25a9811cea54938e594",
-                         "destinationSha256":  "b0cdafc2607a604d35a4804e5fea8ef86d0bf09192f5e25a9811cea54938e594",
+                         "sourceSha256":  "489cae934f1c3a0a2c486ce3bea89ca69758ed274b8eb0c30ed1d7ef1fad709d",
+                         "destinationSha256":  "489cae934f1c3a0a2c486ce3bea89ca69758ed274b8eb0c30ed1d7ef1fad709d",
                          "contentHashMatches":  true,
                          "byteLength":  25641,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:33:37.6311875Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:33:37.6311875Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:01:11.3726051Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:01:11.3726051Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json",
@@ -1194,12 +1213,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "6edb93cdb3286e0bfb5a67f77e1b550d8dbd60a53bd840d90d1de2e8a122bb7e",
-                         "destinationSha256":  "6edb93cdb3286e0bfb5a67f77e1b550d8dbd60a53bd840d90d1de2e8a122bb7e",
+                         "sourceSha256":  "e0b023d6bd63cad17b1ee02f19c34f15ac6627289f7ca85d9dbe3eb0dc96e2b5",
+                         "destinationSha256":  "e0b023d6bd63cad17b1ee02f19c34f15ac6627289f7ca85d9dbe3eb0dc96e2b5",
                          "contentHashMatches":  true,
-                         "byteLength":  76945,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:08:44.4007794Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:08:44.4007794Z"
+                         "byteLength":  77250,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:33.0969991Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:33.0969991Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json",
@@ -1207,12 +1226,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "dcba5d9323f7f5b8b037a14e0331147f59786b3040365b00dbb2d2190e4ecb86",
-                         "destinationSha256":  "dcba5d9323f7f5b8b037a14e0331147f59786b3040365b00dbb2d2190e4ecb86",
+                         "sourceSha256":  "bb5a48040c14cc4884e8c6cca9b843f117478287d9b54e5a5677f06ce7b0ef4d",
+                         "destinationSha256":  "bb5a48040c14cc4884e8c6cca9b843f117478287d9b54e5a5677f06ce7b0ef4d",
                          "contentHashMatches":  true,
                          "byteLength":  13893,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:13.8250727Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:13.8250727Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:13.4125942Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:13.4125942Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json",
@@ -1259,12 +1278,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "2e38ffba5d10daaf5241cfdf7269d49f080e0a731cb0ba7be93a83d44377a99a",
-                         "destinationSha256":  "2e38ffba5d10daaf5241cfdf7269d49f080e0a731cb0ba7be93a83d44377a99a",
+                         "sourceSha256":  "593e12e440fad4fb3f3e932d91c611001fd4e3b6e6a5ee21f52b8d1347e9f4f1",
+                         "destinationSha256":  "593e12e440fad4fb3f3e932d91c611001fd4e3b6e6a5ee21f52b8d1347e9f4f1",
                          "contentHashMatches":  true,
                          "byteLength":  13294,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:26:18.1065421Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:26:18.1065421Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:35:16.2761382Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:35:16.2761382Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
@@ -1293,17 +1312,30 @@
                          "destinationLastWriteTimeUtc":  "2026-05-21T03:35:07.2641714Z"
                      },
                      {
+                         "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json",
+                         "destination":  "evidence/public-rpc-command-matrix-report.json",
+                         "copied":  true,
+                         "required":  true,
+                         "reason":  "copied",
+                         "sourceSha256":  "79d59e6699e6dc611fcc40cdf2efa8515baf39c3562f864402e83771866a0762",
+                         "destinationSha256":  "79d59e6699e6dc611fcc40cdf2efa8515baf39c3562f864402e83771866a0762",
+                         "contentHashMatches":  true,
+                         "byteLength":  35513,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:23.3749963Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:23.3749963Z"
+                     },
+                     {
                          "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
                          "destination":  "evidence/public-rpc-readiness-report.json",
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "c1851050600b1a7663989b96b4af844e0c295766981e1c1303bfa357b9558c79",
-                         "destinationSha256":  "c1851050600b1a7663989b96b4af844e0c295766981e1c1303bfa357b9558c79",
+                         "sourceSha256":  "d2a9f17b6ac94ef503381d9292b660de1c1106490bcc9d782589ca35eb69a2d4",
+                         "destinationSha256":  "d2a9f17b6ac94ef503381d9292b660de1c1106490bcc9d782589ca35eb69a2d4",
                          "contentHashMatches":  true,
                          "byteLength":  8359,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:29:45.3606195Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:29:45.3606195Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:39:36.7796704Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:39:36.7796704Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
@@ -1350,12 +1382,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "52285c6101b17a2746095346ab249b3782d2c1193c801f5520552dd329e5e2cb",
-                         "destinationSha256":  "52285c6101b17a2746095346ab249b3782d2c1193c801f5520552dd329e5e2cb",
+                         "sourceSha256":  "e5d40293c36dc0a073e4c2f0032d01a668bdb688c3c75d3dcbfbe4645de04e1d",
+                         "destinationSha256":  "e5d40293c36dc0a073e4c2f0032d01a668bdb688c3c75d3dcbfbe4645de04e1d",
                          "contentHashMatches":  true,
                          "byteLength":  2604,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:00.3550414Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:00.3550414Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:39:55.7581134Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:39:55.7581134Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
@@ -1415,12 +1447,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "b05d42d3d94023340867d57ebd7050135a6147251731f99f770fa7bec0c2c0f2",
-                         "destinationSha256":  "b05d42d3d94023340867d57ebd7050135a6147251731f99f770fa7bec0c2c0f2",
+                         "sourceSha256":  "9e71e7a2301957b0ef1046572445b96241111891d01a7f35e3675139f9d96985",
+                         "destinationSha256":  "9e71e7a2301957b0ef1046572445b96241111891d01a7f35e3675139f9d96985",
                          "contentHashMatches":  true,
-                         "byteLength":  38034,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:50.9690936Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:50.9690936Z"
+                         "byteLength":  38369,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:35.2183521Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:35.2183521Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json",
@@ -1428,12 +1460,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "2e5cbc23ced36b8012cafde84653423db59f4cd177be27dcc322c97e317a95d0",
-                         "destinationSha256":  "2e5cbc23ced36b8012cafde84653423db59f4cd177be27dcc322c97e317a95d0",
+                         "sourceSha256":  "6fe463b3f87684a954f62556b0d4b09470a8de4dffa34e5f4bedc9b669b1b362",
+                         "destinationSha256":  "6fe463b3f87684a954f62556b0d4b09470a8de4dffa34e5f4bedc9b669b1b362",
                          "contentHashMatches":  true,
-                         "byteLength":  47270,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:53.1542432Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:53.1542432Z"
+                         "byteLength":  48452,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:43.7529687Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:43.7529687Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json",
@@ -1441,12 +1473,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "06aed9eb469d357ae58a72ccd19b68994666d0a13291a85c3394fe1d418271c9",
-                         "destinationSha256":  "06aed9eb469d357ae58a72ccd19b68994666d0a13291a85c3394fe1d418271c9",
+                         "sourceSha256":  "14c8d260dbe7de4b1265bb3dae8fff15ebabca2b57d84e21ff98c7ba9ac5678e",
+                         "destinationSha256":  "14c8d260dbe7de4b1265bb3dae8fff15ebabca2b57d84e21ff98c7ba9ac5678e",
                          "contentHashMatches":  true,
-                         "byteLength":  35178,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:55.3988207Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:55.3988207Z"
+                         "byteLength":  35680,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:45.1711671Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:45.1711671Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json",
@@ -1480,12 +1512,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "e55bb05868fab347f8c67462b6585621c9a6dc4b2a3f62f3351cac7addb6437c",
-                         "destinationSha256":  "e55bb05868fab347f8c67462b6585621c9a6dc4b2a3f62f3351cac7addb6437c",
+                         "sourceSha256":  "fa9965f674deeaae10211231449edbf279fe7fac1c83f9f16db369f6b21342ae",
+                         "destinationSha256":  "fa9965f674deeaae10211231449edbf279fe7fac1c83f9f16db369f6b21342ae",
                          "contentHashMatches":  true,
-                         "byteLength":  98783,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:55.0288089Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:55.0288089Z"
+                         "byteLength":  101343,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:44.8391590Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:44.8391590Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
@@ -1493,12 +1525,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "e2b358ed1da1ff9c4a6b347c2f0801418ac3c028432ad6fc031667009a28dd25",
-                         "destinationSha256":  "e2b358ed1da1ff9c4a6b347c2f0801418ac3c028432ad6fc031667009a28dd25",
+                         "sourceSha256":  "3996f017d539398ca91c564bfefd8eea6c048e2280f0fc721a3349536dbe93c9",
+                         "destinationSha256":  "3996f017d539398ca91c564bfefd8eea6c048e2280f0fc721a3349536dbe93c9",
                          "contentHashMatches":  true,
-                         "byteLength":  69548,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:11:54.7738099Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:11:54.7738099Z"
+                         "byteLength":  71434,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:44.5871541Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:44.5871541Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json",
@@ -1519,12 +1551,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "80f2dcf71ed421da0bdc0934fa84280e20c67b24446530c397f3fb5e041b4506",
-                         "destinationSha256":  "80f2dcf71ed421da0bdc0934fa84280e20c67b24446530c397f3fb5e041b4506",
+                         "sourceSha256":  "2da95aa4f830669b8501d50268d11b2f47f31c2128d1ba0e64dc7f3d524df23a",
+                         "destinationSha256":  "2da95aa4f830669b8501d50268d11b2f47f31c2128d1ba0e64dc7f3d524df23a",
                          "contentHashMatches":  true,
                          "byteLength":  5273,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:01.9684267Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:01.9684267Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:39:57.5340802Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:39:57.5340802Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
@@ -1532,12 +1564,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "acf34760a1296d88b1644eb58224acbef64d22de79886d0471ca080bdf9dd7c1",
-                         "destinationSha256":  "acf34760a1296d88b1644eb58224acbef64d22de79886d0471ca080bdf9dd7c1",
+                         "sourceSha256":  "3bf8c5fea7fc1f3e5f60483f16c5efcd99cc7e1b13b7287142721a88d825908a",
+                         "destinationSha256":  "3bf8c5fea7fc1f3e5f60483f16c5efcd99cc7e1b13b7287142721a88d825908a",
                          "contentHashMatches":  true,
                          "byteLength":  6826,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:03.8424309Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:03.8424309Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:39:59.2756128Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:39:59.2756128Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
@@ -1558,12 +1590,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "1a4e91f613d0d15c7f138dd0d7c74b72a343cd26fc2d9dce407d0554bed8cabb",
-                         "destinationSha256":  "1a4e91f613d0d15c7f138dd0d7c74b72a343cd26fc2d9dce407d0554bed8cabb",
+                         "sourceSha256":  "4d7bd5fa8767d236ddc5cd1233658705be674434c32121cb569ebfd15307ff92",
+                         "destinationSha256":  "4d7bd5fa8767d236ddc5cd1233658705be674434c32121cb569ebfd15307ff92",
                          "contentHashMatches":  true,
                          "byteLength":  9152,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:07.8703997Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:07.8703997Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:04.9546373Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:04.9546373Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json",
@@ -1662,12 +1694,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "f9b3db9ee0927dbeee3ebd4597dedefd298eb8253644ced99c3cccdd8c9e6fc8",
-                         "destinationSha256":  "f9b3db9ee0927dbeee3ebd4597dedefd298eb8253644ced99c3cccdd8c9e6fc8",
+                         "sourceSha256":  "d00a9a5d985791b820a924e0f72cafbddd9bac93c3508c55339fd59c0fde1b8c",
+                         "destinationSha256":  "d00a9a5d985791b820a924e0f72cafbddd9bac93c3508c55339fd59c0fde1b8c",
                          "contentHashMatches":  true,
                          "byteLength":  1790,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:28:48.3401843Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:28:48.3401843Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:38:20.2700420Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:38:20.2700420Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
@@ -1688,12 +1720,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "bc2bd194e568cb6f9d890b845d459267bdba0e599aa7b31e21df4318b6ba82ac",
-                         "destinationSha256":  "bc2bd194e568cb6f9d890b845d459267bdba0e599aa7b31e21df4318b6ba82ac",
+                         "sourceSha256":  "4870b6f4db58ef446bcf5339d89392f783fd3ab943cfe43ba3ed592796db5a80",
+                         "destinationSha256":  "4870b6f4db58ef446bcf5339d89392f783fd3ab943cfe43ba3ed592796db5a80",
                          "contentHashMatches":  true,
                          "byteLength":  11819,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:28:45.1396799Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:28:45.1396799Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:38:17.0670879Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:38:17.0670879Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
@@ -1701,12 +1733,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "d5d4254a5aa2ebda25f3b3adcbeb78aebb7bf027d5e88721bef2f74f3aae1449",
-                         "destinationSha256":  "d5d4254a5aa2ebda25f3b3adcbeb78aebb7bf027d5e88721bef2f74f3aae1449",
+                         "sourceSha256":  "df8c6fed9b6f6b3094a7e2d5284d4c49c35758279d444df8ffd9f91432e59c60",
+                         "destinationSha256":  "df8c6fed9b6f6b3094a7e2d5284d4c49c35758279d444df8ffd9f91432e59c60",
                          "contentHashMatches":  true,
                          "byteLength":  5599,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:14.8246031Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:14.8246031Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:14.7134615Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:14.7134615Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json",
@@ -1714,12 +1746,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "b380fba57cd4bd5d7a648c041885beeb2bcbdba199f45c95e0b378f27b0bf9db",
-                         "destinationSha256":  "b380fba57cd4bd5d7a648c041885beeb2bcbdba199f45c95e0b378f27b0bf9db",
+                         "sourceSha256":  "e6ecaeecc0af81b78decd555b53f8bb035bde370dfc0db7fab98771a0d1990bd",
+                         "destinationSha256":  "e6ecaeecc0af81b78decd555b53f8bb035bde370dfc0db7fab98771a0d1990bd",
                          "contentHashMatches":  true,
                          "byteLength":  5926,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:15.6146179Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:15.6146179Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:15.5664827Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:15.5664827Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json",
@@ -1727,12 +1759,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "f02e85c4d01424fa8ff3aac8aae6c26fa1357b843fce26805e4ea5f57d48217d",
-                         "destinationSha256":  "f02e85c4d01424fa8ff3aac8aae6c26fa1357b843fce26805e4ea5f57d48217d",
+                         "sourceSha256":  "a07b190072159f20c8072ea16aadc60372b9d32c34eae094cd19ca7b919c2708",
+                         "destinationSha256":  "a07b190072159f20c8072ea16aadc60372b9d32c34eae094cd19ca7b919c2708",
                          "contentHashMatches":  true,
                          "byteLength":  1679,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:17.7854081Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:17.7854081Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:17.8688268Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:17.8688268Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-client-dry-run-report.json",
@@ -1740,12 +1772,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "1f51840563686de96c3de28195140d6601083628128448a563fba65602403194",
-                         "destinationSha256":  "1f51840563686de96c3de28195140d6601083628128448a563fba65602403194",
+                         "sourceSha256":  "f1b4ce6c2c8f6ea614e8f230496e2e25cec3ccce944f199368ed392373eb528b",
+                         "destinationSha256":  "f1b4ce6c2c8f6ea614e8f230496e2e25cec3ccce944f199368ed392373eb528b",
                          "contentHashMatches":  true,
                          "byteLength":  1014,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:17.3423997Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:17.3423997Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:17.3565191Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:17.3565191Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json",
@@ -1779,12 +1811,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "6a0222e61b96f0a66ebcd4856824a91221feaee3d023aa378b6852854fd1c9d8",
-                         "destinationSha256":  "6a0222e61b96f0a66ebcd4856824a91221feaee3d023aa378b6852854fd1c9d8",
+                         "sourceSha256":  "77f52532d88ce52557f8d9ad93a402dfe639c2db2665d087876187fe74216c33",
+                         "destinationSha256":  "77f52532d88ce52557f8d9ad93a402dfe639c2db2665d087876187fe74216c33",
                          "contentHashMatches":  true,
                          "byteLength":  56098,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:26:22.7529078Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:26:22.7529078Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:35:23.3020272Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:35:23.3020272Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
@@ -1792,12 +1824,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "ee66a2d8cff7abffc30780858686509cf37b45aa0dcd53a4dfe8876f423cc991",
-                         "destinationSha256":  "ee66a2d8cff7abffc30780858686509cf37b45aa0dcd53a4dfe8876f423cc991",
+                         "sourceSha256":  "78f02b4d43a2c58395e093cc6b3a72c871e342c076caa6f2c0206b160f53a368",
+                         "destinationSha256":  "78f02b4d43a2c58395e093cc6b3a72c871e342c076caa6f2c0206b160f53a368",
                          "contentHashMatches":  true,
-                         "byteLength":  30791,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:31:23.6900807Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:31:23.6900807Z"
+                         "byteLength":  30771,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:41:17.7406166Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:41:17.7406166Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json",
@@ -1805,12 +1837,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "d9427333900ca4c3b5afc351a127368145fdf2f56deebad491fea3eef0abdc00",
-                         "destinationSha256":  "d9427333900ca4c3b5afc351a127368145fdf2f56deebad491fea3eef0abdc00",
+                         "sourceSha256":  "03d834abd5b2efc1f02282bb11592a93eed218fee14af07c4e1841c4c17da82b",
+                         "destinationSha256":  "03d834abd5b2efc1f02282bb11592a93eed218fee14af07c4e1841c4c17da82b",
                          "contentHashMatches":  true,
-                         "byteLength":  100942,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:12:12.8941962Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:12:12.8941962Z"
+                         "byteLength":  103998,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T06:00:57.7744981Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T06:00:57.7744981Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
@@ -1818,12 +1850,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "32abc5e016f277a738ab61656c62097884f070b473f28c48160a32ec03a535eb",
-                         "destinationSha256":  "32abc5e016f277a738ab61656c62097884f070b473f28c48160a32ec03a535eb",
+                         "sourceSha256":  "3bedeac422f932daef5d06eefae2ccb66799e9082374f7867dacb0c92f99b8da",
+                         "destinationSha256":  "3bedeac422f932daef5d06eefae2ccb66799e9082374f7867dacb0c92f99b8da",
                          "contentHashMatches":  true,
                          "byteLength":  229008,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:30:27.0560498Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:30:27.0560498Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:40:28.2782297Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:40:28.2782297Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
@@ -1831,12 +1863,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "9010429c2b2641bebdebb9cd6cddcf6927557e1d261d187d355ff7635980ca03",
-                         "destinationSha256":  "9010429c2b2641bebdebb9cd6cddcf6927557e1d261d187d355ff7635980ca03",
+                         "sourceSha256":  "001f201d37bbefe614ba6c8c0c8ce5dc5affcdafcada4994ffaa7a409a59f0e6",
+                         "destinationSha256":  "001f201d37bbefe614ba6c8c0c8ce5dc5affcdafcada4994ffaa7a409a59f0e6",
                          "contentHashMatches":  true,
-                         "byteLength":  176149,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:32:44.8483662Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:32:44.8483662Z"
+                         "byteLength":  176135,
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:41:27.8344581Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:41:27.8344581Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
@@ -1844,12 +1876,12 @@
                          "copied":  true,
                          "required":  true,
                          "reason":  "copied",
-                         "sourceSha256":  "ca38e30ed79b4d22498cf2f1eb24bc7ac400e5bfb31a6fb729eb553147cc9966",
-                         "destinationSha256":  "ca38e30ed79b4d22498cf2f1eb24bc7ac400e5bfb31a6fb729eb553147cc9966",
+                         "sourceSha256":  "11d004bb1f935111af071213bf8649ebfe7e1095f07005b53b9af5db7a053a7d",
+                         "destinationSha256":  "11d004bb1f935111af071213bf8649ebfe7e1095f07005b53b9af5db7a053a7d",
                          "contentHashMatches":  true,
                          "byteLength":  2204,
-                         "sourceLastWriteTimeUtc":  "2026-05-21T05:32:31.0611171Z",
-                         "destinationLastWriteTimeUtc":  "2026-05-21T05:32:31.0611171Z"
+                         "sourceLastWriteTimeUtc":  "2026-05-21T05:41:17.0716028Z",
+                         "destinationLastWriteTimeUtc":  "2026-05-21T05:41:17.0716028Z"
                      },
                      {
                          "source":  "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json",

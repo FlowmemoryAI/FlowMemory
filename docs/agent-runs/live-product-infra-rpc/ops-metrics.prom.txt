@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 109610
+flowchain_latest_height 109783
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 109610
+flowchain_finalized_height 109783
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 1
+flowchain_state_file_age_seconds 4
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 28998.985
+flowchain_transaction_intake_file_age_seconds 31923.499
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -142,6 +142,30 @@ flowchain_public_rpc_deployment_bundle_ready 1
 # HELP flowchain_public_rpc_deployment_automation_ready One when public RPC deployment automation validation is passed.
 # TYPE flowchain_public_rpc_deployment_automation_ready gauge
 flowchain_public_rpc_deployment_automation_ready 1
+# HELP flowchain_public_rpc_command_matrix_ready One when public RPC command matrix is passed and safe.
+# TYPE flowchain_public_rpc_command_matrix_ready gauge
+flowchain_public_rpc_command_matrix_ready 1
+# HELP flowchain_public_rpc_command_matrix_commands_total Public RPC command matrix command count.
+# TYPE flowchain_public_rpc_command_matrix_commands_total gauge
+flowchain_public_rpc_command_matrix_commands_total 21
+# HELP flowchain_public_rpc_command_matrix_owner_host_commands Public RPC command matrix owner-host command count.
+# TYPE flowchain_public_rpc_command_matrix_owner_host_commands gauge
+flowchain_public_rpc_command_matrix_owner_host_commands 6
+# HELP flowchain_public_rpc_command_matrix_mutating_owner_host_commands Public RPC command matrix mutating owner-host command count.
+# TYPE flowchain_public_rpc_command_matrix_mutating_owner_host_commands gauge
+flowchain_public_rpc_command_matrix_mutating_owner_host_commands 4
+# HELP flowchain_public_rpc_command_matrix_missing_scripts Missing package scripts in public RPC command matrix.
+# TYPE flowchain_public_rpc_command_matrix_missing_scripts gauge
+flowchain_public_rpc_command_matrix_missing_scripts 0
+# HELP flowchain_public_rpc_command_matrix_phase_gaps Missing phase count in public RPC command matrix.
+# TYPE flowchain_public_rpc_command_matrix_phase_gaps gauge
+flowchain_public_rpc_command_matrix_phase_gaps 0
+# HELP flowchain_public_rpc_command_matrix_rollback_coverage One when mutating public RPC owner-host commands have rollback coverage.
+# TYPE flowchain_public_rpc_command_matrix_rollback_coverage gauge
+flowchain_public_rpc_command_matrix_rollback_coverage 1
+# HELP flowchain_public_rpc_command_matrix_no_secrets One when public RPC command matrix reports no secrets and no env value printing.
+# TYPE flowchain_public_rpc_command_matrix_no_secrets gauge
+flowchain_public_rpc_command_matrix_no_secrets 1
 # HELP flowchain_public_rpc_disallowed_origin_preflight One when the public RPC bundle includes a disallowed origin preflight.
 # TYPE flowchain_public_rpc_disallowed_origin_preflight gauge
 flowchain_public_rpc_disallowed_origin_preflight 1
@@ -903,10 +927,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 64
+flowchain_truth_gates_total 65
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 47
+flowchain_truth_gates_passed 48
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 17

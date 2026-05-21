@@ -251,13 +251,15 @@ $launchSequence = @(
         commands = @(
             "npm run flowchain:public-rpc:deployment-bundle",
             "npm run flowchain:public-rpc:deployment:automation",
+            "npm run flowchain:public-rpc:command-matrix",
             "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE>",
             "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan",
             "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
-            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
+            "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
         )
     },
     [ordered]@{

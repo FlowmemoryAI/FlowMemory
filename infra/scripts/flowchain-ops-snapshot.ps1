@@ -53,6 +53,7 @@ $paths = [ordered]@{
     publicRpcSyntheticCanary = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    publicRpcCommandMatrix = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     backup = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
@@ -416,11 +417,44 @@ $publicRpcSyntheticCanaryProbeCount = [int](Get-OpsProp -Object $publicRpcSynthe
 $publicRpcSyntheticCanaryFailedProbeCount = [int](Get-OpsProp -Object $publicRpcSyntheticCanary -Name "failedProbeCount" -Default 0)
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcCommandMatrix = $reports.publicRpcCommandMatrix
 $publicRpcDeploymentBundleStatus = Get-OpsStatus -Report $publicRpcDeploymentBundle
 $publicRpcDeploymentAutomationStatus = Get-OpsStatus -Report $publicRpcDeploymentAutomation
+$publicRpcCommandMatrixStatus = Get-OpsStatus -Report $publicRpcCommandMatrix
 $publicRpcChecks = Get-OpsProp -Object $reports.publicRpc -Name "checks"
 $publicRpcDeploymentBundleChecks = Get-OpsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-OpsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcCommandMatrixChecks = Get-OpsProp -Object $publicRpcCommandMatrix -Name "checks"
+$publicRpcCommandMatrixFailedChecks = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "failedChecks" -Default @()))
+$publicRpcCommandMatrixMissingScripts = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "missingPackageScripts" -Default @()))
+$publicRpcCommandMatrixMissingPhases = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "missingPhases" -Default @()))
+$publicRpcCommandMatrixEnvReferenceGaps = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "rowsMissingEnvReferences" -Default @()))
+$publicRpcCommandMatrixValidationGaps = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "rowsMissingValidationSignals" -Default @()))
+$publicRpcCommandMatrixInlineEnvCommands = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "commandsWithInlineEnvAssignment" -Default @()))
+$publicRpcCommandMatrixUrlCommands = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "commandsWithUrls" -Default @()))
+$publicRpcCommandMatrixKeyMaterialCommands = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "commandsWithKeyMaterialReference" -Default @()))
+$publicRpcCommandMatrixBadOwnerInputs = @((Get-OpsProp -Object $publicRpcCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$publicRpcCommandMatrixReady = $publicRpcCommandMatrixStatus -eq "passed" `
+    -and $publicRpcCommandMatrixFailedChecks.Count -eq 0 `
+    -and $publicRpcCommandMatrixMissingScripts.Count -eq 0 `
+    -and $publicRpcCommandMatrixMissingPhases.Count -eq 0 `
+    -and $publicRpcCommandMatrixEnvReferenceGaps.Count -eq 0 `
+    -and $publicRpcCommandMatrixValidationGaps.Count -eq 0 `
+    -and $publicRpcCommandMatrixInlineEnvCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixUrlCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixKeyMaterialCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixBadOwnerInputs.Count -eq 0 `
+    -and ([int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0) -ge 20) `
+    -and ([int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0) -ge 6) `
+    -and ([int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 12) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrixChecks -Name "phaseCoverageComplete" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrixChecks -Name "renderPlanApplyProofRollbackCovered" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrixChecks -Name "mutatingOwnerHostCommandsHaveRollbackCoverage" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcRequiredCutoverCommands = @(
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:wallet:live-tester:e2e",
@@ -1043,6 +1077,9 @@ if ($publicRpcSyntheticCanaryStatus -eq "failed") {
 if (-not $publicRpcEdgeHardeningReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-rpc-edge-hardening-failed" -Message "Public RPC edge deployment hardening evidence is missing or failed." -Commands @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
 }
+if (-not $publicRpcCommandMatrixReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "public-rpc-command-matrix-failed" -Message "Public RPC command matrix is missing or unsafe: every launch command must be mapped to owner inputs, host mutation risk, rollback coverage, and committed evidence without secrets." -Commands @("npm run flowchain:public-rpc:command-matrix", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-rpc:deployment-bundle")
+}
 if ($backupStatus -ne "passed") {
     Add-OpsFinding -Findings $findings -Severity "blocked" -Code "backup-not-ready" -Message "State backup is not ready for public operation." -Commands @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:check")
 }
@@ -1289,6 +1326,19 @@ $report = [ordered]@{
         publicRpcDeploymentBundle = $publicRpcDeploymentBundleStatus
         publicRpcDeploymentAutomation = $publicRpcDeploymentAutomationStatus
         publicRpcEdgeHardeningReady = $publicRpcEdgeHardeningReady
+        publicRpcCommandMatrix = $publicRpcCommandMatrixStatus
+        publicRpcCommandMatrixReady = $publicRpcCommandMatrixReady
+        publicRpcCommandMatrixCommands = [int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0)
+        publicRpcCommandMatrixOwnerHostCommands = [int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0)
+        publicRpcCommandMatrixMutatingOwnerHostCommands = [int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0)
+        publicRpcCommandMatrixCommittedEvidencePaths = [int](Get-OpsProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        publicRpcCommandMatrixFailedChecks = $publicRpcCommandMatrixFailedChecks.Count
+        publicRpcCommandMatrixMissingScripts = $publicRpcCommandMatrixMissingScripts.Count
+        publicRpcCommandMatrixMissingPhases = $publicRpcCommandMatrixMissingPhases.Count
+        publicRpcCommandMatrixEnvReferenceGaps = $publicRpcCommandMatrixEnvReferenceGaps.Count
+        publicRpcCommandMatrixValidationGaps = $publicRpcCommandMatrixValidationGaps.Count
+        publicRpcCommandMatrixNoSecrets = ((Get-OpsProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true)
+        publicRpcCommandMatrixNoBroadcasts = ((Get-OpsProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
         publicRpcDisallowedOriginPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false
         publicRpcBroadStateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false
         publicRpcPrivateWalletCreateBlockedPreflight = Get-OpsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false

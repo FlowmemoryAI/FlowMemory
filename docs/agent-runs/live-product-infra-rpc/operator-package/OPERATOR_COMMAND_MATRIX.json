@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T05:33:41.9190027Z",
+    "generatedAt":  "2026-05-21T06:01:15.0951023Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -126,6 +126,11 @@
                          "phase":  "public-rpc",
                          "command":  "npm run flowchain:public-rpc:deployment:automation",
                          "purpose":  "Validate render, preflight, verify, and rollback phases."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:command-matrix",
+                         "purpose":  "Map public RPC launch commands to owner inputs, mutation risk, rollback coverage, and evidence paths."
                      },
                      {
                          "phase":  "public-rpc",

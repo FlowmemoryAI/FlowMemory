@@ -362,6 +362,14 @@ $rules = @(
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
+        id = "public-rpc-command-matrix-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-command-matrix-failed")
+        signal = "Public RPC command matrix is missing or unsafe."
+        threshold = "command matrix must cover preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, rollback, owner input names, mutation risk, rollback coverage, committed evidence paths, no-secret, and no-broadcast checks"
+        commands = @("npm run flowchain:public-rpc:command-matrix", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-rpc:deployment-bundle")
+    },
+    [ordered]@{
         id = "public-rpc-synthetic-canary-failed"
         severity = "critical"
         findingCodes = @("public-rpc-synthetic-canary-failed")
@@ -461,6 +469,14 @@ $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRul
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("install/edge apply phases", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("post-deploy evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
+$publicRpcCommandMatrixRule = @($rules | Where-Object { $_.id -eq "public-rpc-command-matrix-failed" } | Select-Object -First 1)
+$publicRpcCommandMatrixRuleCoversLaunchRunbook = $publicRpcCommandMatrixRule.Count -eq 1 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("preflight", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("owner-host plan/apply", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("post-deploy proof", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("rollback coverage", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("committed evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcCommandMatrixRule[0].commands) -contains "npm run flowchain:public-rpc:command-matrix")
 $backupRestoreValidationRule = @($rules | Where-Object { $_.id -eq "backup-restore-validation-failed" } | Select-Object -First 1)
 $backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRule.Count -eq 1 `
     -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("snapshot/restore", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -588,6 +604,7 @@ $checks = [ordered]@{
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
     publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan
+    publicRpcCommandMatrixRuleCoversLaunchRunbook = $publicRpcCommandMatrixRuleCoversLaunchRunbook
     backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRuleCoversSafety
     backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls

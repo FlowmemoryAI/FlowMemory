@@ -30,6 +30,7 @@ $paths = [ordered]@{
     publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    publicRpcCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
@@ -249,6 +250,7 @@ $bridgeReconciliation = $reports.bridgeReconciliation
 $bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentAutomation = $reports.publicRpcDeploymentAutomation
+$publicRpcCommandMatrix = $reports.publicRpcCommandMatrix
 $backupRestoreValidation = $reports.backupRestoreValidation
 $backupOwnerPathDryRun = $reports.backupOwnerPathDryRun
 $liveCutover = $reports.liveCutover
@@ -392,6 +394,31 @@ $publicRpcSyntheticCanaryChecks = Get-MetricsProp -Object $publicRpcSyntheticCan
 $publicRpcSyntheticCanaryMissingEnvCount = @((Get-MetricsProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @())).Count
 $publicRpcDeploymentBundleChecks = Get-MetricsProp -Object $publicRpcDeploymentBundle -Name "checks"
 $publicRpcDeploymentAutomationChecks = Get-MetricsProp -Object $publicRpcDeploymentAutomation -Name "checks"
+$publicRpcCommandMatrixChecks = Get-MetricsProp -Object $publicRpcCommandMatrix -Name "checks"
+$publicRpcCommandMatrixFailedChecks = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "failedChecks" -Default @()))
+$publicRpcCommandMatrixMissingScripts = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "missingPackageScripts" -Default @()))
+$publicRpcCommandMatrixMissingPhases = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "missingPhases" -Default @()))
+$publicRpcCommandMatrixEnvReferenceGaps = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "rowsMissingEnvReferences" -Default @()))
+$publicRpcCommandMatrixValidationGaps = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "rowsMissingValidationSignals" -Default @()))
+$publicRpcCommandMatrixInlineEnvCommands = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "commandsWithInlineEnvAssignment" -Default @()))
+$publicRpcCommandMatrixUrlCommands = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "commandsWithUrls" -Default @()))
+$publicRpcCommandMatrixKeyMaterialCommands = @((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "commandsWithKeyMaterialReference" -Default @()))
+$publicRpcCommandMatrixReady = (Get-MetricsStatus -Report $publicRpcCommandMatrix) -eq "passed" `
+    -and $publicRpcCommandMatrixFailedChecks.Count -eq 0 `
+    -and $publicRpcCommandMatrixMissingScripts.Count -eq 0 `
+    -and $publicRpcCommandMatrixMissingPhases.Count -eq 0 `
+    -and $publicRpcCommandMatrixEnvReferenceGaps.Count -eq 0 `
+    -and $publicRpcCommandMatrixValidationGaps.Count -eq 0 `
+    -and $publicRpcCommandMatrixInlineEnvCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixUrlCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixKeyMaterialCommands.Count -eq 0 `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrixChecks -Name "phaseCoverageComplete" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrixChecks -Name "renderPlanApplyProofRollbackCovered" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrixChecks -Name "mutatingOwnerHostCommandsHaveRollbackCoverage" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcDeploymentAutomationRollbackReady = ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackRenderedConfigExists" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $publicRpcDeploymentAutomationChecks -Name "rollbackPreviousConfigWritten" -Default $false) -eq $true) `
@@ -628,6 +655,14 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_live_security_head
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_security_header_policy_ready" -Help "One when the public RPC readiness policy requires live headers only for non-local public endpoints and currently passes that policy." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_deployment_bundle_ready" -Help "One when the public RPC deployment bundle is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $publicRpcDeploymentBundle))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_deployment_automation_ready" -Help "One when public RPC deployment automation validation is passed." -Value (ConvertTo-MetricStatusPassed -Value (Get-MetricsStatus -Report $publicRpcDeploymentAutomation))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_ready" -Help "One when public RPC command matrix is passed and safe." -Value (ConvertTo-MetricBool -Value $publicRpcCommandMatrixReady)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_commands_total" -Help "Public RPC command matrix command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_owner_host_commands" -Help "Public RPC command matrix owner-host command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_mutating_owner_host_commands" -Help "Public RPC command matrix mutating owner-host command count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_missing_scripts" -Help "Missing package scripts in public RPC command matrix." -Value (ConvertTo-MetricNumber -Value $publicRpcCommandMatrixMissingScripts.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_phase_gaps" -Help "Missing phase count in public RPC command matrix." -Value (ConvertTo-MetricNumber -Value $publicRpcCommandMatrixMissingPhases.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_rollback_coverage" -Help "One when mutating public RPC owner-host commands have rollback coverage." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcCommandMatrixChecks -Name "mutatingOwnerHostCommandsHaveRollbackCoverage" -Default $false))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_command_matrix_no_secrets" -Help "One when public RPC command matrix reports no secrets and no env value printing." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_disallowed_origin_preflight" -Help "One when the public RPC bundle includes a disallowed origin preflight." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_broad_state_blocked_preflight" -Help "One when the public RPC bundle blocks broad state paths in preflight." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_public_rpc_private_wallet_create_blocked_preflight" -Help "One when the public RPC bundle blocks private wallet creation paths in preflight." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $publicRpcDeploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false))
@@ -907,6 +942,7 @@ $metricsJson = [ordered]@{
         publicRpcSyntheticCanaryStatus = Get-MetricsStatus -Report $publicRpcSyntheticCanary
         publicRpcDeploymentBundleStatus = Get-MetricsStatus -Report $publicRpcDeploymentBundle
         publicRpcDeploymentAutomationStatus = Get-MetricsStatus -Report $publicRpcDeploymentAutomation
+        publicRpcCommandMatrixStatus = Get-MetricsStatus -Report $publicRpcCommandMatrix
         backupRestoreValidationStatus = Get-MetricsStatus -Report $backupRestoreValidation
         backupOwnerPathDryRunStatus = Get-MetricsStatus -Report $backupOwnerPathDryRun
         bridgeCommandMatrixStatus = Get-MetricsStatus -Report $bridgeCommandMatrix
@@ -989,6 +1025,14 @@ $requiredMetricNames = @(
     "flowchain_public_rpc_security_header_policy_ready",
     "flowchain_public_rpc_deployment_bundle_ready",
     "flowchain_public_rpc_deployment_automation_ready",
+    "flowchain_public_rpc_command_matrix_ready",
+    "flowchain_public_rpc_command_matrix_commands_total",
+    "flowchain_public_rpc_command_matrix_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_missing_scripts",
+    "flowchain_public_rpc_command_matrix_phase_gaps",
+    "flowchain_public_rpc_command_matrix_rollback_coverage",
+    "flowchain_public_rpc_command_matrix_no_secrets",
     "flowchain_public_rpc_disallowed_origin_preflight",
     "flowchain_public_rpc_broad_state_blocked_preflight",
     "flowchain_public_rpc_private_wallet_create_blocked_preflight",
@@ -1263,6 +1307,7 @@ $checks = [ordered]@{
     ownerInputsValidationLoaded = $null -ne $ownerInputsValidation
     ownerActivationPlanLoaded = $null -ne $ownerActivationPlan
     ownerGoLiveHandoffLoaded = $null -ne $ownerGoLiveHandoff
+    publicRpcCommandMatrixLoaded = $null -ne $publicRpcCommandMatrix
     liveCutoverLoaded = $null -ne $liveCutover
     truthTableLoaded = $null -ne $truthTable
     noSecretLoaded = $null -ne $noSecret
@@ -1471,6 +1516,16 @@ $checks = [ordered]@{
         "flowchain_public_rpc_rollback_artifacts_scoped",
         "flowchain_public_rpc_rollback_no_secrets",
         "flowchain_public_rpc_rollback_no_broadcasts"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    publicRpcCommandMatrixMetricsPresent = @(
+        "flowchain_public_rpc_command_matrix_ready",
+        "flowchain_public_rpc_command_matrix_commands_total",
+        "flowchain_public_rpc_command_matrix_owner_host_commands",
+        "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+        "flowchain_public_rpc_command_matrix_missing_scripts",
+        "flowchain_public_rpc_command_matrix_phase_gaps",
+        "flowchain_public_rpc_command_matrix_rollback_coverage",
+        "flowchain_public_rpc_command_matrix_no_secrets"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     publicRpcRollbackDrillMetricsPresent = @(
         "flowchain_public_rpc_rollback_drill_ready",

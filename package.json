@@ -107,6 +107,7 @@
     "flowchain:public-rpc:edge-template": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-edge-template.ps1",
     "flowchain:public-rpc:deployment-bundle": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-bundle.ps1",
     "flowchain:public-rpc:deployment:automation": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
+    "flowchain:public-rpc:command-matrix": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-command-matrix.ps1",
     "flowchain:public-rpc:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-validation.ps1",
     "flowchain:public-rpc:synthetic-canary": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-synthetic-canary.ps1",
     "flowchain:public-rpc:abuse-test": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-abuse-test.ps1",

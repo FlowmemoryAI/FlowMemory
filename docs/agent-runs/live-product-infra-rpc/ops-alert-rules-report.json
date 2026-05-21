@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T05:11:53.0142574Z",
+    "generatedAt":  "2026-05-21T06:00:43.6013782Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  41,
-    "criticalRuleCount":  34,
+    "ruleCount":  42,
+    "criticalRuleCount":  35,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -65,6 +65,7 @@
                                 "owner-inputs-validation-failed",
                                 "owner-go-live-handoff-failed",
                                 "public-rpc-edge-hardening-failed",
+                                "public-rpc-command-matrix-failed",
                                 "public-rpc-synthetic-canary-failed",
                                 "public-rpc-not-ready",
                                 "backup-not-ready",
@@ -109,6 +110,7 @@
                    "publicRpcEdgeHardeningRuleCoversWalletCutover":  true,
                    "publicRpcEdgeHardeningRuleCoversRollbackDrill":  true,
                    "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan":  true,
+                   "publicRpcCommandMatrixRuleCoversLaunchRunbook":  true,
                    "backupRestoreValidationRuleCoversSafety":  true,
                    "backupOwnerPathDryRunRuleCoversOwnerPath":  true,
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
@@ -613,6 +615,20 @@
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-command-matrix-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "public-rpc-command-matrix-failed"
+                                       ],
+                      "signal":  "Public RPC command matrix is missing or unsafe.",
+                      "threshold":  "command matrix must cover preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, rollback, owner input names, mutation risk, rollback coverage, committed evidence paths, no-secret, and no-broadcast checks",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:command-matrix",
+                                       "npm run flowchain:public-rpc:deployment:automation",
+                                       "npm run flowchain:public-rpc:deployment-bundle"
                                    ]
                   },
                   {

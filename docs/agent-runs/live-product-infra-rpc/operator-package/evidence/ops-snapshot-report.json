@@ -1,32 +1,18 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-21T05:11:50.6289293Z",
+    "generatedAt":  "2026-05-21T06:00:34.9384525Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  true,
+                    "performed":  false,
                     "steps":  [
-                                  {
-                                      "name":  "service-status",
-                                      "exitCode":  0,
-                                      "outputLineCount":  10
-                                  },
-                                  {
-                                      "name":  "service-monitor",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  },
-                                  {
-                                      "name":  "public-rpc-synthetic-canary",
-                                      "exitCode":  0,
-                                      "outputLineCount":  4
-                                  }
+
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "109610",
-                  "finalizedHeight":  "109610",
-                  "stateFileLastWriteAgeSeconds":  1,
+                  "latestHeight":  "109783",
+                  "finalizedHeight":  "109783",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
@@ -38,10 +24,10 @@
                               "txIntakeRows":  187,
                               "txIntakeAcceptedRows":  187,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  28998.985,
+                              "txIntakeLastWriteAgeSeconds":  31923.499,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  502196.425,
+                              "runtimeSubmitNewestFileAgeSeconds":  505120.849,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -109,6 +95,19 @@
                            "publicRpcDeploymentBundle":  "passed",
                            "publicRpcDeploymentAutomation":  "passed",
                            "publicRpcEdgeHardeningReady":  true,
+                           "publicRpcCommandMatrix":  "passed",
+                           "publicRpcCommandMatrixReady":  true,
+                           "publicRpcCommandMatrixCommands":  21,
+                           "publicRpcCommandMatrixOwnerHostCommands":  6,
+                           "publicRpcCommandMatrixMutatingOwnerHostCommands":  4,
+                           "publicRpcCommandMatrixCommittedEvidencePaths":  21,
+                           "publicRpcCommandMatrixFailedChecks":  0,
+                           "publicRpcCommandMatrixMissingScripts":  0,
+                           "publicRpcCommandMatrixMissingPhases":  0,
+                           "publicRpcCommandMatrixEnvReferenceGaps":  0,
+                           "publicRpcCommandMatrixValidationGaps":  0,
+                           "publicRpcCommandMatrixNoSecrets":  true,
+                           "publicRpcCommandMatrixNoBroadcasts":  true,
                            "publicRpcDisallowedOriginPreflight":  true,
                            "publicRpcBroadStateBlockedPreflight":  true,
                            "publicRpcPrivateWalletCreateBlockedPreflight":  true,
@@ -495,6 +494,7 @@
                         "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
+                        "publicRpcCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-command-matrix-report.json",
                         "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
                         "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
                         "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",

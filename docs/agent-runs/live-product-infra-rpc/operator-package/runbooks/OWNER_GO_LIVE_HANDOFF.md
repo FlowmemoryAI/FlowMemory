@@ -1,6 +1,6 @@
 # FlowChain Owner Go-Live Handoff
 
-Generated: 2026-05-21T05:08:44.1977784Z
+Generated: 2026-05-21T06:00:32.9112705Z
 Status: passed
 Release ready: False
 
@@ -46,7 +46,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 | Step | Expected status | Stop on failure | Commands | Evidence reports |
 | --- | --- | --- | --- | --- |
 | Validate ignored owner inputs | passed | True | npm run flowchain:owner-env:readiness -- -AllowBlocked<br>npm run flowchain:owner-inputs -- -AllowBlocked<br>npm run flowchain:owner-inputs:validate | docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json<br>docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json<br>docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json |
-| Render public RPC edge artifacts | passed | True | npm run flowchain:public-rpc:deployment-bundle<br>npm run flowchain:public-rpc:deployment:automation<br>powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE><br>bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan<br>powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan | docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json |
+| Render public RPC edge artifacts | passed | True | npm run flowchain:public-rpc:deployment-bundle<br>npm run flowchain:public-rpc:deployment:automation<br>npm run flowchain:public-rpc:command-matrix<br>powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-rpc-deployment-automation.ps1 -Action Render -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -OwnerEnvFile <FLOWCHAIN_OWNER_ENV_FILE> -TlsCertificatePath <PATH_TO_TLS_CERTIFICATE> -TlsCertificateKeyPath <PATH_TO_TLS_CERTIFICATE_KEY> -NginxExe <FLOWCHAIN_NGINX_EXE><br>bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan<br>powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan | docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json |
 | Plan reboot-persistent services | passed | True | npm run flowchain:service:install:systemd:validate<br>npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR><br>npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop<br>bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan<br>powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Plan | docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json |
 | Apply owner-host public RPC edge | passed | True | bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh apply<br>powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1 -Action Apply | docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json<br>docs/agent-runs/live-product-infra-rpc/service-status-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json<br>docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json<br>docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json<br>docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json<br>docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json<br>docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json<br>docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json |
 | Prove live service health | passed | True | npm run flowchain:service:status<br>npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30 | docs/agent-runs/live-product-infra-rpc/service-status-report.json<br>docs/agent-runs/live-product-infra-rpc/service-monitor-report.json |
@@ -70,7 +70,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 
 ## Package Script Coverage
 
-- Launch sequence package scripts: 35
+- Launch sequence package scripts: 36
 - Missing launch sequence package scripts: 0
 - Rollback package scripts: 7
 - Missing rollback package scripts: 0
@@ -147,6 +147,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 - npm run flowchain:service:supervisor:validate
 - npm run flowchain:service:install:validate
 - npm run flowchain:dev-pack:e2e
+- npm run flowchain:bridge:command-matrix
 - npm run flowchain:bridge:relayer:guardrail:validate
 - npm run flowchain:bridge:relayer:loop:validate
 - npm run flowchain:bridge:runtime-credit:validate

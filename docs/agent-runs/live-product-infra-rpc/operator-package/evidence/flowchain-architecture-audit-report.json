@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-21T05:12:12.6861929Z",
+    "generatedAt":  "2026-05-21T06:00:57.6141878Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -19,10 +19,10 @@
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  24,
+                       "passed":  25,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  31
+                       "total":  32
                    },
     "items":  [
                   {
@@ -30,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=109610, finalizedHeight=109610",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=109783, finalizedHeight=109783",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -68,7 +68,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=41, alertCoveredFindings=43, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, publicRpcApplyPlanAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, bridgeCommandMatrixAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=307, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, publicRpcOwnerApplyMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, bridgeCommandMatrixMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=34, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=42, alertCoveredFindings=44, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, publicRpcApplyPlanAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, bridgeCommandMatrixAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=315, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, publicRpcOwnerApplyMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, bridgeCommandMatrixMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=35, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -268,6 +268,24 @@
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-command-matrix-boundary",
+                      "layer":  "Public edge",
+                      "requirement":  "Public RPC command matrix maps launch commands across preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback phases to owner input names, mutation risk, rollback coverage, and committed no-secret evidence.",
+                      "status":  "passed",
+                      "evidence":  "matrix=passed, commands=21, phases=9, ownerHostCommands=6, mutatingOwnerHostCommands=4, committedEvidencePaths=21, failedChecks=0, missingScripts=0, missingPhases=0, envReferenceGaps=0, validationGaps=0, badOwnerInputs=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-public-rpc-command-matrix.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:command-matrix"
                                    ],
                       "blockers":  [
 
@@ -491,7 +509,7 @@
                       "layer":  "Deployment/governance",
                       "requirement":  "Owner go-live handoff sequences owner inputs, public RPC render, owner-host apply, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary.",
                       "status":  "passed",
-                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=10, launchCommands=43, evidenceReports=44, applyPlan=True, applyExecution=True, applyRollback=True, windowsApplyPlan=True, windowsApplyExecution=True, windowsApplyRollback=True, invalidEvidenceReports=0, missingRequiredInputs=14, missingOptionalInputs=1, neededNowOptionalInputs=0, missingLaunchScripts=0, rollbackCommands=9, missingRollbackScripts=0, failedChecks=0, secretFindings=0",
+                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=10, launchCommands=44, evidenceReports=45, applyPlan=True, applyExecution=True, applyRollback=True, windowsApplyPlan=True, windowsApplyExecution=True, windowsApplyRollback=True, invalidEvidenceReports=0, missingRequiredInputs=14, missingOptionalInputs=1, neededNowOptionalInputs=0, missingLaunchScripts=0, rollbackCommands=9, missingRollbackScripts=0, failedChecks=0, secretFindings=0",
                       "files":  [
                                     "infra/scripts/flowchain-owner-go-live-handoff.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md"
@@ -1084,6 +1102,7 @@
                         "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
+                        "publicRpcCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-command-matrix-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
                         "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
@@ -1159,15 +1178,15 @@
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  41,
-                             "criticalRuleCount":  34,
+                             "ruleCount":  42,
+                             "criticalRuleCount":  35,
                              "blockedRuleCount":  7,
-                             "coveredFindingCount":  43,
+                             "coveredFindingCount":  44,
                              "unmappedCurrentFindingCount":  0
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  307,
+                               "metricCount":  315,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
@@ -1187,6 +1206,10 @@
                                "missingPublicRpcOwnerHostApplyPlanMetricNames":  [
 
                                                                                  ],
+                               "publicRpcCommandMatrixMetricsPresent":  true,
+                               "missingPublicRpcCommandMatrixMetricNames":  [
+
+                                                                            ],
                                "bridgeDeployControlMetricsPresent":  true,
                                "missingBridgeDeployControlMetricNames":  [
 
@@ -1262,6 +1285,30 @@
 
                                                                         ]
                                     },
+    "publicRpcCommandMatrixEvidence":  {
+                                           "status":  "passed",
+                                           "ready":  true,
+                                           "commandCount":  21,
+                                           "phaseCount":  9,
+                                           "ownerHostCommandCount":  6,
+                                           "mutatingOwnerHostCommandCount":  4,
+                                           "committedEvidencePathCount":  21,
+                                           "failedChecks":  [
+
+                                                            ],
+                                           "missingScripts":  [
+
+                                                              ],
+                                           "missingPhases":  [
+
+                                                             ],
+                                           "envReferenceGaps":  [
+
+                                                                ],
+                                           "validationSignalGaps":  [
+
+                                                                    ]
+                                       },
     "bridgeRelayerSafetyEvidence":  {
                                         "status":  "blocked",
                                         "childTimeoutSeconds":  300,

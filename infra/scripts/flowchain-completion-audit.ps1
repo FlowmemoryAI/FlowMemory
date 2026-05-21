@@ -53,6 +53,7 @@ $paths = [ordered]@{
     secondComputerReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    publicRpcCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
@@ -467,6 +468,9 @@ $publicRpcDeploymentBundleExitCode = $publicRpcDeploymentBundleResult.exitCode
 $publicRpcDeploymentAutomationResult = Invoke-AuditChild -Path $paths.publicRpcDeploymentAutomation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"))
 $publicRpcDeploymentAutomationOutput = @($publicRpcDeploymentAutomationResult.output)
 $publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationResult.exitCode
+$publicRpcCommandMatrixResult = Invoke-AuditChild -Path $paths.publicRpcCommandMatrix -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-command-matrix.ps1"))
+$publicRpcCommandMatrixOutput = @($publicRpcCommandMatrixResult.output)
+$publicRpcCommandMatrixExitCode = $publicRpcCommandMatrixResult.exitCode
 $operatorPackageResult = Invoke-AuditChild -Path $paths.operatorPackage -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-operator-package.ps1"))
 $operatorPackageOutput = @($operatorPackageResult.output)
 $operatorPackageExitCode = $operatorPackageResult.exitCode
@@ -1763,6 +1767,69 @@ $publicRpcDeploymentAutomationPassed = $publicRpcDeploymentAutomationExitCode -e
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $publicRpcDeploymentAutomation -Name "liveBroadcasts" -Default $true) -eq $false)
+$publicRpcCommandMatrix = $reports.publicRpcCommandMatrix
+$publicRpcCommandMatrixStatus = Get-ReportStatus -Report $publicRpcCommandMatrix
+$publicRpcCommandMatrixChecks = Get-AuditProp -Object $publicRpcCommandMatrix -Name "checks"
+$publicRpcCommandMatrixFailedChecks = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "failedChecks" -Default @()))
+$publicRpcCommandMatrixMissingScripts = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "missingPackageScripts" -Default @()))
+$publicRpcCommandMatrixMissingPhases = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "missingPhases" -Default @()))
+$publicRpcCommandMatrixRowsMissingEnv = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "rowsMissingEnvReferences" -Default @()))
+$publicRpcCommandMatrixRowsMissingValidation = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "rowsMissingValidationSignals" -Default @()))
+$publicRpcCommandMatrixInlineEnvCommands = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "commandsWithInlineEnvAssignment" -Default @()))
+$publicRpcCommandMatrixUrlCommands = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "commandsWithUrls" -Default @()))
+$publicRpcCommandMatrixKeyMaterialCommands = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "commandsWithKeyMaterialReference" -Default @()))
+$publicRpcCommandMatrixBadOwnerInputRows = @((Get-AuditProp -Object $publicRpcCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$publicRpcCommandMatrixRequiredChecks = @(
+    "packageScriptPresent",
+    "allPackageScriptsPresent",
+    "phaseCoverageComplete",
+    "renderPlanApplyProofRollbackCovered",
+    "ownerHostPlanCommandsPresent",
+    "ownerHostApplyCommandsPresent",
+    "ownerHostRollbackCommandsPresent",
+    "mutatingOwnerHostCommandsHaveRollbackCoverage",
+    "deploymentAutomationReportPassed",
+    "deploymentBundleReportPassed",
+    "deploymentAutomationCommandPlanCovered",
+    "deploymentAutomationOwnerHostApplyCovered",
+    "deploymentAutomationRollbackDrillCovered",
+    "deploymentBundleRollbackRunbookCovered",
+    "requiredEnvReferencesPresent",
+    "validationSignalsPresent",
+    "commandsAvoidInlineEnvAssignment",
+    "commandsAvoidUrls",
+    "commandsAvoidKeyMaterial",
+    "ownerInputNamesOnly",
+    "committedEvidencePathsCovered",
+    "envValuesPrintedFalse",
+    "broadcastsFalse",
+    "noSecrets"
+)
+$publicRpcCommandMatrixMissingChecks = Get-MissingAuditChecks -Checks $publicRpcCommandMatrixChecks -Names $publicRpcCommandMatrixRequiredChecks
+$publicRpcCommandMatrixFalseRequiredChecks = @($publicRpcCommandMatrixRequiredChecks | Where-Object { (Get-AuditProp -Object $publicRpcCommandMatrixChecks -Name $_ -Default $false) -ne $true })
+$publicRpcCommandMatrixFailedCheckCount = @($publicRpcCommandMatrixFailedChecks | Where-Object { $null -ne $_ }).Count
+$publicRpcCommandMatrixMissingCheckCount = @($publicRpcCommandMatrixMissingChecks | Where-Object { $null -ne $_ }).Count
+$publicRpcCommandMatrixFalseRequiredCheckCount = @($publicRpcCommandMatrixFalseRequiredChecks | Where-Object { $null -ne $_ }).Count
+$publicRpcCommandMatrixPassed = $publicRpcCommandMatrixExitCode -eq 0 `
+    -and $publicRpcCommandMatrixStatus -eq "passed" `
+    -and $publicRpcCommandMatrixFailedCheckCount -eq 0 `
+    -and $publicRpcCommandMatrixMissingCheckCount -eq 0 `
+    -and $publicRpcCommandMatrixFalseRequiredCheckCount -eq 0 `
+    -and $publicRpcCommandMatrixMissingScripts.Count -eq 0 `
+    -and $publicRpcCommandMatrixMissingPhases.Count -eq 0 `
+    -and $publicRpcCommandMatrixRowsMissingEnv.Count -eq 0 `
+    -and $publicRpcCommandMatrixRowsMissingValidation.Count -eq 0 `
+    -and $publicRpcCommandMatrixInlineEnvCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixUrlCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixKeyMaterialCommands.Count -eq 0 `
+    -and $publicRpcCommandMatrixBadOwnerInputRows.Count -eq 0 `
+    -and ([int](Get-AuditProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0) -ge 20) `
+    -and ([int](Get-AuditProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0) -ge 6) `
+    -and ([int](Get-AuditProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-AuditProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 12) `
+    -and ((Get-AuditProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $operatorPackage = $reports.operatorPackage
 $operatorPackageStatus = Get-ReportStatus -Report $operatorPackage
 $operatorPackageChecks = Get-AuditProp -Object $operatorPackage -Name "checks"
@@ -3409,6 +3476,12 @@ Add-AuditItem -Items $items -Id "public-rpc-deployment-automation" `
     -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), walletTesterE2e=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false), syntheticCanary=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false), cutoverRehearsal=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false), disallowedOriginProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false), blockedStateProbe=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false), privateWalletCreateBlocked=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false), authForwardingScoped=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false), renderSummary=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), applyScript=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false), applyScriptHashes=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false), applyScriptPostDeploy=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false), windowsApplyScript=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false), windowsApplyScriptParses=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false), windowsApplyScriptHashes=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false), windowsApplyScriptPostDeploy=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false), applyPlan=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false), ownerApplyScriptInPlan=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false), windowsOwnerApplyScriptInPlan=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false), artifactHashes=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false), installPhase=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false), edgePhase=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingEdgePhase" -Default $false), hostMutationFalse=$(Get-AuditProp -Object $publicRpcDeploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false), failedChecks=$publicRpcDeploymentAutomationFailedCheckCount, missingChecks=$publicRpcDeploymentAutomationMissingCheckCount, secretFindings=$publicRpcDeploymentAutomationSecretFindingCount, report=$($paths.publicRpcDeploymentAutomation)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
+Add-AuditItem -Items $items -Id "public-rpc-command-matrix" `
+    -Requirement "Public RPC command matrix maps preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback commands to owner inputs, mutation risk, evidence paths, and no-secret boundaries." `
+    -Status $(if ($publicRpcCommandMatrixPassed) { "passed" } else { "failed" }) `
+    -Evidence "matrixStatus=$publicRpcCommandMatrixStatus, commands=$(Get-AuditProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0), ownerHostCommands=$(Get-AuditProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0), mutatingOwnerHostCommands=$(Get-AuditProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0), committedEvidencePaths=$(Get-AuditProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0), failedChecks=$publicRpcCommandMatrixFailedCheckCount, missingChecks=$publicRpcCommandMatrixMissingCheckCount, falseRequiredChecks=$publicRpcCommandMatrixFalseRequiredCheckCount, missingScripts=$($publicRpcCommandMatrixMissingScripts.Count), missingPhases=$($publicRpcCommandMatrixMissingPhases.Count), envReferenceGaps=$($publicRpcCommandMatrixRowsMissingEnv.Count), validationSignalGaps=$($publicRpcCommandMatrixRowsMissingValidation.Count), inlineEnvCommands=$($publicRpcCommandMatrixInlineEnvCommands.Count), urlCommands=$($publicRpcCommandMatrixUrlCommands.Count), keyMaterialCommands=$($publicRpcCommandMatrixKeyMaterialCommands.Count), badOwnerInputRows=$($publicRpcCommandMatrixBadOwnerInputRows.Count), report=$($paths.publicRpcCommandMatrix)" `
+    -Commands @("npm run flowchain:public-rpc:command-matrix")
+
 Add-AuditItem -Items $items -Id "node-operator-package" `
     -Requirement "Node operator package collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates." `
     -Status $(if ($operatorPackagePassed) { "passed" } else { "failed" }) `
@@ -3793,6 +3866,8 @@ $report = [ordered]@{
     publicRpcDeploymentBundleOutputRedacted = @($publicRpcDeploymentBundleOutput | ForEach-Object { "$_" })
     publicRpcDeploymentAutomationExitCode = $publicRpcDeploymentAutomationExitCode
     publicRpcDeploymentAutomationOutputRedacted = @($publicRpcDeploymentAutomationOutput | ForEach-Object { "$_" })
+    publicRpcCommandMatrixExitCode = $publicRpcCommandMatrixExitCode
+    publicRpcCommandMatrixOutputRedacted = @($publicRpcCommandMatrixOutput | ForEach-Object { "$_" })
     operatorPackageExitCode = $operatorPackageExitCode
     operatorPackageOutputRedacted = @($operatorPackageOutput | ForEach-Object { "$_" })
     operatorPackageVerifyExitCode = $operatorPackageVerifyExitCode
@@ -3913,6 +3988,7 @@ $report = [ordered]@{
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:deployment:automation",
+        "npm run flowchain:public-rpc:command-matrix",
         "npm run flowchain:operator:package",
         "npm run flowchain:operator:package:verify",
         "npm run flowchain:public-rpc:validate",

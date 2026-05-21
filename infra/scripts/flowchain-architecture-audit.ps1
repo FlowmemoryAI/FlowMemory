@@ -80,6 +80,7 @@ $reportPaths = [ordered]@{
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    publicRpcCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
@@ -346,6 +347,18 @@ $publicRpcOwnerHostApplyPlanMetricNames = @(
 )
 $missingPublicRpcOwnerHostApplyPlanMetricNames = @($publicRpcOwnerHostApplyPlanMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
 $opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics = $missingPublicRpcOwnerHostApplyPlanMetricNames.Count -eq 0
+$publicRpcCommandMatrixMetricNames = @(
+    "flowchain_public_rpc_command_matrix_ready",
+    "flowchain_public_rpc_command_matrix_commands_total",
+    "flowchain_public_rpc_command_matrix_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_missing_scripts",
+    "flowchain_public_rpc_command_matrix_phase_gaps",
+    "flowchain_public_rpc_command_matrix_rollback_coverage",
+    "flowchain_public_rpc_command_matrix_no_secrets"
+)
+$missingPublicRpcCommandMatrixMetricNames = @($publicRpcCommandMatrixMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcCommandMatrixMetrics = $missingPublicRpcCommandMatrixMetricNames.Count -eq 0
 $backupRestoreValidationMetricNames = @(
     "flowchain_backup_restore_validation_ready",
     "flowchain_backup_restore_validation_failed_checks",
@@ -616,6 +629,7 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcCommandMatrixRuleCoversLaunchRunbook" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false) -eq $true) `
@@ -641,6 +655,9 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($opsMetricsHasPublicRpcRollbackDrillMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcCommandMatrixLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcCommandMatrixMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcCommandMatrixMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
     -and ($opsMetricsHasBridgeDeployControlMetrics -eq $true) `
     -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixLoaded" -Default $false) -eq $true) `
@@ -1075,6 +1092,34 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
+$publicRpcCommandMatrix = $reports.publicRpcCommandMatrix
+$publicRpcCommandMatrixStatus = Get-ArchitectureStatus -Report $publicRpcCommandMatrix
+$publicRpcCommandMatrixChecks = Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "checks"
+$publicRpcCommandMatrixFailedChecks = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "failedChecks" -Default @()))
+$publicRpcCommandMatrixMissingScripts = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "missingPackageScripts" -Default @()))
+$publicRpcCommandMatrixMissingPhases = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "missingPhases" -Default @()))
+$publicRpcCommandMatrixEnvReferenceGaps = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "rowsMissingEnvReferences" -Default @()))
+$publicRpcCommandMatrixValidationGaps = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "rowsMissingValidationSignals" -Default @()))
+$publicRpcCommandMatrixBadOwnerInputs = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$publicRpcCommandMatrixReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:command-matrix") `
+    -and (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-command-matrix.ps1") `
+    -and ($publicRpcCommandMatrixStatus -eq "passed") `
+    -and ($publicRpcCommandMatrixFailedChecks.Count -eq 0) `
+    -and ($publicRpcCommandMatrixMissingScripts.Count -eq 0) `
+    -and ($publicRpcCommandMatrixMissingPhases.Count -eq 0) `
+    -and ($publicRpcCommandMatrixEnvReferenceGaps.Count -eq 0) `
+    -and ($publicRpcCommandMatrixValidationGaps.Count -eq 0) `
+    -and ($publicRpcCommandMatrixBadOwnerInputs.Count -eq 0) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0) -ge 20) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0) -ge 6) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 12) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "renderPlanApplyProofRollbackCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "mutatingOwnerHostCommandsHaveRollbackCoverage" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-edge-template.ps1") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:edge-template") `
     -and ($publicRpcEdgeTemplateStatus -eq "passed") `
@@ -1103,6 +1148,13 @@ Add-ArchitectureItem -Items $items -Id "public-rpc-deployment-automation-boundar
     -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), securityHeaders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false), securityHeaderPreflight=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false), methodRejectionProbes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false), testerUnauthProbe=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), walletTesterE2e=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false), syntheticCanary=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false), cutoverRehearsal=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false), rollbackDrill=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), renderSummary=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), applyScript=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false), applyScriptHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false), applyScriptPostDeploy=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false), windowsApplyScript=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false), windowsApplyScriptParses=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false), windowsApplyScriptHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false), windowsApplyScriptPostDeploy=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false), applyPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false), ownerApplyScriptInPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false), windowsOwnerApplyScriptInPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false), artifactHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false), installTargets=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
     -Files @("infra/scripts/flowchain-public-rpc-deployment-automation.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json", "docs/agent-runs/live-product-infra-rpc/public-rpc-render-report-snapshot.json") `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
+
+Add-ArchitectureItem -Items $items -Id "public-rpc-command-matrix-boundary" -Layer "Public edge" `
+    -Requirement "Public RPC command matrix maps launch commands across preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback phases to owner input names, mutation risk, rollback coverage, and committed no-secret evidence." `
+    -Status $(if ($publicRpcCommandMatrixReady) { "passed" } else { "failed" }) `
+    -Evidence "matrix=$publicRpcCommandMatrixStatus, commands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'commandCount' -Default 0), phases=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'phaseCount' -Default 0), ownerHostCommands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'ownerHostCommandCount' -Default 0), mutatingOwnerHostCommands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'mutatingOwnerHostCommandCount' -Default 0), committedEvidencePaths=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'committedEvidencePathCount' -Default 0), failedChecks=$($publicRpcCommandMatrixFailedChecks.Count), missingScripts=$($publicRpcCommandMatrixMissingScripts.Count), missingPhases=$($publicRpcCommandMatrixMissingPhases.Count), envReferenceGaps=$($publicRpcCommandMatrixEnvReferenceGaps.Count), validationGaps=$($publicRpcCommandMatrixValidationGaps.Count), badOwnerInputs=$($publicRpcCommandMatrixBadOwnerInputs.Count)" `
+    -Files @("infra/scripts/flowchain-public-rpc-command-matrix.ps1", "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md") `
+    -Commands @("npm run flowchain:public-rpc:command-matrix")
 
 $wallet = $reports.liveWallet
 $testerNetwork = $reports.testerNetwork
@@ -2056,6 +2108,8 @@ $report = [ordered]@{
         missingPublicRpcRollbackDrillMetricNames = @($missingPublicRpcRollbackDrillMetricNames)
         publicRpcOwnerHostApplyPlanMetricsPresent = $opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics
         missingPublicRpcOwnerHostApplyPlanMetricNames = @($missingPublicRpcOwnerHostApplyPlanMetricNames)
+        publicRpcCommandMatrixMetricsPresent = $opsMetricsHasPublicRpcCommandMatrixMetrics
+        missingPublicRpcCommandMatrixMetricNames = @($missingPublicRpcCommandMatrixMetricNames)
         bridgeDeployControlMetricsPresent = $opsMetricsHasBridgeDeployControlMetrics
         missingBridgeDeployControlMetricNames = @($missingBridgeDeployControlMetricNames)
         bridgeCommandMatrixMetricsPresent = $opsMetricsHasBridgeCommandMatrixMetrics
@@ -2102,6 +2156,20 @@ $report = [ordered]@{
         missingScripts = @($bridgeCommandMatrixMissingScripts)
         missingPhases = @($bridgeCommandMatrixMissingPhases)
         liveBroadcastRowsWithoutAck = @($bridgeCommandMatrixBroadcastAckGaps)
+    }
+    publicRpcCommandMatrixEvidence = [ordered]@{
+        status = $publicRpcCommandMatrixStatus
+        ready = $publicRpcCommandMatrixReady
+        commandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0)
+        phaseCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "phaseCount" -Default 0)
+        ownerHostCommandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0)
+        mutatingOwnerHostCommandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0)
+        committedEvidencePathCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        failedChecks = @($publicRpcCommandMatrixFailedChecks)
+        missingScripts = @($publicRpcCommandMatrixMissingScripts)
+        missingPhases = @($publicRpcCommandMatrixMissingPhases)
+        envReferenceGaps = @($publicRpcCommandMatrixEnvReferenceGaps)
+        validationSignalGaps = @($publicRpcCommandMatrixValidationGaps)
     }
     bridgeRelayerSafetyEvidence = [ordered]@{
         status = $bridgeRelayerStatus

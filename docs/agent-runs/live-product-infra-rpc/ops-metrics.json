@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T05:11:54.7798051Z",
+    "generatedAt":  "2026-05-21T06:00:44.5891558Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -11,6 +11,7 @@
                           "publicRpcSyntheticCanaryStatus":  "blocked",
                           "publicRpcDeploymentBundleStatus":  "passed",
                           "publicRpcDeploymentAutomationStatus":  "passed",
+                          "publicRpcCommandMatrixStatus":  "passed",
                           "backupRestoreValidationStatus":  "passed",
                           "backupOwnerPathDryRunStatus":  "passed",
                           "bridgeCommandMatrixStatus":  "passed",
@@ -36,19 +37,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  109610
+                        "value":  109783
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  109610
+                        "value":  109783
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  1
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -90,7 +91,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  28998.985
+                        "value":  31923.499
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -318,6 +319,54 @@
                         "name":  "flowchain_public_rpc_deployment_automation_ready",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation validation is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_ready",
+                        "type":  "gauge",
+                        "help":  "One when public RPC command matrix is passed and safe.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_commands_total",
+                        "type":  "gauge",
+                        "help":  "Public RPC command matrix command count.",
+                        "value":  21
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_owner_host_commands",
+                        "type":  "gauge",
+                        "help":  "Public RPC command matrix owner-host command count.",
+                        "value":  6
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+                        "type":  "gauge",
+                        "help":  "Public RPC command matrix mutating owner-host command count.",
+                        "value":  4
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_missing_scripts",
+                        "type":  "gauge",
+                        "help":  "Missing package scripts in public RPC command matrix.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_phase_gaps",
+                        "type":  "gauge",
+                        "help":  "Missing phase count in public RPC command matrix.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_rollback_coverage",
+                        "type":  "gauge",
+                        "help":  "One when mutating public RPC owner-host commands have rollback coverage.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_command_matrix_no_secrets",
+                        "type":  "gauge",
+                        "help":  "One when public RPC command matrix reports no secrets and no env value printing.",
                         "value":  1
                     },
                     {
@@ -1842,13 +1891,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  64
+                        "value":  65
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  47
+                        "value":  48
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",
@@ -1875,7 +1924,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  307,
+    "metricCount":  315,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

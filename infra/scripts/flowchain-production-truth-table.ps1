@@ -1260,6 +1260,62 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "public-rpc-command-matrix"
+        requirement = "Public RPC command matrix maps preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback commands to owner inputs, mutation risk, evidence paths, and no-secret boundaries."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
+        command = "npm run flowchain:public-rpc:command-matrix"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            commandCount = 20
+            ownerHostCommandCount = 6
+            mutatingOwnerHostCommandCount = 4
+            committedEvidencePathCount = 12
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "allPackageScriptsPresent",
+            "phaseCoverageComplete",
+            "renderPlanApplyProofRollbackCovered",
+            "ownerHostPlanCommandsPresent",
+            "ownerHostApplyCommandsPresent",
+            "ownerHostRollbackCommandsPresent",
+            "mutatingOwnerHostCommandsHaveRollbackCoverage",
+            "deploymentAutomationReportPassed",
+            "deploymentBundleReportPassed",
+            "deploymentAutomationCommandPlanCovered",
+            "deploymentAutomationOwnerHostApplyCovered",
+            "deploymentAutomationRollbackDrillCovered",
+            "deploymentBundleRollbackRunbookCovered",
+            "requiredEnvReferencesPresent",
+            "validationSignalsPresent",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "commandsAvoidKeyMaterial",
+            "ownerInputNamesOnly",
+            "committedEvidencePathsCovered",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts",
+            "missingPhases",
+            "rowsMissingEnvReferences",
+            "rowsMissingValidationSignals",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "commandsWithKeyMaterialReference",
+            "badOwnerInputRows"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "node-operator-package"
         requirement = "No-secret node operator package collects runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates."
         path = "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
@@ -2600,7 +2656,7 @@ $definitions = @(
             "noSecrets" = $true
             "broadcasts" = $false
         }
-        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "external-tester-packet-validation", "external-tester-client-validation", "completion-audit")
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "external-tester-packet-validation", "external-tester-client-validation", "public-rpc-command-matrix", "completion-audit")
     },
     [ordered]@{
         id = "architecture-audit"
@@ -2617,7 +2673,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
