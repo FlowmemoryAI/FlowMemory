@@ -64,6 +64,23 @@ foreach ($scriptPath in $scriptPaths) {
     Invoke-PilotParserCheck -Path $scriptPath
 }
 
+$pilotScriptText = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot "flowchain-real-value-pilot.ps1")
+$observerGuardrailChecks = [ordered]@{
+    usesExplicitPilotMode = $pilotScriptText.Contains('"base-mainnet-pilot"')
+    noLongerUsesCanaryObserverForPilotCredit = -not $pilotScriptText.Contains('"base-mainnet-canary"')
+    includesCursorState = $pilotScriptText.Contains('"--cursor-state"')
+    includesRuntimeState = $pilotScriptText.Contains('"--runtime-state"')
+    includesApprovedLockbox = $pilotScriptText.Contains('"--approved-lockbox"')
+    includesSupportedToken = $pilotScriptText.Contains('"--supported-token"')
+    includesPilotAck = $pilotScriptText.Contains('"--acknowledge-pilot"')
+    toBlockDocumentedOptional = $pilotScriptText.Contains('FLOWCHAIN_BASE8453_TO_BLOCK is optional')
+}
+foreach ($entry in $observerGuardrailChecks.GetEnumerator()) {
+    if ($entry.Value -ne $true) {
+        throw "Pilot observer guardrail check failed: $($entry.Key)"
+    }
+}
+
 $pilotEnvNames = @(
     "FLOWCHAIN_PILOT_OPERATOR_ACK",
     "FLOWCHAIN_BASE8453_RPC_URL",
@@ -162,6 +179,7 @@ $report = [ordered]@{
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = "passed"
     parserChecks = "passed"
+    observerGuardrailChecks = $observerGuardrailChecks
     dryRunPilot = "passed"
     dryRunEmergencyStop = "passed"
     liveMissingEnvRefusal = "passed"
