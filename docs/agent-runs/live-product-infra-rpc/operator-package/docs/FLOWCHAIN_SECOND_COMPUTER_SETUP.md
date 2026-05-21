@@ -218,14 +218,20 @@ The final package should provide these root-level commands or documented
 equivalents:
 
 ```powershell
+npm install
+npm install --prefix apps/dashboard
+npm install --prefix crypto
 npm run flowchain:prereq
+npm run flowchain:doctor
 npm run flowchain:init
-npm run flowchain:start
-npm run flowchain:stop
+npm run flowchain:node:start
+npm run flowchain:node:status
+npm run flowchain:node:stop
 npm run flowchain:demo
 npm run flowchain:smoke
 npm run flowchain:full-smoke
 npm run flowchain:product-e2e
+npm run flowchain:production-l1:e2e
 npm run flowchain:real-value-pilot:ops
 npm run flowchain:real-value-pilot:emergency-stop
 npm run flowchain:real-value-pilot:export
@@ -245,6 +251,10 @@ Current status:
 | `npm run flowchain:smoke` | Implemented for current private/local surfaces | Runs service tests, crypto validation, launch candidate, devnet tests, control-plane smoke, deterministic replay, dashboard build, hardware fixture, unsafe-claim scan, and no-secret export scan. |
 | `npm run flowchain:full-smoke` | Implemented acceptance gate | Wraps smoke, wallet CLI sign/verify, full-smoke report, no-secret scan, and `git diff --check`. |
 | `npm run flowchain:product-e2e` | Implemented product testnet gate | Wraps the full smoke and proves local account funding, token launch, DEX pool/liquidity/swap receipts, bridge-test records, control-plane product queries, workbench product surfaces, and no-secret API boundaries. |
+| `npm run flowchain:production-l1:e2e` | Implemented private/local ops wrapper gate | Runs prereq, init, bounded node start/status, wallet, transfer, product, token/DEX, bridge mock, live-readiness refusal, control-plane smoke, dashboard build, export/import, restart recovery, no-secret scan, unsafe-claim scan, and evidence export. |
+| `npm run flowchain:bridge:live:check` | Implemented fail-closed readiness check | Checks Base `8453` readiness only when env names are present; prints names, never values, and broadcasts nothing. |
+| `npm run flowchain:emergency:stop-local` | Implemented emergency local stop wrapper | Requests node stop and prints/manualizes local service stop commands. |
+| `npm run flowchain:emergency:export-evidence` | Implemented secret-scanned evidence export | Writes an ignored local evidence bundle under `devnet/local/production-l1-e2e/evidence/`. |
 | `npm run flowchain:real-value-pilot:ops` | Branch-local dry-run pilot ops proof | Parser-checks pilot scripts, proves dry-run needs no RPC or keys, verifies missing live env refusal, checks emergency-stop dry-run, and writes sanitized evidence export. |
 | `npm run flowchain:real-value-pilot:emergency-stop` | Branch-local guarded pause wrapper | Routes to the live `Pause` action after explicit acknowledgement, Base `8453` chain check, cap check, lockbox address check, and owner key check. |
 | `npm run flowchain:real-value-pilot:export` | Branch-local pilot evidence exporter | Writes a sanitized ignored bundle excluding Git metadata, dependency folders, build targets, local vaults, private-key files, and env files. |
@@ -354,3 +364,36 @@ This setup guide is complete for the HQ/Ops wrapper layer and current
 private/local acceptance gate. The next evidence step is running
 `npm run flowchain:full-smoke` on a clean second computer and recording the
 generated report.
+
+## Current Final Wrapper Path
+
+For the latest ops wrapper proof, use:
+
+```powershell
+npm install
+npm install --prefix apps/dashboard
+npm install --prefix crypto
+npm run flowchain:production-l1:e2e
+```
+
+The command writes:
+
+```text
+devnet/local/production-l1-e2e/flowchain-production-l1-e2e-report.json
+devnet/local/production-l1-e2e/flowchain-production-l1-e2e-summary.md
+devnet/local/production-l1-e2e/evidence/flowchain-production-l1-evidence.zip
+```
+
+For a no-GitHub-login transfer to a second computer, run:
+
+```powershell
+npm run flowchain:second-computer:bundle
+```
+
+Then move the generated zip from `devnet/local/second-computer/` to the second
+machine, extract it, install dependencies, and run:
+
+```powershell
+npm run flowchain:second-computer:verify
+npm run flowchain:production-l1:e2e
+```

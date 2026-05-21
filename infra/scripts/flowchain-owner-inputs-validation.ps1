@@ -50,6 +50,12 @@ function Set-OwnerValidationEnv {
         [Environment]::SetEnvironmentVariable($name, $value, "Process")
     }
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $OwnerEnvFilePath, "Process")
+    if ([string]::IsNullOrWhiteSpace($OwnerEnvFilePath)) {
+        [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", "true", "Process")
+    }
+    else {
+        [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", $null, "Process")
+    }
 }
 
 function Get-ValidationJsonProp {
@@ -106,6 +112,7 @@ foreach ($name in @($requiredEnvNames + $optionalEnvNames)) {
     $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, "Process")
 }
 $originalOwnerEnvFile = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")
+$originalDefaultImportDisabled = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", "Process")
 
 $invalidBackupFile = Join-Path $validationDir "invalid-backup-path.txt"
 "not-a-directory" | Set-Content -LiteralPath $invalidBackupFile -Encoding UTF8
@@ -193,6 +200,7 @@ finally {
         [Environment]::SetEnvironmentVariable($name, $originalEnv[$name], "Process")
     }
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $originalOwnerEnvFile, "Process")
+    [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", $originalDefaultImportDisabled, "Process")
 }
 
 $failedScenarios = @($scenarios | Where-Object { $_.passed -ne $true })

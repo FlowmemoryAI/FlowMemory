@@ -1,0 +1,65 @@
+{
+    "schema":  "flowchain.public_tester_gateway_e2e_report.v0",
+    "generatedAt":  "2026-05-21T13:09:17.6556003Z",
+    "status":  "passed",
+    "localOnly":  true,
+    "originRestricted":  true,
+    "testerGatewayConfigured":  true,
+    "testerWriteTokenHashConfigured":  true,
+    "maxSendUnits":  "10",
+    "walletCreateSchema":  "flowmemory.control_plane.tester_wallet_create_result.v0",
+    "testerFaucetSchema":  "flowmemory.control_plane.tester_faucet_result.v0",
+    "walletSendSchema":  "flowmemory.control_plane.tester_wallet_send_result.v0",
+    "accountCount":  2,
+    "transferAccepted":  true,
+    "transferStatus":  "applied_local_runtime",
+    "transferId":  "0x4a50830f132f961f04b08eafe5931a3538924e915a59d9e8c7bc9e8d655e5173",
+    "capRejected":  true,
+    "capRejectStatusCode":  400,
+    "capRejectSchema":  "flowmemory.control_plane.tester_wallet_send_error.v0",
+    "routes":  [
+                   "/tester/status",
+                   "/tester/wallets/create",
+                   "/tester/faucet",
+                   "/tester/wallets/send",
+                   "/rpc balance_get"
+               ],
+    "balancesAfter":  {
+                          "sender":  "9",
+                          "recipient":  "11"
+                      },
+    "checks":  {
+                   "localOnly":  true,
+                   "originRestricted":  true,
+                   "testerGatewayConfigured":  true,
+                   "testerWriteTokenHashConfigured":  true,
+                   "walletCreateSchemaOk":  true,
+                   "testerFaucetSchemaOk":  true,
+                   "walletSendSchemaOk":  true,
+                   "accountCountAtLeastTwo":  true,
+                   "transferAccepted":  true,
+                   "transferAppliedLocalRuntime":  true,
+                   "transferIdPresent":  true,
+                   "capRejected":  true,
+                   "capRejectStatusCode400":  true,
+                   "capRejectSchemaOk":  true,
+                   "capRejectNoSecrets":  true,
+                   "routesCoverRequired":  true,
+                   "balancesMatchExpected":  true,
+                   "noLiveBroadcast":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "noLiveBroadcast":  true,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

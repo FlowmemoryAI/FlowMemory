@@ -27,7 +27,10 @@ import {
 import { WalletView } from "../views/WalletView";
 import { ExternalTesterLaunchView } from "../views/ExternalTesterLaunchView";
 import { ExplorerView } from "../views/ExplorerView";
+import { BridgePilotView } from "../views/BridgePilotView";
 import { OpsView } from "../views/OpsView";
+import { AlertsView } from "../views/AlertsView";
+import { OwnerActivationView } from "../views/OwnerActivationView";
 import { UniswapHooksView } from "../views/UniswapHooksView";
 import { WorkbenchView } from "../views/WorkbenchView";
 
@@ -163,6 +166,19 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.length).toBeGreaterThan(0);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "deployment ready")?.value).toBe("false");
     expect(workbench.sections.liveReadiness.some((record) => record.id === "public-rpc-edge")).toBe(true);
+    expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge reconciliation schedule")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge reconciliation no mutation")?.value).toBe("true");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix commands")?.value).toBe("20");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret audit")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret findings")?.value).toBe("0");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "owner env template")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "owner env field guide")?.value).toBe("19");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix commands")?.value).toBe("21");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "source chain ID" && fact.value === "8453"))).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
@@ -424,6 +440,9 @@ describe("dashboard fixture", () => {
     expect(html).toContain("State backup proof");
     expect(html).toContain("Backup dry run");
     expect(html).toContain("Bridge relayer queue");
+    expect(html).toContain("Bridge runtime credit");
+    expect(html).toContain("Bridge release evidence");
+    expect(html).toContain("flowchain:bridge:release:evidence:validate");
     expect(html).toContain("External tester packet");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("flowchain:public-deployment:contract");
@@ -447,6 +466,25 @@ describe("dashboard fixture", () => {
     expect(html).not.toContain("local-tester-write-token");
   });
 
+  it("renders signed transaction intake controls without exposing write RPC", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/wallet?panel=signed"] }, createElement(WalletView, { workbench })));
+
+    expect(html).toContain("Signed transaction intake");
+    expect(html).toContain("/transactions/submit");
+    expect(html).toContain("Submit signed envelope");
+    expect(html).toContain("Intake only");
+    expect(html).toContain("Runtime direct");
+    expect(html).not.toContain("transaction_submit");
+    expect(html).not.toContain("privateKey");
+    expect(html).not.toContain("seedPhrase");
+  });
+
   it("renders the dedicated friends-and-family launch flow without secrets", () => {
     const workbench = buildWorkbenchSnapshot(data, {
       devnetState,
@@ -458,8 +496,14 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Friends-and-family launch");
     expect(html).toContain("Shareable");
+    expect(html).toContain("Live infra");
+    expect(html).toContain("Missing inputs");
     expect(html).toContain("Packet smoke");
     expect(html).toContain("Gateway proof");
+    expect(html).toContain("RPC command matrix");
+    expect(html).toContain("RPC launch matrix");
+    expect(html).toContain("RPC matrix");
+    expect(html).toContain("21 commands; 6 owner-host");
     expect(html).toContain("Relayer timeout");
     expect(html).toContain("Alert rules");
     expect(html).toContain("Tester workflow");
@@ -480,7 +524,57 @@ describe("dashboard fixture", () => {
     expect(html).toContain("/tester/faucet");
     expect(html).toContain("/tester/wallets/send");
     expect(html).toContain("/explorer/summary");
+    expect(html).toContain("npm run flowchain:public-rpc:command-matrix");
     expect(html).toContain("npm run flowchain:external-tester:packet");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the L1 activation cockpit without owner values", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/activation"] }, createElement(OwnerActivationView, { workbench })));
+
+    expect(html).toContain("L1 activation");
+    expect(html).toContain("Release");
+    expect(html).toContain("handoff passed");
+    expect(html).toContain("Activation stages");
+    expect(html).toContain("Host apply sequence");
+    expect(html).toContain("owner-host-apply.sh plan");
+    expect(html).toContain("owner-host-apply.sh apply");
+    expect(html).toContain("owner-host-apply.sh rollback");
+    expect(html).toContain("owner-host-apply.ps1 -Action Plan");
+    expect(html).toContain("owner-host-apply.ps1 -Action Apply");
+    expect(html).toContain("owner-host-apply.ps1 -Action Rollback");
+    expect(html).toContain("Apply owner-host public RPC edge");
+    expect(html).toContain("Expose repo-owned FlowChain RPC");
+    expect(html).toContain("Provision durable state backup storage");
+    expect(html).toContain("Configure capped Base 8453 bridge pilot observation");
+    expect(html).toContain("Needed now");
+    expect(html).toContain("Owner setup groups");
+    expect(html).toContain("Public RPC edge");
+    expect(html).toContain("Pick the public RPC URL");
+    expect(html).toContain("Friends and family need a public HTTPS RPC endpoint");
+    expect(html).toContain("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked");
+    expect(html).toContain("Backup storage");
+    expect(html).toContain("Base 8453 bridge");
+    expect(html).toContain("Ready groups");
+    expect(html).toContain("Tester write gateway");
+    expect(html).toContain("blocked by");
+    expect(html).toContain("Owner inputs");
+    expect(html).toContain("Next commands");
+    expect(html).toContain("Do not send");
+    expect(html).toContain("Env field guide");
+    expect(html).toContain("Guide rows");
+    expect(html).toContain("absolute non-local HTTPS endpoint");
+    expect(html).toContain("owner DNS, tunnel, or reverse proxy hostname");
+    expect(html).toContain("Where to get it");
+    expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
+    expect(html).toContain("FLOWCHAIN_BASE8453_RPC_URL");
+    expect(html).toContain("npm run flowchain:owner-env:readiness");
     expect(html).not.toContain("local-tester-write-token");
   });
 
@@ -499,6 +593,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Private chain live");
     expect(html).toContain("Public RPC");
     expect(html).toContain("Tester sharing");
+    expect(html).toContain("Bridge audit");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeNoSecretAuditStatus}; findings ${liveReadinessReport.metrics.bridgeNoSecretAuditFindings}`);
     expect(html).toContain("Alert coverage");
     expect(html).toContain("timeout 300s");
     expect(html).toContain("Open readiness");
@@ -508,6 +604,37 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Transactions");
     expect(html).toContain("Wallets");
     expect(html).toContain("Bridge");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders bridge pilot runtime proof from live readiness evidence", () => {
+    const workbench = buildWorkbenchSnapshot(data, {
+      devnetState,
+      devnetDashboardState,
+      bridgeTestDeposit,
+      liveReadinessReport,
+    });
+    const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: ["/bridge"] }, createElement(BridgePilotView, { workbench })));
+
+    expect(html).toContain("Bridge runtime proof");
+    expect(html).toContain("Relayer and credit checks");
+    expect(html).toContain("Bridge command matrix");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixCommands} commands`);
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixLiveBroadcastCommands} live-broadcast gated`);
+    expect(html).toContain("npm run flowchain:bridge:command-matrix");
+    expect(html).toContain("No-secret audit");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeNoSecretAuditScannedFiles} files scanned`);
+    expect(html).toContain("npm run flowchain:bridge:no-secret-audit");
+    expect(html).toContain("Pilot aggregate");
+    expect(html).toContain("Runtime credit");
+    expect(html).toContain("Transfer settlement");
+    expect(html).toContain("Relayer guardrail");
+    expect(html).toContain("Relayer loop");
+    expect(html).toContain("Reconciliation schedule");
+    expect(html).toContain("flowchain:bridge:reconciliation:schedule:validate");
+    expect(html).toContain(`${liveReadinessReport.metrics.realValuePilotAggregateCommandsRun} proof commands`);
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditLatencySeconds}s`);
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeRuntimeCreditTransferSeconds}s`);
     expect(html).not.toContain("local-tester-write-token");
   });
 
@@ -521,12 +648,33 @@ describe("dashboard fixture", () => {
     const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(OpsView, { workbench })));
 
     expect(html).toContain("Ops center");
+    expect(html).toContain("Bridge audit");
+    expect(html).toContain("Bridge evidence audit");
     expect(html).toContain("Current findings");
     expect(html).toContain("Incident commands");
     expect(html).toContain("network sends; stores secrets");
+    expect(html).toContain("Relayer check contract");
+    expect(html).toContain("bridge-relayer-check-contract-failed");
     expect(html).toContain("Relayer loop");
     expect(html).toContain("Escalation dry run");
+    expect(html).toContain("Autorecovery drill");
+    expect(html).toContain("Windows service plan");
+    expect(html).toContain("Systemd service plan");
+    expect(html).toContain("Public RPC automation");
+    expect(html).toContain("Tester gateway E2E");
+    expect(html).toContain("Tester gateway proof");
+    expect(html).toContain("Ops install proof");
     expect(html).toContain("public-rpc-not-ready");
+    expect(html).not.toContain("local-tester-write-token");
+  });
+
+  it("renders the alerts route without exposing tester secrets", () => {
+    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(AlertsView, { data })));
+
+    expect(html).toContain("Alerts");
+    expect(html).toContain("Verifier failed");
+    expect(html).toContain("UPSTREAM_LOSS");
+    expect(html).toContain("next action");
     expect(html).not.toContain("local-tester-write-token");
   });
 

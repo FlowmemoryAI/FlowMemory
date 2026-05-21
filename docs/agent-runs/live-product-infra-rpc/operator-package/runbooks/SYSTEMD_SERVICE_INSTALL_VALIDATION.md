@@ -1,14 +1,17 @@
 ﻿# FlowChain Systemd Service Install Validation
 
-Generated: 2026-05-18T05:14:07.5290463Z
+Generated: 2026-05-21T13:58:41.5038701Z
 Status: passed
 
 This validation proves the owner Linux systemd install plan is present, no-secret, non-mutating, live-profile by default, and includes autorecovery through the FlowChain supervisor.
+It also executes the real default Plan and bridge-relayer opt-in Plan actions against rendered units in a temporary directory and verifies that no host mutation occurs.
 
 ## Checks
 
 | Check | Result |
 | --- | --- |
+| installScriptExists | True |
+| installPackageScriptPresent | True |
 | validationPackageScriptPresent | True |
 | publicRpcBundleExists | True |
 | liveServiceTemplateExists | True |
@@ -25,6 +28,15 @@ This validation proves the owner Linux systemd install plan is present, no-secre
 | supervisorUsesAutorecoveryLoop | True |
 | supervisorRestartAlways | True |
 | bridgeRelayerDefaultOff | True |
+| bridgeRelayerOptInPlanCommandPassed | True |
+| bridgeRelayerOptInPlanReportPassed | True |
+| bridgeRelayerOptInPlanDidNotMutate | True |
+| bridgeRelayerOptInPlanUsesRenderedUnits | True |
+| bridgeRelayerOptInStartsLoop | True |
+| bridgeRelayerOptInUsesSupervisor | True |
+| bridgeRelayerOptInPlanNoSecrets | True |
+| bridgeRelayerOptInPlanEnvValuesPrintedFalse | True |
+| bridgeRelayerOptInPlanBroadcastsFalse | True |
 | ownerEnvFileUsed | True |
 | repoWorkingDirectoryUsed | True |
 | cargoTargetDirIsExternalized | True |
@@ -34,6 +46,13 @@ This validation proves the owner Linux systemd install plan is present, no-secre
 | renderScriptRendersSystemdUnits | True |
 | verifyRunbookMentionsSystemdVerify | True |
 | rollbackRunbookMentionsSystemctl | True |
+| installPlanValidationPassed | True |
+| installPlanCommandPassed | True |
+| installPlanDidNotMutate | True |
+| installPlanUsesRenderedUnits | True |
+| installPlanReportNoSecrets | True |
+| installPlanReportEnvValuesPrintedFalse | True |
+| installPlanReportBroadcastsFalse | True |
 | installCommandsPresent | True |
 | statusCommandsPresent | True |
 | uninstallCommandsPresent | True |

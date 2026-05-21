@@ -208,9 +208,9 @@ function baseMainnetPilotRpcArgs(extra: string[] = []): string[] {
   ];
 }
 
-function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
+function runBridgeNodeScript(script: string, args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolveRun, rejectRun) => {
-    const child = spawn(process.execPath, ["src/observe-base-lockbox.ts", ...args], {
+    const child = spawn(process.execPath, [script, ...args], {
       cwd: fileURLToPath(new URL("..", import.meta.url)),
       env: { ...process.env, ...env },
       stdio: ["ignore", "pipe", "pipe"],
@@ -234,6 +234,10 @@ function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise
       rejectRun(new Error(`bridge CLI exited ${code}\nstdout:\n${stdout}\nstderr:\n${stderr}`));
     });
   });
+}
+
+function runBridgeCli(args: string[], env: Record<string, string> = {}): Promise<{ stdout: string; stderr: string }> {
+  return runBridgeNodeScript("src/observe-base-lockbox.ts", args, env);
 }
 
 test("validates the committed mock bridge deposit fixture", () => {
@@ -345,6 +349,55 @@ test("mock pilot E2E path applies a Base 8453 credit exactly once across replay"
     validateSchema("bridge-release-evidence.schema.json", firstRun.releaseEvidences[0]);
   } finally {
     rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("mock pilot E2E report exposes explicit status and checks", async () => {
+  const outDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-pilot-report-"));
+  try {
+    const { stdout } = await runBridgeNodeScript("src/bridge-pilot-e2e.ts", [
+      "--mode",
+      "mock-pilot",
+      "--fixture",
+      fileURLToPath(pilotFixtureUrl),
+      "--duplicate-fixture",
+      fileURLToPath(pilotDuplicateFixtureUrl),
+      "--out-dir",
+      outDir,
+    ]);
+    assert.match(stdout, /Bridge pilot E2E report:/);
+
+    const report = JSON.parse(readFileSync(join(outDir, "bridge-real-value-pilot-e2e-report.json"), "utf8")) as {
+      schema?: string;
+      status?: string;
+      checks?: Record<string, boolean>;
+      failedChecks?: string[];
+      broadcast?: boolean;
+      noSecrets?: boolean;
+    };
+    assert.equal(report.schema, "flowmemory.bridge_real_value_pilot_e2e_report.v0");
+    assert.equal(report.status, "passed");
+    assert.equal(report.broadcast, false);
+    assert.equal(report.noSecrets, true);
+    assert.deepEqual(report.failedChecks, []);
+    [
+      "sourceChainIsBase8453",
+      "firstCreditApplied",
+      "firstApplicationAppliedOnce",
+      "replayCreditRejected",
+      "replayApplicationIdempotent",
+      "duplicateReplayRejected",
+      "exactValueConserved",
+      "wrongChainRejected",
+      "unapprovedContractRejected",
+      "withdrawalIntentCreated",
+      "releaseEvidenceNoBroadcast",
+      "noLiveBroadcast",
+      "noSecrets",
+    ].forEach((name) => assert.equal(report.checks?.[name], true, name));
+    assertNoSecrets(report);
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
   }
 });
 
@@ -891,6 +944,85 @@ test("Base public-network pilot cursor advances over confirmed ranges", async ()
   }
 });
 
+test("Base public-network pilot cursor serializes concurrent same-process scans", async () => {
+  const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-concurrent-"));
+  const cursorPath = join(stateDir, "cursor-state.json");
+  const ranges: { fromBlock?: string; toBlock?: string }[] = [];
+  const depositLog = sampleBridgeDepositLog(BASE_MAINNET_CHAIN_ID);
+  let blockNumberReads = 0;
+  const originalFetch = globalThis.fetch;
+  const previousCursorLockHold = process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS;
+  process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS = "50";
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: Record<string, unknown>[] };
+    if (body.method === "eth_chainId") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_blockNumber") {
+      blockNumberReads += 1;
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: blockNumberReads === 1 ? "0x70" : "0x72" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getLogs") {
+      const range = body.params[0] ?? {};
+      ranges.push({
+        fromBlock: String(range.fromBlock),
+        toBlock: String(range.toBlock),
+      });
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        result: ranges.length === 1 ? [depositLog] : [],
+      }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (body.method === "eth_getBlockByNumber") {
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: canonicalBlockForLog(depositLog) }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: "unexpected method" } }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    const [firstRun, secondRun] = await Promise.all([
+      runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+        "--cursor-state",
+        cursorPath,
+      ]))),
+      runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+        "--cursor-state",
+        cursorPath,
+      ]))),
+    ]);
+    const cursor = JSON.parse(readFileSync(cursorPath, "utf8")) as { lastScannedBlock: string; lastConfirmedHead: string; lastLogCount: number };
+
+    assert.equal(firstRun.observations.length + secondRun.observations.length, 1);
+    assert.deepEqual(ranges, [
+      { fromBlock: "0x64", toBlock: "0x6b" },
+      { fromBlock: "0x6c", toBlock: "0x6d" },
+    ]);
+    assert.equal(cursor.lastScannedBlock, "109");
+    assert.equal(cursor.lastConfirmedHead, "109");
+    assert.equal(cursor.lastLogCount, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousCursorLockHold === undefined) {
+      delete process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS;
+    } else {
+      process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS = previousCursorLockHold;
+    }
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
 test("Base public-network pilot cursor does not advance when no confirmed block is available", async () => {
   const stateDir = mkdtempSync(join(tmpdir(), "flowmemory-bridge-cursor-wait-"));
   const cursorPath = join(stateDir, "cursor-state.json");
@@ -994,6 +1126,97 @@ test("Base public-network pilot rejects tampered cursor state before log scannin
   } finally {
     globalThis.fetch = originalFetch;
     rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("Base public-network pilot rejects internally inconsistent cursor ranges before log scanning", async () => {
+  const scenarios = [
+    {
+      name: "from-after-to",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "108",
+      lastToBlock: "107",
+      lastLogCount: 1,
+      expected: /cursor.lastFromBlock exceeds cursor.lastToBlock/,
+    },
+    {
+      name: "to-not-scanned",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "106",
+      lastLogCount: 1,
+      expected: /cursor.lastToBlock must match cursor.lastScannedBlock/,
+    },
+    {
+      name: "scanned-after-confirmed",
+      lastScannedBlock: "108",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "108",
+      lastLogCount: 1,
+      expected: /cursor.lastScannedBlock exceeds cursor.lastConfirmedHead/,
+    },
+    {
+      name: "negative-log-count",
+      lastScannedBlock: "107",
+      lastConfirmedHead: "107",
+      lastFromBlock: "100",
+      lastToBlock: "107",
+      lastLogCount: -1,
+      expected: /cursor.lastLogCount must be a non-negative integer/,
+    },
+  ];
+
+  for (const scenario of scenarios) {
+    const stateDir = mkdtempSync(join(tmpdir(), `flowmemory-bridge-cursor-${scenario.name}-`));
+    const cursorPath = join(stateDir, "cursor-state.json");
+    writeFileSync(cursorPath, `${JSON.stringify({
+      schema: "flowmemory.bridge_lockbox_cursor_state.v0",
+      stateId: testCursorStateId(scenario.lastScannedBlock, scenario.lastConfirmedHead),
+      updatedAt: FIXED_TEST_OBSERVED_AT,
+      mode: "base-mainnet-pilot",
+      sourceChainId: BASE_MAINNET_CHAIN_ID,
+      lockboxAddress: "0x1111111111111111111111111111111111111111",
+      lastScannedBlock: scenario.lastScannedBlock,
+      lastConfirmedHead: scenario.lastConfirmedHead,
+      lastFromBlock: scenario.lastFromBlock,
+      lastToBlock: scenario.lastToBlock,
+      lastLogCount: scenario.lastLogCount,
+      localOnly: false,
+      productionReady: true,
+    }, null, 2)}\n`);
+
+    const calls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body ?? "{}")) as { method: string };
+      calls.push(body.method);
+      if (body.method === "eth_chainId") {
+        return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x2105" }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, error: { message: `unexpected method for ${scenario.name}` } }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      });
+    };
+
+    try {
+      await assert.rejects(
+        () => runBridgePipeline(parseBridgeArgs(baseMainnetPilotRpcArgs([
+          "--cursor-state",
+          cursorPath,
+        ]))),
+        scenario.expected,
+      );
+      assert.deepEqual(calls, ["eth_chainId"]);
+    } finally {
+      globalThis.fetch = originalFetch;
+      rmSync(stateDir, { recursive: true, force: true });
+    }
   }
 });
 

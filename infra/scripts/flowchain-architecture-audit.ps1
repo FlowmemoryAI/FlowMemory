@@ -42,16 +42,21 @@ $reportPaths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     operatorPackage = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
     operatorPackageVerify = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+    opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
+    monitoringBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
+    metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     liveWallet = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json"
     testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
     publicRpcReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
     backupReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
@@ -60,25 +65,30 @@ $reportPaths = [ordered]@{
     backupInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
     bridgeLiveReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfraReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    bridgeCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
     bridgePilotLocal = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "services/bridge-relayer/out/real-value-pilot-e2e/bridge-real-value-pilot-e2e-report.json"
     baseTxDiagnostic = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
+    ownerGoLiveHandoff = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
     ownerInputs = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     ownerEnvReadinessValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"
     publicRpcEdgeTemplate = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-edge-template-report.json"
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    publicRpcCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     ownerInputsValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
     liveInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json"
     liveProduct = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     externalTesterEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     dashboardUiReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
     devPack = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
@@ -273,10 +283,19 @@ $monitorSamples = [int](Get-ArchitectureProp -Object $monitor -Name "sampleCount
 $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-ArchitectureStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+$supervisorChecks = Get-ArchitectureProp -Object $supervisorValidation -Name "checks"
+$supervisorNodeRecovery = Get-ArchitectureProp -Object $supervisorValidation -Name "nodeRecovery"
+$supervisorNodeRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorNodeRecovery -Name "restartAttempts" -Default 0)
+$supervisorRelayerRecovery = Get-ArchitectureProp -Object $supervisorValidation -Name "relayerLoopRecovery"
+$supervisorRelayerRestartAttempts = [int](Get-ArchitectureProp -Object $supervisorRelayerRecovery -Name "restartAttempts" -Default 0)
 $serviceInstallValidation = $reports.serviceInstallValidation
 $serviceInstallValidationStatus = Get-ArchitectureStatus -Report $serviceInstallValidation
 $serviceInstallChecks = Get-ArchitectureProp -Object $serviceInstallValidation -Name "checks"
 $serviceInstallFailedChecks = @((Get-ArchitectureProp -Object $serviceInstallValidation -Name "failedChecks" -Default @()))
+$systemdServiceInstallValidation = $reports.systemdServiceInstallValidation
+$systemdServiceInstallValidationStatus = Get-ArchitectureStatus -Report $systemdServiceInstallValidation
+$systemdServiceInstallChecks = Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "checks"
+$systemdServiceInstallFailedChecks = @((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "failedChecks" -Default @()))
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-ArchitectureStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-ArchitectureProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
@@ -287,10 +306,248 @@ $opsAlertCriticalRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name
 $opsAlertBlockedRules = [int](Get-ArchitectureProp -Object $opsAlertRules -Name "blockedRuleCount" -Default 0)
 $opsAlertCoveredFindingCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "coveredFindingCodes" -Default @()))
 $opsAlertUnmappedCodes = @((Get-ArchitectureProp -Object $opsAlertRules -Name "unmappedCurrentFindingCodes" -Default @()))
+$opsAlertChecks = Get-ArchitectureProp -Object $opsAlertRules -Name "checks"
 $alertInstallValidation = $reports.alertInstallValidation
 $alertInstallValidationStatus = Get-ArchitectureStatus -Report $alertInstallValidation
 $alertInstallChecks = Get-ArchitectureProp -Object $alertInstallValidation -Name "checks"
 $alertInstallFailedChecks = @((Get-ArchitectureProp -Object $alertInstallValidation -Name "failedChecks" -Default @()))
+$opsMetricsExport = $reports.opsMetricsExport
+$opsMetricsExportStatus = Get-ArchitectureStatus -Report $opsMetricsExport
+$opsMetricsExportChecks = Get-ArchitectureProp -Object $opsMetricsExport -Name "checks"
+$opsMetricsExportMetricCount = [int](Get-ArchitectureProp -Object $opsMetricsExport -Name "metricCount" -Default 0)
+$opsMetricsExportRequiredMetricNames = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "requiredMetricNames" -Default @()))
+$publicRpcSecurityHeaderMetricNames = @(
+    "flowchain_public_rpc_live_security_header_probe",
+    "flowchain_public_rpc_live_security_headers",
+    "flowchain_public_rpc_security_header_policy_ready",
+    "flowchain_public_rpc_security_headers",
+    "flowchain_public_rpc_security_header_preflight",
+    "flowchain_public_rpc_rendered_security_headers",
+    "flowchain_public_rpc_rendered_security_header_preflight"
+)
+$missingPublicRpcSecurityHeaderMetricNames = @($publicRpcSecurityHeaderMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcSecurityHeaderMetrics = $missingPublicRpcSecurityHeaderMetricNames.Count -eq 0
+$publicRpcRollbackDrillMetricNames = @(
+    "flowchain_public_rpc_rollback_drill_ready",
+    "flowchain_public_rpc_rollback_drill_performed",
+    "flowchain_public_rpc_rollback_restored_previous",
+    "flowchain_public_rpc_rollback_restored_original",
+    "flowchain_public_rpc_rollback_artifacts_scoped",
+    "flowchain_public_rpc_rollback_no_secrets",
+    "flowchain_public_rpc_rollback_no_broadcasts"
+)
+$missingPublicRpcRollbackDrillMetricNames = @($publicRpcRollbackDrillMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcRollbackDrillMetrics = $missingPublicRpcRollbackDrillMetricNames.Count -eq 0
+$publicRpcOwnerHostApplyPlanMetricNames = @(
+    "flowchain_public_rpc_owner_host_apply_plan_ready",
+    "flowchain_public_rpc_owner_host_artifacts_hashed",
+    "flowchain_public_rpc_owner_host_install_targets_mapped",
+    "flowchain_public_rpc_owner_host_systemd_install_command",
+    "flowchain_public_rpc_owner_host_nginx_reload_command",
+    "flowchain_public_rpc_owner_host_post_deploy_evidence"
+)
+$missingPublicRpcOwnerHostApplyPlanMetricNames = @($publicRpcOwnerHostApplyPlanMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics = $missingPublicRpcOwnerHostApplyPlanMetricNames.Count -eq 0
+$publicRpcCommandMatrixMetricNames = @(
+    "flowchain_public_rpc_command_matrix_ready",
+    "flowchain_public_rpc_command_matrix_commands_total",
+    "flowchain_public_rpc_command_matrix_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_mutating_owner_host_commands",
+    "flowchain_public_rpc_command_matrix_missing_scripts",
+    "flowchain_public_rpc_command_matrix_phase_gaps",
+    "flowchain_public_rpc_command_matrix_rollback_coverage",
+    "flowchain_public_rpc_command_matrix_no_secrets"
+)
+$missingPublicRpcCommandMatrixMetricNames = @($publicRpcCommandMatrixMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasPublicRpcCommandMatrixMetrics = $missingPublicRpcCommandMatrixMetricNames.Count -eq 0
+$backupRestoreValidationMetricNames = @(
+    "flowchain_backup_restore_validation_ready",
+    "flowchain_backup_restore_validation_failed_checks",
+    "flowchain_backup_restore_validation_missing_checks",
+    "flowchain_backup_restore_validation_secret_findings",
+    "flowchain_backup_restore_hash_round_trip",
+    "flowchain_backup_restore_live_state_protected",
+    "flowchain_backup_restore_retention_protected"
+)
+$missingBackupRestoreValidationMetricNames = @($backupRestoreValidationMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBackupRestoreValidationMetrics = $missingBackupRestoreValidationMetricNames.Count -eq 0
+$backupOwnerPathDryRunMetricNames = @(
+    "flowchain_backup_owner_path_dry_run_ready",
+    "flowchain_backup_owner_path_dry_run_failed_checks",
+    "flowchain_backup_owner_path_dry_run_missing_checks",
+    "flowchain_backup_owner_path_dry_run_secret_findings",
+    "flowchain_backup_owner_path_dry_run_snapshot_proof",
+    "flowchain_backup_owner_path_dry_run_restore_proof",
+    "flowchain_backup_owner_path_dry_run_live_state_protected",
+    "flowchain_backup_owner_path_dry_run_no_mutation",
+    "flowchain_backup_owner_path_dry_run_no_secrets"
+)
+$missingBackupOwnerPathDryRunMetricNames = @($backupOwnerPathDryRunMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBackupOwnerPathDryRunMetrics = $missingBackupOwnerPathDryRunMetricNames.Count -eq 0
+$bridgeDeployControlMetricNames = @(
+    "flowchain_bridge_deploy_control_validation_ready",
+    "flowchain_bridge_deploy_control_failed_checks",
+    "flowchain_bridge_deploy_control_missing_checks",
+    "flowchain_bridge_deploy_control_missing_env_fail_closed",
+    "flowchain_bridge_deploy_control_requires_broadcast_ack",
+    "flowchain_bridge_deploy_control_pause_resume_emergency",
+    "flowchain_bridge_deploy_control_runbook_rollback",
+    "flowchain_bridge_deploy_control_no_secrets",
+    "flowchain_bridge_deploy_control_no_broadcasts"
+)
+$missingBridgeDeployControlMetricNames = @($bridgeDeployControlMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeDeployControlMetrics = $missingBridgeDeployControlMetricNames.Count -eq 0
+$bridgeCommandMatrixMetricNames = @(
+    "flowchain_bridge_command_matrix_ready",
+    "flowchain_bridge_command_matrix_commands_total",
+    "flowchain_bridge_command_matrix_live_broadcast_commands",
+    "flowchain_bridge_command_matrix_missing_scripts",
+    "flowchain_bridge_command_matrix_broadcast_ack_gaps",
+    "flowchain_bridge_command_matrix_no_secrets"
+)
+$missingBridgeCommandMatrixMetricNames = @($bridgeCommandMatrixMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeCommandMatrixMetrics = $missingBridgeCommandMatrixMetricNames.Count -eq 0
+$supervisorNodeRecoveryMetricNames = @(
+    "flowchain_supervisor_node_recovery_validated",
+    "flowchain_supervisor_node_restart_attempts",
+    "flowchain_supervisor_node_crash_detected",
+    "flowchain_supervisor_node_recovery_live_profile",
+    "flowchain_supervisor_node_recovery_unbounded"
+)
+$missingSupervisorNodeRecoveryMetricNames = @($supervisorNodeRecoveryMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasSupervisorNodeRecoveryMetrics = $missingSupervisorNodeRecoveryMetricNames.Count -eq 0
+$serviceInstallValidationMetricNames = @(
+    "flowchain_service_install_validation_ready",
+    "flowchain_service_install_failed_checks",
+    "flowchain_service_install_missing_scripts",
+    "flowchain_service_install_plan_did_not_mutate",
+    "flowchain_service_install_live_profile_default",
+    "flowchain_service_install_bridge_relayer_opt_in",
+    "flowchain_service_install_status_read_only",
+    "flowchain_service_install_no_secrets",
+    "flowchain_service_install_no_broadcasts",
+    "flowchain_systemd_service_install_validation_ready",
+    "flowchain_systemd_service_install_failed_checks",
+    "flowchain_systemd_service_install_rendered_units",
+    "flowchain_systemd_service_install_autorecovery_loop",
+    "flowchain_systemd_service_install_restart_always",
+    "flowchain_systemd_service_install_hardening",
+    "flowchain_systemd_service_install_no_secrets",
+    "flowchain_systemd_service_install_no_broadcasts"
+)
+$missingServiceInstallValidationMetricNames = @($serviceInstallValidationMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasServiceInstallValidationMetrics = $missingServiceInstallValidationMetricNames.Count -eq 0
+$bridgeRelayerLoopValidationMetricNames = @(
+    "flowchain_bridge_relayer_loop_validation_ready",
+    "flowchain_bridge_relayer_loop_failed_checks",
+    "flowchain_bridge_relayer_loop_secret_findings",
+    "flowchain_bridge_relayer_loop_poll_seconds",
+    "flowchain_bridge_relayer_loop_settle_seconds",
+    "flowchain_bridge_relayer_loop_report_fresh",
+    "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
+    "flowchain_bridge_relayer_loop_pid_cleanup_verified",
+    "flowchain_bridge_relayer_loop_no_secrets",
+    "flowchain_bridge_relayer_loop_no_broadcasts"
+)
+$missingBridgeRelayerLoopValidationMetricNames = @($bridgeRelayerLoopValidationMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeRelayerLoopValidationMetrics = $missingBridgeRelayerLoopValidationMetricNames.Count -eq 0
+$bridgeReconciliationMetricNames = @(
+    "flowchain_bridge_reconciliation_ready",
+    "flowchain_bridge_reconciliation_rows_total",
+    "flowchain_bridge_reconciliation_failed_checks",
+    "flowchain_bridge_reconciliation_observed_credits",
+    "flowchain_bridge_reconciliation_new_credits",
+    "flowchain_bridge_reconciliation_queued_transactions",
+    "flowchain_bridge_reconciliation_applied_credits",
+    "flowchain_bridge_reconciliation_pending_credits",
+    "flowchain_bridge_reconciliation_cursor_staged",
+    "flowchain_bridge_reconciliation_cursor_committed",
+    "flowchain_bridge_reconciliation_cursor_not_committed_when_blocked",
+    "flowchain_bridge_reconciliation_runtime_credit_applied",
+    "flowchain_bridge_reconciliation_replay_rejected",
+    "flowchain_bridge_reconciliation_release_evidence_validated",
+    "flowchain_bridge_reconciliation_no_secrets",
+    "flowchain_bridge_reconciliation_no_broadcasts"
+)
+$missingBridgeReconciliationMetricNames = @($bridgeReconciliationMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeReconciliationMetrics = $missingBridgeReconciliationMetricNames.Count -eq 0
+$externalTesterClientMetricNames = @(
+    "flowchain_external_tester_client_validation_ready",
+    "flowchain_external_tester_client_failed_checks",
+    "flowchain_external_tester_client_secret_findings",
+    "flowchain_external_tester_client_dry_run_no_network",
+    "flowchain_external_tester_client_routes_cover_reads",
+    "flowchain_external_tester_client_routes_cover_writes",
+    "flowchain_external_tester_client_no_token_configured",
+    "flowchain_external_tester_client_no_broadcasts",
+    "flowchain_external_tester_client_no_secrets",
+    "flowchain_external_tester_client_env_values_hidden"
+)
+$missingExternalTesterClientMetricNames = @($externalTesterClientMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasExternalTesterClientMetrics = $missingExternalTesterClientMetricNames.Count -eq 0
+$secondComputerMetricNames = @(
+    "flowchain_second_computer_ready",
+    "flowchain_second_computer_bundle_created",
+    "flowchain_second_computer_bundle_sha256_present",
+    "flowchain_second_computer_stage_no_secret_ready",
+    "flowchain_second_computer_verify_checks_passed",
+    "flowchain_second_computer_failed_checks",
+    "flowchain_second_computer_missing_next_commands",
+    "flowchain_second_computer_failed_verify_checks",
+    "flowchain_second_computer_secret_findings",
+    "flowchain_second_computer_no_secrets",
+    "flowchain_second_computer_no_broadcasts"
+)
+$missingSecondComputerMetricNames = @($secondComputerMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasSecondComputerMetrics = $missingSecondComputerMetricNames.Count -eq 0
+$bridgeReleaseEvidenceMetricNames = @(
+    "flowchain_bridge_release_evidence_validation_ready",
+    "flowchain_bridge_release_evidence_cases_total",
+    "flowchain_bridge_release_evidence_failed_cases",
+    "flowchain_bridge_release_evidence_missing_cases",
+    "flowchain_bridge_release_evidence_failed_checks",
+    "flowchain_bridge_release_evidence_secret_findings",
+    "flowchain_bridge_release_evidence_release_broadcast_rejected",
+    "flowchain_bridge_release_evidence_withdrawal_broadcast_rejected",
+    "flowchain_bridge_release_evidence_no_broadcasts",
+    "flowchain_bridge_release_evidence_no_secrets"
+)
+$missingBridgeReleaseEvidenceMetricNames = @($bridgeReleaseEvidenceMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasBridgeReleaseEvidenceMetrics = $missingBridgeReleaseEvidenceMetricNames.Count -eq 0
+$devPackMetricNames = @(
+    "flowchain_dev_pack_ready",
+    "flowchain_dev_pack_failed_checks",
+    "flowchain_dev_pack_methods_total",
+    "flowchain_dev_pack_public_ready_methods",
+    "flowchain_dev_pack_language_sdks_total",
+    "flowchain_dev_pack_python_sdk_ready",
+    "flowchain_dev_pack_browser_starter_packaged",
+    "flowchain_dev_pack_browser_starter_build_ready",
+    "flowchain_dev_pack_browser_starter_smoke_ready",
+    "flowchain_dev_pack_public_readiness_fail_closed",
+    "flowchain_dev_pack_no_secrets"
+)
+$missingDevPackMetricNames = @($devPackMetricNames | Where-Object { $_ -notin $opsMetricsExportRequiredMetricNames })
+$opsMetricsHasDevPackMetrics = $missingDevPackMetricNames.Count -eq 0
+$opsMetricsExportFailedChecks = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "failedChecks" -Default @()))
+$opsMetricsExportSecretFindings = @((Get-ArchitectureProp -Object $opsMetricsExport -Name "secretMarkerFindings" -Default @()))
+$monitoringBundle = $reports.monitoringBundle
+$monitoringBundleStatus = Get-ArchitectureStatus -Report $monitoringBundle
+$monitoringBundleChecks = Get-ArchitectureProp -Object $monitoringBundle -Name "checks"
+$monitoringBundleFailedChecks = @((Get-ArchitectureProp -Object $monitoringBundle -Name "failedChecks" -Default @()))
+$monitoringBundleSecretFindings = @((Get-ArchitectureProp -Object $monitoringBundle -Name "secretMarkerFindings" -Default @()))
+$monitoringBundleDashboardPanelCount = [int](Get-ArchitectureProp -Object $monitoringBundle -Name "dashboardPanelCount" -Default 0)
+$monitoringBundlePrometheusRuleCount = [int](Get-ArchitectureProp -Object $monitoringBundle -Name "prometheusRuleCount" -Default 0)
+$monitoringBundleMissingDashboardMetrics = @((Get-ArchitectureProp -Object $monitoringBundle -Name "missingDashboardMetricNames" -Default @()))
+$monitoringBundleMissingPrometheusMetrics = @((Get-ArchitectureProp -Object $monitoringBundle -Name "missingPrometheusMetricNames" -Default @()))
+$monitoringBundleMissingSourceRuleIds = @((Get-ArchitectureProp -Object $monitoringBundle -Name "missingSourceRuleIds" -Default @()))
+$monitoringBundleCommandsWithUrls = @((Get-ArchitectureProp -Object $monitoringBundle -Name "commandsWithUrls" -Default @()))
+$monitoringBundleCommandsWithInlineEnvAssignment = @((Get-ArchitectureProp -Object $monitoringBundle -Name "commandsWithInlineEnvAssignment" -Default @()))
+$metricsInstallValidation = $reports.metricsInstallValidation
+$metricsInstallValidationStatus = Get-ArchitectureStatus -Report $metricsInstallValidation
+$metricsInstallChecks = Get-ArchitectureProp -Object $metricsInstallValidation -Name "checks"
+$metricsInstallFailedChecks = @((Get-ArchitectureProp -Object $metricsInstallValidation -Name "failedChecks" -Default @()))
+$metricsInstallSecretFindings = @((Get-ArchitectureProp -Object $metricsInstallValidation -Name "secretMarkerFindings" -Default @()))
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-ArchitectureStatus -Report $opsEscalationDryRun
 $opsEscalationChecks = Get-ArchitectureProp -Object $opsEscalationDryRun -Name "checks"
@@ -308,7 +565,15 @@ $observabilityFiles = @(
     "infra/scripts/flowchain-ops-snapshot.ps1",
     "infra/scripts/flowchain-ops-alerts.ps1",
     "infra/scripts/flowchain-alert-install-windows.ps1",
+    "infra/scripts/flowchain-alert-install-systemd.ps1",
+    "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
     "infra/scripts/flowchain-alert-install-validation.ps1",
+    "infra/scripts/flowchain-ops-metrics-export.ps1",
+    "infra/scripts/flowchain-monitoring-bundle.ps1",
+    "infra/scripts/flowchain-metrics-install-windows.ps1",
+    "infra/scripts/flowchain-metrics-install-systemd.ps1",
+    "infra/scripts/flowchain-metrics-install-systemd-validation.ps1",
+    "infra/scripts/flowchain-metrics-install-validation.ps1",
     "infra/scripts/flowchain-ops-escalation-dry-run.ps1",
     "infra/scripts/flowchain-incident-drill.ps1",
     "infra/scripts/flowchain-emergency-stop-local.ps1",
@@ -321,7 +586,15 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:snapshot") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:export") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:monitoring:bundle") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:windows") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:escalation:dry-run") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:ops:incident-drill") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:emergency:stop-local") `
@@ -330,6 +603,19 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($monitorSamples -ge 2) `
     -and ($supervisorValidationStatus -eq "passed") `
     -and ($supervisorRestartAttempts -ge 1) `
+    -and ($supervisorNodeRestartAttempts -ge 1) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "beforeNodeCrashPidRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "nodeRestartAttemptsExactlyOne" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false) -eq $true) `
+    -and ($supervisorRelayerRestartAttempts -ge 1) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "relayerCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopCommandLineMatched" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopReportHealthy" -Default $false) -eq $true) `
     -and ($opsSnapshotStatus -in @("passed", "blocked")) `
     -and ($opsCriticalCount -eq 0) `
     -and ($opsAlertRulesStatus -eq "passed") `
@@ -347,7 +633,95 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "uninstallAbsentTaskAbsentAfter" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "scheduledTaskTriggerSupportsRepetition" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcCommandMatrixRuleCoversLaunchRunbook" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeCommandMatrixRuleCoversLaunchRunbook" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false) -eq $true) `
+    -and ($opsMetricsExportStatus -eq "passed") `
+    -and ($opsMetricsExportMetricCount -ge 10) `
+    -and ($opsMetricsExportFailedChecks.Count -eq 0) `
+    -and ($opsMetricsExportSecretFindings.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBackupRestoreValidationMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBackupOwnerPathDryRunMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcSecurityHeaderMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcRollbackDrillMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcCommandMatrixLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcCommandMatrixMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasPublicRpcCommandMatrixMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeDeployControlMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeCommandMatrixMetrics -eq $true) `
+    -and ($opsMetricsHasSupervisorNodeRecoveryMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasServiceInstallValidationMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeRelayerLoopValidationMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeReconciliationMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasBridgeReleaseEvidenceMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasExternalTesterClientMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "secondComputerLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "secondComputerMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasSecondComputerMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "devPackLoaded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "devPackMetricsPresent" -Default $false) -eq $true) `
+    -and ($opsMetricsHasDevPackMetrics -eq $true) `
+    -and ((Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusHasHelpAndType" -Default $false) -eq $true) `
+    -and ($monitoringBundleStatus -eq "passed") `
+    -and ($monitoringBundleFailedChecks.Count -eq 0) `
+    -and ($monitoringBundleSecretFindings.Count -eq 0) `
+    -and ($monitoringBundleDashboardPanelCount -ge 12) `
+    -and ($monitoringBundlePrometheusRuleCount -ge 8) `
+    -and ($monitoringBundleMissingDashboardMetrics.Count -eq 0) `
+    -and ($monitoringBundleMissingPrometheusMetrics.Count -eq 0) `
+    -and ($monitoringBundleMissingSourceRuleIds.Count -eq 0) `
+    -and ($monitoringBundleCommandsWithUrls.Count -eq 0) `
+    -and ($monitoringBundleCommandsWithInlineEnvAssignment.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $monitoringBundleChecks -Name "dashboardIncludesCorePanels" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $monitoringBundleChecks -Name "prometheusRulesReferenceKnownAlertRuleIds" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $monitoringBundleChecks -Name "filesNoSecretMarkers" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $monitoringBundleChecks -Name "noNetworkDelivery" -Default $false) -eq $true) `
+    -and ($metricsInstallValidationStatus -eq "passed") `
+    -and ($metricsInstallFailedChecks.Count -eq 0) `
+    -and ($metricsInstallSecretFindings.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "hasMetricsJsonPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "hasPrometheusTextPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ($opsEscalationDryRunStatus -eq "passed") `
     -and ($opsEscalationFailedChecks.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $opsEscalationChecks -Name "notificationPlanNoNetworkDelivery" -Default $false) -eq $true) `
@@ -359,17 +733,23 @@ $observabilityReady = (Test-AllRepoFilesExist -Paths $observabilityFiles) `
     -and ($incidentFailedCases -eq 0) `
     -and ($incidentTotalCases -ge 8)
 Add-ArchitectureItem -Items $items -Id "ops-observability-boundary" -Layer "Operations" `
-    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
+    -Requirement "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, no-secret Grafana/Prometheus monitoring bundle, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers." `
     -Status $(if ($observabilityReady) { "passed" } else { "failed" }) `
-    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), alertInstall=$alertInstallValidationStatus, alertInstallFailedChecks=$($alertInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
+    -Evidence "monitorStatus=$monitorStatus, samples=$monitorSamples, heightAdvanced=$monitorAdvanced, supervisorValidation=$supervisorValidationStatus, supervisorRestartAttempts=$supervisorRestartAttempts, supervisorNodeRestartAttempts=$supervisorNodeRestartAttempts, supervisorNodeRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), supervisorRelayerRestartAttempts=$supervisorRelayerRestartAttempts, supervisorRelayerRecovered=$(Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false), opsSnapshot=$opsSnapshotStatus, criticalCount=$opsCriticalCount, alertRules=$opsAlertRulesStatus, alertRuleCount=$opsAlertRuleCount, alertCoveredFindings=$($opsAlertCoveredFindingCodes.Count), relayerLoopAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeRelayerLoopRuleCoversValidationTelemetry" -Default $false), bridgeReconciliationAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false), secondComputerAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false), serviceInstallAlertCoverage=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), devPackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false), publicRpcRollbackAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), publicRpcApplyPlanAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false), backupRestoreAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false), backupOwnerPathAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false), bridgeDeployControlAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), bridgeCommandMatrixAlert=$(Get-ArchitectureProp -Object $opsAlertChecks -Name "bridgeCommandMatrixRuleCoversLaunchRunbook" -Default $false), alertInstall=$alertInstallValidationStatus, systemdAlert=$(Get-ArchitectureProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false), alertInstallFailedChecks=$($alertInstallFailedChecks.Count), metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, publicRpcEdgeMetrics=$(Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcSecurityHeaderMetrics=$opsMetricsHasPublicRpcSecurityHeaderMetrics, publicRpcRollbackMetrics=$opsMetricsHasPublicRpcRollbackDrillMetrics, publicRpcOwnerApplyMetrics=$opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics, backupRestoreMetrics=$opsMetricsHasBackupRestoreValidationMetrics, backupOwnerPathMetrics=$opsMetricsHasBackupOwnerPathDryRunMetrics, bridgeDeployControlMetrics=$opsMetricsHasBridgeDeployControlMetrics, bridgeCommandMatrixMetrics=$opsMetricsHasBridgeCommandMatrixMetrics, supervisorNodeRecoveryMetrics=$opsMetricsHasSupervisorNodeRecoveryMetrics, serviceInstallValidationMetrics=$opsMetricsHasServiceInstallValidationMetrics, bridgeRelayerLoopValidationMetrics=$opsMetricsHasBridgeRelayerLoopValidationMetrics, bridgeReconciliationMetrics=$opsMetricsHasBridgeReconciliationMetrics, bridgeReleaseEvidenceMetrics=$opsMetricsHasBridgeReleaseEvidenceMetrics, externalTesterClientMetrics=$opsMetricsHasExternalTesterClientMetrics, secondComputerMetrics=$opsMetricsHasSecondComputerMetrics, devPackMetrics=$opsMetricsHasDevPackMetrics, monitoringBundle=$monitoringBundleStatus, monitoringPanels=$monitoringBundleDashboardPanelCount, monitoringRules=$monitoringBundlePrometheusRuleCount, monitoringFailedChecks=$($monitoringBundleFailedChecks.Count), metricsInstall=$metricsInstallValidationStatus, systemdMetrics=$(Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false), metricsInstallFailedChecks=$($metricsInstallFailedChecks.Count), escalationDryRun=$opsEscalationDryRunStatus, escalationFailedChecks=$($opsEscalationFailedChecks.Count), criticalRules=$opsAlertCriticalRules, blockedRules=$opsAlertBlockedRules, unmappedAlerts=$($opsAlertUnmappedCodes.Count), incidentDrill=$incidentDrillStatus, incidentCases=$incidentTotalCases, incidentFailed=$incidentFailedCases" `
     -Files $observabilityFiles `
-    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
+    -Commands @("npm run flowchain:service:monitor", "npm run flowchain:service:supervisor:validate", "npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:monitoring:bundle", "npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked", "npm run flowchain:ops:incident-drill", "npm run flowchain:emergency:stop-local")
 
 $serviceInstallFiles = @(
     "infra/scripts/flowchain-service-install-windows.ps1",
     "infra/scripts/flowchain-service-install-validation.ps1",
     "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md",
     "docs/agent-runs/live-product-infra-rpc/SERVICE_INSTALL_VALIDATION.md"
+)
+$systemdServiceInstallFiles = @(
+    "infra/scripts/flowchain-service-install-systemd.ps1",
+    "infra/scripts/flowchain-service-install-systemd-validation.ps1",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"
 )
 $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:windows") `
@@ -406,6 +786,32 @@ $serviceInstallReady = (Test-AllRepoFilesExist -Paths $serviceInstallFiles) `
     -and ((Get-ArchitectureProp -Object $serviceInstallChecks -Name "uninstallAbsentReportBroadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $serviceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+$systemdServiceInstallReady = (Test-AllRepoFilesExist -Paths $systemdServiceInstallFiles) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd:validate") `
+    -and ($systemdServiceInstallValidationStatus -eq "passed") `
+    -and ($systemdServiceInstallFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installScriptExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanReportPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInUsesSupervisor" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInPlanBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "liveServiceUsesLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "leastPrivilegeHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $systemdServiceInstallValidation -Name "noSecrets" -Default $false) -eq $true)
 $operatorPackage = $reports.operatorPackage
 $operatorPackageStatus = Get-ArchitectureStatus -Report $operatorPackage
 $operatorPackageChecks = Get-ArchitectureProp -Object $operatorPackage -Name "checks"
@@ -436,13 +842,22 @@ $operatorPackageVerifyChecks = Get-ArchitectureProp -Object $operatorPackageVeri
 $operatorPackageVerifyFailedChecks = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "failedChecks" -Default @()))
 $operatorPackageVerifyExpectedFileCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "expectedFileCount" -Default 0)
 $operatorPackageVerifyCommandCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "commandCount" -Default 0)
+$operatorPackageVerifyGoLiveEvidenceCount = [int](Get-ArchitectureProp -Object $operatorPackageVerify -Name "goLiveExpectedPackageEvidenceCount" -Default 0)
+$operatorPackageVerifyMissingGoLiveEvidence = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "missingGoLivePackageEvidence" -Default @()))
+$operatorPackageVerifyGoLiveEvidenceNotInManifest = @((Get-ArchitectureProp -Object $operatorPackageVerify -Name "goLivePackageEvidenceNotInManifest" -Default @()))
 $operatorPackageVerifyReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and ($operatorPackageVerifyStatus -eq "passed") `
     -and ($operatorPackageVerifyFailedChecks.Count -eq 0) `
     -and ($operatorPackageVerifyExpectedFileCount -ge 20) `
     -and ($operatorPackageVerifyCommandCount -ge 20) `
+    -and ($operatorPackageVerifyGoLiveEvidenceCount -ge 30) `
+    -and ($operatorPackageVerifyMissingGoLiveEvidence.Count -eq 0) `
+    -and ($operatorPackageVerifyGoLiveEvidenceNotInManifest.Count -eq 0) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "packageReportPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "expectedFilesPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveHandoffEvidencePresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidencePathsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "goLiveExpectedEvidenceInManifest" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noForbiddenLocalFiles" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false) -eq $true) `
@@ -456,6 +871,13 @@ Add-ArchitectureItem -Items $items -Id "service-install-boundary" -Layer "Operat
     -Files $serviceInstallFiles `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 
+Add-ArchitectureItem -Items $items -Id "systemd-service-install-boundary" -Layer "Operations" `
+    -Requirement "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for reboot-persistent live supervisor autorecovery from rendered units." `
+    -Status $(if ($systemdServiceInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "systemdInstallValidation=$systemdServiceInstallValidationStatus, failedChecks=$($systemdServiceInstallFailedChecks.Count), installScript=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installScriptExists"), plan=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "installPlanUsesRenderedUnits"), relayerDefaultOff=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerDefaultOff"), relayerOptIn=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), supervisor=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-ArchitectureProp -Object $systemdServiceInstallChecks -Name "leastPrivilegeHardeningPresent")" `
+    -Files $systemdServiceInstallFiles `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
+
 Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "Operations" `
     -Requirement "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates." `
     -Status $(if ($operatorPackageReady) { "passed" } else { "failed" }) `
@@ -464,19 +886,21 @@ Add-ArchitectureItem -Items $items -Id "node-operator-package-boundary" -Layer "
     -Commands @("npm run flowchain:operator:package")
 
 Add-ArchitectureItem -Items $items -Id "node-operator-package-verify-boundary" -Layer "Operations" `
-    -Requirement "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan." `
+    -Requirement "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan." `
     -Status $(if ($operatorPackageVerifyReady) { "passed" } else { "failed" }) `
-    -Evidence "operatorPackageVerify=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, failedChecks=$($operatorPackageVerifyFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false)" `
+    -Evidence "operatorPackageVerify=$operatorPackageVerifyStatus, expectedFiles=$operatorPackageVerifyExpectedFileCount, commands=$operatorPackageVerifyCommandCount, goLiveEvidence=$operatorPackageVerifyGoLiveEvidenceCount, missingGoLiveEvidence=$($operatorPackageVerifyMissingGoLiveEvidence.Count), goLiveEvidenceNotInManifest=$($operatorPackageVerifyGoLiveEvidenceNotInManifest.Count), failedChecks=$($operatorPackageVerifyFailedChecks.Count), noSecretScan=$(Get-ArchitectureProp -Object $operatorPackageVerifyChecks -Name "noSecretScanPassed" -Default $false)" `
     -Files @("infra/scripts/flowchain-operator-package-verify.ps1", "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md") `
     -Commands @("npm run flowchain:operator:package:verify")
 
 $publicRpcValidation = $reports.publicRpcValidation
 $publicRpcAbuseTest = $reports.publicRpcAbuseTest
 $publicRpc = $reports.publicRpcReadiness
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
 $rpcFiles = @(
     "services/control-plane/src/server.ts",
     "services/control-plane/src/methods.ts",
     "infra/scripts/flowchain-public-rpc-readiness.ps1",
+    "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1",
     "infra/scripts/flowchain-public-rpc-validation.ps1",
     "infra/scripts/flowchain-public-rpc-abuse-test.ps1"
 )
@@ -488,6 +912,8 @@ $endpointChecks = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name 
 $rateLimitProbe = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitProbePerformed" -Default $false
 $rateLimitRejected = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRejected" -Default $false
 $rateLimitRetryAfter = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false
+$securityHeaderSkip = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "securityHeaderProbeSkippedForLocalEndpoint" -Default $false
+$securityHeaderPolicy = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "securityHeaderPassRequiredOnlyForPublicMode" -Default $false
 $responseHygiene = Get-ArchitectureProp -Object $publicRpcValidationChecks -Name "responseHygienePassed" -Default $false
 $publicRpcAbuseStatus = Get-ArchitectureStatus -Report $publicRpcAbuseTest
 $publicRpcAbuseReady = Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "abuseTestReady" -Default $false
@@ -519,8 +945,26 @@ $publicRpcAbusePassed = $publicRpcAbuseStatus -eq "passed" `
     -and $publicRpcAbuseMissingChecks.Count -eq 0 `
     -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "ownerValuesRequired" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcAbuseTest -Name "noSecrets" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryStatus = Get-ArchitectureStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryChecks = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "checks"
+$publicRpcSyntheticCanaryReady = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false
+$publicRpcSyntheticCanaryOwnerBlocked = Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
+$publicRpcSyntheticCanaryNoWriteMethods = ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "noWriteMethodsInvoked" -Default $false) -eq $true)
+$publicRpcSyntheticCanaryReadPlanCovered = ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadPathsCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "plannedReadMethodsCovered" -Default $false) -eq $true)
+$publicRpcSyntheticCanarySafe = $publicRpcSyntheticCanaryStatus -in @("passed", "blocked") `
+    -and ($publicRpcSyntheticCanaryNoWriteMethods -eq $true) `
+    -and ($publicRpcSyntheticCanaryReadPlanCovered -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "safeReadMethodAllowlistEnforced" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanaryChecks -Name "responseHygienePassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "endpointValuePrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcSyntheticCanary -Name "broadcasts" -Default $true) -eq $false)
 $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:validate") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:synthetic-canary") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:abuse-test") `
     -and ($publicRpcValidationStatus -eq "passed") `
     -and ($corsAllowed -eq $true) `
@@ -529,23 +973,30 @@ $rpcBoundaryReady = (Test-AllRepoFilesExist -Paths $rpcFiles) `
     -and ($rateLimitProbe -eq $true) `
     -and ($rateLimitRejected -eq $true) `
     -and ($rateLimitRetryAfter -eq $true) `
+    -and ($securityHeaderSkip -eq $true) `
+    -and ($securityHeaderPolicy -eq $true) `
     -and ($responseHygiene -eq $true) `
+    -and ($publicRpcSyntheticCanarySafe -eq $true) `
     -and ($publicRpcAbusePassed -eq $true)
 Add-ArchitectureItem -Items $items -Id "rpc-api-boundary" -Layer "RPC/API" `
-    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly." `
+    -Requirement "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, read-only synthetic canary coverage, narrow public reads, and abuse rejection before it can be exposed publicly." `
     -Status $(if ($rpcBoundaryReady) { "passed" } else { "failed" }) `
-    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
+    -Evidence "validationStatus=$publicRpcValidationStatus, corsAllowed=$corsAllowed, corsRejected=$corsRejected, endpointChecks=$endpointChecks, securityHeaderSkip=$securityHeaderSkip, securityHeaderPolicy=$securityHeaderPolicy, rateLimitProbe=$rateLimitProbe, rateLimitRejected=$rateLimitRejected, rateLimitRetryAfter=$rateLimitRetryAfter, responseHygiene=$responseHygiene, canaryStatus=$publicRpcSyntheticCanaryStatus, canarySafe=$publicRpcSyntheticCanarySafe, noWriteMethods=$publicRpcSyntheticCanaryNoWriteMethods, abuseStatus=$publicRpcAbuseStatus, abusePassed=$publicRpcAbusePassed, abuseMissingChecks=$($publicRpcAbuseMissingChecks.Count)" `
     -Files $rpcFiles `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test")
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:abuse-test")
 
 $publicRpcStatus = Get-ArchitectureStatus -Report $publicRpc
 $publicRpcReady = Get-ArchitectureProp -Object $publicRpc -Name "publicRpcReady" -Default $false
+$publicRpcChecks = Get-ArchitectureProp -Object $publicRpc -Name "checks"
+$publicRpcLiveHeaderProbe = Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false
+$publicRpcLiveHeaders = ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersProbePerformed" -Default $false) -eq $true) -and ((Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true)
+$publicRpcHeaderPolicyReady = Get-ArchitectureProp -Object $publicRpcChecks -Name "securityHeadersAllRequiredPresent" -Default $false
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge" -Layer "Public edge" `
-    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene." `
-    -Status $(if ($publicRpcStatus -eq "passed" -and $publicRpcReady -eq $true) { "passed" } elseif ($publicRpcStatus -eq "blocked") { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady" `
-    -Files @("infra/scripts/flowchain-public-rpc-readiness.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
-    -Commands @("npm run flowchain:public-rpc:check") `
+    -Requirement "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, response hygiene, and passing read-only synthetic canary." `
+    -Status $(if ($publicRpcStatus -eq "passed" -and $publicRpcReady -eq $true -and $publicRpcSyntheticCanaryReady -eq $true) { "passed" } elseif ($publicRpcStatus -eq "blocked" -or ($publicRpcSyntheticCanaryStatus -eq "blocked" -and $publicRpcSyntheticCanaryOwnerBlocked -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, liveHeaderProbe=$publicRpcLiveHeaderProbe, liveHeaders=$publicRpcLiveHeaders, headerPolicyReady=$publicRpcHeaderPolicyReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, canarySafe=$publicRpcSyntheticCanarySafe" `
+    -Files @("infra/scripts/flowchain-public-rpc-readiness.ps1", "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
+    -Commands @("npm run flowchain:public-rpc:check", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $publicRpcEdgeTemplate = $reports.publicRpcEdgeTemplate
@@ -558,9 +1009,23 @@ $edgeTemplateRequiresRateLimit = Get-ArchitectureProp -Object $publicRpcEdgeTemp
 $edgeTemplateForwardsOrigin = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "forwardsOriginForCors" -Default $false
 $edgeTemplateStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "publicStateMirrorExcluded" -Default $false
 $edgeTemplateDevnetStateExcluded = Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "devnetStatePublicRpcExcluded" -Default $false
+$edgeTemplateSecurityHeaders = @((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "securityHeaders" -Default @()))
+$edgeTemplateDefensiveHeaderRequirementPassed = @((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "edgeRequirements" -Default @()) | Where-Object {
+        [string](Get-ArchitectureProp -Object $_ -Name "id" -Default "") -eq "defensive-response-headers" `
+            -and [string](Get-ArchitectureProp -Object $_ -Name "status" -Default "") -eq "passed"
+    }).Count -gt 0
+$edgeTemplateHasSecurityHeaders = $edgeTemplateSecurityHeaders.Count -ge 6
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-ArchitectureStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "checks"
+$deploymentBundleRequiredCommands = @((Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "requiredCommands" -Default @()) | ForEach-Object { "$_" })
+$deploymentBundleCoversWalletCutover = @(
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
+) | Where-Object { $_ -notin $deploymentBundleRequiredCommands } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
 $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:deployment-bundle") `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "nginxTemplateWritten" -Default $false) -eq $true) `
@@ -569,6 +1034,15 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightTokensPresent" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesWindowsNginxConfigTest" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderPreflightsRejectWrongMethods" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "publicStateMirrorExcluded" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "devnetStatePublicRpcExcluded" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false) -eq $true) `
@@ -576,6 +1050,7 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "verifyRunbookWritten" -Default $false) -eq $true) `
+    -and ($deploymentBundleCoversWalletCutover -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
@@ -593,17 +1068,87 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "bundleHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "bundlePreflightsCheckSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryListsFiles" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryHasRequiredEnvNames" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryOwnerPathsOutsideRepo" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactManifestCount" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingInstallPhase" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanHasMutatingEdgePhase" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcDeploymentAutomation -Name "broadcasts" -Default $true) -eq $false)
+$publicRpcCommandMatrix = $reports.publicRpcCommandMatrix
+$publicRpcCommandMatrixStatus = Get-ArchitectureStatus -Report $publicRpcCommandMatrix
+$publicRpcCommandMatrixChecks = Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "checks"
+$publicRpcCommandMatrixFailedChecks = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "failedChecks" -Default @()))
+$publicRpcCommandMatrixMissingScripts = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "missingPackageScripts" -Default @()))
+$publicRpcCommandMatrixMissingPhases = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "missingPhases" -Default @()))
+$publicRpcCommandMatrixEnvReferenceGaps = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "rowsMissingEnvReferences" -Default @()))
+$publicRpcCommandMatrixValidationGaps = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "rowsMissingValidationSignals" -Default @()))
+$publicRpcCommandMatrixBadOwnerInputs = @((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$publicRpcCommandMatrixReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:command-matrix") `
+    -and (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-command-matrix.ps1") `
+    -and ($publicRpcCommandMatrixStatus -eq "passed") `
+    -and ($publicRpcCommandMatrixFailedChecks.Count -eq 0) `
+    -and ($publicRpcCommandMatrixMissingScripts.Count -eq 0) `
+    -and ($publicRpcCommandMatrixMissingPhases.Count -eq 0) `
+    -and ($publicRpcCommandMatrixEnvReferenceGaps.Count -eq 0) `
+    -and ($publicRpcCommandMatrixValidationGaps.Count -eq 0) `
+    -and ($publicRpcCommandMatrixBadOwnerInputs.Count -eq 0) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0) -ge 20) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0) -ge 6) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 12) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "renderPlanApplyProofRollbackCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "mutatingOwnerHostCommandsHaveRollbackCoverage" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
 $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-public-rpc-edge-template.ps1") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:edge-template") `
     -and ($publicRpcEdgeTemplateStatus -eq "passed") `
@@ -615,21 +1160,30 @@ $publicRpcEdgeTemplateReady = (Test-RepoFile -Path "infra/scripts/flowchain-publ
     -and ($edgeTemplateForwardsOrigin -eq $true) `
     -and ($edgeTemplateStateExcluded -eq $true) `
     -and ($edgeTemplateDevnetStateExcluded -eq $true) `
+    -and ($edgeTemplateHasSecurityHeaders -eq $true) `
+    -and ($edgeTemplateDefensiveHeaderRequirementPassed -eq $true) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "public-rpc-edge-template-boundary" -Layer "Public edge" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, defensive response headers, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), methodRejectionPreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false)), walletCutoverCommands=$deploymentBundleCoversWalletCutover, securityHeaders=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "includesSecurityHeaders" -Default $false)), securityHeaderPreflight=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "preflightsCheckSecurityHeaders" -Default $false)), ownerRenderSecurityHeaders=$((Get-ArchitectureProp -Object $deploymentBundleChecks -Name "ownerRenderIncludesSecurityHeaders" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Files @("infra/scripts/flowchain-public-rpc-edge-template.ps1", "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_EDGE_TEMPLATE.md", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle/WINDOWS_NGINX_PREFLIGHT.md") `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-ArchitectureItem -Items $items -Id "public-rpc-deployment-automation-boundary" -Layer "Public edge" `
-    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, defensive response-header probes, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, hashed artifact manifest, Linux and Windows owner-host plan/apply/rollback scripts, install/edge apply phases, post-deploy evidence, and rollback drill phases without host mutation or owner-value leakage." `
     -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), rollbackDrill=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
-    -Files @("infra/scripts/flowchain-public-rpc-deployment-automation.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json") `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), securityHeaders=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedNginxHasSecurityHeaders" -Default $false), securityHeaderPreflight=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksSecurityHeaders" -Default $false), methodRejectionProbes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false), testerUnauthProbe=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), walletTesterE2e=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false), syntheticCanary=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false), cutoverRehearsal=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false), rollbackDrill=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), renderSummary=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), applyScript=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false), applyScriptHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false), applyScriptPostDeploy=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false), windowsApplyScript=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false), windowsApplyScriptParses=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false), windowsApplyScriptHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false), windowsApplyScriptPostDeploy=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false), applyPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false), ownerApplyScriptInPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false), windowsOwnerApplyScriptInPlan=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false), artifactHashes=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false), installTargets=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanInstallTargetsMapped" -Default $false), hostMutationFalse=$(Get-ArchitectureProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Files @("infra/scripts/flowchain-public-rpc-deployment-automation.ps1", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md", "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json", "docs/agent-runs/live-product-infra-rpc/public-rpc-render-report-snapshot.json") `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
+
+Add-ArchitectureItem -Items $items -Id "public-rpc-command-matrix-boundary" -Layer "Public edge" `
+    -Requirement "Public RPC command matrix maps launch commands across preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback phases to owner input names, mutation risk, rollback coverage, and committed no-secret evidence." `
+    -Status $(if ($publicRpcCommandMatrixReady) { "passed" } else { "failed" }) `
+    -Evidence "matrix=$publicRpcCommandMatrixStatus, commands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'commandCount' -Default 0), phases=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'phaseCount' -Default 0), ownerHostCommands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'ownerHostCommandCount' -Default 0), mutatingOwnerHostCommands=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'mutatingOwnerHostCommandCount' -Default 0), committedEvidencePaths=$(Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name 'committedEvidencePathCount' -Default 0), failedChecks=$($publicRpcCommandMatrixFailedChecks.Count), missingScripts=$($publicRpcCommandMatrixMissingScripts.Count), missingPhases=$($publicRpcCommandMatrixMissingPhases.Count), envReferenceGaps=$($publicRpcCommandMatrixEnvReferenceGaps.Count), validationGaps=$($publicRpcCommandMatrixValidationGaps.Count), badOwnerInputs=$($publicRpcCommandMatrixBadOwnerInputs.Count)" `
+    -Files @("infra/scripts/flowchain-public-rpc-command-matrix.ps1", "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json", "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md") `
+    -Commands @("npm run flowchain:public-rpc:command-matrix")
 
 $wallet = $reports.liveWallet
 $testerNetwork = $reports.testerNetwork
@@ -690,6 +1244,8 @@ $bridgeLiveFiles = @(
     "infra/scripts/flowchain-bridge-relayer-once.ps1",
     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
     "infra/scripts/flowchain-service-start.ps1"
 )
@@ -704,6 +1260,39 @@ Add-ArchitectureItem -Items $items -Id "bridge-live-edge" -Layer "Bridge" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:live:check", "npm run flowchain:bridge:infra:check", "npm run flowchain:bridge:diagnose:tx") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+$bridgeCommandMatrix = $reports.bridgeCommandMatrix
+$bridgeCommandMatrixStatus = Get-ArchitectureStatus -Report $bridgeCommandMatrix
+$bridgeCommandMatrixChecks = Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "checks"
+$bridgeCommandMatrixFailedChecks = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "failedChecks" -Default @()))
+$bridgeCommandMatrixMissingScripts = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "missingScripts" -Default @()))
+$bridgeCommandMatrixMissingPhases = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "missingPhases" -Default @()))
+$bridgeCommandMatrixBroadcastAckGaps = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastRowsWithoutAck" -Default @()))
+$bridgeCommandMatrixBadOwnerInputRows = @((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "badOwnerInputRows" -Default @()))
+$bridgeCommandMatrixReady = (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:command-matrix") `
+    -and (Test-RepoFile -Path "infra/scripts/flowchain-bridge-command-matrix.ps1") `
+    -and ($bridgeCommandMatrixStatus -eq "passed") `
+    -and ($bridgeCommandMatrixFailedChecks.Count -eq 0) `
+    -and ($bridgeCommandMatrixMissingScripts.Count -eq 0) `
+    -and ($bridgeCommandMatrixMissingPhases.Count -eq 0) `
+    -and ($bridgeCommandMatrixBroadcastAckGaps.Count -eq 0) `
+    -and ($bridgeCommandMatrixBadOwnerInputRows.Count -eq 0) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "commandCount" -Default 0) -ge 18) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0) -ge 4) `
+    -and ([int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0) -ge 10) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "liveBroadcastCommandsAckGated" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "deployObserveRelayerControlReleaseCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "commandsAvoidInlineEnvAssignment" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrixChecks -Name "ownerInputNamesOnly" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+Add-ArchitectureItem -Items $items -Id "bridge-command-matrix-boundary" -Layer "Bridge" `
+    -Requirement "Bridge pilot operations expose a single no-secret command matrix that maps every deploy, observe, relayer, credit, reconciliation, withdrawal/release, emergency-control, and release command to owner input names, acknowledgement gates, risk class, and committed evidence paths." `
+    -Status $(if ($bridgeCommandMatrixReady) { "passed" } else { "failed" }) `
+    -Evidence "matrix=$bridgeCommandMatrixStatus, commands=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'commandCount' -Default 0), phases=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'phaseCount' -Default 0), liveBroadcastCommands=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'liveBroadcastCapableCommandCount' -Default 0), committedEvidencePaths=$(Get-ArchitectureProp -Object $bridgeCommandMatrix -Name 'committedEvidencePathCount' -Default 0), failedChecks=$($bridgeCommandMatrixFailedChecks.Count), missingScripts=$($bridgeCommandMatrixMissingScripts.Count), missingPhases=$($bridgeCommandMatrixMissingPhases.Count), ackGaps=$($bridgeCommandMatrixBroadcastAckGaps.Count)" `
+    -Files @("infra/scripts/flowchain-bridge-command-matrix.ps1", "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json", "docs/agent-runs/live-product-infra-rpc/BRIDGE_COMMAND_MATRIX.md") `
+    -Commands @("npm run flowchain:bridge:command-matrix")
 
 $bridgeRelayer = $reports.bridgeRelayerOnce
 $bridgeRelayerGuardrail = $reports.bridgeRelayerGuardrailValidation
@@ -742,6 +1331,59 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
+$bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditStatus = Get-ArchitectureStatus -Report $bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditChecks = Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "checks"
+$bridgeRuntimeCreditTiming = Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "timing"
+$bridgeRuntimeCreditFailedChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingRuntimeChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseRuntimeChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditReady = ($bridgeRuntimeCreditStatus -eq "passed") `
+    -and ($bridgeRuntimeCreditFailedChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditMissingRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditFalseRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditProofFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "sourceChainBase8453" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "creditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "creditedBalanceTransferable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "replayRejected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "restartPreservesCreditHistory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "exportImportPreservesReplayProtection" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "latencyGatePassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "transferLatencyUnderTarget" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoReleaseBroadcast" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoWithdrawalBroadcast" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:runtime-credit:validate")
+$bridgeRelayerChecks = Get-ArchitectureProp -Object $bridgeRelayer -Name "checks"
+$bridgeRelayerFailedChecks = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "failedChecks" -Default @()))
+$bridgeRelayerCheckContractReady = ($bridgeRelayerFailedChecks.Count -eq 0) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "statusKnown" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "requiredEnvNamesPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "childTimeoutRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "childProcessesDidNotTimeout" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "readinessInfraChecked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "readinessLiveCheckedWhenInfraPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "blockedBeforeLiveReadinessWhenInfraBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "blockedBeforeObservationWhenReadinessBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noQueuedTransactionsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "noAppliedCreditsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "cursorModeStaged" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "finalCursorNotCommittedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "finalCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "stagedCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "issuesClassified" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "externalBlockerClassifiedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "latencyGateRecorded" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "latencyGatePassedWhenApplied" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "queueAndApplyMatchWhenPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $bridgeRelayerChecks -Name "cursorSafeWhenPassed" -Default $false) -eq $true)
 $bridgeRelayerCounts = Get-ArchitectureProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerCursorCommit = Get-ArchitectureProp -Object $bridgeRelayer -Name "cursorCommit"
 $bridgeRelayerSteps = @((Get-ArchitectureProp -Object $bridgeRelayer -Name "steps" -Default @()))
@@ -761,6 +1403,7 @@ $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:guardrail:validate") `
     -and ($bridgeRelayerStatus -eq "passed") `
+    -and $bridgeRelayerCheckContractReady `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-ArchitectureProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
@@ -770,14 +1413,21 @@ $bridgeRelayerReady = (Test-AllRepoFilesExist -Paths $bridgeLiveFiles) `
     -and $bridgeRelayerGuardrailReady `
     -and $bridgeRelayerLoopReady `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:loop:validate")
-$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady -and $bridgeRelayerChildTimeoutReady
+$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerCheckContractReady -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady -and $bridgeRelayerChildTimeoutReady
 Add-ArchitectureItem -Items $items -Id "bridge-relayer-runtime-queue" -Layer "Bridge" `
     -Requirement "The live bridge relayer path checks owner guardrails, bounds child process execution, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerBlockedSafely) { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, childTimeoutSeconds=$bridgeRelayerChildTimeoutSeconds, timedOutSteps=$($bridgeRelayerTimedOutSteps.Count), guardrail=$bridgeRelayerGuardrailStatus, guardrailChildTimeoutRecorded=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerChildTimeoutRecorded' -Default $false), guardrailNoChildTimeouts=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerNoChildTimeouts' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
+    -Evidence "relayer=$bridgeRelayerStatus, onceChecksReady=$bridgeRelayerCheckContractReady, onceFailedChecks=$($bridgeRelayerFailedChecks.Count), childTimeoutSeconds=$bridgeRelayerChildTimeoutSeconds, timedOutSteps=$($bridgeRelayerTimedOutSteps.Count), guardrail=$bridgeRelayerGuardrailStatus, guardrailChildTimeoutRecorded=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerChildTimeoutRecorded' -Default $false), guardrailNoChildTimeouts=$(Get-ArchitectureProp -Object $bridgeRelayerGuardrailChecks -Name 'relayerNoChildTimeouts' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-ArchitectureProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-ArchitectureProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason" `
     -Files $bridgeLiveFiles `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+Add-ArchitectureItem -Items $items -Id "bridge-runtime-credit-proof" -Layer "Bridge" `
+    -Requirement "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts." `
+    -Status $(if ($bridgeRuntimeCreditReady) { "passed" } else { "failed" }) `
+    -Evidence "runtimeCredit=$bridgeRuntimeCreditStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'queueToSpendableSeconds' -Default ''), transferSeconds=$(Get-ArchitectureProp -Object $bridgeRuntimeCreditTiming -Name 'transferSettlementSeconds' -Default '')" `
+    -Files @("infra/scripts/flowchain-bridge-runtime-credit-validation.ps1", "infra/scripts/flowchain-real-value-pilot-runtime.ps1", "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json", "docs/agent-runs/live-product-infra-rpc/BRIDGE_RUNTIME_CREDIT_VALIDATION.md") `
+    -Commands @("npm run flowchain:bridge:runtime-credit:validate")
 
 $backupStatus = Get-ArchitectureStatus -Report $reports.backupReadiness
 $backupValidation = $reports.backupRestoreValidation
@@ -798,7 +1448,15 @@ $backupValidationRequiredChecks = @(
     "missingStateArtifactDetected",
     "missingSnapshotManifestDetected",
     "latestPointerTamperDetected",
-    "wrongChainStateMismatchDetected"
+    "wrongChainStateMismatchDetected",
+    "retentionBackupCommandPassed",
+    "retentionPrunedOldestSnapshot",
+    "retentionRetainedNewestSnapshots",
+    "retentionLatestManifestMatchesNewest",
+    "retentionReportShowsPrunedSnapshot",
+    "retentionReportProtectsCurrentSnapshot",
+    "retentionRestoreCommandPassed",
+    "retentionRestoreUsedNewestSnapshot"
 )
 $backupValidationMissingChecks = @($backupValidationRequiredChecks | Where-Object {
     (Get-ArchitectureProp -Object $backupValidationChecks -Name $_ -Default $false) -ne $true
@@ -816,6 +1474,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "retentionPruneErrorsEmpty" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "backupRetentionProtectedSnapshot" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
@@ -837,11 +1498,31 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "taskNamesDistinct" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "retentionCountValid" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "actionUsesRetentionCount" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasRestoreRoot" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasStatePath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillHasReportPath" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdRestoreServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdRestoreTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdCommandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdOwnerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupRootWritePathConfigurable" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdChildReportNoSecrets" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
-    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true)
+    -and ((Get-ArchitectureProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd:validate")
 $backupFiles = @(
     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
     "infra/scripts/flowchain-state-backup.ps1",
@@ -849,16 +1530,20 @@ $backupFiles = @(
     "infra/scripts/flowchain-backup-restore-validation.ps1",
     "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
     "infra/scripts/flowchain-backup-install-windows.ps1",
+    "infra/scripts/flowchain-backup-install-systemd.ps1",
+    "infra/scripts/flowchain-backup-install-systemd-validation.ps1",
     "infra/scripts/flowchain-backup-install-validation.ps1",
     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md",
+    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
 )
 Add-ArchitectureItem -Items $items -Id "state-backup-boundary" -Layer "Storage/recovery" `
-    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
+    -Requirement "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, Windows and Linux scheduled backup plus restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation." `
     -Status $(if ($backupStatus -eq "passed" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "passed" } elseif ($backupStatus -eq "blocked" -and $backupValidationPassed -and $backupOwnerPathDryRunReady -and $backupInstallReady) { "blocked" } else { "failed" }) `
-    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
+    -Evidence "backupStatus=$backupStatus, validationStatus=$backupValidationStatus, ownerPathDryRun=$backupOwnerPathDryRunStatus, ownerPathFailedChecks=$($backupOwnerPathDryRunFailedChecks.Count), installValidation=$backupInstallValidationStatus, installFailedChecks=$($backupInstallFailedChecks.Count), systemdValidation=$(Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-ArchitectureProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned"), snapshotProof=$backupSnapshotProof, restoreProof=$backupRestoreProof, requiredChecks=$($backupValidationRequiredChecks.Count), missingChecks=$($backupValidationMissingChecks.Count)" `
     -Files $backupFiles `
-    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:check") `
+    -Commands @("npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify", "npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:systemd -- -Action Plan", "npm run flowchain:backup:install:systemd:validate", "npm run flowchain:backup:check") `
     -Blockers @("FLOWCHAIN_RPC_STATE_BACKUP_PATH")
 
 $deploymentContract = $reports.publicDeploymentContract
@@ -882,6 +1567,67 @@ Add-ArchitectureItem -Items $items -Id "public-deployment-contract-boundary" -La
     -Evidence "deploymentStatus=$deploymentContractStatus, deploymentReady=$deploymentContractReady, packetShareable=$deploymentContractPacketShareable, packetSmoke=$deploymentContractPacketSmoke, blockedOnlyKnown=$deploymentContractBlockedOnlyKnown, blockedItems=$deploymentContractBlocked, failedItems=$deploymentContractFailed" `
     -Files @("infra/scripts/flowchain-public-deployment-contract.ps1", "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md") `
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked") `
+    -Blockers @($missingOwnerInputs)
+
+$ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
+$ownerGoLiveHandoffStatus = Get-ArchitectureStatus -Report $ownerGoLiveHandoff
+$ownerGoLiveHandoffChecks = Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "checks"
+$ownerGoLiveHandoffFailedChecks = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
+$ownerGoLiveHandoffSecretFindings = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
+$ownerGoLiveHandoffStageCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
+$ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
+$ownerGoLiveHandoffExpectedReportPathCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "launchSequenceExpectedReportPathCount" -Default 0)
+$ownerGoLiveHandoffInvalidExpectedReportPaths = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "invalidLaunchSequenceExpectedReportPaths" -Default @()))
+$ownerGoLiveHandoffMissingRequiredInputs = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingRequiredEnvNames" -Default @()))
+$ownerGoLiveHandoffMissingOptionalInputs = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingOptionalEnvNames" -Default @()))
+$ownerGoLiveHandoffNextOptionalInputs = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "nextOwnerOptionalInputNames" -Default @()))
+$ownerGoLiveHandoffMissingLaunchPackageScripts = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingLaunchSequencePackageScriptNames" -Default @()))
+$ownerGoLiveHandoffRollbackCommandCount = [int](Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "rollbackCommandCount" -Default 0)
+$ownerGoLiveHandoffMissingRollbackPackageScripts = @((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "missingRollbackPackageScriptNames" -Default @()))
+$ownerGoLiveHandoffSafe = $ownerGoLiveHandoffStatus -eq "passed" `
+    -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
+    -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
+    -and $ownerGoLiveHandoffStageCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCount -ge 8 `
+    -and $ownerGoLiveHandoffLaunchSequenceCommandCount -ge 20 `
+    -and $ownerGoLiveHandoffExpectedReportPathCount -ge 8 `
+    -and $ownerGoLiveHandoffInvalidExpectedReportPaths.Count -eq 0 `
+    -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceEveryStepHasExpectedReportPath" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceExpectedReportPathsScoped" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversPublicRpcRender" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversSystemdInstallPlan" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversBackupRestore" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversBridgeRelayer" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversTesterPacket" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversCutoverAudit" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequencePackageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "requiredAndOptionalOwnerInputsSeparated" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "neededNowExcludesOptionalOwnerInputs" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffNextOptionalInputs.Count -eq 0 `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCommandsPresent" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversLocalStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversBridgeEmergencyStop" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffMissingLaunchPackageScripts.Count -eq 0 `
+    -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0 `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
+Add-ArchitectureItem -Items $items -Id "owner-go-live-launch-boundary" -Layer "Deployment/governance" `
+    -Requirement "Owner go-live handoff sequences owner inputs, public RPC render, owner-host apply, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary." `
+    -Status $(if ($ownerGoLiveHandoffSafe) { "passed" } else { "failed" }) `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, evidenceReports=$ownerGoLiveHandoffExpectedReportPathCount, applyPlan=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyPlan" -Default $false), applyExecution=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversOwnerHostApplyExecution" -Default $false), applyRollback=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOwnerHostApplyRollback" -Default $false), windowsApplyPlan=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyPlan" -Default $false), windowsApplyExecution=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "launchSequenceCoversWindowsOwnerHostApplyExecution" -Default $false), windowsApplyRollback=$(Get-ArchitectureProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversWindowsOwnerHostApplyRollback" -Default $false), invalidEvidenceReports=$($ownerGoLiveHandoffInvalidExpectedReportPaths.Count), missingRequiredInputs=$($ownerGoLiveHandoffMissingRequiredInputs.Count), missingOptionalInputs=$($ownerGoLiveHandoffMissingOptionalInputs.Count), neededNowOptionalInputs=$($ownerGoLiveHandoffNextOptionalInputs.Count), missingLaunchScripts=$($ownerGoLiveHandoffMissingLaunchPackageScripts.Count), rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, missingRollbackScripts=$($ownerGoLiveHandoffMissingRollbackPackageScripts.Count), failedChecks=$($ownerGoLiveHandoffFailedChecks.Count), secretFindings=$($ownerGoLiveHandoffSecretFindings.Count)" `
+    -Files @("infra/scripts/flowchain-owner-go-live-handoff.ps1", "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md") `
+    -Commands @("npm run flowchain:owner:go-live-handoff") `
     -Blockers @($missingOwnerInputs)
 
 $ownerInputs = $reports.ownerInputs
@@ -1019,6 +1765,7 @@ Add-ArchitectureItem -Items $items -Id "secret-broadcast-boundary" -Layer "Secur
 $liveInfra = $reports.liveInfra
 $externalTester = $reports.externalTester
 $externalTesterPacket = $reports.externalTesterPacket
+$testerWriteTokenSetup = $reports.testerWriteTokenSetup
 $publicTesterGateway = $reports.publicTesterGateway
 $dashboardUiReadiness = $reports.dashboardUiReadiness
 $devPackStatus = Get-ArchitectureStatus -Report $devPack
@@ -1033,12 +1780,14 @@ $devPackReady = (Test-RepoFile -Path "services/flowchain-sdk/src/client.ts") `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletTransfersReadable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletBalancesReadable" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "walletSendRuntimeBacked" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "browserExampleViteReactPackaged" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $devPackChecks -Name "browserExampleBuildPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $devPackChecks -Name "publicReadinessFailClosed" -Default $false) -eq $true)
 Add-ArchitectureItem -Items $items -Id "developer-dev-pack-boundary" -Layer "Developer ecosystem" `
-    -Requirement "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness." `
+    -Requirement "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, prove the packaged browser starter, and fail closed for public readiness." `
     -Status $(if ($devPackReady) { "passed" } else { "failed" }) `
     -Evidence "devPackStatus=$devPackStatus, methodCount=$(Get-ArchitectureProp -Object $devPack -Name "methodCount"), heights=$(Get-ArchitectureProp -Object $devPack -Name "firstHeight")->$(Get-ArchitectureProp -Object $devPack -Name "secondHeight"), report=$($reportPaths.devPack)" `
-    -Files @("services/flowchain-sdk/src/client.ts", "services/flowchain-sdk/src/cli.ts", "docs/developer/FLOWCHAIN_QUICKSTART.md", "docs/sdk/RPC_REFERENCE.generated.md") `
+    -Files @("services/flowchain-sdk/src/client.ts", "services/flowchain-sdk/src/cli.ts", "examples/flowchain-browser-readiness/package.json", "examples/flowchain-browser-readiness/src/main.jsx", "docs/developer/FLOWCHAIN_QUICKSTART.md", "docs/sdk/RPC_REFERENCE.generated.md") `
     -Commands @("npm run flowchain:dev-pack:e2e")
 $productGateFiles = @(
     "infra/scripts/flowchain-live-infra-check.ps1",
@@ -1051,6 +1800,7 @@ $productGateFiles = @(
     "infra/scripts/flowchain-external-tester-readiness.ps1",
     "infra/scripts/flowchain-external-tester-packet.ps1",
     "infra/scripts/flowchain-external-tester-evidence-validation.ps1",
+    "infra/scripts/flowchain-tester-write-token-setup.ps1",
     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
     "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
     "apps/dashboard/playwright.config.ts",
@@ -1060,6 +1810,24 @@ $liveInfraGateStatus = Get-ArchitectureStatus -Report $liveInfra
 $liveProductGateStatus = Get-ArchitectureStatus -Report $liveProduct
 $externalTesterStatus = Get-ArchitectureStatus -Report $externalTester
 $externalTesterPacketStatus = Get-ArchitectureStatus -Report $externalTesterPacket
+$testerWriteTokenSetupStatus = Get-ArchitectureStatus -Report $testerWriteTokenSetup
+$testerWriteTokenSetupChecks = Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "checks"
+$testerWriteTokenSetupReady = ($testerWriteTokenSetupStatus -eq "passed") `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenFileExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvFileExists" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterHashWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterCapWritten" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "rawTokenPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetupChecks -Name "tokenHashPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "rawTokenPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenHashPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "broadcasts" -Default $true) -eq $false) `
+    -and (@((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "failedChecks" -Default @())).Count -eq 0) `
+    -and (@((Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "secretMarkerFindings" -Default @())).Count -eq 0)
 $publicTesterGatewayStatus = Get-ArchitectureStatus -Report $publicTesterGateway
 $publicTesterGatewayReady = ($publicTesterGatewayStatus -eq "passed") `
     -and ((Get-ArchitectureProp -Object $publicTesterGateway -Name "testerGatewayConfigured" -Default $false) -eq $true) `
@@ -1074,9 +1842,16 @@ $dashboardUiCoveredRoutes = @((Get-ArchitectureProp -Object $dashboardUiReadines
 $dashboardUiReady = ($dashboardUiStatus -eq "passed") `
     -and ($dashboardUiFailedChecks.Count -eq 0) `
     -and ($dashboardUiBrowserProjects.Count -ge 2) `
-    -and ($dashboardUiCoveredRoutes.Count -ge 5) `
+    -and ($dashboardUiCoveredRoutes.Count -ge 7) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "desktopProjectConfigured" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "mobileProjectConfigured" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "walletTesterRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerWalletCreateCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerFaucetCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerSendCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "explorerRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "testerLaunchRouteCovered" -Default $false) -eq $true) `
+    -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "activationRouteCovered" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBrowserE2ePassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "dashboardBuildPassed" -Default $false) -eq $true) `
     -and ((Get-ArchitectureProp -Object $dashboardUiChecks -Name "controlPlaneTesterGatewayTestsPassed" -Default $false) -eq $true) `
@@ -1136,6 +1911,12 @@ Add-ArchitectureItem -Items $items -Id "external-tester-launch-boundary" -Layer 
     -Files @("infra/scripts/flowchain-external-tester-readiness.ps1", "infra/scripts/flowchain-external-tester-packet.ps1", "infra/scripts/flowchain-external-tester-evidence-validation.ps1", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md", "docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json", "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md") `
     -Commands @("npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked", "npm run flowchain:tester:evidence:validate") `
     -Blockers @($missingOwnerInputs)
+Add-ArchitectureItem -Items $items -Id "tester-write-token-setup-boundary" -Layer "External tester launch" `
+    -Requirement "Friends-and-family tester write access has a no-secret setup proof where the raw bearer token stays in ignored local storage, only its digest and cap are written to the ignored owner env file, and committed evidence prints neither token nor digest." `
+    -Status $(if ($testerWriteTokenSetupReady) { "passed" } else { "failed" }) `
+    -Evidence "tokenSetupStatus=$testerWriteTokenSetupStatus, tokenPath=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenPath"), ownerEnvFile=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "ownerEnvFile"), tokenCreated=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenCreated"), tokenPreserved=$(Get-ArchitectureProp -Object $testerWriteTokenSetup -Name "tokenPreserved"), report=$($reportPaths.testerWriteTokenSetup)" `
+    -Files @("infra/scripts/flowchain-tester-write-token-setup.ps1") `
+    -Commands @("npm run flowchain:tester:token:setup")
 Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "External tester launch" `
     -Requirement "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection." `
     -Status $(if ($publicTesterGatewayReady) { "passed" } else { "failed" }) `
@@ -1143,10 +1924,10 @@ Add-ArchitectureItem -Items $items -Id "public-tester-gateway-boundary" -Layer "
     -Files @("services/control-plane/src/server.ts", "infra/scripts/flowchain-public-tester-gateway-e2e.ps1") `
     -Commands @("npm run flowchain:tester:gateway:e2e")
 Add-ArchitectureItem -Items $items -Id "dashboard-ui-browser-boundary" -Layer "Explorer and wallet UI" `
-    -Requirement "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow." `
+    -Requirement "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, tester launch readiness, L1 activation cockpit, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow." `
     -Status $(if ($dashboardUiReady) { "passed" } else { "failed" }) `
     -Evidence "dashboardUiStatus=$dashboardUiStatus, browserProjects=$($dashboardUiBrowserProjects.Count), coveredRoutes=$($dashboardUiCoveredRoutes.Count), failedChecks=$($dashboardUiFailedChecks.Count), report=$($reportPaths.dashboardUiReadiness)" `
-    -Files @("apps/dashboard/playwright.config.ts", "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts", "apps/dashboard/src/views/WalletView.tsx", "apps/dashboard/src/views/ExplorerView.tsx", "infra/scripts/flowchain-dashboard-ui-readiness.ps1") `
+    -Files @("apps/dashboard/playwright.config.ts", "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts", "apps/dashboard/src/views/WalletView.tsx", "apps/dashboard/src/views/ExplorerView.tsx", "apps/dashboard/src/views/ExternalTesterLaunchView.tsx", "apps/dashboard/src/views/OwnerActivationView.tsx", "infra/scripts/flowchain-dashboard-ui-readiness.ps1") `
     -Commands @("npm run flowchain:dashboard:ui:readiness", "npm run browser:e2e --prefix apps/dashboard")
 $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:live-infra:check") `
@@ -1157,6 +1938,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:operator:package:verify") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dev-pack:e2e") `
+    -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:token:setup") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:gateway:e2e") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:tester:evidence:validate") `
     -and (Test-PackageScript -PackageJson $packageJson -Name "flowchain:dashboard:ui:readiness") `
@@ -1168,6 +1950,7 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
     -and ($externalTesterPacketExecutableSmokeValidated -eq $true) `
     -and ($externalTesterEvidenceValidationPassed -eq $true) `
     -and ($externalTesterConnectPackReady -eq $true) `
+    -and ($testerWriteTokenSetupReady -eq $true) `
     -and ($publicTesterGatewayReady -eq $true) `
     -and ($dashboardUiReady -eq $true) `
     -and ($operatorDoctorReady -eq $true) `
@@ -1177,9 +1960,9 @@ $productGateReady = (Test-AllRepoFilesExist -Paths $productGateFiles) `
 Add-ArchitectureItem -Items $items -Id "aggregate-verification-boundary" -Layer "Verification" `
     -Requirement "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path." `
     -Status $(if ($productGateReady) { "passed" } else { "failed" }) `
-    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, publicTesterGateway=$publicTesterGatewayStatus, dashboardUi=$dashboardUiStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
+    -Evidence "liveInfra=$liveInfraGateStatus, liveProduct=$liveProductGateStatus, externalTester=$externalTesterStatus, testerNetworkFresh=$externalTesterNetworkFresh, externalTesterPacket=$externalTesterPacketStatus, packetSmoke=$externalTesterPacketExecutableSmokeValidated, connectPackReady=$externalTesterConnectPackReady, testerTokenSetup=$testerWriteTokenSetupStatus, publicTesterGateway=$publicTesterGatewayStatus, dashboardUi=$dashboardUiStatus, operatorDoctor=$operatorDoctorStatus, operatorPackage=$operatorPackageStatus, operatorPackageVerify=$operatorPackageVerifyStatus, devPack=$devPackStatus" `
     -Files $productGateFiles `
-    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dashboard:ui:readiness", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
+    -Commands @("npm run flowchain:live-infra:check", "npm run flowchain:live-product:e2e", "npm run flowchain:completion:audit", "npm run flowchain:external-tester:packet", "npm run flowchain:tester:token:setup", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:dashboard:ui:readiness", "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json", "npm run flowchain:operator:package", "npm run flowchain:operator:package:verify", "npm run flowchain:dev-pack:e2e")
 
 $failedItems = @($items | Where-Object { $_.status -eq "failed" })
 $blockedItems = @($items | Where-Object { $_.status -eq "blocked" })
@@ -1202,7 +1985,7 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "owner-host-service-lifecycle"
-        path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane recovery")
+        path = @("Windows Scheduled Task", "repo working directory", "live service supervisor", "service status check", "restart with live profile", "private node/control-plane/relayer recovery")
         latestEvidence = $reportPaths.serviceInstallValidation
     },
     [ordered]@{
@@ -1211,9 +1994,15 @@ $dataFlows = @(
         latestEvidence = $reportPaths.operatorPackageVerify
     },
     [ordered]@{
+        name = "tester-write-token-setup"
+        path = @("ignored local bearer token file", "SHA-256 digest only in ignored owner env", "tester send cap env gate", "no-secret setup evidence", "public tester gateway auth")
+        latestEvidence = $reportPaths.testerWriteTokenSetup
+    },
+    [ordered]@{
         name = "public-tester-gateway"
-        path = @("tester bearer token", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
+        path = @("tester token setup proof", "public edge /tester/wallets/create", "public-only wallet metadata", "public edge /tester/wallets/send", "cap enforcement", "runtime block", "balance proof")
         latestEvidence = $reportPaths.publicTesterGateway
+        tokenSetupEvidence = $reportPaths.testerWriteTokenSetup
     },
     [ordered]@{
         name = "dashboard-wallet-explorer"
@@ -1227,13 +2016,14 @@ $dataFlows = @(
     },
     [ordered]@{
         name = "public-rpc-exposure"
-        path = @("owner TLS endpoint", "allowed-origin/rate-limit gate", "control-plane HTTP server", "JSON-RPC/REST methods", "runtime state reads")
+        path = @("owner TLS endpoint", "allowed-origin/rate-limit gate", "control-plane HTTP server", "read-only synthetic canary", "JSON-RPC/REST methods", "runtime state reads")
         latestEvidence = $reportPaths.publicRpcReadiness
+        canaryEvidence = $reportPaths.publicRpcSyntheticCanary
         blockedBy = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
     },
     [ordered]@{
         name = "public-rpc-edge-template"
-        path = @("placeholder edge config", "owner DNS/TLS", "rate-limited reverse proxy", "private FlowChain RPC origin", "readiness gates")
+        path = @("placeholder edge config", "owner DNS/TLS", "rate-limited reverse proxy", "defensive response headers", "private FlowChain RPC origin", "readiness gates")
         latestEvidence = $reportPaths.publicRpcEdgeTemplate
     },
     [ordered]@{
@@ -1245,6 +2035,12 @@ $dataFlows = @(
         name = "owner-signup-checklist"
         path = @("owner signup/setup list", "public RPC hostname", "tester write token hash and cap", "always-on host", "backup storage", "Base 8453 RPC", "bridge pilot values", "local env-file loader")
         latestEvidence = $reportPaths.ownerSignupChecklist
+    },
+    [ordered]@{
+        name = "owner-go-live-launch"
+        path = @("ignored owner inputs", "public RPC render", "systemd service plan", "live monitor", "public canary", "backup restore proof", "bridge relayer pilot", "external tester packet", "completion/truth/no-secret gates", "rollback commands")
+        latestEvidence = $reportPaths.ownerGoLiveHandoff
+        blockedBy = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_STATE_BACKUP_PATH", "FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL")
     },
     [ordered]@{
         name = "base8453-bridge-credit"
@@ -1263,15 +2059,16 @@ $dataFlows = @(
 $objectiveDeliverables = @(
     "A live-profile L1 node produces and finalizes blocks.",
     "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
-    "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
+    "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, CORS-origin forwarding, and defensive response headers.",
     "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
     "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
     "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
     "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-    "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+    "State backup, monitoring, node/control-plane/bridge-relayer autorecovery, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
     "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
     "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
     "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
+    "The owner go-live handoff gives the operator one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and final release audits.",
     "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
 )
 
@@ -1306,6 +2103,8 @@ $report = [ordered]@{
         connectPackReady = $externalTesterConnectPackReady
         connectPackChecks = $externalTesterConnectPackChecks
         testerNetworkFresh = $externalTesterNetworkFresh
+        testerWriteTokenSetupStatus = $testerWriteTokenSetupStatus
+        testerWriteTokenSetupReady = $testerWriteTokenSetupReady
         publicTesterGatewayStatus = $publicTesterGatewayStatus
         publicTesterGatewayReady = $publicTesterGatewayReady
         dashboardUiStatus = $dashboardUiStatus
@@ -1321,6 +2120,93 @@ $report = [ordered]@{
         blockedRuleCount = $opsAlertBlockedRules
         coveredFindingCount = $opsAlertCoveredFindingCodes.Count
         unmappedCurrentFindingCount = $opsAlertUnmappedCodes.Count
+    }
+    opsMetricsCoverage = [ordered]@{
+        exportStatus = $opsMetricsExportStatus
+        metricCount = $opsMetricsExportMetricCount
+        exportFailedCheckCount = $opsMetricsExportFailedChecks.Count
+        installStatus = $metricsInstallValidationStatus
+        installFailedCheckCount = $metricsInstallFailedChecks.Count
+        metricsJsonWritten = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false)
+        prometheusTextWritten = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false)
+        requiredMetricsPresent = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false)
+        publicRpcEdgeMetricsPresent = (Get-ArchitectureProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false)
+        publicRpcSecurityHeaderMetricsPresent = $opsMetricsHasPublicRpcSecurityHeaderMetrics
+        missingPublicRpcSecurityHeaderMetricNames = @($missingPublicRpcSecurityHeaderMetricNames)
+        publicRpcRollbackDrillMetricsPresent = $opsMetricsHasPublicRpcRollbackDrillMetrics
+        missingPublicRpcRollbackDrillMetricNames = @($missingPublicRpcRollbackDrillMetricNames)
+        publicRpcOwnerHostApplyPlanMetricsPresent = $opsMetricsHasPublicRpcOwnerHostApplyPlanMetrics
+        missingPublicRpcOwnerHostApplyPlanMetricNames = @($missingPublicRpcOwnerHostApplyPlanMetricNames)
+        publicRpcCommandMatrixMetricsPresent = $opsMetricsHasPublicRpcCommandMatrixMetrics
+        missingPublicRpcCommandMatrixMetricNames = @($missingPublicRpcCommandMatrixMetricNames)
+        bridgeDeployControlMetricsPresent = $opsMetricsHasBridgeDeployControlMetrics
+        missingBridgeDeployControlMetricNames = @($missingBridgeDeployControlMetricNames)
+        bridgeCommandMatrixMetricsPresent = $opsMetricsHasBridgeCommandMatrixMetrics
+        missingBridgeCommandMatrixMetricNames = @($missingBridgeCommandMatrixMetricNames)
+        supervisorNodeRecoveryMetricsPresent = $opsMetricsHasSupervisorNodeRecoveryMetrics
+        missingSupervisorNodeRecoveryMetricNames = @($missingSupervisorNodeRecoveryMetricNames)
+        serviceInstallValidationMetricsPresent = $opsMetricsHasServiceInstallValidationMetrics
+        missingServiceInstallValidationMetricNames = @($missingServiceInstallValidationMetricNames)
+        bridgeRelayerLoopValidationMetricsPresent = $opsMetricsHasBridgeRelayerLoopValidationMetrics
+        missingBridgeRelayerLoopValidationMetricNames = @($missingBridgeRelayerLoopValidationMetricNames)
+        bridgeReconciliationMetricsPresent = $opsMetricsHasBridgeReconciliationMetrics
+        missingBridgeReconciliationMetricNames = @($missingBridgeReconciliationMetricNames)
+        bridgeReleaseEvidenceMetricsPresent = $opsMetricsHasBridgeReleaseEvidenceMetrics
+        missingBridgeReleaseEvidenceMetricNames = @($missingBridgeReleaseEvidenceMetricNames)
+        externalTesterClientMetricsPresent = $opsMetricsHasExternalTesterClientMetrics
+        missingExternalTesterClientMetricNames = @($missingExternalTesterClientMetricNames)
+        secondComputerMetricsPresent = $opsMetricsHasSecondComputerMetrics
+        missingSecondComputerMetricNames = @($missingSecondComputerMetricNames)
+        devPackMetricsPresent = $opsMetricsHasDevPackMetrics
+        missingDevPackMetricNames = @($missingDevPackMetricNames)
+        monitoringBundleStatus = $monitoringBundleStatus
+        monitoringBundleDashboardPanelCount = $monitoringBundleDashboardPanelCount
+        monitoringBundlePrometheusRuleCount = $monitoringBundlePrometheusRuleCount
+        monitoringBundleFailedCheckCount = $monitoringBundleFailedChecks.Count
+        monitoringBundleSecretFindingCount = $monitoringBundleSecretFindings.Count
+        monitoringBundleMissingDashboardMetricCount = $monitoringBundleMissingDashboardMetrics.Count
+        monitoringBundleMissingPrometheusMetricCount = $monitoringBundleMissingPrometheusMetrics.Count
+        monitoringBundleMissingSourceRuleIdCount = $monitoringBundleMissingSourceRuleIds.Count
+        systemdTimerUnitPlanned = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false)
+        noExternalDelivery = (Get-ArchitectureProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false)
+    }
+    serviceSupervisorAutorecovery = [ordered]@{
+        status = $supervisorValidationStatus
+        controlPlaneRestartAttempts = $supervisorRestartAttempts
+        nodeRestartAttempts = $supervisorNodeRestartAttempts
+        relayerRestartAttempts = $supervisorRelayerRestartAttempts
+        nodeCrashDetected = (Get-ArchitectureProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false)
+        nodeRecovered = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false)
+        controlPlaneRecoveredAfterNodeCrash = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false)
+        nodeRecoveryLiveProfile = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false)
+        nodeRecoveryMaxBlocksUnbounded = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false)
+        relayerRecovered = (Get-ArchitectureProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false)
+    }
+    bridgeCommandMatrixEvidence = [ordered]@{
+        status = $bridgeCommandMatrixStatus
+        ready = $bridgeCommandMatrixReady
+        commandCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "commandCount" -Default 0)
+        phaseCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "phaseCount" -Default 0)
+        liveBroadcastCapableCommandCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0)
+        committedEvidencePathCount = [int](Get-ArchitectureProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        failedChecks = @($bridgeCommandMatrixFailedChecks)
+        missingScripts = @($bridgeCommandMatrixMissingScripts)
+        missingPhases = @($bridgeCommandMatrixMissingPhases)
+        liveBroadcastRowsWithoutAck = @($bridgeCommandMatrixBroadcastAckGaps)
+    }
+    publicRpcCommandMatrixEvidence = [ordered]@{
+        status = $publicRpcCommandMatrixStatus
+        ready = $publicRpcCommandMatrixReady
+        commandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "commandCount" -Default 0)
+        phaseCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "phaseCount" -Default 0)
+        ownerHostCommandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "ownerHostCommandCount" -Default 0)
+        mutatingOwnerHostCommandCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "mutatingOwnerHostCommandCount" -Default 0)
+        committedEvidencePathCount = [int](Get-ArchitectureProp -Object $publicRpcCommandMatrix -Name "committedEvidencePathCount" -Default 0)
+        failedChecks = @($publicRpcCommandMatrixFailedChecks)
+        missingScripts = @($publicRpcCommandMatrixMissingScripts)
+        missingPhases = @($publicRpcCommandMatrixMissingPhases)
+        envReferenceGaps = @($publicRpcCommandMatrixEnvReferenceGaps)
+        validationSignalGaps = @($publicRpcCommandMatrixValidationGaps)
     }
     bridgeRelayerSafetyEvidence = [ordered]@{
         status = $bridgeRelayerStatus

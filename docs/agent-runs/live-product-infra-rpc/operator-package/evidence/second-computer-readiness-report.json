@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.second_computer_readiness_report.v0",
-    "generatedAt":  "2026-05-18T06:21:35.5840229+00:00",
+    "generatedAt":  "2026-05-20T22:18:50.2128640+00:00",
     "status":  "passed",
     "checks":  {
                    "bundlePackageScriptPresent":  true,
@@ -46,7 +46,7 @@
                                "label":  "second-computer source bundle",
                                "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-second-computer-bundle.ps1 -Force",
                                "exitCode":  0,
-                               "durationSeconds":  69,
+                               "durationSeconds":  125,
                                "outputLineCount":  5
                            },
                            {

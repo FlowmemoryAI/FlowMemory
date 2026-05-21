@@ -1,27 +1,28 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-18T14:35:32.2472381Z",
+    "generatedAt":  "2026-05-21T16:02:08.9234062Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
                                   "A live-profile L1 node produces and finalizes blocks.",
                                   "RPC clients can connect through a private service now and through a public owner-operated edge only after TLS/CORS/rate-limit checks pass.",
-                                  "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, and CORS-origin forwarding.",
+                                  "Public RPC exposure has a no-values owner edge template for HTTPS reverse proxying, rate limiting, CORS-origin forwarding, and defensive response headers.",
                                   "Wallets can be created without returned secret material and can send wallet-to-wallet transfers that settle in produced blocks.",
                                   "The dashboard has a browser-level desktop/mobile proof for tester wallet create, faucet, send, and Explorer inspection without leaking tester tokens or causing horizontal overflow.",
                                   "Friends-and-family write access has an authenticated tester gateway with cap enforcement and a local E2E proof.",
                                   "Bridge funds are modeled through a Base 8453 observer/credit path that is local-proven, bounds relayer child processes, stages the Base scan cursor until L1 credit proof, can queue new relayer handoffs into the L1, and remains live-blocked until owner guardrails are configured.",
-                                  "State backup, monitoring, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
+                                  "State backup, monitoring, node/control-plane/bridge-relayer autorecovery, reboot-persistent service install, operator doctor diagnostics, node-operator packaging, service lifecycle, emergency stop, and external tester packet are explicit operational boundaries.",
                                   "Owner onboarding explicitly separates the repo-owned FlowChain RPC public edge from the external Base 8453 bridge RPC dependency.",
                                   "Owner signup checklist maps the external services and local setup values needed for public operation without requesting secrets.",
                                   "The owner-operated public deployment contract has pre-exposure and rollback commands and cannot become shareable until all public gates pass.",
+                                  "The owner go-live handoff gives the operator one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and final release audits.",
                                   "Every missing production edge fails closed on exact owner input names, with no secrets, env values, or live broadcasts."
                               ],
     "itemCounts":  {
-                       "passed":  19,
+                       "passed":  25,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  26
+                       "total":  32
                    },
     "items":  [
                   {
@@ -29,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=72709, finalizedHeight=72709",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=113582, finalizedHeight=113582",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -51,7 +52,7 @@
                       "layer":  "Operations",
                       "requirement":  "Operator doctor covers host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values.",
                       "status":  "passed",
-                      "evidence":  "doctorStatus=blocked, checks=52, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
+                      "evidence":  "doctorStatus=blocked, checks=57, failedChecks=0, blockedChecks=5, blockedOnlyOwner=True",
                       "files":  [
                                     "infra/scripts/flowchain-doctor.ps1"
                                 ],
@@ -65,9 +66,9 @@
                   {
                       "id":  "ops-observability-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, alert rules, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
+                      "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, no-secret Grafana/Prometheus monitoring bundle, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=16, alertCoveredFindings=18, alertInstall=passed, alertInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=10, blockedRules=6, unmappedAlerts=0, incidentDrill=passed, incidentCases=11, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=44, alertCoveredFindings=46, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, publicRpcApplyPlanAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, bridgeCommandMatrixAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=334, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, publicRpcOwnerApplyMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, bridgeCommandMatrixMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, monitoringBundle=passed, monitoringPanels=20, monitoringRules=12, monitoringFailedChecks=0, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=37, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -75,7 +76,15 @@
                                     "infra/scripts/flowchain-ops-snapshot.ps1",
                                     "infra/scripts/flowchain-ops-alerts.ps1",
                                     "infra/scripts/flowchain-alert-install-windows.ps1",
+                                    "infra/scripts/flowchain-alert-install-systemd.ps1",
+                                    "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
                                     "infra/scripts/flowchain-alert-install-validation.ps1",
+                                    "infra/scripts/flowchain-ops-metrics-export.ps1",
+                                    "infra/scripts/flowchain-monitoring-bundle.ps1",
+                                    "infra/scripts/flowchain-metrics-install-windows.ps1",
+                                    "infra/scripts/flowchain-metrics-install-systemd.ps1",
+                                    "infra/scripts/flowchain-metrics-install-systemd-validation.ps1",
+                                    "infra/scripts/flowchain-metrics-install-validation.ps1",
                                     "infra/scripts/flowchain-ops-escalation-dry-run.ps1",
                                     "infra/scripts/flowchain-incident-drill.ps1",
                                     "infra/scripts/flowchain-emergency-stop-local.ps1",
@@ -87,6 +96,11 @@
                                        "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts -- -AllowBlocked",
                                        "npm run flowchain:ops:alerts:install:validate",
+                                       "npm run flowchain:ops:alerts:install:systemd:validate",
+                                       "npm run flowchain:ops:metrics:export -- -AllowBlocked",
+                                       "npm run flowchain:ops:monitoring:bundle",
+                                       "npm run flowchain:ops:metrics:install:validate",
+                                       "npm run flowchain:ops:metrics:install:systemd:validate",
                                        "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
                                        "npm run flowchain:ops:incident-drill",
                                        "npm run flowchain:emergency:stop-local"
@@ -119,11 +133,35 @@
                                    ]
                   },
                   {
+                      "id":  "systemd-service-install-boundary",
+                      "layer":  "Operations",
+                      "requirement":  "Owner-host Linux/VPS service lifecycle includes a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for reboot-persistent live supervisor autorecovery from rendered units.",
+                      "status":  "passed",
+                      "evidence":  "systemdInstallValidation=passed, failedChecks=0, installScript=True, plan=True, planDidNotMutate=True, renderedUnits=True, relayerDefaultOff=True, relayerOptIn=True, supervisor=True, hardening=True",
+                      "files":  [
+                                    "infra/scripts/flowchain-service-install-systemd.ps1",
+                                    "infra/scripts/flowchain-service-install-systemd-validation.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:service:install:systemd:validate",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
+                                       "npm run flowchain:service:install:systemd -- -Action Install -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                                       "npm run flowchain:service:install:systemd -- -Action Status",
+                                       "npm run flowchain:service:install:systemd -- -Action Uninstall"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "node-operator-package-boundary",
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=45, runbooks=27, evidenceReports=37, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=70, runbooks=52, evidenceReports=76, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -138,9 +176,9 @@
                   {
                       "id":  "node-operator-package-verify-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan.",
+                      "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=55, commands=45, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=118, commands=70, goLiveEvidence=36, missingGoLiveEvidence=0, goLiveEvidenceNotInManifest=0, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -155,18 +193,20 @@
                   {
                       "id":  "rpc-api-boundary",
                       "layer":  "RPC/API",
-                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/rate-limit validation, narrow public reads, and abuse rejection before it can be exposed publicly.",
+                      "requirement":  "The control-plane API has explicit health/discovery/readiness/CORS/live security-header/rate-limit validation, read-only synthetic canary coverage, narrow public reads, and abuse rejection before it can be exposed publicly.",
                       "status":  "passed",
-                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0",
+                      "evidence":  "validationStatus=passed, corsAllowed=True, corsRejected=True, endpointChecks=True, securityHeaderSkip=True, securityHeaderPolicy=True, rateLimitProbe=True, rateLimitRejected=True, rateLimitRetryAfter=True, responseHygiene=True, canaryStatus=blocked, canarySafe=True, noWriteMethods=True, abuseStatus=passed, abusePassed=True, abuseMissingChecks=0",
                       "files":  [
                                     "services/control-plane/src/server.ts",
                                     "services/control-plane/src/methods.ts",
                                     "infra/scripts/flowchain-public-rpc-readiness.ps1",
+                                    "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1",
                                     "infra/scripts/flowchain-public-rpc-validation.ps1",
                                     "infra/scripts/flowchain-public-rpc-abuse-test.ps1"
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                        "npm run flowchain:public-rpc:abuse-test"
                                    ],
                       "blockers":  [
@@ -176,15 +216,17 @@
                   {
                       "id":  "public-rpc-edge",
                       "layer":  "Public edge",
-                      "requirement":  "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, endpoint checks, and response hygiene.",
+                      "requirement":  "External RPC exposure is a distinct owner-operated edge with TLS, allowed origins, rate limits, live security-header proof, endpoint checks, response hygiene, and passing read-only synthetic canary.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, liveHeaderProbe=False, liveHeaders=False, headerPolicyReady=True, canaryStatus=blocked, canaryReady=False, canarySafe=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-readiness.ps1",
+                                    "infra/scripts/flowchain-public-rpc-synthetic-canary.ps1",
                                     "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md"
                                 ],
                       "commands":  [
-                                       "npm run flowchain:public-rpc:check"
+                                       "npm run flowchain:public-rpc:check",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
                                    ],
                       "blockers":  [
                                        "FLOWCHAIN_RPC_PUBLIC_URL",
@@ -196,9 +238,9 @@
                   {
                       "id":  "public-rpc-edge-template-boundary",
                       "layer":  "Public edge",
-                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror.",
+                      "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, defensive response headers, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, walletCutoverCommands=True, securityHeaders=True, securityHeaderPreflight=True, ownerRenderSecurityHeaders=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-edge-template.ps1",
                                     "infra/scripts/flowchain-public-rpc-deployment-bundle.ps1",
@@ -217,16 +259,35 @@
                   {
                       "id":  "public-rpc-deployment-automation-boundary",
                       "layer":  "Public edge",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, defensive response-header probes, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, hashed artifact manifest, Linux and Windows owner-host plan/apply/rollback scripts, install/edge apply phases, post-deploy evidence, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, rollbackDrill=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, securityHeaders=True, securityHeaderPreflight=True, methodRejectionProbes=True, testerUnauthProbe=True, walletTesterE2e=True, syntheticCanary=True, cutoverRehearsal=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, installTargets=True, hostMutationFalse=True",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-deployment-automation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_AUTOMATION.md",
-                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-render-report-snapshot.json"
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-command-matrix-boundary",
+                      "layer":  "Public edge",
+                      "requirement":  "Public RPC command matrix maps launch commands across preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback phases to owner input names, mutation risk, rollback coverage, and committed no-secret evidence.",
+                      "status":  "passed",
+                      "evidence":  "matrix=passed, commands=21, phases=9, ownerHostCommands=6, mutatingOwnerHostCommands=4, committedEvidencePaths=21, failedChecks=0, missingScripts=0, missingPhases=0, envReferenceGaps=0, validationGaps=0, badOwnerInputs=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-public-rpc-command-matrix.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:command-matrix"
                                    ],
                       "blockers":  [
 
@@ -283,6 +344,8 @@
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
@@ -304,11 +367,29 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-command-matrix-boundary",
+                      "layer":  "Bridge",
+                      "requirement":  "Bridge pilot operations expose a single no-secret command matrix that maps every deploy, observe, relayer, credit, reconciliation, withdrawal/release, emergency-control, and release command to owner input names, acknowledgement gates, risk class, and committed evidence paths.",
+                      "status":  "passed",
+                      "evidence":  "matrix=passed, commands=20, phases=9, liveBroadcastCommands=4, committedEvidencePaths=13, failedChecks=0, missingScripts=0, missingPhases=0, ackGaps=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-bridge-command-matrix.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/BRIDGE_COMMAND_MATRIX.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:bridge:command-matrix"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "bridge-relayer-runtime-queue",
                       "layer":  "Bridge",
                       "requirement":  "The live bridge relayer path checks owner guardrails, bounds child process execution, validates the isolated relayer loop start/stop path plus fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, builds runtime handoff, filters already-seen replay keys, queues new credits into the running L1, waits for main-state credit evidence, commits the Base cursor only after safe proof without broadcasts, and proves missing-owner-input runs leave cursor state untouched.",
                       "status":  "blocked",
-                      "evidence":  "relayer=blocked, childTimeoutSeconds=300, timedOutSteps=0, guardrail=passed, guardrailChildTimeoutRecorded=True, guardrailNoChildTimeouts=True, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
+                      "evidence":  "relayer=blocked, onceChecksReady=True, onceFailedChecks=0, childTimeoutSeconds=300, timedOutSteps=0, guardrail=passed, guardrailChildTimeoutRecorded=True, guardrailNoChildTimeouts=True, loopValidation=passed, loopFailedChecks=0, loopReportHealthy=True, observed=0, new=0, queued=0, applied=0, cursorCommitRequired=True, cursorCommitted=False, cursorReason=not-run",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-live-check.ps1",
                                     "infra/scripts/flowchain-live-env-bridge-readiness.ps1",
@@ -317,6 +398,8 @@
                                     "infra/scripts/flowchain-bridge-relayer-once.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-guardrail-validation.ps1",
                                     "infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md",
                                     "infra/scripts/flowchain-service-start.ps1"
                                 ],
@@ -339,11 +422,30 @@
                                    ]
                   },
                   {
+                      "id":  "bridge-runtime-credit-proof",
+                      "layer":  "Bridge",
+                      "requirement":  "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts.",
+                      "status":  "passed",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.693, transferSeconds=0.641",
+                      "files":  [
+                                    "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
+                                    "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
+                                    "docs/agent-runs/live-product-infra-rpc/BRIDGE_RUNTIME_CREDIT_VALIDATION.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:bridge:runtime-credit:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "state-backup-boundary",
                       "layer":  "Storage/recovery",
-                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, scheduled backup install proof, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
+                      "requirement":  "Live state backup and restore are separate configured storage boundaries with manifest hash proof, latest-pointer proof, owner-path dry-run proof, Windows and Linux scheduled backup plus restore-drill install proof, retention rotation, live-state protection, and adversarial tamper/missing-artifact/wrong-chain rejection before public operation.",
                       "status":  "blocked",
-                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, snapshotProof=not-run, restoreProof=not-run, requiredChecks=15, missingChecks=0",
+                      "evidence":  "backupStatus=blocked, validationStatus=passed, ownerPathDryRun=passed, ownerPathFailedChecks=0, installValidation=passed, installFailedChecks=0, systemdValidation=True, systemdTimer=True, snapshotProof=not-run, restoreProof=not-run, requiredChecks=23, missingChecks=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-rpc-backup-readiness.ps1",
                                     "infra/scripts/flowchain-state-backup.ps1",
@@ -351,8 +453,12 @@
                                     "infra/scripts/flowchain-backup-restore-validation.ps1",
                                     "infra/scripts/flowchain-backup-owner-path-dry-run.ps1",
                                     "infra/scripts/flowchain-backup-install-windows.ps1",
+                                    "infra/scripts/flowchain-backup-install-systemd.ps1",
+                                    "infra/scripts/flowchain-backup-install-systemd-validation.ps1",
                                     "infra/scripts/flowchain-backup-install-validation.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md",
+                                    "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md",
                                     "docs/agent-runs/live-product-infra-rpc/BACKUP_INSTALL_VALIDATION.md"
                                 ],
                       "commands":  [
@@ -362,6 +468,8 @@
                                        "npm run flowchain:backup:owner-path:dry-run",
                                        "npm run flowchain:backup:install:validate",
                                        "npm run flowchain:backup:install:windows -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd -- -Action Plan",
+                                       "npm run flowchain:backup:install:systemd:validate",
                                        "npm run flowchain:backup:check"
                                    ],
                       "blockers":  [
@@ -373,13 +481,43 @@
                       "layer":  "Deployment",
                       "requirement":  "The owner-operated public deployment contract is machine-checkable, includes rollback commands, and blocks sharing until public RPC, backup, bridge, and tester gates pass.",
                       "status":  "blocked",
-                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=6, failedItems=0",
+                      "evidence":  "deploymentStatus=blocked, deploymentReady=False, packetShareable=False, packetSmoke=True, blockedOnlyKnown=True, blockedItems=7, failedItems=0",
                       "files":  [
                                     "infra/scripts/flowchain-public-deployment-contract.ps1",
                                     "docs/OPERATIONS/FLOWCHAIN_OWNER_OPERATED_PUBLIC_RPC.md"
                                 ],
                       "commands":  [
                                        "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "owner-go-live-launch-boundary",
+                      "layer":  "Deployment/governance",
+                      "requirement":  "Owner go-live handoff sequences owner inputs, public RPC render, owner-host apply, service install, live monitoring, public RPC canaries, backup restore proof, bridge relayer pilot, external testers, final audits, and rollback commands as one no-secret launch-control boundary.",
+                      "status":  "passed",
+                      "evidence":  "handoffStatus=passed, stages=8, launchSteps=10, launchCommands=44, evidenceReports=45, applyPlan=True, applyExecution=True, applyRollback=True, windowsApplyPlan=True, windowsApplyExecution=True, windowsApplyRollback=True, invalidEvidenceReports=0, missingRequiredInputs=14, missingOptionalInputs=1, neededNowOptionalInputs=0, missingLaunchScripts=0, rollbackCommands=9, missingRollbackScripts=0, failedChecks=0, secretFindings=0",
+                      "files":  [
+                                    "infra/scripts/flowchain-owner-go-live-handoff.ps1",
+                                    "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:owner:go-live-handoff"
                                    ],
                       "blockers":  [
                                        "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -514,12 +652,14 @@
                   {
                       "id":  "developer-dev-pack-boundary",
                       "layer":  "Developer ecosystem",
-                      "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, and fail closed for public readiness.",
+                      "requirement":  "Developer SDK/devkit and docs connect to the real FlowChain RPC, generate a live RPC reference, read wallet data, submit a runtime-backed local wallet send, prove the packaged browser starter, and fail closed for public readiness.",
                       "status":  "passed",
-                      "evidence":  "devPackStatus=passed, methodCount=79, heights=61637-\u003e61638, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
+                      "evidence":  "devPackStatus=passed, methodCount=82, heights=106437-\u003e106438, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
                       "files":  [
                                     "services/flowchain-sdk/src/client.ts",
                                     "services/flowchain-sdk/src/cli.ts",
+                                    "examples/flowchain-browser-readiness/package.json",
+                                    "examples/flowchain-browser-readiness/src/main.jsx",
                                     "docs/developer/FLOWCHAIN_QUICKSTART.md",
                                     "docs/sdk/RPC_REFERENCE.generated.md"
                                 ],
@@ -567,6 +707,22 @@
                                    ]
                   },
                   {
+                      "id":  "tester-write-token-setup-boundary",
+                      "layer":  "External tester launch",
+                      "requirement":  "Friends-and-family tester write access has a no-secret setup proof where the raw bearer token stays in ignored local storage, only its digest and cap are written to the ignored owner env file, and committed evidence prints neither token nor digest.",
+                      "status":  "passed",
+                      "evidence":  "tokenSetupStatus=passed, tokenPath=devnet/local/owner-inputs/tester-write-token.local.txt, ownerEnvFile=devnet/local/owner-inputs/flowchain-owner.local.env, tokenCreated=False, tokenPreserved=True, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
+                      "files":  [
+                                    "infra/scripts/flowchain-tester-write-token-setup.ps1"
+                                ],
+                      "commands":  [
+                                       "npm run flowchain:tester:token:setup"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-tester-gateway-boundary",
                       "layer":  "External tester launch",
                       "requirement":  "Public tester write gateway has a local production-shaped E2E proof for bearer auth, public-only wallet creation, capped wallet sends, balance settlement, and over-cap rejection.",
@@ -586,14 +742,16 @@
                   {
                       "id":  "dashboard-ui-browser-boundary",
                       "layer":  "Explorer and wallet UI",
-                      "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
+                      "requirement":  "Dashboard browser verification covers the tester wallet panel, authenticated tester create/faucet/send operations, Explorer inspection, tester launch readiness, L1 activation cockpit, desktop and mobile viewports, no token/secret leakage, and no horizontal overflow.",
                       "status":  "passed",
-                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=5, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                      "evidence":  "dashboardUiStatus=passed, browserProjects=2, coveredRoutes=10, failedChecks=0, report=E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                       "files":  [
                                     "apps/dashboard/playwright.config.ts",
                                     "apps/dashboard/e2e/flowchain-ui-readiness.spec.ts",
                                     "apps/dashboard/src/views/WalletView.tsx",
                                     "apps/dashboard/src/views/ExplorerView.tsx",
+                                    "apps/dashboard/src/views/ExternalTesterLaunchView.tsx",
+                                    "apps/dashboard/src/views/OwnerActivationView.tsx",
                                     "infra/scripts/flowchain-dashboard-ui-readiness.ps1"
                                 ],
                       "commands":  [
@@ -609,7 +767,7 @@
                       "layer":  "Verification",
                       "requirement":  "Product-level verification composes runtime, RPC, wallets, public tester gateway, bridge, backup, public deployment contract, executable external tester packet smoke, operator doctor, node-operator package, developer dev-pack, and completion evidence into one auditable path.",
                       "status":  "passed",
-                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
+                      "evidence":  "liveInfra=blocked, liveProduct=blocked, externalTester=blocked, testerNetworkFresh=True, externalTesterPacket=blocked, packetSmoke=True, connectPackReady=True, testerTokenSetup=passed, publicTesterGateway=passed, dashboardUi=passed, operatorDoctor=blocked, operatorPackage=passed, operatorPackageVerify=passed, devPack=passed",
                       "files":  [
                                     "infra/scripts/flowchain-live-infra-check.ps1",
                                     "infra/scripts/flowchain-live-product-e2e.ps1",
@@ -621,6 +779,7 @@
                                     "infra/scripts/flowchain-external-tester-readiness.ps1",
                                     "infra/scripts/flowchain-external-tester-packet.ps1",
                                     "infra/scripts/flowchain-external-tester-evidence-validation.ps1",
+                                    "infra/scripts/flowchain-tester-write-token-setup.ps1",
                                     "infra/scripts/flowchain-public-tester-gateway-e2e.ps1",
                                     "infra/scripts/flowchain-dashboard-ui-readiness.ps1",
                                     "apps/dashboard/playwright.config.ts",
@@ -631,6 +790,7 @@
                                        "npm run flowchain:live-product:e2e",
                                        "npm run flowchain:completion:audit",
                                        "npm run flowchain:external-tester:packet",
+                                       "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
                                        "npm run flowchain:dashboard:ui:readiness",
                                        "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
@@ -665,7 +825,7 @@
                                        "live service supervisor",
                                        "service status check",
                                        "restart with live profile",
-                                       "private node/control-plane recovery"
+                                       "private node/control-plane/relayer recovery"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json"
                       },
@@ -684,9 +844,20 @@
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json"
                       },
                       {
+                          "name":  "tester-write-token-setup",
+                          "path":  [
+                                       "ignored local bearer token file",
+                                       "SHA-256 digest only in ignored owner env",
+                                       "tester send cap env gate",
+                                       "no-secret setup evidence",
+                                       "public tester gateway auth"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json"
+                      },
+                      {
                           "name":  "public-tester-gateway",
                           "path":  [
-                                       "tester bearer token",
+                                       "tester token setup proof",
                                        "public edge /tester/wallets/create",
                                        "public-only wallet metadata",
                                        "public edge /tester/wallets/send",
@@ -694,7 +865,8 @@
                                        "runtime block",
                                        "balance proof"
                                    ],
-                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json"
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                          "tokenSetupEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json"
                       },
                       {
                           "name":  "dashboard-wallet-explorer",
@@ -728,10 +900,12 @@
                                        "owner TLS endpoint",
                                        "allowed-origin/rate-limit gate",
                                        "control-plane HTTP server",
+                                       "read-only synthetic canary",
                                        "JSON-RPC/REST methods",
                                        "runtime state reads"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                          "canaryEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                           "blockedBy":  [
                                             "FLOWCHAIN_RPC_PUBLIC_URL",
                                             "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
@@ -745,6 +919,7 @@
                                        "placeholder edge config",
                                        "owner DNS/TLS",
                                        "rate-limited reverse proxy",
+                                       "defensive response headers",
                                        "private FlowChain RPC origin",
                                        "readiness gates"
                                    ],
@@ -774,6 +949,28 @@
                                        "local env-file loader"
                                    ],
                           "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json"
+                      },
+                      {
+                          "name":  "owner-go-live-launch",
+                          "path":  [
+                                       "ignored owner inputs",
+                                       "public RPC render",
+                                       "systemd service plan",
+                                       "live monitor",
+                                       "public canary",
+                                       "backup restore proof",
+                                       "bridge relayer pilot",
+                                       "external tester packet",
+                                       "completion/truth/no-secret gates",
+                                       "rollback commands"
+                                   ],
+                          "latestEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
+                          "blockedBy":  [
+                                            "FLOWCHAIN_RPC_PUBLIC_URL",
+                                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                            "FLOWCHAIN_BASE8453_RPC_URL"
+                                        ]
                       },
                       {
                           "name":  "base8453-bridge-credit",
@@ -869,16 +1066,21 @@
                         "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
                         "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
                         "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
                         "operatorPackage":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-report.json",
                         "operatorPackageVerify":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\operator-package-verify-report.json",
                         "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
+                        "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
+                        "monitoringBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\monitoring-bundle-report.json",
+                        "metricsInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-validation-report.json",
                         "opsEscalationDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-escalation-dry-run-report.json",
                         "incidentDrill":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",
                         "liveWallet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
                         "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
                         "publicRpcReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "backupReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
@@ -887,25 +1089,30 @@
                         "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
                         "bridgeLiveReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
                         "bridgeInfraReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-command-matrix-report.json",
                         "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
                         "bridgePilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json",
                         "baseTxDiagnostic":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\live-l1-bridge-e2e\\base-tx-diagnostic.json",
                         "ownerOnboarding":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-onboarding-report.json",
                         "ownerSignupChecklist":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-signup-checklist-report.json",
+                        "ownerGoLiveHandoff":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
                         "ownerInputs":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-report.json",
                         "ownerEnvReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-report.json",
                         "ownerEnvReadinessValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-env-readiness-validation-report.json",
                         "publicRpcEdgeTemplate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-edge-template-report.json",
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
+                        "publicRpcCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-command-matrix-report.json",
                         "ownerInputsValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-inputs-validation-report.json",
                         "liveInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-infra-check-report.json",
                         "liveProduct":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-live-product-e2e-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "externalTesterEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
+                        "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
                         "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
                         "dashboardUiReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
                         "devPack":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json",
@@ -950,6 +1157,8 @@
                                                                    "connectPackBroadcastsFalse":  true
                                                                },
                                          "testerNetworkFresh":  true,
+                                         "testerWriteTokenSetupStatus":  "passed",
+                                         "testerWriteTokenSetupReady":  true,
                                          "publicTesterGatewayStatus":  "passed",
                                          "publicTesterGatewayReady":  true,
                                          "dashboardUiStatus":  "passed",
@@ -963,18 +1172,156 @@
                                                                           "/tester/wallets/create",
                                                                           "/tester/faucet",
                                                                           "/tester/wallets/send",
-                                                                          "/explorer"
+                                                                          "/explorer",
+                                                                          "/tester",
+                                                                          "/activation",
+                                                                          "/bridge",
+                                                                          "/ops",
+                                                                          "/alerts"
                                                                       ],
                                          "publicDeploymentContractPacketSmoke":  true
                                      },
     "opsAlertCoverage":  {
                              "status":  "passed",
-                             "ruleCount":  16,
-                             "criticalRuleCount":  10,
-                             "blockedRuleCount":  6,
-                             "coveredFindingCount":  18,
+                             "ruleCount":  44,
+                             "criticalRuleCount":  37,
+                             "blockedRuleCount":  7,
+                             "coveredFindingCount":  46,
                              "unmappedCurrentFindingCount":  0
                          },
+    "opsMetricsCoverage":  {
+                               "exportStatus":  "passed",
+                               "metricCount":  334,
+                               "exportFailedCheckCount":  0,
+                               "installStatus":  "passed",
+                               "installFailedCheckCount":  0,
+                               "metricsJsonWritten":  true,
+                               "prometheusTextWritten":  true,
+                               "requiredMetricsPresent":  true,
+                               "publicRpcEdgeMetricsPresent":  true,
+                               "publicRpcSecurityHeaderMetricsPresent":  true,
+                               "missingPublicRpcSecurityHeaderMetricNames":  [
+
+                                                                             ],
+                               "publicRpcRollbackDrillMetricsPresent":  true,
+                               "missingPublicRpcRollbackDrillMetricNames":  [
+
+                                                                            ],
+                               "publicRpcOwnerHostApplyPlanMetricsPresent":  true,
+                               "missingPublicRpcOwnerHostApplyPlanMetricNames":  [
+
+                                                                                 ],
+                               "publicRpcCommandMatrixMetricsPresent":  true,
+                               "missingPublicRpcCommandMatrixMetricNames":  [
+
+                                                                            ],
+                               "bridgeDeployControlMetricsPresent":  true,
+                               "missingBridgeDeployControlMetricNames":  [
+
+                                                                         ],
+                               "bridgeCommandMatrixMetricsPresent":  true,
+                               "missingBridgeCommandMatrixMetricNames":  [
+
+                                                                         ],
+                               "supervisorNodeRecoveryMetricsPresent":  true,
+                               "missingSupervisorNodeRecoveryMetricNames":  [
+
+                                                                            ],
+                               "serviceInstallValidationMetricsPresent":  true,
+                               "missingServiceInstallValidationMetricNames":  [
+
+                                                                              ],
+                               "bridgeRelayerLoopValidationMetricsPresent":  true,
+                               "missingBridgeRelayerLoopValidationMetricNames":  [
+
+                                                                                 ],
+                               "bridgeReconciliationMetricsPresent":  true,
+                               "missingBridgeReconciliationMetricNames":  [
+
+                                                                          ],
+                               "bridgeReleaseEvidenceMetricsPresent":  true,
+                               "missingBridgeReleaseEvidenceMetricNames":  [
+
+                                                                           ],
+                               "externalTesterClientMetricsPresent":  true,
+                               "missingExternalTesterClientMetricNames":  [
+
+                                                                          ],
+                               "secondComputerMetricsPresent":  true,
+                               "missingSecondComputerMetricNames":  [
+
+                                                                    ],
+                               "devPackMetricsPresent":  true,
+                               "missingDevPackMetricNames":  [
+
+                                                             ],
+                               "monitoringBundleStatus":  "passed",
+                               "monitoringBundleDashboardPanelCount":  20,
+                               "monitoringBundlePrometheusRuleCount":  12,
+                               "monitoringBundleFailedCheckCount":  0,
+                               "monitoringBundleSecretFindingCount":  0,
+                               "monitoringBundleMissingDashboardMetricCount":  0,
+                               "monitoringBundleMissingPrometheusMetricCount":  0,
+                               "monitoringBundleMissingSourceRuleIdCount":  0,
+                               "systemdTimerUnitPlanned":  true,
+                               "noExternalDelivery":  true
+                           },
+    "serviceSupervisorAutorecovery":  {
+                                          "status":  "passed",
+                                          "controlPlaneRestartAttempts":  1,
+                                          "nodeRestartAttempts":  1,
+                                          "relayerRestartAttempts":  1,
+                                          "nodeCrashDetected":  true,
+                                          "nodeRecovered":  true,
+                                          "controlPlaneRecoveredAfterNodeCrash":  true,
+                                          "nodeRecoveryLiveProfile":  true,
+                                          "nodeRecoveryMaxBlocksUnbounded":  true,
+                                          "relayerRecovered":  true
+                                      },
+    "bridgeCommandMatrixEvidence":  {
+                                        "status":  "passed",
+                                        "ready":  true,
+                                        "commandCount":  20,
+                                        "phaseCount":  9,
+                                        "liveBroadcastCapableCommandCount":  4,
+                                        "committedEvidencePathCount":  13,
+                                        "failedChecks":  [
+
+                                                         ],
+                                        "missingScripts":  [
+
+                                                           ],
+                                        "missingPhases":  [
+
+                                                          ],
+                                        "liveBroadcastRowsWithoutAck":  [
+
+                                                                        ]
+                                    },
+    "publicRpcCommandMatrixEvidence":  {
+                                           "status":  "passed",
+                                           "ready":  true,
+                                           "commandCount":  21,
+                                           "phaseCount":  9,
+                                           "ownerHostCommandCount":  6,
+                                           "mutatingOwnerHostCommandCount":  4,
+                                           "committedEvidencePathCount":  21,
+                                           "failedChecks":  [
+
+                                                            ],
+                                           "missingScripts":  [
+
+                                                              ],
+                                           "missingPhases":  [
+
+                                                             ],
+                                           "envReferenceGaps":  [
+
+                                                                ],
+                                           "validationSignalGaps":  [
+
+                                                                    ]
+                                       },
     "bridgeRelayerSafetyEvidence":  {
                                         "status":  "blocked",
                                         "childTimeoutSeconds":  300,

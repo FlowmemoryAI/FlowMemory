@@ -7,9 +7,11 @@ Status: local/private operator guide with public deployment boundaries.
 ```powershell
 npm run flowchain:operator:package
 npm run flowchain:operator:package:verify
+npm run flowchain:install:check
 npm run flowchain:service:start -- -LiveProfile
 npm run flowchain:service:status -- -AllowBlocked
 npm run flowchain:service:monitor -- -AllowBlocked
+npm run flowchain:upgrade:rehearse
 npm run flowchain:service:restart -- -LiveProfile
 npm run flowchain:service:stop
 ```
@@ -22,6 +24,13 @@ fresh state file writes, and advancing height.
 the command matrix, owner-input names, and current readiness evidence.
 `flowchain:operator:package:verify` independently validates that package after
 it exists.
+
+`flowchain:install:check` is the top-level owner-host preflight. It checks the
+required tools, package scripts, install runbooks, Windows Scheduled Task
+validation, Linux systemd validation, and no-secret boundaries without mutating
+the host. `flowchain:upgrade:rehearse` copies the current live state into an
+ignored local rehearsal directory, proves next-release and rollback state hashes
+match the source, and writes the operator upgrade/rollback runbook.
 
 ## Service Supervisor
 
@@ -38,7 +47,9 @@ npm run flowchain:service:install:systemd:validate
 
 The supervisor checks `flowchain:service:status`, requires live profile by
 default, restarts with `flowchain:service:restart -- -LiveProfile`, and writes
-redacted reports under `docs/agent-runs/live-product-infra-rpc/`.
+redacted reports under `docs/agent-runs/live-product-infra-rpc/`. With
+`-StartBridgeRelayerLoop`, it also treats a stopped, mismatched, or unhealthy
+bridge relayer loop as an autorecovery restart reason.
 
 On a Windows owner host, `flowchain:service:install:windows` can register,
 inspect, and remove a Scheduled Task that starts the live supervisor at logon:
@@ -51,8 +62,13 @@ npm run flowchain:service:install:windows -- -Action Uninstall
 
 On a Linux VPS, `flowchain:service:install:systemd:validate` checks the rendered
 systemd live-service and supervisor templates, install/status/uninstall command
-plans, owner env-file wiring, scoped write paths, and autorecovery defaults
-without mutating the host.
+plans, owner env-file wiring, scoped write paths, autorecovery defaults, and the
+explicit bridge-relayer opt-in supervisor plan without mutating the host.
+
+```powershell
+npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
+npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop
+```
 
 ## Public RPC Boundary
 
@@ -89,21 +105,29 @@ npm run flowchain:backup:restore:verify
 npm run flowchain:backup:restore:validate
 npm run flowchain:backup:check -- -AllowBlocked
 npm run flowchain:backup:install:windows -- -Action Plan
+npm run flowchain:backup:install:systemd -- -Action Plan
+npm run flowchain:backup:install:systemd:validate
 npm run flowchain:backup:install:validate
 ```
 
 Backups must write readable snapshots, readable manifests, an atomically written
-latest pointer, and matching manifest hashes. Restore validation must prove
-missing artifact, tampered manifest, corrupt restore, wrong-chain restore, and
-latest-pointer tamper failures.
+latest pointer, matching manifest hashes, and a retention policy that protects
+the newest snapshot while pruning older eligible snapshots. Restore validation
+must prove missing artifact, tampered manifest, corrupt restore, wrong-chain
+restore, latest-pointer tamper failures, retention rotation, and restore of the
+newest retained snapshot.
 
 On a Windows owner host, the backup install command can register, inspect, and
-remove a daily Scheduled Task for manifest-backed state snapshots:
+remove daily Scheduled Tasks for manifest-backed state snapshots and recurring
+restore drills:
 
 ```powershell
 npm run flowchain:backup:install:windows -- -Action Install
 npm run flowchain:backup:install:windows -- -Action Status
 npm run flowchain:backup:install:windows -- -Action Uninstall
+npm run flowchain:backup:install:systemd -- -Action Install
+npm run flowchain:backup:install:systemd -- -Action Status
+npm run flowchain:backup:install:systemd -- -Action Uninstall
 ```
 
 ## Bridge Relayer

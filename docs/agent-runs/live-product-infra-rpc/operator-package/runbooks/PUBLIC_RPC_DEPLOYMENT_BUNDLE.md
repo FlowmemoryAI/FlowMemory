@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Bundle
 
-Generated: 2026-05-18T06:51:17.2713954Z
+Generated: 2026-05-21T12:55:17.9614147Z
 Status: passed
 
 This bundle packages placeholder-only files for an owner-operated HTTPS edge in front of the repo-owned private RPC origin `127.0.0.1:8787`.
@@ -26,6 +26,7 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - <FLOWCHAIN_RPC_PUBLIC_HOST>
 - <FLOWCHAIN_RPC_PUBLIC_URL>
 - <FLOWCHAIN_RPC_ALLOWED_ORIGIN>
+- <FLOWCHAIN_RPC_DISALLOWED_ORIGIN>
 - <FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>
 - <PATH_TO_TLS_CERTIFICATE>
 - <PATH_TO_TLS_CERTIFICATE_KEY>
@@ -59,15 +60,22 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - npm run flowchain:service:restart -- -LiveProfile
 - npm run flowchain:service:supervisor -- -Once
 - npm run flowchain:service:supervisor:validate
+- npm run flowchain:service:install:systemd:validate
 - npm run flowchain:service:status
 - npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30
 - npm run flowchain:ops:snapshot -- -AllowBlocked
 - npm run flowchain:public-rpc:validate
 - npm run flowchain:public-rpc:check
+- npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
+- npm run flowchain:tester:gateway:e2e
+- npm run flowchain:wallet:live-tester:e2e
 - npm run flowchain:backup:restore:validate
 - npm run flowchain:backup:check
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
+- npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
+- npm run flowchain:truth-table -- -AllowBlocked
+- npm run flowchain:no-secret:scan
 
 ## Owner-Host Render Commands
 
@@ -75,6 +83,8 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 
 ## Owner-Host Preflight Commands
 
+- npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>
+- npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop
 - systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>
 - systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>
 - nginx -t
@@ -126,15 +136,29 @@ This bundle packages placeholder-only files for an owner-operated HTTPS edge in 
 - ownerRenderWritesWindowsPreflight: True
 - ownerRenderDoesNotPrintTokenHash: True
 - ownerRenderFilesDoNotContainTokenHash: True
+- ownerRenderIncludesSecurityHeaders: True
+- ownerRenderIncludesTimeoutGuardrails: True
+- ownerRenderPreflightsRejectWrongMethods: True
+- ownerRenderRejectsPublicUrlPath: True
+- ownerRenderPublicUrlPathRejectOutputNoSecrets: True
 - includesPrivateOrigin: True
 - includesRateLimitPlaceholder: True
 - includesTlsPlaceholders: True
+- includesSecurityHeaders: True
+- includesTimeoutGuardrails: True
+- preflightsCheckSecurityHeaders: True
+- preflightsCheckTimeoutGuardrails: True
+- includesMethodRejectionPreflight: True
 - includesCorsOriginForwarding: True
 - publicStateMirrorExcluded: True
 - devnetStatePublicRpcExcluded: True
 - includesNginxConfigTest: True
 - includesWindowsNginxConfigTest: True
 - includesTesterWritePreflight: True
+- includesDisallowedOriginPreflight: True
+- includesBroadStateBlockedPreflight: True
+- includesPrivateWalletCreateBlockedPreflight: True
+- authorizationForwardingScopedToTesterWrite: True
 - includesVerificationCommands: True
 - includesRollbackCommands: True
 - envExampleHasAllRequiredNames: True

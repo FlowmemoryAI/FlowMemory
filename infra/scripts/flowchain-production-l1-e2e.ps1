@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 . "$PSScriptRoot\flowchain-common.ps1"
+. "$PSScriptRoot\flowchain-live-env-common.ps1"
 
 $repoRoot = Set-FlowChainRepoRoot
 Set-FlowChainCargoTargetDir -RepoRoot $repoRoot -Purpose "production-l1-e2e" | Out-Null
@@ -198,6 +199,17 @@ function Get-StateFacts {
     if (-not (Test-Path -LiteralPath $StatePath)) {
         return $facts
     }
+
+    $fastFacts = Get-FlowChainStateFacts -StatePath ([System.IO.Path]::GetFullPath($StatePath))
+    if ($fastFacts.readable -eq $true) {
+        if (-not [string]::IsNullOrWhiteSpace($fastFacts.chainId)) { $facts.chainId = "$($fastFacts.chainId)" }
+        if (-not [string]::IsNullOrWhiteSpace($fastFacts.latestHeight)) { $facts.latestHeight = "$($fastFacts.latestHeight)" }
+        if (-not [string]::IsNullOrWhiteSpace($fastFacts.latestHash)) { $facts.latestHash = "$($fastFacts.latestHash)" }
+        if (-not [string]::IsNullOrWhiteSpace($fastFacts.finalizedHeight)) { $facts.finalizedHeight = "$($fastFacts.finalizedHeight)" }
+        if (-not [string]::IsNullOrWhiteSpace($fastFacts.latestRoot)) { $facts.stateRoot = "$($fastFacts.latestRoot)" }
+        return $facts
+    }
+
     try {
         $state = Get-Content -Raw -LiteralPath $StatePath | ConvertFrom-Json
         if ($state.PSObject.Properties.Name -contains "chainId") { $facts.chainId = "$($state.chainId)" }
@@ -379,7 +391,7 @@ $bundlePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/expo
 $exportedStatePath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/export/latest/state.json"
 $importedStatePath = Join-Path $reportFullDir "imported-state.json"
 $importDir = Join-Path $reportFullDir "imported"
-$importStep = Invoke-ProductionStep -Name "Import local state" -Owner "storage" -Command "npm run flowchain:import -- --BundlePath devnet/local/export/flowchain-local-state.zip -StatePath devnet/local/production-l1-e2e/imported-state.json -Force" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-import.ps1"), "-BundlePath", $bundlePath, "-StatePath", $importedStatePath, "-ImportDir", $importDir, "-Force")
+$importStep = Invoke-ProductionStep -Name "Import local state" -Owner "storage" -Command "npm run flowchain:import -- --BundlePath devnet/local/export/flowchain-local-state.zip -StatePath devnet/local/production-l1-e2e/imported-state.json -Force -SkipInspect" -FilePath "powershell" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-import.ps1"), "-BundlePath", $bundlePath, "-StatePath", $importedStatePath, "-ImportDir", $importDir, "-Force", "-SkipInspect")
 
 $exportedFacts = Get-StateFacts -StatePath $exportedStatePath
 $importedFacts = Get-StateFacts -StatePath $importedStatePath

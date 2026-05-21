@@ -1,10 +1,12 @@
 {
     "schema":  "flowchain.alert_install_validation_report.v0",
-    "generatedAt":  "2026-05-18T06:51:03.8641137Z",
+    "generatedAt":  "2026-05-21T10:56:05.1308999Z",
     "status":  "passed",
     "taskName":  "FlowChainOpsAlerts",
     "checks":  {
                    "installScriptExists":  true,
+                   "systemdInstallScriptExists":  true,
+                   "systemdValidationScriptExists":  true,
                    "alertsScriptExists":  true,
                    "packageScriptsPresent":  true,
                    "planCommandPassed":  true,
@@ -29,6 +31,15 @@
                    "commandsPresent":  true,
                    "scheduledCommandKeepsBlockedAlertsVisible":  true,
                    "scheduledCommandDoesNotDisableRefresh":  true,
+                   "systemdValidationCommandPassed":  true,
+                   "systemdValidationPassed":  true,
+                   "systemdPlanDidNotMutate":  true,
+                   "systemdServiceUnitPlanned":  true,
+                   "systemdTimerUnitPlanned":  true,
+                   "systemdTimerIntervalConfigured":  true,
+                   "systemdOwnerEnvFileInjectable":  true,
+                   "systemdNoExternalDelivery":  true,
+                   "systemdChildReportNoSecrets":  true,
                    "envValuesPrintedFalse":  true,
                    "childReportsNoSecrets":  true,
                    "childReportsSecretMarkerFindingsEmpty":  true,
@@ -55,26 +66,35 @@
                                     "name":  "alert-install-plan",
                                     "exitCode":  0,
                                     "timedOut":  false,
-                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015050730-60472-41d0c69b.stdout.log",
-                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015050730-60472-41d0c69b.stderr.log"
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055546192-61484-b210e21d.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055546192-61484-b210e21d.stderr.log"
                                 },
                                 {
                                     "name":  "alert-install-status",
                                     "exitCode":  0,
                                     "timedOut":  false,
-                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015056084-60472-2640e2fd.stdout.log",
-                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015056084-60472-2640e2fd.stderr.log"
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055551980-61484-05a10a7f.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055551980-61484-05a10a7f.stderr.log"
                                 },
                                 {
                                     "name":  "alert-install-uninstall-absent",
                                     "exitCode":  0,
                                     "timedOut":  false,
-                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015059876-60472-d00a236f.stdout.log",
-                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260518015059876-60472-d00a236f.stderr.log"
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055556061-61484-4d26bae6.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055556061-61484-4d26bae6.stderr.log"
+                                },
+                                {
+                                    "name":  "alert-install-systemd-validation",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055600212-61484-02e22cce.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-install-validation\\20260521055600212-61484-02e22cce.stderr.log"
                                 }
                             ],
     "commands":  {
                      "plan":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+                     "systemdPlan":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                     "systemdValidate":  "npm run flowchain:ops:alerts:install:systemd:validate",
                      "install":  "npm run flowchain:ops:alerts:install:windows -- -Action Install",
                      "status":  "npm run flowchain:ops:alerts:install:windows -- -Action Status",
                      "uninstall":  "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",

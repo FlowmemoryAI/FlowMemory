@@ -1144,6 +1144,12 @@ function sleepSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolveSleep) => {
+    setTimeout(resolveSleep, ms);
+  });
+}
+
 function acquireApplicationStateLock(statePath: string): { fd: number; lockPath: string } {
   const resolvedStatePath = resolve(statePath);
   const lockPath = `${resolvedStatePath}.lock`;
@@ -1176,6 +1182,42 @@ function acquireApplicationStateLock(statePath: string): { fd: number; lockPath:
         throw new Error(`timed out waiting for bridge runtime credit state lock: ${lockPath}`);
       }
       sleepSync(APPLICATION_STATE_LOCK_RETRY_MS);
+    }
+  }
+}
+
+async function acquireBridgeStateFileLock(statePath: string): Promise<{ fd: number; lockPath: string }> {
+  const resolvedStatePath = resolve(statePath);
+  const lockPath = `${resolvedStatePath}.lock`;
+  mkdirSync(dirname(resolvedStatePath), { recursive: true });
+  const deadline = Date.now() + APPLICATION_STATE_LOCK_TIMEOUT_MS;
+
+  for (;;) {
+    try {
+      const fd = openSync(lockPath, "wx", 0o600);
+      try {
+        writeFileSync(fd, `${JSON.stringify({
+          pid: process.pid,
+          statePath: resolvedStatePath,
+          acquiredAt: new Date().toISOString(),
+        }, null, 2)}\n`);
+        return { fd, lockPath };
+      } catch (error) {
+        closeSync(fd);
+        rmSync(lockPath, { force: true });
+        throw error;
+      }
+    } catch (error) {
+      const code = typeof error === "object" && error !== null && "code" in error
+        ? String((error as { code?: unknown }).code)
+        : "";
+      if (code !== "EEXIST") {
+        throw error;
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(`timed out waiting for bridge state file lock: ${lockPath}`);
+      }
+      await sleep(APPLICATION_STATE_LOCK_RETRY_MS);
     }
   }
 }
@@ -1260,8 +1302,12 @@ function saveApplicationState(path: string, state: BridgeRuntimeCreditApplicatio
 }
 
 async function withBridgeStateFileLock<T>(statePath: string, operation: () => Promise<T>): Promise<T> {
-  const lock = acquireApplicationStateLock(statePath);
+  const lock = await acquireBridgeStateFileLock(statePath);
   try {
+    const testHoldMs = Number(process.env.FLOWCHAIN_BRIDGE_CURSOR_LOCK_TEST_HOLD_MS ?? "0");
+    if (Number.isFinite(testHoldMs) && testHoldMs > 0) {
+      await sleep(Math.min(testHoldMs, 1_000));
+    }
     return await operation();
   } finally {
     releaseApplicationStateLock(lock);
@@ -1291,6 +1337,7 @@ function loadBridgeCursorState(path: string, options: CliOptions, expectedChainI
   const lastConfirmedHead = asBlock(String(parsed.lastConfirmedHead ?? "0"), "cursor.lastConfirmedHead");
   const lastFromBlock = asBlock(String(parsed.lastFromBlock ?? "0"), "cursor.lastFromBlock");
   const lastToBlock = asBlock(String(parsed.lastToBlock ?? "0"), "cursor.lastToBlock");
+  const lastLogCount = asNonNegativeInteger(parsed.lastLogCount ?? 0, "cursor.lastLogCount");
   const parsedStateId = asHash(String(parsed.stateId), "cursor.stateId");
   const expectedStateId = bridgeCursorStateId(
     parsed.mode,
@@ -1301,6 +1348,15 @@ function loadBridgeCursorState(path: string, options: CliOptions, expectedChainI
   );
   if (parsedStateId.toLowerCase() !== expectedStateId.toLowerCase()) {
     throw new Error("bridge cursor state id mismatch");
+  }
+  if (lastFromBlock > lastToBlock) {
+    throw new Error("bridge cursor range is invalid: cursor.lastFromBlock exceeds cursor.lastToBlock");
+  }
+  if (lastToBlock !== lastScannedBlock) {
+    throw new Error("bridge cursor range is invalid: cursor.lastToBlock must match cursor.lastScannedBlock");
+  }
+  if (lastScannedBlock > lastConfirmedHead) {
+    throw new Error("bridge cursor range is invalid: cursor.lastScannedBlock exceeds cursor.lastConfirmedHead");
   }
   return {
     schema: "flowmemory.bridge_lockbox_cursor_state.v0",
@@ -1313,7 +1369,7 @@ function loadBridgeCursorState(path: string, options: CliOptions, expectedChainI
     lastConfirmedHead: lastConfirmedHead.toString(),
     lastFromBlock: lastFromBlock.toString(),
     lastToBlock: lastToBlock.toString(),
-    lastLogCount: Number(parsed.lastLogCount ?? 0),
+    lastLogCount,
     localOnly: false,
     productionReady: true,
   };

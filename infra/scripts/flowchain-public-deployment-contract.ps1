@@ -47,9 +47,12 @@ $paths = [ordered]@{
     serviceMonitor = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
     serviceSupervisorValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     serviceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    systemdServiceInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     opsSnapshot = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
+    opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
+    metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     ownerOnboarding = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"
     ownerSignupChecklist = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"
@@ -59,8 +62,11 @@ $paths = [ordered]@{
     publicRpcDeploymentBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
     publicRpcDeploymentAutomation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
     publicRpc = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    publicRpcSyntheticCanary = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
+    publicRpcCanaryScheduleValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json"
     publicRpcValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"
     publicRpcAbuseTest = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     publicTesterGateway = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
     backup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
@@ -71,6 +77,9 @@ $paths = [ordered]@{
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
+    bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
+    bridgeReconciliationScheduleValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -324,9 +333,12 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:service:monitor -- -DurationSeconds 20 -PollSeconds 5 -MaxStateAgeSeconds 90",
     "npm run flowchain:service:supervisor:validate",
     "npm run flowchain:service:install:validate",
+    "npm run flowchain:service:install:systemd:validate",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:ops:alerts -- -AllowBlocked",
+    "npm run flowchain:ops:metrics:export -- -AllowBlocked",
     "npm run flowchain:ops:alerts:install:validate",
+    "npm run flowchain:ops:metrics:install:validate",
     "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
     "npm run flowchain:owner:onboarding",
     "npm run flowchain:owner:signup-checklist",
@@ -336,7 +348,10 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:public-rpc:deployment-bundle",
     "npm run flowchain:public-rpc:deployment:automation",
     "npm run flowchain:public-rpc:validate",
+    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+    "npm run flowchain:public-rpc:canary:schedule:validate",
     "npm run flowchain:public-rpc:abuse-test",
+    "npm run flowchain:tester:token:setup",
     "npm run flowchain:tester:gateway:e2e",
     "npm run flowchain:public-rpc:check -- -AllowBlocked",
     "npm run flowchain:backup:restore:validate",
@@ -347,6 +362,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
     "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
     "npm run flowchain:bridge:relayer:loop:validate",
+    "npm run flowchain:bridge:release:evidence:validate",
     "npm run flowchain:external-tester:packet -- -AllowBlocked",
     "npm run flowchain:no-secret:scan"
 )
@@ -356,9 +372,12 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-monitor" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-monitor.ps1"), "-DurationSeconds", "20", "-PollSeconds", "5", "-MaxStateAgeSeconds", "90", "-ReportPath", $paths.serviceMonitor)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-supervisor-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-supervisor-validation.ps1"), "-ReportPath", $paths.serviceSupervisorValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-validation.ps1"), "-ReportPath", $paths.serviceInstallValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "systemd-service-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-service-install-systemd-validation.ps1"), "-ReportPath", $paths.systemdServiceInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-snapshot" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-snapshot.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsSnapshot)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-alert-rules" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsAlertRules)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-metrics-export" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-metrics-export.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsMetricsExport)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "alert-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-alert-install-validation.ps1"), "-ReportPath", $paths.alertInstallValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "metrics-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-metrics-install-validation.ps1"), "-ReportPath", $paths.metricsInstallValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "ops-escalation-dry-run" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-escalation-dry-run.ps1"), "-AllowBlocked", "-NoRefresh", "-ReportPath", $paths.opsEscalationDryRun, "-OpsSnapshotPath", $paths.opsSnapshot, "-OpsAlertRulesPath", $paths.opsAlertRules)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-onboarding" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-onboarding.ps1"), "-ReportPath", $paths.ownerOnboarding)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "owner-signup-checklist" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-owner-signup-checklist.ps1"), "-ReportPath", $paths.ownerSignupChecklist)
@@ -369,8 +388,11 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-deployment-automation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-deployment-automation.ps1"), "-ReportPath", $paths.publicRpcDeploymentAutomation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-validation.ps1"), "-ReportPath", $paths.publicRpcValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-abuse-test" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-abuse-test.ps1"), "-ReportPath", $paths.publicRpcAbuseTest)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "tester-write-token-setup" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-tester-write-token-setup.ps1"), "-ReportPath", $paths.testerWriteTokenSetup)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-tester-gateway-e2e" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-tester-gateway-e2e.ps1"), "-ReportPath", $paths.publicTesterGateway)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-readiness" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-readiness.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpc)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-synthetic-canary" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-synthetic-canary.ps1"), "-AllowBlocked", "-ReportPath", $paths.publicRpcSyntheticCanary)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "public-rpc-canary-schedule-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-public-rpc-canary-schedule-validation.ps1"), "-ReportPath", $paths.publicRpcCanaryScheduleValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-restore-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-restore-validation.ps1"), "-ReportPath", $paths.backupRestoreValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-owner-path-dry-run" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-owner-path-dry-run.ps1"), "-ReportPath", $paths.backupOwnerPathDryRun)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "backup-install-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-backup-install-validation.ps1"), "-ReportPath", $paths.backupInstallValidation)
@@ -380,6 +402,9 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-once" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-once.ps1"), "-AllowBlocked", "-ReportPath", $paths.bridgeRelayerOnce)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-guardrail-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"), "-ReportPath", $paths.bridgeRelayerGuardrailValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-loop-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"), "-ReportPath", $paths.bridgeRelayerLoopValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-runtime-credit-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"), "-ReportPath", $paths.bridgeRuntimeCreditValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-release-evidence-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"), "-ReportPath", $paths.bridgeReleaseEvidenceValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-reconciliation-schedule-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-reconciliation-schedule-validation.ps1"), "-ReportPath", $paths.bridgeReconciliationScheduleValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
         "-NoProfile",
@@ -387,11 +412,6 @@ if (-not $NoRefresh.IsPresent) {
         "Bypass",
         "-File",
         (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1"),
-        "-Paths",
-        "docs/agent-runs/live-product-infra-rpc",
-        "docs/OPERATIONS",
-        "services/bridge-relayer/out/real-value-pilot-e2e",
-        "devnet/local/live-l1-bridge-e2e",
         "-ReportPath",
         $paths.noSecret
     )
@@ -514,17 +534,24 @@ $ownerEnvTemplateGitIgnored = Get-DeploymentProp -Object $ownerEnvTemplate -Name
 $ownerEnvTemplateIncludesRequired = Get-DeploymentProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-DeploymentProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
 $ownerEnvTemplateOptionalCount = @((Get-DeploymentProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
+$ownerEnvTemplateFieldGuideCount = [int](Get-DeploymentProp -Object $ownerEnvTemplate -Name "fieldGuideCount" -Default 0)
+$ownerEnvTemplateChecks = Get-DeploymentProp -Object $ownerEnvTemplate -Name "checks"
 $ownerEnvTemplateReady = ($ownerEnvTemplateStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:owner-env:template") `
     -and ($ownerEnvTemplateGitIgnored -eq $true) `
     -and ($ownerEnvTemplateIncludesRequired -eq $true) `
     -and (($ownerEnvTemplateRequiredCount + $ownerEnvTemplateOptionalCount) -eq $knownOwnerInputs.Count) `
+    -and ($ownerEnvTemplateFieldGuideCount -eq $knownOwnerInputs.Count) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideCoversAllRequiredEnvNames" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideCoversAllOptionalEnvNames" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideHasValidationForEveryName" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideHasDoNotSendForEveryName" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "owner-env-template" `
-    -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
+    -Requirement "Owner env-file setup has a command-generated local scaffold and no-secret field guide whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplateReady) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, fieldGuideCount=$ownerEnvTemplateFieldGuideCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
     -Commands @("npm run flowchain:owner-env:template")
 
 $publicRpcEdgeTemplate = $reports.publicRpcEdgeTemplate
@@ -540,6 +567,14 @@ $edgeTemplateDevnetStateExcluded = Get-DeploymentProp -Object $publicRpcEdgeTemp
 $publicRpcDeploymentBundle = $reports.publicRpcDeploymentBundle
 $publicRpcDeploymentBundleStatus = Get-DeploymentStatus -Report $publicRpcDeploymentBundle
 $deploymentBundleChecks = Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "checks"
+$deploymentBundleRequiredCommands = @((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "requiredCommands" -Default @()) | ForEach-Object { "$_" })
+$deploymentBundleCoversWalletCutover = @(
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
+) | Where-Object { $_ -notin $deploymentBundleRequiredCommands } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
 $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxTemplateWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "nginxPreflightScriptWritten" -Default $false) -eq $true) `
@@ -547,13 +582,22 @@ $deploymentBundleReady = $publicRpcDeploymentBundleStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "windowsNginxPreflightTokensPresent" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesWindowsNginxConfigTest" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTimeoutGuardrails" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "preflightsCheckTimeoutGuardrails" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "publicStateMirrorExcluded" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "devnetStatePublicRpcExcluded" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderFilesHaveNoPlaceholders" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderDoesNotPrintTokenHash" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderPreflightsRejectWrongMethods" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerEnvExampleWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "verifyRunbookWritten" -Default $false) -eq $true) `
+    -and ($deploymentBundleCoversWalletCutover -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentBundleChecks -Name "rollbackRunbookWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentBundle -Name "noSecrets" -Default $false) -eq $true)
@@ -571,13 +615,48 @@ $deploymentAutomationReady = $publicRpcDeploymentAutomationStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTls" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasCorsForwarding" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasRateLimit" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTimeoutGuardrails" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedSystemdUsesOwnerEnv" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasReadinessProbe" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightChecksTimeoutGuardrails" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackRenderedConfigRestoredFromPrevious" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackOriginalConfigRestoredAfterDrill" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackArtifactsStayedInsideRenderDir" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryListsFiles" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryHasRequiredEnvNames" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryOwnerPathsOutsideRepo" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellHasPlanApplyRollback" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesPostDeployEvidence" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTesterGatewayE2e" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcDeploymentAutomation -Name "noSecrets" -Default $false) -eq $true) `
@@ -594,15 +673,15 @@ $publicRpcEdgeTemplateReady = ($publicRpcEdgeTemplateStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $publicRpcEdgeTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "public-rpc-edge-template" `
-    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, verification, rollback, and no broad local state mirror." `
+    -Requirement "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror." `
     -Status $(if ($publicRpcEdgeTemplateReady -and $deploymentBundleReady) { "passed" } else { "failed" }) `
-    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
+    -Evidence "edgeTemplateStatus=$publicRpcEdgeTemplateStatus, bundleStatus=$publicRpcDeploymentBundleStatus, renderValidation=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "ownerRenderValidationPassed" -Default $false)), testerWritePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTesterWritePreflight" -Default $false)), methodRejectionPreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesMethodRejectionPreflight" -Default $false)), timeoutGuardrails=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesTimeoutGuardrails" -Default $false)), walletCutoverCommands=$deploymentBundleCoversWalletCutover, disallowedOriginPreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesDisallowedOriginPreflight" -Default $false)), blockedStatePreflight=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesBroadStateBlockedPreflight" -Default $false)), privateWalletCreateBlocked=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "includesPrivateWalletCreateBlockedPreflight" -Default $false)), authForwardingScoped=$((Get-DeploymentProp -Object $deploymentBundleChecks -Name "authorizationForwardingScopedToTesterWrite" -Default $false)), repoOwned=$edgeTemplateRepoOwned, requiresTls=$edgeTemplateRequiresTls, requiresRateLimit=$edgeTemplateRequiresRateLimit, forwardsOrigin=$edgeTemplateForwardsOrigin, publicStateMirrorExcluded=$edgeTemplateStateExcluded, devnetStatePublicRpcExcluded=$edgeTemplateDevnetStateExcluded" `
     -Commands @("npm run flowchain:public-rpc:edge-template", "npm run flowchain:public-rpc:deployment-bundle")
 
 Add-DeploymentItem -Items $items -Id "public-rpc-deployment-automation" `
-    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, verification, and rollback drill phases without host mutation or owner-value leakage." `
+    -Requirement "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage." `
     -Status $(if ($deploymentAutomationReady) { "passed" } else { "failed" }) `
-    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), testerUnauthProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), rollbackDrill=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
+    -Evidence "automationStatus=$publicRpcDeploymentAutomationStatus, action=$publicRpcDeploymentAutomationAction, renderCommand=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderCommandPassed" -Default $false), noPlaceholders=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedFilesHaveNoPlaceholders" -Default $false), timeoutGuardrails=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxHasTimeoutGuardrails" -Default $false), testerUnauthProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasTesterUnauthProbe" -Default $false), methodRejectionProbes=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasMethodRejectionProbes" -Default $false), walletTesterE2e=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false), cutoverRehearsal=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false), disallowedOriginProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightHasDisallowedOriginProbe" -Default $false), blockedStateProbe=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksBroadStatePath" -Default $false), privateWalletCreateBlocked=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedPreflightBlocksPrivateWalletCreate" -Default $false), authForwardingScoped=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedNginxAuthorizationForwardingScoped" -Default $false), rollbackDrill=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "rollbackDrillPerformed" -Default $false), renderSummary=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSummaryPresent" -Default $false), renderSnapshot=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedReportSnapshotWritten" -Default $false), applyScript=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptWritten" -Default $false), applyScriptHashes=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptVerifiesHashes" -Default $false), applyScriptPostDeploy=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptRunsPostDeployProof" -Default $false), windowsApplyScript=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellWritten" -Default $false), windowsApplyScriptParses=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellParses" -Default $false), windowsApplyScriptHashes=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellVerifiesHashes" -Default $false), windowsApplyScriptPostDeploy=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyPowerShellRunsPostDeployProof" -Default $false), applyPlan=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanPresent" -Default $false), ownerApplyScriptInPlan=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesOwnerApplyScript" -Default $false), windowsOwnerApplyScriptInPlan=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanIncludesWindowsOwnerApplyScript" -Default $false), artifactHashes=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "ownerHostApplyPlanArtifactsHaveSha256" -Default $false), hostMutationFalse=$(Get-DeploymentProp -Object $deploymentAutomationChecks -Name "hostMutationPerformedFalse" -Default $false)" `
     -Commands @("npm run flowchain:public-rpc:deployment:automation")
 
 $service = $reports.serviceStatus
@@ -641,10 +720,26 @@ Add-DeploymentItem -Items $items -Id "pre-share-monitoring" `
 $supervisorValidation = $reports.serviceSupervisorValidation
 $supervisorValidationStatus = Get-DeploymentStatus -Report $supervisorValidation
 $supervisorRestartAttempts = [int](Get-DeploymentProp -Object $supervisorValidation -Name "restartAttempts" -Default 0)
+$supervisorNodeRecovery = Get-DeploymentProp -Object $supervisorValidation -Name "nodeRecovery"
+$supervisorRelayerRecovery = Get-DeploymentProp -Object $supervisorValidation -Name "relayerLoopRecovery"
+$supervisorChecks = Get-DeploymentProp -Object $supervisorValidation -Name "checks"
+$supervisorNodeRestartAttempts = [int](Get-DeploymentProp -Object $supervisorNodeRecovery -Name "restartAttempts" -Default 0)
+$supervisorRelayerRestartAttempts = [int](Get-DeploymentProp -Object $supervisorRelayerRecovery -Name "restartAttempts" -Default 0)
+$supervisorRecoveryReady = ($supervisorValidationStatus -eq "passed") `
+    -and ($supervisorRestartAttempts -ge 1) `
+    -and ($supervisorNodeRestartAttempts -ge 1) `
+    -and ($supervisorRelayerRestartAttempts -ge 1) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "nodeCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryControlPlaneRunning" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryMaxBlocksUnbounded" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "relayerCrashDetected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "service-autorecovery" `
-    -Requirement "The owner service has an autorecovery supervisor and an isolated recovery drill proving control-plane restart without touching live state." `
-    -Status $(if (($supervisorValidationStatus -eq "passed") -and ($supervisorRestartAttempts -ge 1)) { "passed" } else { "failed" }) `
-    -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts" `
+    -Requirement "The owner service has an autorecovery supervisor and an isolated recovery drill proving node, control-plane, and bridge-relayer-loop restart without touching live state." `
+    -Status $(if ($supervisorRecoveryReady) { "passed" } else { "failed" }) `
+    -Evidence "supervisorValidation=$supervisorValidationStatus, restartAttempts=$supervisorRestartAttempts, nodeRestartAttempts=$supervisorNodeRestartAttempts, relayerRestartAttempts=$supervisorRelayerRestartAttempts, nodeRecovered=$(Get-DeploymentProp -Object $supervisorChecks -Name "afterNodeRecoveryNodeRunning" -Default $false), relayerRecovered=$(Get-DeploymentProp -Object $supervisorChecks -Name "afterRelayerRecoveryLoopRunning" -Default $false)" `
     -Commands @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -IntervalSeconds 30 -MaxRestartAttempts 3")
 
 $serviceInstallValidation = $reports.serviceInstallValidation
@@ -690,6 +785,49 @@ Add-DeploymentItem -Items $items -Id "service-install-automation" `
     -Evidence "serviceInstallValidation=$serviceInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "planDidNotMutate"), statusCommand=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "statusCommandPassed"), statusDidNotMutate=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "statusDidNotMutate"), uninstallNoop=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "uninstallAbsentDidNotCreateTask"), liveProfileDefault=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "liveProfileDefault"), relayerDefaultOff=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "noBridgeRelayerDefault"), relayerOptIn=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "bridgeRelayerOptInStartsLoop"), commandsPresent=$(Get-DeploymentProp -Object $serviceInstallChecks -Name "commandsPresent")" `
     -Commands @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:windows -- -Action Plan", "npm run flowchain:service:install:windows -- -Action Install", "npm run flowchain:service:install:windows -- -Action Status", "npm run flowchain:service:install:windows -- -Action Uninstall")
 
+$systemdInstallValidation = $reports.systemdServiceInstallValidation
+$systemdInstallValidationStatus = Get-DeploymentStatus -Report $systemdInstallValidation
+$systemdInstallChecks = Get-DeploymentProp -Object $systemdInstallValidation -Name "checks"
+$systemdInstallReady = ($systemdInstallValidationStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "validationPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanCommandPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanReportPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanUsesRenderedUnits" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInStartsLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInUsesSupervisor" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInPlanBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceStopPreservesState" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceRestartOnFailure" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorRestartAlways" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerDefaultOff" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "ownerEnvFileUsed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "writePathsScoped" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportNoSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanReportBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $systemdInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $systemdInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:service:install:systemd:validate")
+Add-DeploymentItem -Items $items -Id "systemd-service-install-automation" `
+    -Requirement "The owner Linux/VPS host has a real no-secret systemd plan/install/status/uninstall path plus bridge-relayer opt-in plan for rendered live-service and supervisor units, validated through read-only rendered-unit plan drills." `
+    -Status $(if ($systemdInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "systemdInstallValidation=$systemdInstallValidationStatus, installScript=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installScriptExists"), plan=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanValidationPassed"), planDidNotMutate=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanDidNotMutate"), renderedUnits=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "installPlanUsesRenderedUnits"), relayerDefaultOff=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerDefaultOff"), relayerOptIn=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "bridgeRelayerOptInStartsLoop"), liveProfile=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "liveServiceUsesLiveProfile"), supervisor=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "supervisorUsesAutorecoveryLoop"), hardening=$(Get-DeploymentProp -Object $systemdInstallChecks -Name "leastPrivilegeHardeningPresent")" `
+    -Commands @("npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop", "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>", "npm run flowchain:service:install:systemd -- -Action Status", "npm run flowchain:service:install:systemd -- -Action Uninstall")
+
 $opsSnapshot = $reports.opsSnapshot
 $opsSnapshotStatus = Get-DeploymentStatus -Report $opsSnapshot
 $opsCriticalCount = [int](Get-DeploymentProp -Object $opsSnapshot -Name "criticalCount" -Default 999)
@@ -730,16 +868,58 @@ $alertInstallReady = ($alertInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "actionUsesAlertsScript" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "scheduledCommandDoesNotDisableRefresh" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $alertInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:systemd:validate") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:alerts:install:validate")
 Add-DeploymentItem -Items $items -Id "ops-alert-schedule-automation" `
-    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops snapshot and alert-rule refresh without committed external delivery credentials." `
     -Status $(if ($alertInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate"), uninstallAbsentDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "uninstallAbsentDidNotMutate"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
-    -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall")
+    -Evidence "alertInstallValidation=$alertInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $alertInstallChecks -Name "statusDidNotMutate"), systemdValidation=$(Get-DeploymentProp -Object $alertInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-DeploymentProp -Object $alertInstallChecks -Name "systemdTimerUnitPlanned"), hasAllowBlocked=$(Get-DeploymentProp -Object $alertInstallChecks -Name "hasAllowBlocked"), noExternalDelivery=$(Get-DeploymentProp -Object $alertInstallChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:ops:alerts:install:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Plan", "npm run flowchain:ops:alerts:install:systemd -- -Action Plan", "npm run flowchain:ops:alerts:install:systemd:validate", "npm run flowchain:ops:alerts:install:windows -- -Action Install", "npm run flowchain:ops:alerts:install:windows -- -Action Status", "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall", "npm run flowchain:ops:alerts:install:systemd -- -Action Status", "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall")
+
+$metricsInstallValidation = $reports.metricsInstallValidation
+$metricsInstallValidationStatus = Get-DeploymentStatus -Report $metricsInstallValidation
+$metricsInstallChecks = Get-DeploymentProp -Object $metricsInstallValidation -Name "checks"
+$metricsInstallFailedChecks = @((Get-DeploymentProp -Object $metricsInstallValidation -Name "failedChecks" -Default @()))
+$metricsInstallReady = ($metricsInstallValidationStatus -eq "passed") `
+    -and ($metricsInstallFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "packageScriptsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "statusDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "uninstallAbsentDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "actionUsesMetricsScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "hasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "hasMetricsJsonPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "hasPrometheusTextPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "scheduledCommandDoesNotDisableRefresh" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdNoExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $metricsInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $metricsInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:systemd:validate") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:ops:metrics:install:validate")
+Add-DeploymentItem -Items $items -Id "ops-metrics-schedule-automation" `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer install paths for recurring ops metrics JSON and Prometheus textfile refresh without committed external delivery credentials." `
+    -Status $(if ($metricsInstallReady) { "passed" } else { "failed" }) `
+    -Evidence "metricsInstallValidation=$metricsInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "planDidNotMutate"), statusDidNotMutate=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "statusDidNotMutate"), systemdValidation=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "systemdTimerUnitPlanned"), hasMetricsJsonPath=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "hasMetricsJsonPath"), hasPrometheusTextPath=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "hasPrometheusTextPath"), noExternalDelivery=$(Get-DeploymentProp -Object $metricsInstallChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:ops:metrics:install:validate", "npm run flowchain:ops:metrics:install:windows -- -Action Plan", "npm run flowchain:ops:metrics:install:systemd -- -Action Plan", "npm run flowchain:ops:metrics:install:systemd:validate", "npm run flowchain:ops:metrics:install:windows -- -Action Install", "npm run flowchain:ops:metrics:install:windows -- -Action Status", "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall", "npm run flowchain:ops:metrics:install:systemd -- -Action Status", "npm run flowchain:ops:metrics:install:systemd -- -Action Uninstall")
 
 $opsEscalationDryRun = $reports.opsEscalationDryRun
 $opsEscalationDryRunStatus = Get-DeploymentStatus -Report $opsEscalationDryRun
@@ -778,12 +958,45 @@ Add-DeploymentItem -Items $items -Id "owner-input-contract" `
 $publicRpc = $reports.publicRpc
 $publicRpcStatus = Get-DeploymentStatus -Report $publicRpc
 $publicRpcReady = Get-DeploymentProp -Object $publicRpc -Name "publicRpcReady" -Default $false
+$publicRpcSyntheticCanary = $reports.publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryStatus = Get-DeploymentStatus -Report $publicRpcSyntheticCanary
+$publicRpcSyntheticCanaryReady = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "syntheticCanaryReady" -Default $false
+$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs = Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "blockedOnlyOnKnownExternalOwnerInputs" -Default $false
+$publicRpcSyntheticCanaryMissingEnvNames = @((Get-DeploymentProp -Object $publicRpcSyntheticCanary -Name "missingEnvNames" -Default @()))
+$publicRpcCanaryScheduleValidation = $reports.publicRpcCanaryScheduleValidation
+$publicRpcCanaryScheduleValidationStatus = Get-DeploymentStatus -Report $publicRpcCanaryScheduleValidation
+$publicRpcCanaryScheduleChecks = Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "checks"
+$publicRpcCanaryScheduleFailedChecks = @((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "failedChecks" -Default @()))
+$publicRpcCanaryScheduleReady = ($publicRpcCanaryScheduleValidationStatus -eq "passed") `
+    -and ($publicRpcCanaryScheduleFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "packageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "syntheticCanaryPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "canaryScriptReadOnlyPlan" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesCanaryScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanHasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanDoesNotMutateHost" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceHasAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerPersistent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $publicRpcCanaryScheduleValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:public-rpc:canary:schedule:validate")
 $publicValidation = $reports.publicRpcValidation
 $publicValidationStatus = Get-DeploymentStatus -Report $publicValidation
 $publicValidationChecks = Get-DeploymentProp -Object $publicValidation -Name "checks"
 $publicValidationPassed = ($publicValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "allowedOriginAccepted" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "disallowedOriginRejected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "securityHeaderProbeSkippedForLocalEndpoint" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "securityHeaderPassRequiredOnlyForPublicMode" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitProbePerformed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRejected" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $publicValidationChecks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true) `
@@ -826,11 +1039,22 @@ Add-DeploymentItem -Items $items -Id "public-rpc-abuse-test" `
     -Status $(if ($publicAbusePassed) { "passed" } else { "failed" }) `
     -Evidence "abuseStatus=$publicAbuseStatus, abuseReady=$publicAbuseReady, missingChecks=$($publicAbuseMissingChecks.Count)" `
     -Commands @("npm run flowchain:public-rpc:abuse-test")
+Add-DeploymentItem -Items $items -Id "public-rpc-synthetic-canary" `
+    -Requirement "The public RPC synthetic canary must run read-only live endpoint probes, avoid write methods, and stay owner-blocked until the public endpoint exists." `
+    -Status $(if (($publicRpcSyntheticCanaryStatus -eq "passed") -and ($publicRpcSyntheticCanaryReady -eq $true)) { "passed" } elseif (($publicRpcSyntheticCanaryStatus -eq "blocked") -and ($publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "canaryStatus=$publicRpcSyntheticCanaryStatus, ready=$publicRpcSyntheticCanaryReady, ownerBlocked=$publicRpcSyntheticCanaryBlockedOnlyOnOwnerInputs" `
+    -Commands @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
+    -Blockers @($publicRpcSyntheticCanaryMissingEnvNames)
+Add-DeploymentItem -Items $items -Id "public-rpc-canary-schedule-automation" `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks without host mutation or external delivery credentials." `
+    -Status $(if ($publicRpcCanaryScheduleReady) { "passed" } else { "failed" }) `
+    -Evidence "canaryScheduleValidation=$publicRpcCanaryScheduleValidationStatus, windowsPlan=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "windowsPlanUsesCanaryScript"), systemdTimer=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdTimerRendered"), ownerEnv=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "systemdServiceUsesOwnerEnvFile"), noMutation=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "hostMutationPerformedFalse"), noExternalDelivery=$(Get-DeploymentProp -Object $publicRpcCanaryScheduleChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:public-rpc:canary:schedule:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked")
 Add-DeploymentItem -Items $items -Id "public-rpc-edge" `
-    -Requirement "The owner TLS edge must pass endpoint, CORS, rate-limit, readiness, and response-hygiene checks before sharing." `
-    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
-    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
+    -Requirement "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing." `
+    -Status $(if (($publicRpcStatus -eq "passed") -and ($publicRpcReady -eq $true) -and ($publicRpcSyntheticCanaryReady -eq $true) -and ($publicRpcCanaryScheduleReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "passed" } elseif (($publicRpcStatus -eq "blocked") -and ($publicRpcSyntheticCanaryStatus -in @("blocked", "passed")) -and ($publicRpcCanaryScheduleReady -eq $true) -and ($publicValidationPassed -eq $true) -and ($publicAbusePassed -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "publicRpcStatus=$publicRpcStatus, publicRpcReady=$publicRpcReady, canaryStatus=$publicRpcSyntheticCanaryStatus, canaryReady=$publicRpcSyntheticCanaryReady, canaryScheduleReady=$publicRpcCanaryScheduleReady, validationStatus=$publicValidationStatus, validationPassed=$publicValidationPassed, abuseStatus=$publicAbuseStatus, abusePassed=$publicAbusePassed" `
+    -Commands @("npm run flowchain:public-rpc:validate", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:canary:schedule:validate", "npm run flowchain:public-rpc:abuse-test", "npm run flowchain:public-rpc:check") `
     -Blockers @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "FLOWCHAIN_RPC_TLS_TERMINATED")
 
 $backup = $reports.backup
@@ -856,7 +1080,15 @@ $backupRestoreValidationRequiredChecks = @(
     "missingStateArtifactDetected",
     "missingSnapshotManifestDetected",
     "latestPointerTamperDetected",
-    "wrongChainStateMismatchDetected"
+    "wrongChainStateMismatchDetected",
+    "retentionBackupCommandPassed",
+    "retentionPrunedOldestSnapshot",
+    "retentionRetainedNewestSnapshots",
+    "retentionLatestManifestMatchesNewest",
+    "retentionReportShowsPrunedSnapshot",
+    "retentionReportProtectsCurrentSnapshot",
+    "retentionRestoreCommandPassed",
+    "retentionRestoreUsedNewestSnapshot"
 )
 $backupRestoreValidationMissingChecks = @($backupRestoreValidationRequiredChecks | Where-Object {
     (Get-DeploymentProp -Object $backupRestoreValidationChecks -Name $_ -Default $false) -ne $true
@@ -866,7 +1098,7 @@ $backupRestoreValidationPassed = $backupRestoreValidationStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $backupRestoreValidation -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "state-backup-restore-validation" `
-    -Requirement "Backup tooling must create manifest-backed state snapshots, restore the latest snapshot safely, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets." `
+    -Requirement "Backup tooling must create manifest-backed state snapshots, rotate retained snapshots safely, restore the latest retained snapshot, reject tampered/missing/stale/wrong-chain backup evidence, and avoid owner secrets." `
     -Status $(if ($backupRestoreValidationPassed) { "passed" } else { "failed" }) `
     -Evidence "validationStatus=$backupRestoreValidationStatus, requiredChecks=$($backupRestoreValidationRequiredChecks.Count), missingChecks=$($backupRestoreValidationMissingChecks.Count)" `
     -Commands @("npm run flowchain:backup:restore:validate")
@@ -881,6 +1113,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "readinessStatusPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionPruneErrorsEmpty" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "backupRetentionProtectedSnapshot" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreLiveStateProtected" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreDidNotMutateLiveState" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "ownerBackupEnvRestored" -Default $false) -eq $true) `
@@ -889,9 +1124,9 @@ $backupOwnerPathDryRunReady = ($backupOwnerPathDryRunStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "broadcasts" -Default $true) -eq $false) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:owner-path:dry-run")
 Add-DeploymentItem -Items $items -Id "state-backup-owner-path-dry-run" `
-    -Requirement "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot plus restore evidence without using the owner's real directory." `
+    -Requirement "Backup readiness has an owner-path dry run that injects an ignored local backup path into the production backup gate and proves snapshot, retention, and restore evidence without using the owner's real directory." `
     -Status $(if ($backupOwnerPathDryRunReady) { "passed" } else { "failed" }) `
-    -Evidence "dryRun=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), restoreProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed")" `
+    -Evidence "dryRun=$backupOwnerPathDryRunStatus, failedChecks=$($backupOwnerPathDryRunFailedChecks.Count), readiness=$(Get-DeploymentProp -Object $backupOwnerPathDryRun -Name "childReadinessStatus"), snapshotProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "snapshotProofPassed"), retention=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "retentionCurrentSnapshotProtected"), restoreProof=$(Get-DeploymentProp -Object $backupOwnerPathDryRunChecks -Name "restoreProofPassed")" `
     -Commands @("npm run flowchain:backup:owner-path:dry-run")
 
 $backupInstallValidation = $reports.backupInstallValidation
@@ -903,19 +1138,39 @@ $backupInstallReady = ($backupInstallValidationStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "schedulerCmdletsAvailable" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "scheduledTaskActionSupportsWorkingDirectory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "taskNamesDistinct" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "retentionCountValid" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesBackupScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasRestoreRoot" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasStatePath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillHasReportPath" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillOwnerBackupEnvRequired" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "commandsPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdValidationPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdPlanDidNotMutate" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdRestoreServiceUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdRestoreTimerUnitPlanned" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdCommandOmitsAllowBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdOwnerBackupEnvRequired" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupRootWritePathConfigurable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $backupInstallChecks -Name "systemdChildReportNoSecrets" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $backupInstallValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:windows") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd") `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:systemd:validate") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:backup:install:validate")
 Add-DeploymentItem -Items $items -Id "state-backup-schedule-automation" `
-    -Requirement "The owner host has a no-secret Windows install, status, and uninstall path for recurring manifest-backed state backups that fail closed without the owner backup path." `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd install, status, and uninstall paths for recurring manifest-backed state backups, retention rotation, and restore drills that fail closed without the owner backup path." `
     -Status $(if ($backupInstallReady) { "passed" } else { "failed" }) `
-    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked")" `
-    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall")
+    -Evidence "backupInstallValidation=$backupInstallValidationStatus, planDidNotMutate=$(Get-DeploymentProp -Object $backupInstallChecks -Name "planDidNotMutate"), retention=$(Get-DeploymentProp -Object $backupInstallChecks -Name "actionUsesRetentionCount"), restoreDrill=$(Get-DeploymentProp -Object $backupInstallChecks -Name "restoreDrillUsesRestoreScript"), ownerBackupEnvRequired=$(Get-DeploymentProp -Object $backupInstallChecks -Name "ownerBackupEnvRequired"), commandOmitsAllowBlocked=$(Get-DeploymentProp -Object $backupInstallChecks -Name "commandOmitsAllowBlocked"), systemdValidation=$(Get-DeploymentProp -Object $backupInstallChecks -Name "systemdValidationPassed"), systemdTimer=$(Get-DeploymentProp -Object $backupInstallChecks -Name "systemdBackupTimerUnitPlanned")" `
+    -Commands @("npm run flowchain:backup:install:validate", "npm run flowchain:backup:install:windows -- -Action Plan", "npm run flowchain:backup:install:windows -- -Action Install", "npm run flowchain:backup:install:windows -- -Action Status", "npm run flowchain:backup:install:windows -- -Action Uninstall", "npm run flowchain:backup:install:systemd -- -Action Plan", "npm run flowchain:backup:install:systemd -- -Action Install", "npm run flowchain:backup:install:systemd -- -Action Status", "npm run flowchain:backup:install:systemd -- -Action Uninstall", "npm run flowchain:backup:install:systemd:validate")
 
 Add-DeploymentItem -Items $items -Id "state-backup" `
     -Requirement "The public deployment must prove the configured state backup directory can create a manifest-backed snapshot and restore it in rehearsal." `
@@ -941,6 +1196,16 @@ $bridgeRelayerGuardrailReady = $bridgeRelayerGuardrailStatus -eq "passed" `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "finalCursorUnchanged" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "stagedCursorNotWritten" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "noCreditsQueued" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveFailedClosed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveReportWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveStatusBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveUsesStagedCursorByDefault" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveCursorNotFinal" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveFinalCursorUnchanged" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveStagedCursorNotWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveEnvValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "directObserveNoSecrets" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name "noSecrets" -Default $false) -eq $true)
@@ -970,6 +1235,32 @@ $bridgeRelayerLoopReady = ($bridgeRelayerLoopStatus -eq "passed") `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $bridgeRelayerLoopValidation -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerStatus = Get-DeploymentStatus -Report $bridgeRelayer
+$bridgeRelayerChecks = Get-DeploymentProp -Object $bridgeRelayer -Name "checks"
+$bridgeRelayerFailedChecks = @((Get-DeploymentProp -Object $bridgeRelayer -Name "failedChecks" -Default @()))
+$bridgeRelayerCheckContractReady = ($bridgeRelayerFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "statusKnown" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "requiredEnvNamesPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "childTimeoutRecorded" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "childProcessesDidNotTimeout" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "broadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "envValuesPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "readinessInfraChecked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "readinessLiveCheckedWhenInfraPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "blockedBeforeLiveReadinessWhenInfraBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "blockedBeforeObservationWhenReadinessBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "noQueuedTransactionsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "noAppliedCreditsWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "cursorModeStaged" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "finalCursorNotCommittedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "finalCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "stagedCursorPathInsideRepo" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "issuesClassified" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "externalBlockerClassifiedWhenBlocked" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "latencyGateRecorded" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "latencyGatePassedWhenApplied" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "queueAndApplyMatchWhenPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRelayerChecks -Name "cursorSafeWhenPassed" -Default $false) -eq $true)
 $bridgeRelayerCounts = Get-DeploymentProp -Object $bridgeRelayer -Name "counts"
 $bridgeRelayerTiming = Get-DeploymentProp -Object $bridgeRelayer -Name "timing"
 $bridgeRelayerCursorCommit = Get-DeploymentProp -Object $bridgeRelayer -Name "cursorCommit"
@@ -985,6 +1276,7 @@ $bridgeRelayerCursorReason = Get-DeploymentProp -Object $bridgeRelayerCursorComm
 $bridgeRelayerQueueReady = ($bridgeRelayerNewCount -eq 0) -or (($bridgeRelayerQueueDisabled -eq $false) -and ($bridgeRelayerQueuedCount -ge $bridgeRelayerNewCount) -and ($bridgeRelayerAppliedCount -eq $bridgeRelayerNewCount))
 $bridgeRelayerCursorReady = ($bridgeRelayerStatus -ne "passed") -or ($bridgeRelayerCursorCommitted -eq $true) -or ($bridgeRelayerCursorCommitRequired -eq $false)
 $bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
+    -and $bridgeRelayerCheckContractReady `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "broadcasts" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $bridgeRelayer -Name "noSecrets" -Default $false) -eq $true) `
@@ -996,13 +1288,135 @@ $bridgeRelayerReady = ($bridgeRelayerStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:once") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:guardrail:validate") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:relayer:loop:validate")
-$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady
+$bridgeRelayerBlockedSafely = ($bridgeRelayerStatus -eq "blocked") -and $bridgeRelayerCheckContractReady -and $bridgeRelayerGuardrailReady -and $bridgeRelayerLoopReady
 Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
-    -Requirement "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, proves fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs leave cursor state untouched." `
+    -Requirement "The bridge relayer has a no-broadcast one-shot path plus an isolated loop validation that checks owner guardrails, proves fresh no-secret/no-broadcast loop health, observes Base 8453 deposits with a staged cursor, filters replays, queues new credits into the running L1, waits for main-state credit evidence, records handoff-to-spendable latency, only commits the Base cursor after safe proof, and proves missing-owner-input runs plus standalone observation leave final cursor state untouched." `
     -Status $(if ($bridgeRelayerReady) { "passed" } elseif ($bridgeRelayerBlockedSafely) { "blocked" } else { "failed" }) `
-    -Evidence "relayer=$bridgeRelayerStatus, guardrail=$bridgeRelayerGuardrailStatus, loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
+    -Evidence "relayer=$bridgeRelayerStatus, onceChecksReady=$bridgeRelayerCheckContractReady, onceFailedChecks=$($bridgeRelayerFailedChecks.Count), guardrail=$bridgeRelayerGuardrailStatus, directObserveStagedDefault=$(Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name 'directObserveUsesStagedCursorByDefault' -Default $false), directObserveCursorNotFinal=$(Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name 'directObserveCursorNotFinal' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+$bridgeReconciliationScheduleValidation = $reports.bridgeReconciliationScheduleValidation
+$bridgeReconciliationScheduleStatus = Get-DeploymentStatus -Report $bridgeReconciliationScheduleValidation
+$bridgeReconciliationScheduleChecks = Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "checks"
+$bridgeReconciliationScheduleFailedChecks = @((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "failedChecks" -Default @()))
+$bridgeReconciliationScheduleReady = ($bridgeReconciliationScheduleStatus -eq "passed") `
+    -and ($bridgeReconciliationScheduleFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "packageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationScriptReadsRelayerEvidence" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationScriptReadsRuntimeEvidence" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesReconciliationScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanHasReportPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanHasMarkdownPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanDoesNotMutateHost" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHasReportPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHasMarkdownPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerPersistent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:reconciliation:schedule:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-reconciliation-schedule-automation" `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery credentials." `
+    -Status $(if ($bridgeReconciliationScheduleReady) { "passed" } else { "failed" }) `
+    -Evidence "reconciliationSchedule=$bridgeReconciliationScheduleStatus, windowsPlan=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesReconciliationScript"), systemdTimer=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerRendered"), ownerEnv=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceUsesOwnerEnvFile"), noMutation=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "hostMutationPerformedFalse"), noExternalDelivery=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:bridge:reconciliation:schedule:validate", "npm run flowchain:bridge:reconciliation")
+
+$bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditStatus = Get-DeploymentStatus -Report $bridgeRuntimeCreditValidation
+$bridgeRuntimeCreditChecks = Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "checks"
+$bridgeRuntimeCreditTiming = Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "timing"
+$bridgeRuntimeCreditFailedChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "failedChecks" -Default @()))
+$bridgeRuntimeCreditMissingRuntimeChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "missingRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditFalseRuntimeChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "falseRuntimeChecks" -Default @()))
+$bridgeRuntimeCreditProofFailedChecks = @((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "proofFailedChecks" -Default @()))
+$bridgeRuntimeCreditReady = ($bridgeRuntimeCreditStatus -eq "passed") `
+    -and ($bridgeRuntimeCreditFailedChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditMissingRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditFalseRuntimeChecks.Count -eq 0) `
+    -and ($bridgeRuntimeCreditProofFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "requiredRuntimeChecksCovered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "requiredRuntimeChecksPassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "sourceChainBase8453" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "creditAppliedOnce" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "creditedBalanceTransferable" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "replayRejected" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "restartPreservesCreditHistory" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "exportImportPreservesReplayProtection" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "latencyGatePassed" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "transferLatencyUnderTarget" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "proofBroadcastsFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoReleaseBroadcast" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditChecks -Name "handoffNoWithdrawalBroadcast" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeRuntimeCreditValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:runtime-credit:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-runtime-credit-proof" `
+    -Requirement "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts." `
+    -Status $(if ($bridgeRuntimeCreditReady) { "passed" } else { "failed" }) `
+    -Evidence "runtimeCredit=$bridgeRuntimeCreditStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'queueToSpendableSeconds' -Default ''), transferSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'transferSettlementSeconds' -Default '')" `
+    -Commands @("npm run flowchain:bridge:runtime-credit:validate")
+
+$bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceStatus = Get-DeploymentStatus -Report $bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceChecks = Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
+$bridgeReleaseEvidenceFailedChecks = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
+$bridgeReleaseEvidenceFailedCases = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
+$bridgeReleaseEvidenceMissingCases = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "missingRequiredCases" -Default @()))
+$bridgeReleaseEvidenceSecretFindings = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeReleaseEvidenceCaseCount = [int](Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0)
+$bridgeReleaseEvidenceRequiredChecks = @(
+    "releaseEvidenceScriptExists",
+    "matchingEvidencePasses",
+    "missingInputsBlock",
+    "amountMismatchFails",
+    "methodMismatchFails",
+    "tokenMismatchFails",
+    "recipientMismatchFails",
+    "chainMismatchFails",
+    "assetMismatchFails",
+    "releaseBroadcastRejected",
+    "withdrawalBroadcastRejected",
+    "releaseProductionReadyFalseRejected",
+    "releaseLocalOnlyTrueRejected",
+    "allRequiredCasesCovered",
+    "failedCasesAbsent",
+    "noSecretScanPassed",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$bridgeReleaseEvidenceMissingChecks = @($bridgeReleaseEvidenceRequiredChecks | Where-Object {
+        (Get-DeploymentProp -Object $bridgeReleaseEvidenceChecks -Name $_ -Default $false) -ne $true
+    })
+$bridgeReleaseEvidenceReady = ($bridgeReleaseEvidenceStatus -eq "passed") `
+    -and ($bridgeReleaseEvidenceCaseCount -ge 12) `
+    -and ($bridgeReleaseEvidenceFailedChecks.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceFailedCases.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceMissingCases.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceMissingChecks.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceSecretFindings.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:release:evidence:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-release-evidence-validation" `
+    -Requirement "Bridge withdrawal/release evidence must prove the Base 8453 release method, amount, token, recipient, source chain, destination asset, production-ready flag, local-only boundary, and no-broadcast/no-secret constraints before bridge-funded tester launch." `
+    -Status $(if ($bridgeReleaseEvidenceReady) { "passed" } else { "failed" }) `
+    -Evidence "releaseEvidence=$bridgeReleaseEvidenceStatus, cases=$bridgeReleaseEvidenceCaseCount, failedChecks=$($bridgeReleaseEvidenceFailedChecks.Count), missingChecks=$($bridgeReleaseEvidenceMissingChecks.Count), failedCases=$($bridgeReleaseEvidenceFailedCases.Count), missingCases=$($bridgeReleaseEvidenceMissingCases.Count), secretFindings=$($bridgeReleaseEvidenceSecretFindings.Count), broadcasts=$(Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name 'broadcasts' -Default 'missing'), noSecrets=$(Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name 'noSecrets' -Default 'missing')" `
+    -Commands @("npm run flowchain:bridge:release:evidence:validate")
 
 $externalTester = $reports.externalTester
 $externalPacket = $reports.externalTesterPacket
@@ -1035,10 +1449,35 @@ $connectPackReady = ((Get-DeploymentProp -Object $connectPackChecks -Name "conne
     -and ($connectPackShareable -eq $packetShareable)
 Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
     -Requirement "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke." `
-    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
+    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true) -and ($bridgeReleaseEvidenceReady -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true) -and ($bridgeReleaseEvidenceReady -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, bridgeReleaseEvidenceReady=$bridgeReleaseEvidenceReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($ownerMissingInputs)
+
+$testerWriteTokenSetup = $reports.testerWriteTokenSetup
+$testerWriteTokenSetupStatus = Get-DeploymentStatus -Report $testerWriteTokenSetup
+$testerWriteTokenSetupChecks = Get-DeploymentProp -Object $testerWriteTokenSetup -Name "checks"
+$testerWriteTokenSetupReady = ($testerWriteTokenSetupStatus -eq "passed") `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvPathGitIgnored" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenFileExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvFileExists" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterHashWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "ownerEnvTesterCapWritten" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "rawTokenPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetupChecks -Name "tokenHashPrintedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "rawTokenPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenHashPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "broadcasts" -Default $true) -eq $false) `
+    -and (@((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "failedChecks" -Default @())).Count -eq 0) `
+    -and (@((Get-DeploymentProp -Object $testerWriteTokenSetup -Name "secretMarkerFindings" -Default @())).Count -eq 0)
+Add-DeploymentItem -Items $items -Id "tester-write-token-setup" `
+    -Requirement "Friends-and-family tester writes have a no-secret setup proof: the raw bearer token stays in ignored local storage, only its SHA-256 digest and send cap enter the ignored owner env file, and committed evidence prints neither token nor digest." `
+    -Status $(if ($testerWriteTokenSetupReady) { "passed" } else { "failed" }) `
+    -Evidence "tokenSetupStatus=$testerWriteTokenSetupStatus, tokenPath=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenPath"), ownerEnvFile=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "ownerEnvFile"), tokenCreated=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenCreated"), tokenPreserved=$(Get-DeploymentProp -Object $testerWriteTokenSetup -Name "tokenPreserved")" `
+    -Commands @("npm run flowchain:tester:token:setup")
 
 $publicTesterGateway = $reports.publicTesterGateway
 $publicTesterGatewayStatus = Get-DeploymentStatus -Report $publicTesterGateway
@@ -1106,42 +1545,69 @@ $operatorCommands = [ordered]@{
         "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
         "npm run flowchain:service:install:validate",
         "npm run flowchain:service:install:windows -- -Action Plan",
+        "npm run flowchain:service:install:systemd:validate",
+        "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+        "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:ops:alerts -- -AllowBlocked",
+        "npm run flowchain:ops:metrics:export -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:validate",
+        "npm run flowchain:ops:metrics:install:validate",
         "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
         "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+        "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+        "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
         "npm run flowchain:owner:onboarding",
         "npm run flowchain:owner-env:template",
         "npm run flowchain:owner-inputs",
         "npm run flowchain:public-rpc:edge-template",
         "npm run flowchain:public-rpc:deployment-bundle",
         "npm run flowchain:public-rpc:validate",
+        "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
         "npm run flowchain:public-rpc:abuse-test",
         "npm run flowchain:tester:gateway:e2e",
+        "npm run flowchain:wallet:live-tester:e2e",
         "npm run flowchain:public-rpc:check",
         "npm run flowchain:backup:restore:validate",
         "npm run flowchain:backup:install:validate",
         "npm run flowchain:backup:install:windows -- -Action Plan",
+        "npm run flowchain:backup:install:systemd -- -Action Plan",
+        "npm run flowchain:backup:install:systemd:validate",
         "npm run flowchain:backup:owner-path:dry-run",
         "npm run flowchain:backup:create",
         "npm run flowchain:backup:restore:verify",
         "npm run flowchain:backup:check",
         "npm run flowchain:bridge:live:check",
-        "npm run flowchain:bridge:infra:check",
-        "npm run flowchain:bridge:relayer:once",
-        "npm run flowchain:tester:readiness",
+                                                 "npm run flowchain:bridge:infra:check",
+                                                 "npm run flowchain:bridge:relayer:once",
+                                                 "npm run flowchain:bridge:runtime-credit:validate",
+                                                 "npm run flowchain:bridge:release:evidence:validate",
+                                                 "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
+        "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+        "npm run flowchain:truth-table -- -AllowBlocked",
+        "npm run flowchain:no-secret:scan",
         "npm run flowchain:completion:audit"
     )
     rollback = @(
         "npm run flowchain:service:status",
         "npm run flowchain:service:install:windows -- -Action Status",
         "npm run flowchain:service:install:windows -- -Action Uninstall",
+        "npm run flowchain:service:install:systemd -- -Action Status",
+        "npm run flowchain:service:install:systemd -- -Action Uninstall",
         "npm run flowchain:backup:install:windows -- -Action Status",
         "npm run flowchain:backup:install:windows -- -Action Uninstall",
+        "npm run flowchain:backup:install:systemd -- -Action Status",
+        "npm run flowchain:backup:install:systemd -- -Action Uninstall",
         "npm run flowchain:ops:alerts:install:windows -- -Action Status",
         "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+        "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
+        "npm run flowchain:ops:metrics:install:windows -- -Action Status",
+        "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall",
+        "npm run flowchain:ops:metrics:install:systemd -- -Action Status",
+        "npm run flowchain:ops:metrics:install:systemd -- -Action Uninstall",
         "npm run flowchain:service:stop",
         "npm run flowchain:service:restart -- -LiveProfile",
         "npm run flowchain:emergency:stop-local"

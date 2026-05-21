@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_escalation_dry_run_report.v0",
-    "generatedAt":  "2026-05-18T06:51:05.9119884Z",
+    "generatedAt":  "2026-05-21T10:56:28.2106051Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -168,8 +168,10 @@
                                                     "ops-markdown"
                                                 ],
                              "commands":  [
-                                              "npm run flowchain:tester:readiness",
-                                              "npm run flowchain:external-tester:packet"
+                                              "npm run flowchain:wallet:live-tester:e2e",
+                                              "npm run flowchain:tester:gateway:e2e",
+                                              "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                              "npm run flowchain:external-tester:packet -- -AllowBlocked"
                                           ],
                              "wouldSendNetworkDelivery":  false,
                              "wouldStoreCredentials":  false,

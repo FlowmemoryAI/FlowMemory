@@ -15,7 +15,7 @@ $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 
-$knownOwnerInputs = @(
+$requiredOwnerInputs = @(
     "FLOWCHAIN_RPC_PUBLIC_URL",
     "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
@@ -30,12 +30,15 @@ $knownOwnerInputs = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_CURSOR_STATE",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
 )
+$optionalOwnerInputs = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
+$knownOwnerInputs = @($requiredOwnerInputs + $optionalOwnerInputs)
 
 $definitions = @(
     [ordered]@{
@@ -129,7 +132,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "service-supervisor-validation"
-        requirement = "Service supervisor validation proves a crashed local control-plane can be recovered under the live profile without deleting chain state."
+        requirement = "Service supervisor validation proves crashed local node, control-plane, and bridge relayer loop services can be recovered under the live profile without deleting chain state."
         path = "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
         command = "npm run flowchain:service:supervisor:validate"
         productionGate = $true
@@ -151,6 +154,39 @@ $definitions = @(
             "afterRecoveryHeightNumeric",
             "afterRecoveryLiveProfile",
             "afterRecoveryMaxBlocksUnbounded",
+            "beforeNodeCrashPidRecorded",
+            "nodeCrashStatusCommandPassed",
+            "nodeCrashDetected",
+            "supervisorNodeRecoveryCommandPassed",
+            "nodeRestartAttemptsExactlyOne",
+            "afterNodeRecoveryStatusCommandPassed",
+            "afterNodeRecoveryStatusPassed",
+            "afterNodeRecoveryNodeRunning",
+            "afterNodeRecoveryControlPlaneRunning",
+            "afterNodeRecoveryHeightNumeric",
+            "afterNodeRecoveryLiveProfile",
+            "afterNodeRecoveryMaxBlocksUnbounded",
+            "restartWithRelayerLoopCommandPassed",
+            "beforeRelayerCrashStatusCommandPassed",
+            "beforeRelayerCrashStatusPassed",
+            "beforeRelayerCrashPidRecorded",
+            "beforeRelayerCrashRunning",
+            "beforeRelayerCrashCommandLineMatched",
+            "beforeRelayerCrashReportHealthy",
+            "relayerCrashStatusCommandPassed",
+            "relayerCrashDetected",
+            "supervisorRelayerRecoveryCommandPassed",
+            "relayerRestartAttemptsExactlyOne",
+            "afterRelayerRecoveryStatusCommandPassed",
+            "afterRelayerRecoveryStatusPassed",
+            "afterRelayerRecoveryNodeRunning",
+            "afterRelayerRecoveryControlPlaneRunning",
+            "afterRelayerRecoveryLiveProfile",
+            "afterRelayerRecoveryMaxBlocksUnbounded",
+            "afterRelayerRecoveryLoopRunning",
+            "afterRelayerRecoveryLoopPidRecorded",
+            "afterRelayerRecoveryLoopCommandLineMatched",
+            "afterRelayerRecoveryLoopReportHealthy",
             "childLogPathsInsideRepo",
             "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
@@ -159,6 +195,8 @@ $definitions = @(
         )
         requiredMinimums = [ordered]@{
             restartAttempts = 1
+            "nodeRecovery.restartAttempts" = 1
+            "relayerLoopRecovery.restartAttempts" = 1
         }
         requiredEmptyArrays = @(
             "failedChecks",
@@ -172,6 +210,27 @@ $definitions = @(
             "afterRecovery.controlPlaneRunning" = $true
             "afterRecovery.liveProfile" = $true
             "afterRecovery.maxBlocks" = 0
+            "nodeRecovery.afterCrash.detected" = $true
+            "nodeRecovery.afterRecovery.status" = "passed"
+            "nodeRecovery.afterRecovery.nodeRunning" = $true
+            "nodeRecovery.afterRecovery.controlPlaneRunning" = $true
+            "nodeRecovery.afterRecovery.liveProfile" = $true
+            "nodeRecovery.afterRecovery.maxBlocks" = 0
+            "relayerLoopRecovery.beforeCrash.status" = "passed"
+            "relayerLoopRecovery.beforeCrash.loopStatus" = "running"
+            "relayerLoopRecovery.beforeCrash.commandLineMatched" = $true
+            "relayerLoopRecovery.beforeCrash.reportHealthy" = $true
+            "relayerLoopRecovery.afterCrash.status" = "passed"
+            "relayerLoopRecovery.afterCrash.loopStatus" = "stopped"
+            "relayerLoopRecovery.afterCrash.detected" = $true
+            "relayerLoopRecovery.afterRecovery.status" = "passed"
+            "relayerLoopRecovery.afterRecovery.nodeRunning" = $true
+            "relayerLoopRecovery.afterRecovery.controlPlaneRunning" = $true
+            "relayerLoopRecovery.afterRecovery.liveProfile" = $true
+            "relayerLoopRecovery.afterRecovery.maxBlocks" = 0
+            "relayerLoopRecovery.afterRecovery.loopStatus" = "running"
+            "relayerLoopRecovery.afterRecovery.loopCommandLineMatched" = $true
+            "relayerLoopRecovery.afterRecovery.reportHealthy" = $true
             "envValuesPrinted" = $false
             "noSecrets" = $true
             "broadcasts" = $false
@@ -255,6 +314,8 @@ $definitions = @(
         productionGate = $true
         ownerInputGate = $false
         requiredChecks = @(
+            "installScriptExists",
+            "installPackageScriptPresent",
             "validationPackageScriptPresent",
             "publicRpcBundleExists",
             "liveServiceTemplateExists",
@@ -271,6 +332,15 @@ $definitions = @(
             "supervisorUsesAutorecoveryLoop",
             "supervisorRestartAlways",
             "bridgeRelayerDefaultOff",
+            "bridgeRelayerOptInPlanCommandPassed",
+            "bridgeRelayerOptInPlanReportPassed",
+            "bridgeRelayerOptInPlanDidNotMutate",
+            "bridgeRelayerOptInPlanUsesRenderedUnits",
+            "bridgeRelayerOptInStartsLoop",
+            "bridgeRelayerOptInUsesSupervisor",
+            "bridgeRelayerOptInPlanNoSecrets",
+            "bridgeRelayerOptInPlanEnvValuesPrintedFalse",
+            "bridgeRelayerOptInPlanBroadcastsFalse",
             "ownerEnvFileUsed",
             "repoWorkingDirectoryUsed",
             "cargoTargetDirIsExternalized",
@@ -280,6 +350,13 @@ $definitions = @(
             "renderScriptRendersSystemdUnits",
             "verifyRunbookMentionsSystemdVerify",
             "rollbackRunbookMentionsSystemctl",
+            "installPlanValidationPassed",
+            "installPlanCommandPassed",
+            "installPlanDidNotMutate",
+            "installPlanUsesRenderedUnits",
+            "installPlanReportNoSecrets",
+            "installPlanReportEnvValuesPrintedFalse",
+            "installPlanReportBroadcastsFalse",
             "installCommandsPresent",
             "statusCommandsPresent",
             "uninstallCommandsPresent",
@@ -291,6 +368,89 @@ $definitions = @(
         )
         requiredEmptyArrays = @(
             "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "upgrade-rehearsal"
+        requirement = "State-preserving upgrade and rollback rehearsal copies live L1 state, verifies matching hashes after next-release and rollback restore, and documents exact operator commands without host mutation."
+        path = "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json"
+        command = "npm run flowchain:upgrade:rehearse"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "stateSourceExists",
+            "sourceStateReadable",
+            "previousReleaseStateCopied",
+            "backupStateCopied",
+            "nextReleaseStateCopied",
+            "rollbackStateCopied",
+            "sourceStateHashPresent",
+            "previousStateHashMatchesSource",
+            "nextStateHashMatchesSource",
+            "rollbackStateHashMatchesSource",
+            "chainIdPreserved",
+            "genesisHashPreserved",
+            "nextBlockNumberPreserved",
+            "packageManifestCaptured",
+            "migrationManifestWritten",
+            "rollbackManifestWritten",
+            "rollbackCommandsPresent",
+            "verifyCommandsPresent",
+            "workDirInsideRepo",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "install-check"
+        requirement = "Top-level owner-host install check verifies tools, package commands, install runbooks, Windows service install validation, Linux systemd validation, and no-secret boundaries as one operator preflight."
+        path = "docs/agent-runs/live-product-infra-rpc/install-check-report.json"
+        command = "npm run flowchain:install:check"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "repoRootResolved",
+            "packageJsonReadable",
+            "requiredPackageScriptsPresent",
+            "requiredRunbooksPresent",
+            "requiredToolsPresent",
+            "diskFreeMeetsMinimum",
+            "serviceInstallValidationReportPassed",
+            "systemdInstallValidationReportPassed",
+            "childValidationsPassed",
+            "childValidationsDidNotTimeout",
+            "ownerInputNamesOnly",
+            "ownerInputAbsenceIsNonRepoBlocker",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingScripts",
+            "missingDocs",
             "secretMarkerFindings"
         )
         requiredReportProperties = [ordered]@{
@@ -529,14 +689,165 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "owner-go-live-handoff"
+        requirement = "Owner go-live handoff converts activation stages, remaining owner inputs, external resources, validation commands, and do-not-send boundaries into one machine-readable launch deck without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+        command = "npm run flowchain:owner:go-live-handoff"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "unknownMissingEnvNames",
+            "unknownInvalidEnvNames",
+            "invalidEnvNames"
+        )
+        requiredMinimums = [ordered]@{
+            stageCount = 8
+            nextCommandCount = 6
+            mustNotSendCount = 6
+            launchSequenceCount = 8
+            launchSequenceCommandCount = 20
+            launchSequenceExpectedReportPathCount = 8
+            rollbackCommandCount = 4
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "activationPlanLoaded",
+            "activationPlanPassed",
+            "signupChecklistLoaded",
+            "signupChecklistPassed",
+            "ownerInputsLoaded",
+            "truthTableLoaded",
+            "stageDeckPresent",
+            "stageCountMinimumMet",
+            "everyStageHasValidationCommand",
+            "everyStageHasOwnerMustNotSend",
+            "nonReadyStagesExplainBlockers",
+            "requiredEnvCoverageComplete",
+            "requiredAndOptionalOwnerInputsSeparated",
+            "neededNowExcludesOptionalOwnerInputs",
+            "knownOwnerInputBlockersOnly",
+            "nextOwnerInputsPresentWhenBlocked",
+            "nextCommandsPresent",
+            "launchSequencePresent",
+            "launchSequenceEveryStepHasCommands",
+            "launchSequenceEveryStepHasExpectedStatuses",
+            "launchSequenceEveryStepHasExpectedReportPath",
+            "launchSequenceExpectedReportPathsScoped",
+            "launchSequenceEveryStepStopsOnFailure",
+            "launchSequenceCoversOwnerEnvReadiness",
+            "launchSequenceCoversPublicRpcRender",
+            "launchSequenceCoversOwnerHostApplyPlan",
+            "launchSequenceCoversOwnerHostApplyExecution",
+            "launchSequenceCoversWindowsOwnerHostApplyPlan",
+            "launchSequenceCoversWindowsOwnerHostApplyExecution",
+            "launchSequenceCoversSystemdInstallPlan",
+            "launchSequenceCoversServiceMonitor",
+            "launchSequenceCoversPublicRpcCanary",
+            "launchSequenceCoversBackupRestore",
+            "launchSequenceCoversBridgeRelayer",
+            "launchSequenceCoversTesterPacket",
+            "launchSequenceCoversCutoverAudit",
+            "launchSequenceCoversTruthAndNoSecret",
+            "launchSequenceCommandsAvoidInlineEnvAssignment",
+            "launchSequenceCommandsAvoidUrls",
+            "launchSequencePackageScriptsPresent",
+            "rollbackCommandsPresent",
+            "rollbackCoversLocalStop",
+            "rollbackCoversBridgeEmergencyStop",
+            "rollbackCoversOpsSnapshot",
+            "rollbackCoversOwnerHostApplyRollback",
+            "rollbackCoversWindowsOwnerHostApplyRollback",
+            "rollbackPackageScriptsPresent",
+            "releaseClaimBlockedUntilTruthPassed",
+            "packetShareBlockedUntilReady",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+    },
+    [ordered]@{
+        id = "owner-needs-now"
+        requirement = "Owner needs-now report answers what the L1 needs now by grouping remaining owner-input blockers into public RPC edge, backup, tester gateway, and Base 8453 bridge actions without printing owner values."
+        path = "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"
+        command = "npm run flowchain:owner:needs-now"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "missingRequiredCoverage",
+            "missingSetupCoverage",
+            "setupItemsMissingValidation",
+            "setupItemsMissingDoNotSend",
+            "setupItemsMissingSignupFlag",
+            "unknownNeededNowEnvNames",
+            "optionalNeededNowEnvNames",
+            "invalidEnvNames"
+        )
+        requiredMinimums = [ordered]@{
+            groupCount = 4
+            neededNowGroupCount = 1
+            setupItemCount = 8
+            externalSignupItemCount = 3
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "ownerInputsLoaded",
+            "ownerGoLiveHandoffLoaded",
+            "activationPlanLoaded",
+            "truthTableLoaded",
+            "reportStatusDeckPresent",
+            "groupCountMinimumMet",
+            "requiredEnvCoverageComplete",
+            "setupItemsCountMinimumMet",
+            "setupItemsCoverAllRequiredOwnerInputs",
+            "setupItemsValidationCommandsPresent",
+            "setupItemsDoNotSendPresent",
+            "setupItemsSignupFlagsPresent",
+            "setupItemsIncludeExternalSignup",
+            "setupItemsIncludeAlwaysOnHost",
+            "setupItemsIncludeOwnerEnvFile",
+            "groupCommandsPresent",
+            "groupDoNotSendPresent",
+            "knownNeededNowOwnerInputsOnly",
+            "optionalOwnerInputsExcludedFromNeededNow",
+            "nextOwnerInputsPresentWhenBlocked",
+            "neededNowGroupsPresentWhenBlocked",
+            "readyTesterGatewayCaptured",
+            "noReleaseReadyClaimWhileBlocked",
+            "publicSharingBlockedUntilReady",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredReportProperties = [ordered]@{
+            "launchReadinessStatus" = "blocked-owner-input"
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+    },
+    [ordered]@{
         id = "owner-env-template"
-        requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
+        requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold and no-secret field guide for every owner input without recording real values."
         path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
         command = "npm run flowchain:owner-env:template"
         productionGate = $true
         ownerInputGate = $false
         requiredMinimums = [ordered]@{
             requiredEnvNameCount = 17
+            fieldGuideCount = 19
         }
         requiredChecks = @(
             "pathIsGitIgnored",
@@ -544,6 +855,10 @@ $definitions = @(
             "templateIncludesAllRequiredEnvNames",
             "requiredEnvNameCountExpected",
             "optionalEnvNameCountExpected",
+            "fieldGuideCoversAllRequiredEnvNames",
+            "fieldGuideCoversAllOptionalEnvNames",
+            "fieldGuideHasValidationForEveryName",
+            "fieldGuideHasDoNotSendForEveryName",
             "valuesPrintedFalse",
             "envValuesPrintedFalse",
             "noSecrets",
@@ -611,12 +926,191 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "tester-write-token-setup"
+        requirement = "Tester write token setup creates or preserves the raw bearer token only in ignored local storage, writes only its SHA-256 digest and send cap into the ignored owner env file, and proves no token or digest is printed to committed evidence."
+        path = "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
+        command = "npm run flowchain:tester:token:setup"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "tokenPathGitIgnored",
+            "ownerEnvPathGitIgnored",
+            "tokenFileExists",
+            "ownerEnvFileExists",
+            "tokenLengthSufficient",
+            "tokenHashLengthValid",
+            "ownerEnvTesterEnabledWritten",
+            "ownerEnvTesterHashWritten",
+            "ownerEnvTesterCapWritten",
+            "rawTokenPrintedFalse",
+            "tokenHashPrintedFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "maxSendUnitsConfigured" = $true
+            "rawTokenPrinted" = $false
+            "tokenHashPrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "public-tester-gateway-e2e"
+        requirement = "Public tester write gateway proves friends-and-family wallet create, capped faucet funding, capped tester-to-tester send settlement, over-cap rejection, and no-secret/no-broadcast behavior on a temporary local control plane."
+        path = "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+        command = "npm run flowchain:tester:gateway:e2e"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "localOnly",
+            "originRestricted",
+            "testerGatewayConfigured",
+            "testerWriteTokenHashConfigured",
+            "walletCreateSchemaOk",
+            "testerFaucetSchemaOk",
+            "walletSendSchemaOk",
+            "accountCountAtLeastTwo",
+            "transferAccepted",
+            "transferAppliedLocalRuntime",
+            "transferIdPresent",
+            "capRejected",
+            "capRejectStatusCode400",
+            "capRejectSchemaOk",
+            "capRejectNoSecrets",
+            "routesCoverRequired",
+            "balancesMatchExpected",
+            "noLiveBroadcast",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            accountCount = 2
+        }
+        requiredReportProperties = [ordered]@{
+            "localOnly" = $true
+            "originRestricted" = $true
+            "testerGatewayConfigured" = $true
+            "testerWriteTokenHashConfigured" = $true
+            "transferAccepted" = $true
+            "transferStatus" = "applied_local_runtime"
+            "capRejected" = $true
+            "capRejectStatusCode" = 400
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+        }
+    },
+    [ordered]@{
         id = "public-rpc-readiness"
         requirement = "Public FlowChain RPC has URL, TLS acknowledgement, CORS, rate limit, backup path, and response hygiene."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
         command = "npm run flowchain:public-rpc:check -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
+    },
+    [ordered]@{
+        id = "public-rpc-synthetic-canary"
+        requirement = "Public RPC synthetic canary runs read-only live probes against the owner endpoint, never plans write methods, and stays owner-blocked without printing endpoint values until the endpoint exists."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
+        command = "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+        productionGate = $true
+        ownerInputGate = $true
+        requiredChecks = @(
+            "packageScriptPresent",
+            "endpointConfigured",
+            "endpointAbsoluteHttp",
+            "endpointValuePrintedFalse",
+            "publicModeNonLocal",
+            "httpsRequiredForPublicMode",
+            "safeReadMethodAllowlistEnforced",
+            "noWriteMethodsPlanned",
+            "noWriteMethodsInvoked",
+            "plannedReadPathsCovered",
+            "plannedReadMethodsCovered",
+            "allProbesPassedWhenNetworkAllowed",
+            "responseHygienePassed",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "missingEnvNames",
+            "problems",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "syntheticCanaryReady" = $true
+            "endpointValuePrinted" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "public-rpc-canary-schedule-validation"
+        requirement = "Public RPC canary schedule validation renders no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only synthetic canary checks without host mutation or external delivery."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json"
+        command = "npm run flowchain:public-rpc:canary:schedule:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "syntheticCanaryPackageScriptPresent",
+            "canaryScriptExists",
+            "canaryScriptReadOnlyPlan",
+            "scheduledReportPathInsideRepo",
+            "scheduledMarkdownPathInsideRepo",
+            "windowsPlanUsesCanaryScript",
+            "windowsPlanUsesOwnerEnvFile",
+            "windowsPlanHasAllowBlocked",
+            "windowsPlanHasReportPath",
+            "windowsPlanHasMarkdownPath",
+            "windowsPlanUsesRepoWorkingDirectory",
+            "windowsPlanDoesNotMutateHost",
+            "systemdServiceRendered",
+            "systemdServiceUsesOneshot",
+            "systemdServiceUsesOwnerEnvFile",
+            "systemdServiceHasAllowBlocked",
+            "systemdServiceHasReportPath",
+            "systemdServiceHasMarkdownPath",
+            "systemdServiceHardeningPresent",
+            "systemdServiceWritePathsScoped",
+            "systemdTimerRendered",
+            "systemdTimerPersistent",
+            "systemdTimerIntervalConfigured",
+            "noExternalDelivery",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "hostMutationPerformed" = $false
+        }
     },
     [ordered]@{
         id = "public-rpc-validation"
@@ -636,6 +1130,8 @@ $definitions = @(
             "allowedOriginAccepted",
             "disallowedOriginProbePerformed",
             "disallowedOriginRejected",
+            "securityHeaderProbeSkippedForLocalEndpoint",
+            "securityHeaderPassRequiredOnlyForPublicMode",
             "rateLimitProbePerformed",
             "rateLimitRejected",
             "rateLimitRetryAfterHeaderPresent",
@@ -736,6 +1232,8 @@ $definitions = @(
             "nginxPreflightTokensPresent",
             "includesWindowsNginxConfigTest",
             "includesTesterWritePreflight",
+            "includesMethodRejectionPreflight",
+            "ownerRenderPreflightsRejectWrongMethods",
             "ownerRenderValidationPassed",
             "ownerRenderCommandPassed",
             "ownerRenderFilesHaveNoPlaceholders",
@@ -782,7 +1280,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
-        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, hashed artifact manifest, Linux and Windows owner-host plan/apply/rollback scripts, install/edge apply phases, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         command = "npm run flowchain:public-rpc:deployment:automation"
         productionGate = $true
@@ -795,6 +1293,7 @@ $definitions = @(
             "bundleHasShellPreflight",
             "bundleHasWindowsPreflight",
             "bundleHasRollbackRunbook",
+            "bundlePreflightsCheckMethodRejection",
             "ownerPathsOutsideRepo",
             "hostMutationPerformedFalse",
             "valuesPrintedFalse",
@@ -812,11 +1311,55 @@ $definitions = @(
             "renderedSystemdUsesOwnerEnv",
             "renderedPreflightHasReadinessProbe",
             "renderedPreflightHasTesterUnauthProbe",
+            "renderedPreflightHasMethodRejectionProbes",
+            "commandPlanIncludesSyntheticCanary",
             "renderedFilesDoNotContainTokenHash",
             "renderedReportDoesNotContainTokenHash",
             "renderedReportKeepsOwnerPathsOutsideRepo",
             "renderedReportNoSecrets",
             "renderedReportBroadcastsFalse",
+            "renderedOwnerHostApplyScriptWritten",
+            "renderedOwnerHostApplyScriptHasPlanApplyRollback",
+            "renderedOwnerHostApplyScriptVerifiesHashes",
+            "renderedOwnerHostApplyScriptRunsPostDeployProof",
+            "renderedOwnerHostApplyPowerShellWritten",
+            "renderedOwnerHostApplyPowerShellHasPlanApplyRollback",
+            "renderedOwnerHostApplyPowerShellParses",
+            "renderedOwnerHostApplyPowerShellVerifiesHashes",
+            "renderedOwnerHostApplyPowerShellRunsPostDeployProof",
+            "ownerHostApplyPlanPresent",
+            "ownerHostApplyPlanSchema",
+            "ownerHostApplyPlanRepoOwned",
+            "ownerHostApplyPlanPrivateOrigin",
+            "ownerHostApplyPlanArtifactManifestCount",
+            "ownerHostApplyPlanAllArtifactsListed",
+            "ownerHostApplyPlanArtifactsExist",
+            "ownerHostApplyPlanArtifactsHaveSha256",
+            "ownerHostApplyPlanInstallTargetsMapped",
+            "ownerHostApplyPlanPhaseCount",
+            "ownerHostApplyPlanAllPhasesPresent",
+            "ownerHostApplyPlanHasMutatingInstallPhase",
+            "ownerHostApplyPlanHasMutatingEdgePhase",
+            "ownerHostApplyPlanHasReadOnlyProofPhase",
+            "ownerHostApplyPlanIncludesSystemdInstallCommand",
+            "ownerHostApplyPlanIncludesSystemdStatusCommand",
+            "ownerHostApplyPlanIncludesSystemdUninstallRollback",
+            "ownerHostApplyPlanIncludesNginxReload",
+            "ownerHostApplyPlanIncludesOwnerApplyScript",
+            "ownerHostApplyPlanIncludesWindowsOwnerApplyScript",
+            "ownerHostApplyPlanIncludesPostDeployEvidence",
+            "ownerHostApplyPlanValuesPrintedFalse",
+            "ownerHostApplyPlanEnvValuesPrintedFalse",
+            "ownerHostApplyPlanNoSecrets",
+            "ownerHostApplyPlanBroadcastsFalse",
+            "rollbackDrillPerformed",
+            "rollbackRenderedConfigExists",
+            "rollbackPreviousConfigWritten",
+            "rollbackRenderedConfigRestoredFromPrevious",
+            "rollbackOriginalConfigRestoredAfterDrill",
+            "rollbackArtifactsStayedInsideRenderDir",
+            "rollbackDrillNoSecrets",
+            "rollbackDrillBroadcastsFalse",
             "cleanupAttempted"
         )
         requiredEmptyArrays = @(
@@ -836,6 +1379,62 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "public-rpc-command-matrix"
+        requirement = "Public RPC command matrix maps preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, and rollback commands to owner inputs, mutation risk, evidence paths, and no-secret boundaries."
+        path = "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
+        command = "npm run flowchain:public-rpc:command-matrix"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            commandCount = 20
+            ownerHostCommandCount = 6
+            mutatingOwnerHostCommandCount = 4
+            committedEvidencePathCount = 12
+        }
+        requiredChecks = @(
+            "packageScriptPresent",
+            "allPackageScriptsPresent",
+            "phaseCoverageComplete",
+            "renderPlanApplyProofRollbackCovered",
+            "ownerHostPlanCommandsPresent",
+            "ownerHostApplyCommandsPresent",
+            "ownerHostRollbackCommandsPresent",
+            "mutatingOwnerHostCommandsHaveRollbackCoverage",
+            "deploymentAutomationReportPassed",
+            "deploymentBundleReportPassed",
+            "deploymentAutomationCommandPlanCovered",
+            "deploymentAutomationOwnerHostApplyCovered",
+            "deploymentAutomationRollbackDrillCovered",
+            "deploymentBundleRollbackRunbookCovered",
+            "requiredEnvReferencesPresent",
+            "validationSignalsPresent",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "commandsAvoidKeyMaterial",
+            "ownerInputNamesOnly",
+            "committedEvidencePathsCovered",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts",
+            "missingPhases",
+            "rowsMissingEnvReferences",
+            "rowsMissingValidationSignals",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "commandsWithKeyMaterialReference",
+            "badOwnerInputRows"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "node-operator-package"
         requirement = "No-secret node operator package collects runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates."
         path = "docs/agent-runs/live-product-infra-rpc/operator-package-report.json"
@@ -849,6 +1448,8 @@ $definitions = @(
             "manifestWritten",
             "runbookDocsCopied",
             "evidenceReportsCopied",
+            "copiedFileHashesWritten",
+            "copiedFileHashesMatch",
             "ownerInputNamesOnly",
             "flowChainRpcIsRepoOwned",
             "thirdPartyFlowChainRpcProviderNeededFalse",
@@ -860,16 +1461,21 @@ $definitions = @(
         )
         requiredEmptyArrays = @(
             "failedChecks",
+            "copiedFileHashMismatches",
+            "copiedFilesMissingHashes",
             "secretMarkerFindings"
         )
     },
     [ordered]@{
         id = "node-operator-package-verify"
-        requirement = "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, forbidden local files, and no-secret scan."
+        requirement = "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan."
         path = "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json"
         command = "npm run flowchain:operator:package:verify"
         productionGate = $true
         ownerInputGate = $false
+        requiredMinimums = [ordered]@{
+            goLiveExpectedPackageEvidenceCount = 30
+        }
         requiredChecks = @(
             "packageReportExists",
             "packageReportPassed",
@@ -879,8 +1485,14 @@ $definitions = @(
             "commandMatrixExists",
             "commandMatrixCountMatches",
             "expectedFilesPresent",
+            "manifestRunbookHashesPresent",
+            "manifestEvidenceHashesPresent",
+            "manifestDestinationHashesMatch",
             "reportRunbookCountEnough",
             "reportEvidenceCountEnough",
+            "goLiveHandoffEvidencePresent",
+            "goLiveExpectedEvidencePathsPresent",
+            "goLiveExpectedEvidenceInManifest",
             "ownerInputNamesOnly",
             "noForbiddenLocalFiles",
             "noSecretScanPassed",
@@ -891,6 +1503,9 @@ $definitions = @(
         )
         requiredEmptyArrays = @(
             "failedChecks",
+            "hashProblems",
+            "missingGoLivePackageEvidence",
+            "goLivePackageEvidenceNotInManifest",
             "secretMarkerFindings"
         )
     },
@@ -938,6 +1553,75 @@ $definitions = @(
             "envValuesPrinted" = $false
             "noSecrets" = $true
             "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "developer-dev-pack"
+        requirement = "Developer SDK/devkit proof connects to the real RPC, proves Node and Python SDKs, CLI examples, signed-envelope submission, packaged Vite/React browser starter build/smoke, generated OpenAPI/Postman/cURL docs, runtime-backed local wallet sends, and public readiness fail-closed behavior."
+        path = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"
+        command = "npm run flowchain:dev-pack:e2e"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "discoveryLoaded",
+            "readinessLoaded",
+            "healthReadable",
+            "nodeStatusReadable",
+            "blockListReadable",
+            "blockGetReadable",
+            "transactionListReadable",
+            "transactionGetReadable",
+            "mempoolReadable",
+            "accountListReadable",
+            "balanceReadable",
+            "walletMetadataReadable",
+            "walletTransfersReadable",
+            "walletBalancesReadable",
+            "faucetEventsReadable",
+            "finalityReadable",
+            "bridgeLifecycleReadable",
+            "walletSendRuntimeBacked",
+            "waitTransactionSdkIncluded",
+            "cliJsonStatus",
+            "cliJsonBlocks",
+            "cliJsonWaitTransaction",
+            "nodeExamplePassed",
+            "signedEnvelopeExamplePassed",
+            "cliSignedEnvelopePrepared",
+            "cliSignedTransactionSubmit",
+            "browserExamplePresent",
+            "browserExampleViteReactPackaged",
+            "browserExampleBuildPassed",
+            "browserExampleSmokePassed",
+            "openApiSpecGenerated",
+            "postmanCollectionGenerated",
+            "curlExamplesGenerated",
+            "developerGuidesPresent",
+            "pythonSdkE2ePassed",
+            "pythonSdkDiscoveryLoaded",
+            "pythonSdkReadinessLoaded",
+            "pythonDevkitJsonStatus",
+            "pythonDevkitJsonBlocks",
+            "pythonDevkitWaitTransaction",
+            "pythonSdkDocsPresent",
+            "pythonSdkSafeDiagnostics",
+            "heightAdvanced",
+            "publicReadinessFailClosed",
+            "publicWriteMethodsBlockedFromPublicList",
+            "broadLocalStateBlockedFromPublicList",
+            "inventoryGenerated",
+            "inventorySafe"
+        )
+        requiredMinimums = [ordered]@{
+            "methodCount" = 20
+        }
+        requiredEmptyArrays = @("failedChecks")
+        requiredReportProperties = [ordered]@{
+            "publicReadyMethodCount" = 0
+            "noLiveBroadcast" = $true
+            "broadcasts" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
         }
     },
     [ordered]@{
@@ -1022,6 +1706,64 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "backup-install-validation"
+        requirement = "Backup scheduler validation proves no-secret Windows Scheduled Task and Linux systemd timer plan paths for recurring state snapshots and restore drills without host mutation."
+        path = "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"
+        command = "npm run flowchain:backup:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "installScriptExists",
+            "systemdInstallScriptExists",
+            "systemdValidationScriptExists",
+            "backupScriptExists",
+            "restoreDrillScriptExists",
+            "packageScriptsPresent",
+            "planCommandPassed",
+            "planDidNotMutate",
+            "schedulerCmdletsAvailable",
+            "scheduledTaskActionSupportsWorkingDirectory",
+            "taskNamesDistinct",
+            "retentionCountValid",
+            "actionUsesBackupScript",
+            "actionUsesRetentionCount",
+            "restoreDrillUsesRestoreScript",
+            "restoreDrillHasRestoreRoot",
+            "restoreDrillHasStatePath",
+            "restoreDrillHasReportPath",
+            "ownerBackupEnvRequired",
+            "restoreDrillOwnerBackupEnvRequired",
+            "commandOmitsAllowBlocked",
+            "commandsPresent",
+            "systemdValidationCommandPassed",
+            "systemdValidationPassed",
+            "systemdFailedChecksEmpty",
+            "systemdPlanDidNotMutate",
+            "systemdBackupServiceUnitPlanned",
+            "systemdBackupTimerUnitPlanned",
+            "systemdRestoreServiceUnitPlanned",
+            "systemdRestoreTimerUnitPlanned",
+            "systemdCommandOmitsAllowBlocked",
+            "systemdOwnerBackupEnvRequired",
+            "systemdOwnerEnvInjectable",
+            "systemdServicesHardeningPresent",
+            "systemdBackupRootWritePathConfigurable",
+            "systemdChildReportNoSecrets",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "bridge-live-readiness"
         requirement = "Base 8453 live bridge pilot has required owner inputs, caps, confirmations, and operator acknowledgement."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
@@ -1036,6 +1778,97 @@ $definitions = @(
         command = "npm run flowchain:bridge:infra:check -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
+    },
+    [ordered]@{
+        id = "bridge-command-matrix"
+        requirement = "Bridge pilot command matrix maps deploy, observe, relayer, credit, withdrawal/release, emergency-control, smoke, and release commands to owner env names, broadcast acknowledgement gates, risk class, and evidence paths without owner-value leakage."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+        command = "npm run flowchain:bridge:command-matrix"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "allRequiredScriptsPresent",
+            "phaseCoverageComplete",
+            "deployObserveRelayerControlReleaseCovered",
+            "liveBroadcastCommandsAckGated",
+            "observeCommandOperatorAckGated",
+            "relayerOnceOperatorAckGated",
+            "controlCommandsBroadcastAckGated",
+            "deployCommandBroadcastAckGated",
+            "requiredEnvReferencesPresent",
+            "requiredAckReferencesPresent",
+            "validationSignalsPresent",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "commandsAvoidKeyMaterial",
+            "ownerInputNamesOnly",
+            "committedEvidencePathsCovered",
+            "envValuesPrintedFalse",
+            "broadcastsFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingScripts",
+            "missingPhases",
+            "liveBroadcastRowsWithoutAck",
+            "badOwnerInputRows"
+        )
+        requiredMinimums = [ordered]@{
+            commandCount = 18
+            liveBroadcastCapableCommandCount = 4
+            committedEvidencePathCount = 10
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "bridge-no-secret-audit"
+        requirement = "Bridge generated pilot evidence has committed JSON and Markdown no-secret proof before owner-funded bridge activation."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
+        command = "npm run flowchain:bridge:no-secret-audit"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "scannedPathsPresent",
+            "scannedFileCountPositive",
+            "findingsEmpty",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "findings"
+        )
+        requiredMinimums = [ordered]@{
+            scannedFileCount = 1
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "base-tx-diagnostic-fail-closed"
+        requirement = "Base 8453 transaction diagnosis fails closed without owner env/tx inputs, prints no env values, writes no secrets, and never broadcasts."
+        path = "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
+        command = "npm run flowchain:bridge:diagnose:tx"
+        productionGate = $true
+        ownerInputGate = $false
+        blockedAsPassed = $true
+        requiredReportProperties = [ordered]@{
+            "safeReasonCode" = "missing-env"
+            "broadcasts" = $false
+            "printsEnvValues" = $false
+            "noSecrets" = $true
+        }
     },
     [ordered]@{
         id = "bridge-deploy-control-validation"
@@ -1188,12 +2021,248 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "bridge-runtime-credit-validation"
+        requirement = "Bridge runtime credit validation proves a production-shaped Base 8453 handoff can be queued into an isolated L1, become spendable within the settlement target, reject replay, spend from the credited wallet, and survive restart/export/import without secrets or broadcasts."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+        command = "npm run flowchain:bridge:runtime-credit:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "childCommandPassed",
+            "childDidNotTimeout",
+            "proofReportWritten",
+            "proofClassificationReady",
+            "proofFailedChecksEmpty",
+            "requiredRuntimeChecksCovered",
+            "requiredRuntimeChecksPassed",
+            "sourceChainBase8453",
+            "creditAppliedOnce",
+            "creditedBalanceTransferable",
+            "replayRejected",
+            "restartPreservesCreditHistory",
+            "exportImportPreservesReplayProtection",
+            "latencyRecorded",
+            "latencyGatePassed",
+            "transferLatencyUnderTarget",
+            "proofBroadcastsFalse",
+            "proofEnvValuesPrintedFalse",
+            "proofNoSecrets",
+            "handoffReportReadable",
+            "handoffNoReleaseBroadcast",
+            "handoffNoWithdrawalBroadcast",
+            "secretMarkerFindingsEmpty",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingRuntimeChecks",
+            "falseRuntimeChecks",
+            "proofFailedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "real-value-pilot-aggregate"
+        requirement = "Real-value pilot aggregate coordinates contracts, bridge, runtime, wallet, control-dashboard, and ops proofs under bounded child timeouts before a funded owner pilot can be treated as complete."
+        path = "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
+        command = "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800 -ReportPath docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "pilotSpecPresent",
+            "baselineScriptsPresent",
+            "requiredProofScriptsPresent",
+            "requiredProofCommandsRun",
+            "childTimeoutSecondsPositive",
+            "commandsDidNotTimeout",
+            "commandsDidNotFail",
+            "missingProofsEmpty",
+            "ownerGoNoGoTrue",
+            "outputTailsRedacted",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredMinimums = [ordered]@{
+            "childTimeoutSeconds" = 1
+        }
+        requiredEmptyArrays = @(
+            "missingProofs",
+            "missingExpectedCommands",
+            "timedOutCommands",
+            "failedCommands"
+        )
+        requiredReportProperties = [ordered]@{
+            "skipBaseline" = $true
+            "ownerGoNoGo.go" = $true
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "bridge-reconciliation"
+        requirement = "Bridge reconciliation summarizes live relayer observed/new/queued/applied/pending credits, cursor commit safety, local runtime credit proof, replay rejection, and release evidence validation in one no-secret operator report."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"
+        command = "npm run flowchain:bridge:reconciliation"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "relayerOnceReportLoaded",
+            "relayerOnceStatusBlockedOrPassed",
+            "relayerOnceNoFailedChecks",
+            "relayerOnceNoSecrets",
+            "relayerOnceNoBroadcasts",
+            "relayerCountsNonNegative",
+            "pendingCreditsNonNegative",
+            "cursorModeStaged",
+            "cursorFinalNotCommittedWhenBlocked",
+            "relayerBlockedClassifiedOwnerInput",
+            "guardrailReportPassed",
+            "guardrailNoFailedChecks",
+            "guardrailCursorSafe",
+            "loopValidationPassedOrOwnerBlocked",
+            "runtimeCreditPassed",
+            "runtimeCreditNoFailedChecks",
+            "runtimeCreditAppliedOnce",
+            "runtimeReplayRejected",
+            "localPilotPassed",
+            "localPilotNoFailedChecks",
+            "localPilotExactValueConserved",
+            "localPilotDuplicateReplayRejected",
+            "releaseEvidenceValidationPassed",
+            "releaseEvidenceNoFailedChecks",
+            "reconciliationRowsPresent",
+            "liveReadinessBlockedOrPassed",
+            "bridgeInfraBlockedOrPassed",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            "counts.localRuntimeAppliedProofs" = 1
+            "counts.duplicateReplayRejectedProofs" = 1
+            "counts.releaseEvidenceValidationProofs" = 1
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
+        id = "bridge-reconciliation-schedule-validation"
+        requirement = "Bridge reconciliation schedule validation renders no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"
+        command = "npm run flowchain:bridge:reconciliation:schedule:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "reconciliationPackageScriptPresent",
+            "reconciliationScriptExists",
+            "reconciliationScriptReadsRelayerEvidence",
+            "reconciliationScriptReadsRuntimeEvidence",
+            "scheduledReportPathInsideRepo",
+            "scheduledMarkdownPathInsideRepo",
+            "windowsPlanUsesReconciliationScript",
+            "windowsPlanUsesOwnerEnvFile",
+            "windowsPlanHasReportPath",
+            "windowsPlanHasMarkdownPath",
+            "windowsPlanUsesRepoWorkingDirectory",
+            "windowsPlanDoesNotMutateHost",
+            "systemdServiceRendered",
+            "systemdServiceUsesOneshot",
+            "systemdServiceUsesOwnerEnvFile",
+            "systemdServiceHasReportPath",
+            "systemdServiceHasMarkdownPath",
+            "systemdServiceHardeningPresent",
+            "systemdServiceWritePathsScoped",
+            "systemdTimerRendered",
+            "systemdTimerPersistent",
+            "systemdTimerIntervalConfigured",
+            "noExternalDelivery",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "external-tester-readiness"
         requirement = "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
         command = "npm run flowchain:tester:readiness -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
+        staleIfOlderThan = @("public-tester-gateway-e2e")
+    },
+    [ordered]@{
+        id = "bridge-release-evidence-validation"
+        requirement = "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, method/amount/token/recipient/chain/asset mismatches fail, broadcast and production boundary flags are rejected, and validation remains no-secret/no-broadcast."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
+        command = "npm run flowchain:bridge:release:evidence:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "releaseEvidenceScriptExists",
+            "matchingEvidencePasses",
+            "missingInputsBlock",
+            "amountMismatchFails",
+            "methodMismatchFails",
+            "tokenMismatchFails",
+            "recipientMismatchFails",
+            "chainMismatchFails",
+            "assetMismatchFails",
+            "releaseBroadcastRejected",
+            "withdrawalBroadcastRejected",
+            "releaseProductionReadyFalseRejected",
+            "releaseLocalOnlyTrueRejected",
+            "allRequiredCasesCovered",
+            "failedCasesAbsent",
+            "noSecretScanPassed",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "failedCases",
+            "missingRequiredCases",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            caseCount = 12
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
     },
     [ordered]@{
         id = "external-tester-packet"
@@ -1270,6 +2339,44 @@ $definitions = @(
             "externalSharingReady" = $false
             "packetExecutableSmokeValidated" = $true
         }
+        staleIfOlderThan = @("public-tester-gateway-e2e")
+    },
+    [ordered]@{
+        id = "external-tester-client-validation"
+        requirement = "Standalone friends-and-family tester client validates the generated connect pack in a no-network dry run covering read routes, wallet create, faucet, send, redaction, no-token storage, no secrets, and no broadcasts."
+        path = "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
+        command = "npm run flowchain:external-tester:client:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "clientScriptExists",
+            "connectPackExists",
+            "connectPackSchemaValid",
+            "clientExitCodeZero",
+            "dryRunReportWritten",
+            "dryRunSchemaValid",
+            "dryRunStatusPlanned",
+            "dryRunNoNetwork",
+            "blockedConnectPackAllowedOnlyByFlag",
+            "plannedRoutesCoverReads",
+            "plannedRoutesCoverWrites",
+            "endpointRedacted",
+            "tokenNotConfiguredInDryRun",
+            "broadcastsFalse",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+        staleIfOlderThan = @("external-tester-packet")
     },
     [ordered]@{
         id = "external-tester-evidence-validation"
@@ -1330,7 +2437,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "dashboard-ui-readiness"
-        requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, and avoid token/secret leakage or horizontal overflow."
+        requirement = "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, review tester launch readiness, review the L1 activation cockpit, review bridge/runtime proof surfaces, and avoid token/secret leakage or horizontal overflow."
         path = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
         command = "npm run flowchain:dashboard:ui:readiness"
         productionGate = $true
@@ -1347,12 +2454,20 @@ $definitions = @(
             "testerFaucetCovered",
             "testerSendCovered",
             "explorerRouteCovered",
+            "testerLaunchRouteCovered",
+            "activationRouteCovered",
+            "bridgeRouteCovered",
+            "bridgePilotRuntimeProofCovered",
+            "bridgeRuntimeCreditProofCovered",
+            "realValuePilotAggregateProofCovered",
+            "publicRpcHeaderProofCovered",
             "noSecretLeakageAsserted",
             "noHorizontalOverflowAsserted",
             "dashboardUnitTestsPassed",
             "dashboardBrowserE2ePassed",
             "dashboardBuildPassed",
             "controlPlaneTesterGatewayTestsPassed",
+            "commandsCompletedWithoutTimeout",
             "secretMarkerFindingsEmpty",
             "envValuesPrintedFalse",
             "noSecrets",
@@ -1400,6 +2515,21 @@ $definitions = @(
             "everyActiveRuleHasCommands",
             "commandsAvoidInlineEnvAssignment",
             "commandsAvoidUrls",
+            "publicRpcEdgeHardeningRuleCoversRollbackDrill",
+            "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan",
+            "backupRestoreValidationRuleCoversSafety",
+            "backupOwnerPathDryRunRuleCoversOwnerPath",
+            "bridgeDeployControlRuleCoversDeploymentControls",
+            "bridgeNoSecretAuditRuleCoversNoSecretProof",
+            "supervisorNodeRecoveryRuleCoversLiveProfile",
+            "bridgeRelayerLoopRuleCoversValidationTelemetry",
+            "bridgeReconciliationRuleCoversCursorAndReplay",
+            "serviceInstallValidationRuleCoversAutorecoveryTelemetry",
+            "devPackRuleCoversBrowserStarter",
+            "secondComputerRuleCoversBundleVerifyNoSecret",
+            "publicTesterGatewayRuleCoversNoSecretNoBroadcast",
+            "ownerGoLiveHandoffRuleCoversReleaseReady",
+            "ownerGoLiveHandoffRuleCoversLaunchAndRollback",
             "findingsWithoutCommandsEmpty",
             "notificationPlanStoresNoSecrets",
             "notificationPlanNoNetworkDelivery",
@@ -1428,7 +2558,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "ops-metrics-export"
-        requirement = "Ops metrics export converts no-secret service, alert, public-readiness, bridge, tester, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
+        requirement = "Ops metrics export converts no-secret service, supervisor autorecovery, alert, public-readiness, bridge, tester, owner handoff, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
         command = "npm run flowchain:ops:metrics:export"
         productionGate = $true
@@ -1439,8 +2569,12 @@ $definitions = @(
             "opsAlertRulesLoaded",
             "serviceStatusLoaded",
             "serviceMonitorLoaded",
+            "serviceInstallValidationLoaded",
+            "systemdServiceInstallValidationLoaded",
             "externalTesterEvidenceLoaded",
+            "externalTesterClientValidationLoaded",
             "liveCutoverLoaded",
+            "ownerGoLiveHandoffLoaded",
             "truthTableLoaded",
             "noSecretLoaded",
             "metricsJsonWritten",
@@ -1448,7 +2582,29 @@ $definitions = @(
             "markdownWritten",
             "metricCountSufficient",
             "requiredMetricsPresent",
+            "backupRestoreValidationLoaded",
+            "backupRestoreValidationMetricsPresent",
+            "backupOwnerPathDryRunLoaded",
+            "backupOwnerPathDryRunMetricsPresent",
+            "publicRpcRollbackDrillMetricsPresent",
+            "publicRpcOwnerHostApplyPlanMetricsPresent",
+            "bridgeDeployControlMetricsPresent",
+            "serviceInstallValidationMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
+            "publicTesterGatewayMetricsPresent",
+            "bridgeNoSecretAuditLoaded",
+            "bridgeNoSecretAuditMetricsPresent",
+            "bridgeRelayerLoopValidationMetricsPresent",
+            "bridgeReconciliationLoaded",
+            "bridgeReconciliationMetricsPresent",
+            "bridgeReleaseEvidenceMetricsPresent",
+            "externalTesterClientMetricsPresent",
+            "secondComputerLoaded",
+            "secondComputerMetricsPresent",
+            "devPackLoaded",
+            "devPackMetricsPresent",
+            "ownerGoLiveHandoffMetricsPresent",
+            "supervisorNodeRecoveryMetricsPresent",
             "prometheusHasHelpAndType",
             "prometheusContainsNoUrls",
             "prometheusContainsNoEnvAssignments",
@@ -1476,6 +2632,178 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "ops-monitoring-bundle"
+        requirement = "Ops monitoring bundle renders no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain metrics and alert-rule evidence, covering block production, service health, public RPC, backup, bridge relayer, external testers, truth table, and no-secret boundaries without external delivery credentials."
+        path = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
+        command = "npm run flowchain:ops:monitoring:bundle"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "metricsJsonLoaded",
+            "metricsExportReportLoaded",
+            "alertRulesLoaded",
+            "sourceMetricsSufficient",
+            "sourceAlertRulesSufficient",
+            "dashboardWritten",
+            "dashboardJsonValid",
+            "dashboardPanelCountSufficient",
+            "dashboardTargetsHaveKnownMetrics",
+            "dashboardIncludesCorePanels",
+            "prometheusRulesWritten",
+            "prometheusYamlHasRules",
+            "prometheusRuleCountSufficient",
+            "prometheusRulesReferenceKnownMetrics",
+            "prometheusRulesReferenceKnownAlertRuleIds",
+            "prometheusRulesHaveRunbookCommands",
+            "prometheusCommandsAvoidInlineEnvAssignment",
+            "prometheusCommandsAvoidUrls",
+            "readmeWritten",
+            "manifestWritten",
+            "artifactHashesPresent",
+            "filesNoSecretMarkers",
+            "noNetworkDelivery",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingDashboardMetricNames",
+            "missingPrometheusMetricNames",
+            "missingSourceRuleIds",
+            "missingPanelTitles",
+            "rulesWithoutCommands",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "artifactHashGaps",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            sourceMetricCount = 50
+            sourceAlertRuleCount = 10
+            dashboardPanelCount = 12
+            prometheusRuleCount = 8
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "notificationPlan.storesSecrets" = $false
+            "notificationPlan.sendsNetworkNotifications" = $false
+        }
+    },
+    [ordered]@{
+        id = "ops-launch-watch"
+        requirement = "Ops launch watch ties service install/autorecovery, public RPC deployment, backup/restore, bridge pilot relayer, Explorer/faucet/wallet UI, observability, and release-governance lanes to concrete reports, metrics, alert rules, and local operator commands without treating owner-input blockers as repo failures."
+        path = "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
+        command = "npm run flowchain:ops:launch-watch"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "metricsJsonLoaded",
+            "laneCountSufficient",
+            "everyLaneHasEvidence",
+            "everyLaneHasMetrics",
+            "everyLaneHasAlertRules",
+            "everyLaneHasCommands",
+            "everyLaneCommandHasPackageScript",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "opsSnapshotLoaded",
+            "opsSnapshotHasNoCriticalFindings",
+            "opsSnapshotBlockedFindingsAreExpected",
+            "opsAlertRulesPassed",
+            "opsAlertsMapCurrentFindings",
+            "activeAlertRulesPresent",
+            "opsMetricsExportPassed",
+            "monitoringBundlePassed",
+            "noSecretScanPassed",
+            "truthTableNoRepoBlocked",
+            "truthTableNoFailed",
+            "truthTableNoStale",
+            "capabilityMatrixNoRepoBlocked",
+            "blockedLanesHaveKnownOwnerInputs",
+            "noProductionReadyClaimWhileBlocked",
+            "opsCriticalMetricZero",
+            "truthFailedMetricZero",
+            "truthStaleMetricZero",
+            "truthRepoBlockedMetricZero",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "missingReports",
+            "missingMetrics",
+            "missingAlertRules",
+            "missingPackageScripts",
+            "blockedLaneUnknownBlockers",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            laneCount = 6
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+        staleIfOlderThan = @("ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-monitoring-bundle", "service-status", "service-monitor", "service-install-validation", "systemd-service-install-validation", "public-rpc-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-automation", "public-rpc-command-matrix", "backup-readiness", "backup-restore-validation", "backup-owner-path-dry-run", "backup-install-validation", "bridge-live-readiness", "bridge-infra-readiness", "bridge-relayer-once", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-reconciliation", "bridge-release-evidence-validation", "real-value-pilot-aggregate", "external-tester-readiness", "external-tester-packet", "external-tester-client-validation", "external-tester-evidence-validation", "public-tester-gateway-e2e", "dashboard-ui-readiness", "owner-go-live-handoff", "owner-needs-now", "public-deployment-contract", "live-chain-capability-matrix", "no-secret-scan")
+    },
+    [ordered]@{
+        id = "ops-metrics-install-validation"
+        requirement = "Scheduled metrics export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics."
+        path = "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
+        command = "npm run flowchain:ops:metrics:install:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptsPresent",
+            "planDidNotMutate",
+            "statusDidNotMutate",
+            "statusTaskStatePreserved",
+            "uninstallAbsentCommandPassed",
+            "uninstallAbsentDidNotMutate",
+            "uninstallAbsentTaskAbsentAfter",
+            "scheduledTaskTriggerSupportsRepetition",
+            "actionUsesMetricsScript",
+            "hasAllowBlocked",
+            "hasMetricsJsonPath",
+            "hasPrometheusTextPath",
+            "scheduledCommandDoesNotDisableRefresh",
+            "systemdValidationCommandPassed",
+            "systemdValidationPassed",
+            "systemdPlanDidNotMutate",
+            "systemdServiceUnitPlanned",
+            "systemdTimerUnitPlanned",
+            "systemdTimerIntervalConfigured",
+            "systemdOwnerEnvFileInjectable",
+            "systemdNoExternalDelivery",
+            "systemdChildReportNoSecrets",
+            "noExternalDelivery",
+            "childReportsNoSecrets",
+            "childReportsSecretMarkerFindingsEmpty",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingPackageScripts",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "ops-alert-install-validation"
         requirement = "Scheduled alert refresh install validation proves plan/status/uninstall no-op behavior and no external delivery."
         path = "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
@@ -1494,6 +2822,15 @@ $definitions = @(
             "actionUsesAlertsScript",
             "hasAllowBlocked",
             "scheduledCommandDoesNotDisableRefresh",
+            "systemdValidationCommandPassed",
+            "systemdValidationPassed",
+            "systemdPlanDidNotMutate",
+            "systemdServiceUnitPlanned",
+            "systemdTimerUnitPlanned",
+            "systemdTimerIntervalConfigured",
+            "systemdOwnerEnvFileInjectable",
+            "systemdNoExternalDelivery",
+            "systemdChildReportNoSecrets",
             "noExternalDelivery",
             "childReportsNoSecrets",
             "childReportsSecretMarkerFindingsEmpty",
@@ -1570,6 +2907,7 @@ $definitions = @(
             "allCasesPassed",
             "failedCasesAbsent",
             "minimumCaseCountMet",
+            "publicTesterGatewayIncidentCovered",
             "recoveryCommandPrinted",
             "postDrillLiveStatusPassed",
             "liveStateBeforeReadable",
@@ -1607,7 +2945,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "live-cutover-rehearsal"
-        requirement = "Live cutover rehearsal runs owner-env, public deployment, tester packet, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
+        requirement = "Live cutover rehearsal runs owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion, truth table, and no-secret gates through one redacted command and blocks only on known owner inputs before external sharing."
         path = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"
         command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
         productionGate = $true
@@ -1625,7 +2963,11 @@ $definitions = @(
             "unknownMissingEnvNamesEmpty",
             "ownerEnvReady",
             "publicDeploymentReady",
+            "testerNetworkE2ePassed",
+            "testerWriteTokenSetupPassed",
             "testerPacketShareable",
+            "testerPacketValidationPassed",
+            "testerClientValidationPassed",
             "completionReady",
             "truthTableCompleted",
             "noSecretScanPassed",
@@ -1644,7 +2986,56 @@ $definitions = @(
             "noSecrets" = $true
             "broadcasts" = $false
         }
-        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "external-tester-packet", "completion-audit")
+        staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "external-tester-packet-validation", "external-tester-client-validation", "public-rpc-command-matrix", "completion-audit")
+    },
+    [ordered]@{
+        id = "live-chain-capability-matrix"
+        requirement = "User-facing live-chain capability matrix maps wallet creation, wallet-to-wallet transfer, public RPC connection, real-value bridge pilot, RPC services, block production, Explorer/faucet/wallet UI, backup, observability, external tester launch, developer tooling, and owner go-live controls to concrete evidence and remaining owner-input blockers."
+        path = "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
+        command = "npm run flowchain:live:capabilities"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "requiredReportsLoaded",
+            "capabilityCountMinimumMet",
+            "userRequirementCoverageComplete",
+            "publicLaunchCriticalCapabilitiesCovered",
+            "allCriticalCapabilitiesEitherPassedOrOwnerBlocked",
+            "repoBlockedCapabilitiesEmpty",
+            "blockedCapabilitiesHaveBlockers",
+            "blockedCapabilitiesUseKnownOwnerInputs",
+            "truthTableOwnerBlockersKnown",
+            "publicRpcCapabilityBlocksOnPublicRpcInputs",
+            "bridgeCapabilityBlocksOnBridgeInputs",
+            "backupCapabilityBlocksOnBackupInput",
+            "noProductionReadyClaimWhileBlocked",
+            "ownerNeedsNowLoaded",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredMinimums = [ordered]@{
+            capabilityCount = 12
+            publicLaunchCriticalCapabilityCount = 10
+        }
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "repoBlockedCapabilities",
+            "missingUserCapabilityCoverage",
+            "missingRequiredReports",
+            "blockedCapabilitiesMissingBlockers",
+            "blockedCapabilitiesUnknownBlockers"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+        staleIfOlderThan = @("service-status", "service-monitor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "wallet-live-service-e2e", "tester-network-e2e", "public-rpc-readiness", "public-rpc-synthetic-canary", "public-tester-gateway-e2e", "dashboard-ui-readiness", "bridge-live-readiness", "bridge-infra-readiness", "bridge-relayer-once", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation", "bridge-release-evidence-validation", "backup-readiness", "backup-restore-validation", "backup-owner-path-dry-run", "backup-install-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-monitoring-bundle", "ops-alert-install-validation", "ops-metrics-install-validation", "external-tester-readiness", "external-tester-packet", "external-tester-client-validation", "owner-needs-now", "owner-go-live-handoff", "public-deployment-contract", "developer-dev-pack")
     },
     [ordered]@{
         id = "architecture-audit"
@@ -1661,7 +3052,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "external-tester-packet-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "dashboard-ui-readiness", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-no-secret-audit", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation-schedule-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"
@@ -1673,6 +3064,8 @@ $definitions = @(
         requiredChecks = @(
             "scansDashboardPublicData",
             "scansGeneratedLiveProductReports",
+            "scansGeneratedDevPackReports",
+            "scansGeneratedSdkDocs",
             "reportPathMatchesProductionGate",
             "scannedCountPositive",
             "findingsEmpty",
@@ -1930,6 +3323,7 @@ function ConvertTo-TruthEvidence {
         "externalSignupCount",
         "itemCount",
         "requiredEnvNameCount",
+        "fieldGuideCount",
         "templateIncludesAllRequiredEnvNames",
         "pathIsGitIgnored",
         "deploymentReady",
@@ -1942,6 +3336,8 @@ function ConvertTo-TruthEvidence {
         "metricCount",
         "expectedFileCount",
         "ownerInputNameCount",
+        "methodCount",
+        "publicReadyMethodCount",
         "ruleCount",
         "criticalRuleCount",
         "blockedRuleCount",
@@ -1952,8 +3348,20 @@ function ConvertTo-TruthEvidence {
         "opsSnapshotStatus",
         "opsAlertRulesStatus",
         "completionReady",
+        "launchReadinessStatus",
+        "productionReady",
+        "capabilityCount",
+        "publicLaunchCriticalCapabilityCount",
+        "blockedCapabilityCount",
+        "repoBlockedCapabilityCount",
         "blockedOnlyOnKnownExternalOwnerInputs",
-        "blockedOnlyOnOwnerInputs"
+        "blockedOnlyOnOwnerInputs",
+        "safeReasonCode",
+        "printsEnvValues",
+        "envValuesPrinted",
+        "noSecrets",
+        "noLiveBroadcast",
+        "broadcasts"
     )) {
         $value = Get-TruthProp -Object $Report -Name $name
         if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace("$value")) {
@@ -2018,9 +3426,39 @@ function ConvertTo-TruthEvidence {
             "everyCurrentFindingHasCommands",
             "dryRunEventsDoNotSend",
             "dryRunEventsStoreNoCredentials",
+            "walletSendRuntimeBacked",
+            "cliSignedTransactionSubmit",
+            "browserExampleSmokePassed",
+            "openApiSpecGenerated",
+            "postmanCollectionGenerated",
+            "curlExamplesGenerated",
+            "pythonSdkE2ePassed",
+            "pythonDevkitWaitTransaction",
+            "publicReadinessFailClosed",
+            "requiredAndOptionalOwnerInputsSeparated",
+            "neededNowExcludesOptionalOwnerInputs",
+            "inventoryGenerated",
+            "inventorySafe",
+            "scansGeneratedDevPackReports",
+            "scansGeneratedSdkDocs",
+            "dryRunNoNetwork",
+            "blockedConnectPackAllowedOnlyByFlag",
+            "plannedRoutesCoverReads",
+            "plannedRoutesCoverWrites",
+            "tokenNotConfiguredInDryRun",
             "desktopProjectConfigured",
             "mobileProjectConfigured",
+            "bridgeRouteCovered",
+            "bridgePilotRuntimeProofCovered",
+            "bridgeRuntimeCreditProofCovered",
+            "realValuePilotAggregateProofCovered",
+            "publicRpcHeaderProofCovered",
+            "fieldGuideCoversAllRequiredEnvNames",
+            "fieldGuideCoversAllOptionalEnvNames",
+            "fieldGuideHasValidationForEveryName",
+            "fieldGuideHasDoNotSendForEveryName",
             "dashboardBrowserE2ePassed",
+            "commandsCompletedWithoutTimeout",
             "noSecretLeakageAsserted",
             "noHorizontalOverflowAsserted"
         )) {
@@ -2045,8 +3483,14 @@ function ConvertTo-TruthEvidence {
         "commandsWithUrls",
         "findingsWithoutCommands",
         "unmappedFindingCodes",
+        "missingRequiredEnvNames",
+        "missingOptionalEnvNames",
+        "missingRequiredOwnerInputs",
+        "missingOptionalOwnerInputs",
         "browserProjects",
-        "coveredRoutes"
+        "coveredRoutes",
+        "coveredProofs",
+        "languageSdks"
     )) {
         if (Test-TruthPathExists -Object $Report -Path $arrayName) {
             $values = @((Get-TruthPathProp -Object $Report -Path $arrayName))
@@ -2124,6 +3568,38 @@ function Get-TruthClassification {
     if ($rawStatus -in @("failed", "error", "invalid")) {
         return "failed"
     }
+    if ($rawStatus -eq "blocked" -and ((Get-TruthProp -Object $Definition -Name "blockedAsPassed" -Default $false) -eq $true)) {
+        $requiredChecks = @((Get-TruthProp -Object $Definition -Name "requiredChecks" -Default @()))
+        if ($requiredChecks.Count -gt 0) {
+            $checks = Get-TruthProp -Object $Report -Name "checks"
+            foreach ($name in $requiredChecks) {
+                if ((Get-TruthProp -Object $checks -Name $name -Default $false) -ne $true) {
+                    return "failed"
+                }
+            }
+        }
+
+        foreach ($path in @((Get-TruthProp -Object $Definition -Name "requiredEmptyArrays" -Default @()))) {
+            if (-not (Test-TruthPathExists -Object $Report -Path ([string] $path))) {
+                return "failed"
+            }
+            if (@((Get-TruthPathProp -Object $Report -Path ([string] $path))).Count -ne 0) {
+                return "failed"
+            }
+        }
+
+        $requiredReportProperties = Get-TruthProp -Object $Definition -Name "requiredReportProperties"
+        if ($null -ne $requiredReportProperties -and $requiredReportProperties -is [System.Collections.IDictionary]) {
+            foreach ($entry in $requiredReportProperties.GetEnumerator()) {
+                $actual = Get-TruthPathProp -Object $Report -Path ([string] $entry.Key)
+                if (-not (Test-TruthExpectedValue -Actual $actual -Expected $entry.Value)) {
+                    return "failed"
+                }
+            }
+        }
+
+        return "passed"
+    }
     if ($rawStatus -eq "blocked") {
         $criticalFindings = @((Get-TruthProp -Object $Report -Name "findings" -Default @()) | Where-Object {
             [string](Get-TruthProp -Object $_ -Name "severity" -Default "") -eq "critical"
@@ -2190,6 +3666,10 @@ foreach ($definition in $definitions) {
     $classification = Get-TruthClassification -Definition $definition -Report $report -Blockers $blockers -IsStale (@($staleReasons).Count -gt 0)
     $evidence = ConvertTo-TruthEvidence -Report $report -RawStatus $rawStatus -Blockers $blockers
 
+    $ownerInputBlockers = @($blockers | Where-Object { $_ -in $knownOwnerInputs })
+    $requiredOwnerInputBlockers = @($ownerInputBlockers | Where-Object { $_ -in $requiredOwnerInputs })
+    $optionalOwnerInputBlockers = @($ownerInputBlockers | Where-Object { $_ -in $optionalOwnerInputs })
+
     [void] $items.Add([ordered]@{
         id = $id
         requirement = [string] $definition.requirement
@@ -2203,7 +3683,9 @@ foreach ($definition in $definitions) {
         ageSeconds = $ageSeconds
         staleReasons = @($staleReasons)
         blockers = @($blockers)
-        ownerInputBlockers = @($blockers | Where-Object { $_ -in $knownOwnerInputs })
+        ownerInputBlockers = @($ownerInputBlockers)
+        requiredOwnerInputBlockers = @($requiredOwnerInputBlockers)
+        optionalOwnerInputBlockers = @($optionalOwnerInputBlockers)
         productionGate = [bool] $definition.productionGate
     })
 }
@@ -2214,9 +3696,13 @@ foreach ($classification in @("passed", "blocked-owner-input", "blocked-repo-wor
 }
 
 $missingOwnerInputs = New-Object System.Collections.ArrayList
+$missingOptionalOwnerInputs = New-Object System.Collections.ArrayList
 foreach ($item in @($items)) {
-    foreach ($name in @($item.ownerInputBlockers)) {
+    foreach ($name in @($item.requiredOwnerInputBlockers)) {
         Add-UniqueTruthValue -Target $missingOwnerInputs -Value $name
+    }
+    foreach ($name in @($item.optionalOwnerInputBlockers)) {
+        Add-UniqueTruthValue -Target $missingOptionalOwnerInputs -Value $name
     }
 }
 
@@ -2268,7 +3754,11 @@ $report = [ordered]@{
     productionGateCount = @($items | Where-Object { $_.productionGate -eq $true }).Count
     completionReady = $overallStatus -eq "passed"
     blockedOnlyOnKnownOwnerInputs = $overallStatus -eq "blocked-owner-input"
+    requiredOwnerInputs = @($requiredOwnerInputs)
+    optionalOwnerInputs = @($optionalOwnerInputs)
     missingOwnerInputs = @($missingOwnerInputs)
+    missingRequiredOwnerInputs = @($missingOwnerInputs)
+    missingOptionalOwnerInputs = @($missingOptionalOwnerInputs)
     nextRepoOwnedTasks = @($nextRepoTasks)
     items = @($items)
 }
@@ -2293,9 +3783,20 @@ foreach ($entry in $classificationCounts.GetEnumerator()) {
 [void] $lines.Add("")
 
 if (@($missingOwnerInputs).Count -gt 0) {
-    [void] $lines.Add("## Missing Owner Inputs")
+    [void] $lines.Add("## Missing Required Owner Inputs")
     [void] $lines.Add("")
     foreach ($name in @($missingOwnerInputs)) {
+        [void] $lines.Add("- $name")
+    }
+    [void] $lines.Add("")
+}
+
+if (@($missingOptionalOwnerInputs).Count -gt 0) {
+    [void] $lines.Add("## Optional Owner Inputs Mentioned")
+    [void] $lines.Add("")
+    [void] $lines.Add("These names are accepted owner-provided overrides, but they are not required for go-live readiness.")
+    [void] $lines.Add("")
+    foreach ($name in @($missingOptionalOwnerInputs)) {
         [void] $lines.Add("- $name")
     }
     [void] $lines.Add("")

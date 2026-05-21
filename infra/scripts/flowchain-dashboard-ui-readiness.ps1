@@ -35,10 +35,22 @@ function Test-ScriptExists {
     return $null -ne $scripts.PSObject.Properties[$Name]
 }
 
+function Stop-DashboardUiProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $ProcessId })
+    foreach ($child in $children) {
+        Stop-DashboardUiProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+}
+
 function Invoke-DashboardUiCommand {
     param(
         [Parameter(Mandatory = $true)][string] $Label,
-        [Parameter(Mandatory = $true)][string[]] $ArgumentList
+        [Parameter(Mandatory = $true)][string[]] $ArgumentList,
+        [int] $TimeoutSeconds = 300
     )
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -54,17 +66,29 @@ function Invoke-DashboardUiCommand {
     $process.StartInfo = $psi
     $startedAt = [DateTimeOffset]::UtcNow
     [void] $process.Start()
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
-    $process.WaitForExit()
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+    if ($timedOut) {
+        Stop-DashboardUiProcessTree -ProcessId $process.Id
+        [void] $process.WaitForExit(5000)
+    }
+    else {
+        $process.WaitForExit()
+    }
+    $stdout = $stdoutTask.Result
+    $stderr = $stderrTask.Result
     $finishedAt = [DateTimeOffset]::UtcNow
+    $exitCode = if ($timedOut) { 124 } else { $process.ExitCode }
 
     $command = "npm $($ArgumentList -join ' ')"
-    Write-Host "$Label exit code: $($process.ExitCode)"
+    Write-Host "$Label exit code: $exitCode"
     return [ordered]@{
         label = $Label
         command = $command
-        exitCode = $process.ExitCode
+        exitCode = $exitCode
+        timeoutSeconds = $TimeoutSeconds
+        timedOut = $timedOut
         durationSeconds = [int][Math]::Max(0, [Math]::Ceiling(($finishedAt - $startedAt).TotalSeconds))
         stdoutLineCount = @($stdout -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
         stderrLineCount = @($stderr -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
@@ -102,12 +126,26 @@ $dashboardPackage = Read-JsonObject -Path $dashboardPackagePath
 $rootPackage = Read-JsonObject -Path $rootPackagePath
 $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -LiteralPath $browserSpecPath } else { "" }
 $configText = if (Test-Path -LiteralPath $playwrightConfigPath) { Get-Content -Raw -LiteralPath $playwrightConfigPath } else { "" }
+$workbenchViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/WorkbenchView.tsx"
+$ownerActivationViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/OwnerActivationView.tsx"
+$opsViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/OpsView.tsx"
+$alertsViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/AlertsView.tsx"
+$workbenchDataPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/data/workbench.ts"
+$fixtureSyncPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/scripts/sync-fixtures.mjs"
+$workbenchText = @(
+    if (Test-Path -LiteralPath $workbenchViewPath) { Get-Content -Raw -LiteralPath $workbenchViewPath } else { "" }
+    if (Test-Path -LiteralPath $ownerActivationViewPath) { Get-Content -Raw -LiteralPath $ownerActivationViewPath } else { "" }
+    if (Test-Path -LiteralPath $opsViewPath) { Get-Content -Raw -LiteralPath $opsViewPath } else { "" }
+    if (Test-Path -LiteralPath $alertsViewPath) { Get-Content -Raw -LiteralPath $alertsViewPath } else { "" }
+    if (Test-Path -LiteralPath $workbenchDataPath) { Get-Content -Raw -LiteralPath $workbenchDataPath } else { "" }
+    if (Test-Path -LiteralPath $fixtureSyncPath) { Get-Content -Raw -LiteralPath $fixtureSyncPath } else { "" }
+) -join "`n"
 
 $commands = @(
-    (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "dashboard browser wallet faucet explorer loop" -ArgumentList @("run", "browser:e2e", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "dashboard production build" -ArgumentList @("run", "build", "--prefix", "apps/dashboard")),
-    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane"))
+    (Invoke-DashboardUiCommand -Label "dashboard unit render tests" -ArgumentList @("test", "--prefix", "apps/dashboard") -TimeoutSeconds 180),
+    (Invoke-DashboardUiCommand -Label "dashboard browser wallet faucet explorer loop" -ArgumentList @("run", "browser:e2e", "--prefix", "apps/dashboard", "--", "--workers=1") -TimeoutSeconds 300),
+    (Invoke-DashboardUiCommand -Label "dashboard production build" -ArgumentList @("run", "build", "--prefix", "apps/dashboard") -TimeoutSeconds 300),
+    (Invoke-DashboardUiCommand -Label "control-plane tester gateway tests" -ArgumentList @("test", "--prefix", "services/control-plane") -TimeoutSeconds 600)
 )
 
 $checks = [ordered]@{
@@ -122,12 +160,38 @@ $checks = [ordered]@{
     testerFaucetCovered = $specText.Contains("/tester/faucet")
     testerSendCovered = $specText.Contains("/tester/wallets/send")
     explorerRouteCovered = $specText.Contains("/explorer")
+    testerLaunchRouteCovered = $specText.Contains("/tester")
+    activationRouteCovered = $specText.Contains("/activation")
+    bridgeRouteCovered = $specText.Contains("/bridge")
+    opsRouteCovered = $specText.Contains("/ops")
+    alertsRouteCovered = $specText.Contains("/alerts")
+    bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail") -and $specText.Contains("Pilot aggregate")
+    bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
+    bridgeReleaseEvidenceProofCovered = $specText.Contains("Bridge release evidence") -and $specText.Contains("flowchain:bridge:release:evidence:validate") -and $workbenchText.Contains("base8453-bridge-release-evidence-validation")
+    bridgeCommandMatrixProofCovered = $specText.Contains("Bridge command matrix") -and $specText.Contains("flowchain:bridge:command-matrix") -and $workbenchText.Contains("bridgeCommandMatrix")
+    bridgeReconciliationScheduleProofCovered = $specText.Contains("Reconciliation schedule") -and $specText.Contains("flowchain:bridge:reconciliation:schedule:validate") -and $workbenchText.Contains("bridgeReconciliationSchedule")
+    realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
+    opsObservabilityProofCovered = $specText.Contains("Ops center") -and $specText.Contains("Active rules") -and $specText.Contains("Ops install proof") -and $workbenchText.Contains("opsMetricCount")
+    alertsListProofCovered = $specText.Contains("Verifier failed") -and $specText.Contains("UPSTREAM_LOSS") -and $workbenchText.Contains("recommendedAction")
+    publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
+    publicRpcCommandMatrixProofCovered = $specText.Contains("RPC command matrix") -and $specText.Contains("flowchain:public-rpc:command-matrix") -and $workbenchText.Contains("publicRpcCommandMatrix")
+    ownerHostApplyPlanProofCovered = $specText.Contains("owner-host-apply.sh plan") -and $workbenchText.Contains("launchSequence") -and $workbenchText.Contains("Owner host apply proof")
+    ownerHostApplyExecutionProofCovered = $specText.Contains("owner-host-apply.sh apply") -and $workbenchText.Contains("launchSequenceCoversOwnerHostApplyExecution")
+    ownerHostApplyRollbackProofCovered = $specText.Contains("owner-host-apply.sh rollback") -and $workbenchText.Contains("rollbackCommands")
+    ownerNeedsNowReportCopied = $workbenchText.Contains("owner-needs-now-report.json") -and $workbenchText.Contains("ownerNeedsNow")
+    ownerNeedsNowGroupsCovered = $specText.Contains("Owner setup groups") -and $specText.Contains("Public RPC edge validation commands") -and $workbenchText.Contains("neededNowGroups")
+    ownerNeedsNowActionsCovered = $specText.Contains("Pick the public RPC URL") -and $workbenchText.Contains("ownerAction")
+    ownerNeedsNowReadyGroupCovered = $specText.Contains("Ready setup groups") -and $specText.Contains("Tester write gateway") -and $workbenchText.Contains("readyGroups")
+    ownerEnvTemplateReportCopied = $workbenchText.Contains("owner-env-template-report.json") -and $workbenchText.Contains("ownerEnvTemplate")
+    ownerEnvFieldGuideCovered = $specText.Contains("Owner env field guide") -and $specText.Contains("absolute non-local HTTPS endpoint") -and $workbenchText.Contains("fieldGuide")
+    ownerEnvFieldGuideBoundaryCovered = $specText.Contains("Guide rows") -and $workbenchText.Contains("ownerEnvTemplateNoSecrets") -and $workbenchText.Contains("ownerEnvTemplateEnvValuesPrinted")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
     dashboardUnitTestsPassed = ($commands | Where-Object { $_.label -eq "dashboard unit render tests" } | Select-Object -First 1).exitCode -eq 0
     dashboardBrowserE2ePassed = ($commands | Where-Object { $_.label -eq "dashboard browser wallet faucet explorer loop" } | Select-Object -First 1).exitCode -eq 0
     dashboardBuildPassed = ($commands | Where-Object { $_.label -eq "dashboard production build" } | Select-Object -First 1).exitCode -eq 0
     controlPlaneTesterGatewayTestsPassed = ($commands | Where-Object { $_.label -eq "control-plane tester gateway tests" } | Select-Object -First 1).exitCode -eq 0
+    commandsCompletedWithoutTimeout = @($commands | Where-Object { $_.timedOut -eq $true }).Count -eq 0
     secretMarkerFindingsEmpty = $true
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -143,7 +207,8 @@ $report = [ordered]@{
     secretMarkerFindings = @()
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
-    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer")
+    coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge", "/ops", "/alerts")
+    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "base8453-bridge-release-evidence-validation", "base8453-bridge-reconciliation-schedule-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-needs-now-groups", "owner-env-field-guide", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -174,7 +239,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner needs-now grouped action proof -> owner env field-guide proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> bridge reconciliation schedule proof -> real-value pilot aggregate proof -> ops observability proof -> alert list proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

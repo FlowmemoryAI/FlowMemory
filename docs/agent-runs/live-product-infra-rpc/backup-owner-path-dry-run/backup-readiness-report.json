@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.backup_readiness_report.v1",
-    "generatedAt":  "2026-05-18T04:43:48.1411808Z",
+    "generatedAt":  "2026-05-21T11:04:26.0159615Z",
     "status":  "passed",
     "requiredEnvNames":  [
                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
@@ -11,9 +11,9 @@
     "state":  {
                   "statePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\state.json",
                   "readable":  true,
-                  "latestHeight":  "65552",
-                  "latestHash":  "0xb8afff089644c9fda65e41c087b08c1458d9f951ca9ca5fef1ab9eb642f1afd7",
-                  "latestRoot":  "0xd90c3fc45ca18fd7e4e036f755ea98399570fb9328102ccfbef155f20c52d9d7"
+                  "latestHeight":  "112197",
+                  "latestHash":  "0xd90dee3f01943dce21994538df59f7b6d0ca57521f1246dcdb55dfe65e759e05",
+                  "latestRoot":  "0x9e0d8a19bf083494c5f18d0cfeaeab1aee239c18e677c9409f12fd9a1344c7f6"
               },
     "backup":  {
                    "configured":  true,
@@ -22,16 +22,20 @@
                    "directory":  true,
                    "snapshotProofStatus":  "passed",
                    "restoreProofStatus":  "passed",
-                   "latestBackupTimestamp":  "2026-05-18T04:43:10.2325853Z",
-                   "latestBackupArtifactName":  "flowchain-state-snapshot-20260518T044155394Z",
+                   "latestBackupTimestamp":  "2026-05-21T11:04:18.5063781Z",
+                   "latestBackupArtifactName":  "flowchain-state-snapshot-20260521T110407667Z",
                    "stateRootCompared":  true,
                    "stateRootMatch":  true,
                    "stateFileHashMatch":  true,
                    "writeVerified":  true,
                    "latestPointerVerified":  true,
                    "latestPointerWrittenAtomically":  true,
-                   "snapshotManifestHash":  "fbefe5555823bd6576896dff117a9c67012526cc66179017448a5f31c7173b26",
-                   "latestManifestHash":  "fbefe5555823bd6576896dff117a9c67012526cc66179017448a5f31c7173b26",
+                   "snapshotManifestHash":  "8f2ca9b4afbd5658ca1e14955935209ab9f2d47335754284e6fd15971ab84746",
+                   "latestManifestHash":  "8f2ca9b4afbd5658ca1e14955935209ab9f2d47335754284e6fd15971ab84746",
+                   "retentionCount":  14,
+                   "retentionCandidateCount":  1,
+                   "retentionCurrentSnapshotProtected":  true,
+                   "retentionPruneErrorCount":  0,
                    "restoreVerified":  true
                },
     "proofReports":  {

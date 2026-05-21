@@ -130,12 +130,76 @@ $rules = @(
         commands = @("npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30", "npm run flowchain:service:restart -- -LiveProfile")
     },
     [ordered]@{
+        id = "transaction-intake-corrupt"
+        severity = "critical"
+        findingCodes = @("transaction-intake-invalid-rows")
+        signal = "Signed transaction intake contains invalid local NDJSON rows."
+        threshold = "transactionIntake.txIntakeInvalidRows is greater than zero"
+        commands = @("npm run flowchain:ops:snapshot", "npm run flowchain:control-plane:smoke", "npm run flowchain:no-secret:scan")
+    },
+    [ordered]@{
         id = "secret-boundary-breach"
         severity = "critical"
         findingCodes = @("no-secret-scan-not-passed")
         signal = "No-secret scan did not pass."
         threshold = "any no-secret scan failure"
         commands = @("npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
+    },
+    [ordered]@{
+        id = "backup-retention-unsafe"
+        severity = "critical"
+        findingCodes = @("backup-retention-unsafe")
+        signal = "Backup retention failed to protect the latest snapshot or reported prune errors."
+        threshold = "backup readiness status failed with retentionCurrentSnapshotProtected false or retentionPruneErrorCount greater than zero"
+        commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check")
+    },
+    [ordered]@{
+        id = "backup-restore-validation-failed"
+        severity = "critical"
+        findingCodes = @("backup-restore-validation-failed")
+        signal = "Backup restore validation is missing or unsafe."
+        threshold = "snapshot/restore round-trip, tamper/corruption detection, retention, live-state protection, no-secret, and no-broadcast backup restore checks must all pass"
+        commands = @("npm run flowchain:backup:restore:validate", "npm run flowchain:backup:create", "npm run flowchain:backup:restore:verify")
+    },
+    [ordered]@{
+        id = "backup-owner-path-dry-run-failed"
+        severity = "critical"
+        findingCodes = @("backup-owner-path-dry-run-failed")
+        signal = "Backup owner-path dry run is missing or unsafe."
+        threshold = "ignored local owner path, snapshot proof, restore proof, retention, live-state non-mutation, no-secret, and no-broadcast owner-path dry-run checks must all pass"
+        commands = @("npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check -- -AllowBlocked", "npm run flowchain:backup:restore:validate")
+    },
+    [ordered]@{
+        id = "bridge-deploy-control-validation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-deploy-control-validation-failed")
+        signal = "Bridge deploy/control validation is missing or failing."
+        threshold = "deploy/control validation is not passed, has failedChecks, misses deploy/pause/resume/emergency-stop checks, does not fail closed without owner env, does not require explicit owner broadcast acknowledgement, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "bridge-command-matrix-failed"
+        severity = "critical"
+        findingCodes = @("bridge-command-matrix-failed")
+        signal = "Bridge command matrix is missing or unsafe."
+        threshold = "command matrix must cover deploy, observe, relayer, control, release, owner input names, broadcast acknowledgement gates, committed evidence paths, no-secret, and no-broadcast checks"
+        commands = @("npm run flowchain:bridge:command-matrix", "npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:reconciliation")
+    },
+    [ordered]@{
+        id = "bridge-no-secret-audit-failed"
+        severity = "critical"
+        findingCodes = @("bridge-no-secret-audit-failed")
+        signal = "Bridge generated pilot evidence no-secret audit is missing or unsafe."
+        threshold = "committed bridge no-secret audit JSON and Markdown must scan generated bridge pilot evidence with positive scanned file count, zero findings, zero secret findings, zero failed checks, no env value printing, no secrets, and no broadcasts"
+        commands = @("npm run flowchain:bridge:no-secret-audit", "npm run flowchain:bridge:command-matrix", "npm run flowchain:no-secret:scan")
+    },
+    [ordered]@{
+        id = "bridge-relayer-check-contract-failed"
+        severity = "critical"
+        findingCodes = @("bridge-relayer-check-contract-failed")
+        signal = "Bridge relayer one-shot safety check contract is missing or failing."
+        threshold = "relayer one-shot report is not passed/blocked, has failedChecks, misses required checks, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
         id = "bridge-relayer-latency-failed"
@@ -162,12 +226,68 @@ $rules = @(
         commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
     },
     [ordered]@{
+        id = "bridge-direct-observe-cursor-unsafe"
+        severity = "critical"
+        findingCodes = @("bridge-direct-observe-cursor-unsafe")
+        signal = "Standalone Base 8453 observer could use or mutate the final relayer cursor without explicit owner opt-in."
+        threshold = "direct observer guardrail is missing, not blocked, not staged by default, points at the final cursor, changes final cursor state, writes staged cursor state, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "bridge-runtime-credit-validation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-runtime-credit-validation-failed")
+        signal = "Base 8453 runtime credit proof is missing or failing."
+        threshold = "runtime credit validation is not passed, has failed/missing/false checks, exceeds latency gates, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:service:status", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "bridge-reconciliation-failed"
+        severity = "critical"
+        findingCodes = @("bridge-reconciliation-failed")
+        signal = "Bridge reconciliation report is missing or failing."
+        threshold = "reconciliation status is not passed, relayer counts are negative, pending credits are negative, staged cursor safety is missing, runtime credit or replay rejection proof is missing, release evidence validation is missing, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:bridge:reconciliation", "npm run flowchain:bridge:relayer:once -- -AllowBlocked", "npm run flowchain:bridge:runtime-credit:validate", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "real-value-pilot-aggregate-failed"
+        severity = "critical"
+        findingCodes = @("real-value-pilot-aggregate-failed")
+        signal = "Real-value pilot aggregate proof is missing or failing."
+        threshold = "aggregate report is not passed, has timed-out commands, failed commands, missing proofs, missing expected commands, false owner go/no-go, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
         id = "bridge-relayer-loop-unhealthy"
         severity = "critical"
         findingCodes = @("bridge-relayer-loop-unhealthy")
         signal = "Bridge relayer loop is running without fresh no-secret/no-broadcast health evidence."
-        threshold = "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true"
+        threshold = "service status reports bridgeRelayerLoop.status running and bridgeRelayerLoop.report.healthy is not true, bridge relayer loop validation is not passed, no-secret/no-broadcast evidence is false, or PID cleanup after stop is not proven"
         commands = @("npm run flowchain:service:status", "npm run flowchain:bridge:relayer:loop:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "supervisor-relayer-recovery-failed"
+        severity = "critical"
+        findingCodes = @("supervisor-relayer-recovery-failed")
+        signal = "Service supervisor requested the bridge relayer loop but latest recovery evidence does not show a healthy relayer loop."
+        threshold = "service-supervisor report has bridgeRelayerLoop.requested true and latest after.bridgeRelayerLoopStatus is not running, command line is not matched, report is unhealthy, or supervisor status failed"
+        commands = @("npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop", "npm run flowchain:service:supervisor:validate", "npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop", "npm run flowchain:bridge:emergency-stop")
+    },
+    [ordered]@{
+        id = "supervisor-node-recovery-validation-failed"
+        severity = "critical"
+        findingCodes = @("supervisor-node-recovery-validation-failed")
+        signal = "Service supervisor node crash recovery validation is missing or failed."
+        threshold = "service-supervisor-validation report is not passed or node crash, restart, live-profile, unbounded, node-running, or control-plane-readable recovery checks are false"
+        commands = @("npm run flowchain:service:supervisor:validate", "npm run flowchain:service:supervisor -- -Once", "npm run flowchain:service:restart -- -LiveProfile")
+    },
+    [ordered]@{
+        id = "service-install-validation-failed"
+        severity = "critical"
+        findingCodes = @("service-install-validation-failed")
+        signal = "Windows Scheduled Task or Linux systemd service install validation is missing or unsafe."
+        threshold = "Windows service install validation or systemd service install validation is not passed, has failedChecks or missing scripts, mutates host state, lacks live profile default, bridge-relayer opt-in, autorecovery, restart-always, least-privilege hardening, no-secret evidence, or no-broadcast evidence"
+        commands = @("npm run flowchain:service:install:validate", "npm run flowchain:service:install:systemd:validate", "npm run flowchain:service:status")
     },
     [ordered]@{
         id = "deployment-refresh-aborted"
@@ -178,12 +298,100 @@ $rules = @(
         commands = @("npm run flowchain:public-deployment:contract -- -AllowBlocked", "npm run flowchain:public-deployment:contract -- -NoRefresh -AllowBlocked", "npm run flowchain:ops:snapshot -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
+        id = "truth-table-stale-or-failed"
+        severity = "critical"
+        findingCodes = @("truth-table-stale-or-failed")
+        signal = "Production truth table is stale, failed, missing, or reports repo-owned blockers."
+        threshold = "production truth table status is failed/stale/missing or failed, stale, or blocked-repo-work gate count is greater than zero"
+        commands = @("npm run flowchain:truth-table -- -AllowBlocked", "npm run flowchain:completion:audit -- -AllowBlocked", "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked")
+    },
+    [ordered]@{
         id = "external-tester-evidence-unsafe"
         severity = "critical"
         findingCodes = @("external-tester-evidence-unsafe")
         signal = "External tester returned evidence contains a secret marker, credential URL, or env assignment."
         threshold = "tester evidence validation reports any secretMarkerFindings, credentialUrlFindings, or envAssignmentFindings"
         commands = @("npm run flowchain:tester:evidence:validate", "npm run flowchain:no-secret:scan", "npm run flowchain:emergency:export-evidence")
+    },
+    [ordered]@{
+        id = "public-tester-gateway-e2e-failed"
+        severity = "critical"
+        findingCodes = @("public-tester-gateway-e2e-failed")
+        signal = "Public tester gateway E2E proof is missing or unsafe."
+        threshold = "gateway report is not passed, has failedChecks, misses wallet create/faucet/send/cap rejection/routes, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
+    },
+    [ordered]@{
+        id = "dashboard-ui-readiness-failed"
+        severity = "critical"
+        findingCodes = @("dashboard-ui-readiness-failed")
+        signal = "Dashboard wallet, faucet, send, tester launch, explorer, activation cockpit, or no-secret UI readiness proof is missing or failed."
+        threshold = "dashboard UI readiness status is not passed, required tester flow, activation cockpit, browser E2E/build proof is false, or no-secret flags are unsafe"
+        commands = @("npm run flowchain:dashboard:ui:readiness", "npm run flowchain:dashboard:build", "npm test --prefix apps/dashboard")
+    },
+    [ordered]@{
+        id = "second-computer-readiness-failed"
+        severity = "critical"
+        findingCodes = @("second-computer-readiness-failed")
+        signal = "Second-computer source bundle or verifier readiness is missing or unsafe."
+        threshold = "second-computer readiness status is not passed, bundle or verify command failed, manifest next commands are missing, bundle hash is absent, local-output or env-file exclusions are missing, stage no-secret scan failed, broadcasts, prints env values, or reports secrets"
+        commands = @("npm run flowchain:second-computer:readiness", "npm run flowchain:second-computer:bundle -- -Force", "npm run flowchain:second-computer:verify")
+    },
+    [ordered]@{
+        id = "developer-dev-pack-readiness-failed"
+        severity = "critical"
+        findingCodes = @("developer-dev-pack-readiness-failed")
+        signal = "Developer pack SDK/devkit, docs, or browser starter readiness proof is missing or unsafe."
+        threshold = "dev-pack report is not passed, has failedChecks, has fewer than one implemented language SDK, lacks Python SDK, signed-envelope submission, packaged Vite/React browser starter build/smoke proof, public readiness fail-closed proof, or no-secret/no-broadcast flags"
+        commands = @("npm run flowchain:dev-pack:e2e", "npm run flowchain:browser-readiness:build", "npm run flowchain:browser-readiness:smoke", "npm run flowchain:python-sdk:e2e")
+    },
+    [ordered]@{
+        id = "owner-inputs-validation-failed"
+        severity = "critical"
+        findingCodes = @("owner-inputs-validation-failed")
+        signal = "Owner input validation scenarios are missing, failed, or unsafe to use for live cutover."
+        threshold = "owner input validation status is not passed, fewer than six validation scenarios are present, any scenario failed, required env names are absent, or no-secret flags are unsafe"
+        commands = @("npm run flowchain:owner-inputs:validate", "npm run flowchain:owner-inputs", "npm run flowchain:owner-env:readiness")
+    },
+    [ordered]@{
+        id = "owner-go-live-handoff-failed"
+        severity = "critical"
+        findingCodes = @("owner-go-live-handoff-failed")
+        signal = "Owner go-live handoff is missing or unsafe."
+        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, fails to separate required and optional owner inputs, lets optional owner inputs leak into Needed Now, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
+        commands = @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
+    },
+    [ordered]@{
+        id = "owner-needs-now-failed"
+        severity = "critical"
+        findingCodes = @("owner-needs-now-failed")
+        signal = "Owner needs-now launch blocker report is missing or unsafe."
+        threshold = "needs-now report is not passed, has failedChecks or secretMarkerFindings, lacks grouped owner-input blockers, lacks validation commands, lets optional owner inputs leak into Needed Now, fails public-sharing blocked-until-ready guardrails, prints env values, broadcasts, or reports secrets"
+        commands = @("npm run flowchain:owner:needs-now", "npm run flowchain:owner:go-live-handoff", "npm run flowchain:truth-table -- -AllowBlocked")
+    },
+    [ordered]@{
+        id = "public-rpc-edge-hardening-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-edge-hardening-failed")
+        signal = "Public RPC edge deployment hardening evidence is missing or failed."
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, bounded timeout guardrail proof, wallet/tester cutover command proof, hashed owner-host apply plan, concrete owner-host apply script, plan/apply/rollback modes, artifact hash verification, install/edge apply phases, post-deploy evidence, or rollback drill proof"
+        commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
+    },
+    [ordered]@{
+        id = "public-rpc-command-matrix-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-command-matrix-failed")
+        signal = "Public RPC command matrix is missing or unsafe."
+        threshold = "command matrix must cover preflight, render, service-install, owner-host plan/apply, post-deploy proof, tester, release, rollback, owner input names, mutation risk, rollback coverage, committed evidence paths, no-secret, and no-broadcast checks"
+        commands = @("npm run flowchain:public-rpc:command-matrix", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-rpc:deployment-bundle")
+    },
+    [ordered]@{
+        id = "public-rpc-synthetic-canary-failed"
+        severity = "critical"
+        findingCodes = @("public-rpc-synthetic-canary-failed")
+        signal = "Public RPC synthetic canary failed a read-only live endpoint probe."
+        threshold = "synthetic canary status is failed, any planned read path or read-only JSON-RPC method fails, response hygiene fails, or a write method enters the probe plan"
+        commands = @("npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked", "npm run flowchain:public-rpc:check -- -AllowBlocked", "npm run flowchain:public-rpc:validate")
     },
     [ordered]@{
         id = "public-rpc-not-shareable"
@@ -222,8 +430,8 @@ $rules = @(
         severity = "blocked"
         findingCodes = @("external-tester-not-shareable")
         signal = "External tester packet is not shareable."
-        threshold = "tester readiness status is not passed"
-        commands = @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet")
+        threshold = "tester readiness status is not passed, local tester wallet rehearsal is not ready/fresh, public tester gateway or faucet route is not validated, external sharing is false, or live infra readiness is blocked"
+        commands = @("npm run flowchain:wallet:live-tester:e2e", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:tester:readiness -- -AllowBlocked", "npm run flowchain:external-tester:packet -- -AllowBlocked")
     },
     [ordered]@{
         id = "external-tester-evidence-invalid"
@@ -259,6 +467,154 @@ $criticalRules = @($rules | Where-Object { $_.severity -eq "critical" })
 $blockedRules = @($rules | Where-Object { $_.severity -eq "blocked" })
 $rulesWithoutCommands = @($rules | Where-Object { @($_.commands).Count -eq 0 })
 $activeRuleIdsWithoutCommands = @($rules | Where-Object { $activeRules.Contains($_.id) -and @($_.commands).Count -eq 0 } | ForEach-Object { $_.id })
+$publicRpcEdgeHardeningRule = @($rules | Where-Object { $_.id -eq "public-rpc-edge-hardening-failed" } | Select-Object -First 1)
+$publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("response-header", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicRpcEdgeHardeningRuleCoversTimeoutGuardrails = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("timeout guardrail", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("wallet/tester", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("cutover", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("drill", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
+$publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("owner-host apply plan", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("concrete owner-host apply script", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("plan/apply/rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("artifact hash verification", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("install/edge apply phases", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("post-deploy evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
+$publicRpcCommandMatrixRule = @($rules | Where-Object { $_.id -eq "public-rpc-command-matrix-failed" } | Select-Object -First 1)
+$publicRpcCommandMatrixRuleCoversLaunchRunbook = $publicRpcCommandMatrixRule.Count -eq 1 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("preflight", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("owner-host plan/apply", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("post-deploy proof", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("rollback coverage", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcCommandMatrixRule[0].threshold).IndexOf("committed evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($publicRpcCommandMatrixRule[0].commands) -contains "npm run flowchain:public-rpc:command-matrix")
+$backupRestoreValidationRule = @($rules | Where-Object { $_.id -eq "backup-restore-validation-failed" } | Select-Object -First 1)
+$backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRule.Count -eq 1 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("snapshot/restore", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("tamper", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("retention", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupRestoreValidationRule[0].threshold).IndexOf("live-state", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($backupRestoreValidationRule[0].commands) -contains "npm run flowchain:backup:restore:validate")
+$backupOwnerPathDryRunRule = @($rules | Where-Object { $_.id -eq "backup-owner-path-dry-run-failed" } | Select-Object -First 1)
+$backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRule.Count -eq 1 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("ignored local owner path", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("snapshot", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("restore", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$backupOwnerPathDryRunRule[0].threshold).IndexOf("live-state", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($backupOwnerPathDryRunRule[0].commands) -contains "npm run flowchain:backup:owner-path:dry-run")
+$bridgeRelayerCheckContractRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-check-contract-failed" } | Select-Object -First 1)
+$bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRule.Count -eq 1 `
+    -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerCheckContractRule[0].threshold).IndexOf("required checks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$bridgeDeployControlRule = @($rules | Where-Object { $_.id -eq "bridge-deploy-control-validation-failed" } | Select-Object -First 1)
+$bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRule.Count -eq 1 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("deploy", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("pause", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("resume", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("emergency-stop", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("fail closed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeDeployControlRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeDeployControlRule[0].commands) -contains "npm run flowchain:bridge:deploy:control:validate")
+$bridgeCommandMatrixRule = @($rules | Where-Object { $_.id -eq "bridge-command-matrix-failed" } | Select-Object -First 1)
+$bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRule.Count -eq 1 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("deploy", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("observe", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("relayer", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("control", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("release", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("committed evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeCommandMatrixRule[0].commands) -contains "npm run flowchain:bridge:command-matrix")
+$bridgeNoSecretAuditRule = @($rules | Where-Object { $_.id -eq "bridge-no-secret-audit-failed" } | Select-Object -First 1)
+$bridgeNoSecretAuditRuleCoversNoSecretProof = $bridgeNoSecretAuditRule.Count -eq 1 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("JSON", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("Markdown", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("zero findings", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("no env value printing", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("no broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeNoSecretAuditRule[0].commands) -contains "npm run flowchain:bridge:no-secret-audit")
+$bridgeRelayerLoopRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-loop-unhealthy" } | Select-Object -First 1)
+$bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -eq 1 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("validation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("no-broadcast", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("PID cleanup", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeRelayerLoopRule[0].commands) -contains "npm run flowchain:bridge:relayer:loop:validate")
+$bridgeReconciliationRule = @($rules | Where-Object { $_.id -eq "bridge-reconciliation-failed" } | Select-Object -First 1)
+$bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRule.Count -eq 1 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("staged cursor", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("runtime credit", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("replay rejection", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeReconciliationRule[0].threshold).IndexOf("release evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeReconciliationRule[0].commands) -contains "npm run flowchain:bridge:reconciliation")
+$supervisorNodeRecoveryRule = @($rules | Where-Object { $_.id -eq "supervisor-node-recovery-validation-failed" } | Select-Object -First 1)
+$supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRule.Count -eq 1 `
+    -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("live-profile", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$supervisorNodeRecoveryRule[0].threshold).IndexOf("unbounded", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$serviceInstallValidationRule = @($rules | Where-Object { $_.id -eq "service-install-validation-failed" } | Select-Object -First 1)
+$serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRule.Count -eq 1 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("systemd", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("bridge-relayer opt-in", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("autorecovery", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("restart-always", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("hardening", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$serviceInstallValidationRule[0].threshold).IndexOf("no-broadcast", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($serviceInstallValidationRule[0].commands) -contains "npm run flowchain:service:install:validate") `
+    -and (@($serviceInstallValidationRule[0].commands) -contains "npm run flowchain:service:install:systemd:validate")
+$externalTesterLaunchRule = @($rules | Where-Object { $_.id -eq "external-tester-not-shareable" } | Select-Object -First 1)
+$externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRule.Count -eq 1 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("public tester gateway", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("faucet route", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("local tester wallet rehearsal", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$externalTesterLaunchRule[0].threshold).IndexOf("live infra", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicTesterGatewayRule = @($rules | Where-Object { $_.id -eq "public-tester-gateway-e2e-failed" } | Select-Object -First 1)
+$publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRule.Count -eq 1 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("failedChecks", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicTesterGatewayRule[0].threshold).IndexOf("secrets", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$secondComputerRule = @($rules | Where-Object { $_.id -eq "second-computer-readiness-failed" } | Select-Object -First 1)
+$secondComputerRuleCoversBundleVerifyNoSecret = $secondComputerRule.Count -eq 1 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("bundle", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("verify", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("manifest next commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$secondComputerRule[0].threshold).IndexOf("no-secret", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($secondComputerRule[0].commands) -contains "npm run flowchain:second-computer:readiness")
+$ownerGoLiveHandoffRule = @($rules | Where-Object { $_.id -eq "owner-go-live-handoff-failed" } | Select-Object -First 1)
+$ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRule.Count -eq 1 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("release readiness", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("truth table", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRule.Count -eq 1 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("ordered launch sequence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("evidence report paths", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("rollback commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("missing package scripts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($ownerGoLiveHandoffRule[0].commands) -contains "npm run flowchain:owner:go-live-handoff")
+$ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRule.Count -eq 1 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("required and optional owner inputs", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("Needed Now", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$ownerNeedsNowRule = @($rules | Where-Object { $_.id -eq "owner-needs-now-failed" } | Select-Object -First 1)
+$ownerNeedsNowRuleCoversGroupsAndSharing = $ownerNeedsNowRule.Count -eq 1 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("grouped owner-input blockers", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("validation commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerNeedsNowRule[0].threshold).IndexOf("public-sharing", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($ownerNeedsNowRule[0].commands) -contains "npm run flowchain:owner:needs-now")
+$devPackRule = @($rules | Where-Object { $_.id -eq "developer-dev-pack-readiness-failed" } | Select-Object -First 1)
+$devPackRuleCoversBrowserStarter = $devPackRule.Count -eq 1 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("Vite/React", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("build/smoke", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$devPackRule[0].threshold).IndexOf("fail-closed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:dev-pack:e2e") `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:browser-readiness:build") `
+    -and (@($devPackRule[0].commands) -contains "npm run flowchain:browser-readiness:smoke")
 $allCommands = @($rules | ForEach-Object { @($_.commands) })
 $commandsWithInlineEnvAssignment = @($allCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' })
 $commandsWithUrls = @($allCommands | Where-Object { "$_" -match 'https?://' })
@@ -276,6 +632,30 @@ $checks = [ordered]@{
     commandsAvoidInlineEnvAssignment = $commandsWithInlineEnvAssignment.Count -eq 0
     commandsAvoidUrls = $commandsWithUrls.Count -eq 0
     findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
+    publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
+    publicRpcEdgeHardeningRuleCoversTimeoutGuardrails = $publicRpcEdgeHardeningRuleCoversTimeoutGuardrails
+    publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
+    publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
+    publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan
+    publicRpcCommandMatrixRuleCoversLaunchRunbook = $publicRpcCommandMatrixRuleCoversLaunchRunbook
+    backupRestoreValidationRuleCoversSafety = $backupRestoreValidationRuleCoversSafety
+    backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
+    bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
+    bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRuleCoversLaunchRunbook
+    bridgeNoSecretAuditRuleCoversNoSecretProof = $bridgeNoSecretAuditRuleCoversNoSecretProof
+    bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
+    bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
+    bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRuleCoversCursorAndReplay
+    supervisorNodeRecoveryRuleCoversLiveProfile = $supervisorNodeRecoveryRuleCoversLiveProfile
+    serviceInstallValidationRuleCoversAutorecoveryTelemetry = $serviceInstallValidationRuleCoversAutorecoveryTelemetry
+    externalTesterLaunchRuleCoversGatewayAndFaucet = $externalTesterLaunchRuleCoversGatewayAndFaucet
+    publicTesterGatewayRuleCoversNoSecretNoBroadcast = $publicTesterGatewayRuleCoversNoSecretNoBroadcast
+    secondComputerRuleCoversBundleVerifyNoSecret = $secondComputerRuleCoversBundleVerifyNoSecret
+    ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
+    ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRuleCoversLaunchAndRollback
+    ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRuleCoversInputSeparation
+    ownerNeedsNowRuleCoversGroupsAndSharing = $ownerNeedsNowRuleCoversGroupsAndSharing
+    devPackRuleCoversBrowserStarter = $devPackRuleCoversBrowserStarter
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true
     envValuesPrintedFalse = $true

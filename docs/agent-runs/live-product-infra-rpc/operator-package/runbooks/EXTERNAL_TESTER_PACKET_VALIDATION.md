@@ -1,6 +1,6 @@
 ﻿# FlowChain External Tester Packet Validation
 
-Generated: 2026-05-18T14:48:46.8200703Z
+Generated: 2026-05-21T16:46:21.8300116Z
 Status: passed
 
 This validation proves the friends-and-family tester packet and machine-readable connect pack are generated, no-secret, executable against the local tester gateway, and fail closed until owner public RPC and tester-write inputs exist.
@@ -9,8 +9,11 @@ This validation proves the friends-and-family tester packet and machine-readable
 
 - packageScriptPacketPresent: True
 - packageScriptValidationPresent: True
+- packageScriptClientPresent: True
+- packageScriptClientValidationPresent: True
 - packetScriptExists: True
 - readinessScriptExists: True
+- externalTesterClientExists: True
 - testerNetworkReportExists: True
 - publicTesterGatewayReportExists: True
 - packetCommandAllowsBlocked: True

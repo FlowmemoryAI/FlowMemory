@@ -29,7 +29,9 @@ param(
 
     [string]$RuntimeState = "services/bridge-relayer/out/base8453-pilot-credit-application-state.json",
 
-    [string]$CursorState = $(if ($env:FLOWCHAIN_BASE8453_CURSOR_STATE) { $env:FLOWCHAIN_BASE8453_CURSOR_STATE } else { "services/bridge-relayer/out/base8453-pilot-cursor-state.json" }),
+    [string]$CursorState = $(if ($env:FLOWCHAIN_BASE8453_OBSERVE_CURSOR_STATE) { $env:FLOWCHAIN_BASE8453_OBSERVE_CURSOR_STATE } else { "devnet/local/bridge-live-readiness/base8453-pilot-observe-staged-cursor.json" }),
+
+    [switch]$UseOwnerFinalCursor,
 
     [string]$Out = "services/bridge-relayer/out/base8453-pilot-bridge-observation.json",
 
@@ -52,6 +54,50 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location -LiteralPath $repoRoot
 $requiredAck = "I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+$finalCursorState = $(if ($env:FLOWCHAIN_BASE8453_CURSOR_STATE) { $env:FLOWCHAIN_BASE8453_CURSOR_STATE } else { "services/bridge-relayer/out/base8453-pilot-cursor-state.json" })
+$cursorStateSupplied = $PSBoundParameters.ContainsKey("CursorState")
+if ($UseOwnerFinalCursor.IsPresent -and -not $cursorStateSupplied) {
+    $CursorState = $finalCursorState
+}
+$cursorMode = if ($UseOwnerFinalCursor.IsPresent) {
+    "owner-final-cursor"
+}
+elseif ($cursorStateSupplied) {
+    "explicit-cursor"
+}
+else {
+    "staged-direct-observe"
+}
+function Convert-CursorPathForCompare {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    try {
+        if ([System.IO.Path]::IsPathRooted($Path)) {
+            return [System.IO.Path]::GetFullPath($Path)
+        }
+        return [System.IO.Path]::GetFullPath((Join-Path $repoRoot $Path))
+    }
+    catch {
+        return $Path
+    }
+}
+$cursorStateIsFinalCursor = (Convert-CursorPathForCompare -Path $CursorState).Equals((Convert-CursorPathForCompare -Path $finalCursorState), [System.StringComparison]::OrdinalIgnoreCase)
+if ($cursorStateIsFinalCursor -and -not $UseOwnerFinalCursor.IsPresent) {
+    throw "Direct Base 8453 observation refuses to write the final relayer cursor unless -UseOwnerFinalCursor is supplied. Use flowchain:bridge:relayer:once for production crediting."
+}
+
+function Get-CursorReport {
+    return [ordered]@{
+        mode = $cursorMode
+        cursorStatePath = $CursorState
+        finalCursorStatePath = $finalCursorState
+        cursorStateIsFinalCursor = $cursorStateIsFinalCursor
+        ownerFinalCursorRequested = $UseOwnerFinalCursor.IsPresent
+        cursorStateSupplied = $cursorStateSupplied
+        directObserveUsesStagedCursorByDefault = (-not $UseOwnerFinalCursor.IsPresent -and -not $cursorStateSupplied)
+        finalCursorCommitAllowed = $UseOwnerFinalCursor.IsPresent
+    }
+}
 
 function Write-JsonReport {
     param(
@@ -91,6 +137,7 @@ function Protect-ObserverOutputLine {
             @{ value = $FromBlock; label = "<FLOWCHAIN_BASE8453_FROM_BLOCK>" },
             @{ value = $ToBlock; label = "<FLOWCHAIN_BASE8453_TO_BLOCK>" },
             @{ value = $CursorState; label = "<FLOWCHAIN_BASE8453_CURSOR_STATE>" },
+            @{ value = $finalCursorState; label = "<FLOWCHAIN_BASE8453_FINAL_CURSOR_STATE>" },
             @{ value = $SupportedToken; label = "<FLOWCHAIN_BASE8453_SUPPORTED_TOKEN>" },
             @{ value = $MaxDepositAmount; label = "<FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI>" },
             @{ value = $TotalCapAmount; label = "<FLOWCHAIN_PILOT_TOTAL_CAP_WEI>" }
@@ -129,16 +176,20 @@ if ($missing.Count -gt 0) {
         status = "blocked"
         command = "npm run flowchain:bridge:observe:base8453"
         missingEnvNames = $missing
+        cursor = Get-CursorReport
         broadcasts = $false
+        envValuesPrinted = $false
         noSecrets = $true
     })
-    throw "Base 8453 pilot observation blocked by missing env names: $($missing -join ', ')."
+    Write-Host "Base 8453 pilot observation blocked by missing env names: $($missing -join ', ')."
+    exit 1
 }
 
 Write-Host "Preparing Base 8453 bridge pilot observation." -ForegroundColor Yellow
 Write-Host "Required env names present: FLOWCHAIN_BASE8453_RPC_URL, FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS, FLOWCHAIN_BASE8453_SUPPORTED_TOKEN, FLOWCHAIN_BASE8453_ASSET_DECIMALS, FLOWCHAIN_BASE8453_FROM_BLOCK, FLOWCHAIN_PILOT_CONFIRMATIONS, FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI, FLOWCHAIN_PILOT_TOTAL_CAP_WEI, FLOWCHAIN_PILOT_OPERATOR_ACK"
 Write-Host "Optional guardrail env names: FLOWCHAIN_PILOT_MAX_USD"
 Write-Host "Optional scan upper bound env name: FLOWCHAIN_BASE8453_TO_BLOCK"
+Write-Host "Cursor mode: $cursorMode"
 Write-Host "Broadcast: false; this relayer never sends release transactions."
 
 Write-NextCommand `
@@ -196,6 +247,7 @@ Write-JsonReport -Value ([ordered]@{
     status = "completed"
     command = "npm run flowchain:bridge:observe:base8453"
     outputEnvNames = @("Out", "CreditOut", "HandoffOut", "EvidenceOut", "WithdrawalOut", "ReleaseEvidenceOut", "CursorState")
+    cursor = Get-CursorReport
     cursorStatePath = $CursorState
     broadcasts = $false
     printsEnvValues = $false

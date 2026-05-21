@@ -8,6 +8,7 @@ type BrowserState = {
   created: boolean;
   funded: boolean;
   sent: boolean;
+  unhandledRequests: string[];
 };
 
 async function fulfillJson(route: Route, payload: unknown, status = 200) {
@@ -44,6 +45,17 @@ async function installControlPlaneMocks(page: Page, state: BrowserState) {
           "POST /tester/wallets/send",
         ],
       });
+      return;
+    }
+
+    if (pathname === "/rpc" && method === "POST") {
+      const payload = request.postDataJSON() as Array<{ id?: string | number }> | { id?: string | number };
+      const requests = Array.isArray(payload) ? payload : [payload];
+      await fulfillJson(route, requests.map((entry) => ({
+        jsonrpc: "2.0",
+        id: entry.id ?? null,
+        result: null,
+      })));
       return;
     }
 
@@ -234,7 +246,8 @@ async function installControlPlaneMocks(page: Page, state: BrowserState) {
       return;
     }
 
-    await fulfillJson(route, { schema: "flowmemory.control_plane.not_found.v0", noSecrets: true }, 404);
+    state.unhandledRequests.push(`${method} ${pathname}`);
+    await fulfillJson(route, { schema: "flowmemory.control_plane.unhandled_mock.v0", noSecrets: true });
   });
 }
 
@@ -261,7 +274,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => {
   test("completes the tester wallet funding loop and keeps the explorer inspectable", async ({ page }) => {
     const consoleErrors: string[] = [];
-    const state: BrowserState = { created: false, funded: false, sent: false };
+    const state: BrowserState = { created: false, funded: false, sent: false, unhandledRequests: [] };
 
     page.on("console", (message) => {
       if (message.type() === "error") {
@@ -276,21 +289,33 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.goto("/wallet?panel=tester");
 
     await expect(page.getByText("Tester gateway configured")).toBeVisible();
+    await expect(page.getByLabel("Tester launch path")).toContainText("Create, fund, send, inspect");
+    await expect(page.getByLabel("Tester launch path")).toContainText("needs passphrase");
     await page.getByLabel("Tester bearer token").fill(TESTER_TOKEN);
     await page.getByLabel("Tester wallet label").fill("friend-browser-a");
     await page.getByLabel("Tester wallet passphrase").fill("browser-test-passphrase");
     await page.getByRole("button", { name: /Create tester wallet/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester wallet created");
+    await expect(page.getByLabel("Tester launch path")).toContainText("wallet ready");
+    await expect(page.getByLabel("Fund account")).toHaveValue(TESTER_ACCOUNT_A);
 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Fund account").fill(TESTER_ACCOUNT_A);
+    await page.getByLabel("Faucet units").fill("3");
+    await expect(page.getByLabel("Faucet units")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("button", { name: /Request tester faucet/ })).toBeDisabled();
     await page.getByLabel("Faucet units").fill("2");
     await page.getByRole("button", { name: /Request tester faucet/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester faucet accepted");
+    await expect(page.getByLabel("Tester launch path")).toContainText("funding proof");
+    await expect(page.getByLabel("Sender account")).toHaveValue(TESTER_ACCOUNT_A);
 
     await page.getByRole("button", { name: "Tester", exact: true }).click();
     await page.getByLabel("Sender account").fill(TESTER_ACCOUNT_A);
     await page.getByLabel("Recipient account").fill(TESTER_ACCOUNT_B);
+    await page.getByLabel("Amount units").fill("3");
+    await expect(page.getByLabel("Amount units")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("button", { name: /Send tester units/ })).toBeDisabled();
     await page.getByLabel("Amount units").fill("1");
     await page.getByRole("button", { name: /Send tester units/ }).click();
     await expect(page.getByRole("status")).toContainText("Tester send accepted");
@@ -311,8 +336,90 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.getByRole("button", { name: /Transactions/ }).first().click();
     await expect(page.getByLabel("Explorer records")).toContainText(/transaction|transfer/i);
 
+    await page.goto("/tester");
+    await expect(page.getByRole("heading", { name: "Friends-and-family launch" })).toBeVisible();
+    await expect(page.getByLabel("Tester launch status")).toContainText("Live infra");
+    await expect(page.getByLabel("Tester launch status")).toContainText("Missing inputs");
+    await expect(page.getByLabel("Tester launch status")).toContainText("RPC command matrix");
+    await expect(page.getByText("RPC headers", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("HSTS, no-sniff, no-store, CSP")).toBeVisible();
+    await expect(page.getByText("RPC matrix", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("RPC launch matrix", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("npm run flowchain:public-rpc:command-matrix").first()).toBeVisible();
+
+    await page.goto("/activation");
+    await expect(page.getByRole("heading", { name: "L1 activation" })).toBeVisible();
+    await expect(page.getByLabel("L1 activation status")).toContainText("Needed now");
+    await expect(page.getByLabel("L1 activation status")).toContainText("Release");
+    await expect(page.getByRole("heading", { name: "Needed now" })).toBeVisible();
+    await expect(page.getByLabel("Owner setup groups")).toContainText("Public RPC edge");
+    await expect(page.getByLabel("Owner setup groups")).toContainText("Pick the public RPC URL");
+    await expect(page.getByLabel("Public RPC edge validation commands")).toContainText("flowchain:public-rpc:synthetic-canary");
+    await expect(page.getByLabel("Owner setup groups")).toContainText("Backup storage");
+    await expect(page.getByLabel("Owner setup groups")).toContainText("Base 8453 bridge");
+    await expect(page.getByLabel("Ready setup groups")).toContainText("Tester write gateway");
+    await expect(page.getByRole("heading", { name: "Host apply sequence" })).toBeVisible();
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh plan");
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh apply");
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.ps1 -Action Plan");
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.ps1 -Action Apply");
+    await expect(page.getByLabel("Owner host rollback commands")).toContainText("owner-host-apply.sh rollback");
+    await expect(page.getByLabel("Owner host rollback commands")).toContainText("owner-host-apply.ps1 -Action Rollback");
+    await expect(page.getByLabel("Go-live launch sequence")).toContainText("Apply owner-host public RPC edge");
+    await expect(page.getByLabel("Next owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+    await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();
+    await expect(page.getByLabel("Missing owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("Guide rows");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("absolute non-local HTTPS endpoint");
+    await expect(page.getByLabel("Owner env field guide")).toContainText("owner DNS, tunnel, or reverse proxy hostname");
+
+    await page.goto("/bridge");
+    await expect(page.getByRole("heading", { name: "Bridge funds into Flowchain" })).toBeVisible();
+    const bridgeRuntimeProof = page.getByLabel("Bridge runtime proof");
+    await expect(bridgeRuntimeProof).toContainText("Bridge command matrix");
+    await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:command-matrix");
+    await expect(bridgeRuntimeProof).toContainText("No-secret audit");
+    await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:no-secret-audit");
+    await expect(bridgeRuntimeProof).toContainText("Pilot aggregate");
+    await expect(bridgeRuntimeProof).toContainText("Runtime credit");
+    await expect(bridgeRuntimeProof).toContainText("Transfer settlement");
+    await expect(bridgeRuntimeProof).toContainText("Relayer guardrail");
+    await expect(bridgeRuntimeProof).toContainText("Relayer loop");
+    await expect(bridgeRuntimeProof).toContainText("Reconciliation schedule");
+    await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:reconciliation:schedule:validate");
+    await expect(bridgeRuntimeProof).toContainText(/\d+ proof commands/);
+    await expect(bridgeRuntimeProof).toContainText(/\d+(\.\d+)?s to spendable credit/);
+    await expect(bridgeRuntimeProof).toContainText(/\d+(\.\d+)?s/);
+    await expectNoHorizontalOverflow(page);
+
+    await page.goto("/ops");
+    await expect(page.getByRole("heading", { name: "Ops center" })).toBeVisible();
+    await expect(page.getByLabel("Bridge relayer check contract")).toContainText("Relayer check contract");
+    await expect(page.getByLabel("Bridge relayer check contract")).toContainText("bridge-relayer-check-contract-failed");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Autorecovery drill");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Public RPC automation");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Systemd service plan");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Bridge evidence audit");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Ops install proof");
+    await expect(page.getByText("Active rules", { exact: true })).toBeVisible();
+    await expect(page.getByText("Escalation dry run", { exact: true }).first()).toBeVisible();
+
+    await page.goto("/alerts");
+    await expect(page.getByRole("heading", { name: "Alerts" })).toBeVisible();
+    await expect(page.getByText("Verifier failed", { exact: true })).toBeVisible();
+    await expect(page.getByText("UPSTREAM_LOSS", { exact: true })).toBeVisible();
+    await expect(page.getByText("next action").first()).toBeVisible();
+
+    await page.goto("/");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge runtime credit");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("flowchain:bridge:runtime-credit:validate");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge release evidence");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("flowchain:bridge:release:evidence:validate");
+
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);
+    expect(state.unhandledRequests).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });
 });

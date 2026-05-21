@@ -29,6 +29,15 @@ const send = await client.walletSend({
   amountUnits: "1",
   memo: "sdk-local-test"
 });
+const included = await client.waitForTransaction({
+  txId: send.transferId,
+  timeoutMs: 30000,
+  pollMs: 1000
+});
+const signedSubmit = await client.submitSignedEnvelope(signedEnvelope, {
+  submittedBy: "sdk-local-test",
+  runtimeSubmitMode: "off"
+});
 ```
 
 ## CLI Examples
@@ -47,6 +56,8 @@ npm run flowchain:devkit -- mempool --json --limit 5
 npm run flowchain:devkit -- wallet-balances --json --limit 5
 npm run flowchain:devkit -- wallet-transfers --json --limit 5
 npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account-id> --amount-units 1
+npm run flowchain:devkit -- submit-signed-transaction --json --signed-envelope devnet/local/flowchain-signed-envelope-example/signed-envelope.json
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
 npm run flowchain:devkit -- wallet-metadata --json --limit 5
 npm run flowchain:devkit -- faucet-events --json --limit 5
 npm run flowchain:devkit -- finality --json --limit 5
@@ -61,6 +72,8 @@ npm run flowchain:devkit -- withdrawals --json --limit 5
 ```powershell
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
+node examples/flowchain-signed-envelope.mjs --submit
+node examples/flowchain-signed-envelope.mjs --no-submit --write devnet/local/flowchain-signed-envelope-example/signed-envelope.json
 ```
 
 The browser readiness example lives at:
@@ -69,10 +82,53 @@ The browser readiness example lives at:
 examples/flowchain-browser-readiness/index.html
 ```
 
+Run its no-dependency browser-starter smoke with:
+
+```powershell
+npm run smoke --prefix examples/flowchain-browser-readiness
+```
+
+## Python SDK
+
+The dependency-free Python SDK and devkit live at:
+
+```text
+sdks/python
+```
+
+Run the Python quickstart and CLI with:
+
+```powershell
+$env:PYTHONPATH = "sdks/python"
+python examples/flowchain-python-quickstart.py
+python -m flowchain.cli status --json
+npm run flowchain:python-sdk:e2e
+```
+
+Details are in `docs/sdk/FLOWCHAIN_PYTHON_SDK.md`.
+
+## HTTP Artifacts
+
+`npm run flowchain:dev-pack:e2e` also generates direct HTTP tooling for
+builders who want to inspect the RPC before using the SDK:
+
+```text
+docs/sdk/FLOWCHAIN_RPC.openapi.generated.json
+docs/sdk/FLOWCHAIN_RPC.postman.generated.json
+docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md
+```
+
+The OpenAPI and Postman files are generated from live `rpc_discover` output.
+They intentionally use local/private endpoints and must not contain bearer
+tokens, private wallet routes, or owner env values.
+
 ## Safety Rules
 
 - Default RPC is `http://127.0.0.1:8787/rpc`.
 - The devkit does not expose a public listener.
+- Signed envelope submission uses local/private `transaction_submit` cryptographic
+  intake through `/transactions/submit` by default; it does not turn on public
+  write access and `/rpc` remains public-read guarded.
 - Live Base 8453 bridge commands stay blocked until owner inputs exist.
 - Diagnostics are redacted before printing or writing reports.
 - Do not call this SDK EVM-compatible unless EVM JSON-RPC compatibility is
@@ -87,6 +143,7 @@ npm run flowchain:dev-pack:e2e
 ```
 
 `flowchain:sdk:e2e` checks the expanded SDK/CLI surface, the Node.js example,
-the browser readiness example, and the required developer docs. `flowchain:dev-pack:e2e`
+the browser readiness starter, the Python SDK/devkit, the generated ecosystem
+inventory, and the required developer docs. `flowchain:dev-pack:e2e`
 regenerates `docs/sdk/RPC_REFERENCE.generated.md` from live `rpc_discover`
 output.

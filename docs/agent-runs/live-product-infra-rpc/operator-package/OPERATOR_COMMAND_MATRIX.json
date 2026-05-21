@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-18T15:16:18.0827570Z",
+    "generatedAt":  "2026-05-21T17:13:32.2095625Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -11,6 +11,11 @@
                          "phase":  "preflight",
                          "command":  "npm run flowchain:doctor",
                          "purpose":  "Summarize repo and runtime health."
+                     },
+                     {
+                         "phase":  "preflight",
+                         "command":  "npm run flowchain:install:check",
+                         "purpose":  "Run the no-secret owner-host install preflight and install validation proof."
                      },
                      {
                          "phase":  "service",
@@ -34,6 +39,11 @@
                      },
                      {
                          "phase":  "service",
+                         "command":  "npm run flowchain:upgrade:rehearse",
+                         "purpose":  "Prove upgrade and rollback preserve local L1 state without host mutation."
+                     },
+                     {
+                         "phase":  "service",
                          "command":  "npm run flowchain:service:stop",
                          "purpose":  "Stop local services without deleting state."
                      },
@@ -51,6 +61,16 @@
                          "phase":  "autorecovery",
                          "command":  "npm run flowchain:service:install:validate",
                          "purpose":  "Validate install/status/uninstall paths without mutating the owner host."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e",
+                         "purpose":  "Render the no-secret Linux systemd install plan from owner-rendered units."
+                     },
+                     {
+                         "phase":  "autorecovery",
+                         "command":  "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e -StartBridgeRelayerLoop",
+                         "purpose":  "Render the explicit Linux bridge-relayer opt-in systemd supervisor plan without mutating the owner host."
                      },
                      {
                          "phase":  "autorecovery",
@@ -79,6 +99,16 @@
                      },
                      {
                          "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner:go-live-handoff",
+                         "purpose":  "Generate the exact no-secret go-live handoff deck, next owner inputs, validation commands, and do-not-send list."
+                     },
+                     {
+                         "phase":  "owner-setup",
+                         "command":  "npm run flowchain:owner:needs-now",
+                         "purpose":  "Generate the current no-secret answer to what the L1 needs now, grouped by owner action and validation command."
+                     },
+                     {
+                         "phase":  "owner-setup",
                          "command":  "npm run flowchain:owner-env:template",
                          "purpose":  "Create or preserve the ignored local owner env scaffold with empty values only."
                      },
@@ -104,8 +134,23 @@
                      },
                      {
                          "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:command-matrix",
+                         "purpose":  "Map public RPC launch commands to owner inputs, mutation risk, rollback coverage, and evidence paths."
+                     },
+                     {
+                         "phase":  "public-rpc",
                          "command":  "npm run flowchain:public-rpc:validate",
                          "purpose":  "Run local public-profile RPC readiness validation."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                         "purpose":  "Run read-only public endpoint canary probes after the owner endpoint is configured."
+                     },
+                     {
+                         "phase":  "public-rpc",
+                         "command":  "npm run flowchain:public-rpc:canary:schedule:validate",
+                         "purpose":  "Render no-secret Windows and systemd recurring public RPC canary schedule plans without mutating the owner host."
                      },
                      {
                          "phase":  "public-rpc",
@@ -129,8 +174,18 @@
                      },
                      {
                          "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:systemd -- -Action Plan",
+                         "purpose":  "Render the daily snapshot Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "backup",
+                         "command":  "npm run flowchain:backup:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd backup and restore-drill timer plans without mutating the owner host."
+                     },
+                     {
+                         "phase":  "backup",
                          "command":  "npm run flowchain:backup:install:validate",
-                         "purpose":  "Validate backup task plan/status/uninstall behavior."
+                         "purpose":  "Validate Windows and Linux backup scheduler plan/status/uninstall behavior."
                      },
                      {
                          "phase":  "ops",
@@ -149,8 +204,48 @@
                      },
                      {
                          "phase":  "ops",
+                         "command":  "npm run flowchain:ops:monitoring:bundle",
+                         "purpose":  "Render no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain ops metrics."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:launch-watch",
+                         "purpose":  "Verify every launch-critical operations lane has evidence, metrics, alert rules, and operator commands."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                         "purpose":  "Render recurring metrics export Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
+                         "purpose":  "Render recurring metrics export Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd timer metrics export plan without mutating the owner host."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:metrics:install:validate",
+                         "purpose":  "Validate Windows and Linux recurring metrics export scheduler plan/status/uninstall behavior."
+                     },
+                     {
+                         "phase":  "ops",
                          "command":  "npm run flowchain:ops:alerts:install:windows -- -Action Plan",
                          "purpose":  "Render recurring alert refresh Scheduled Task plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                         "purpose":  "Render recurring alert refresh Linux systemd timer plan."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:alerts:install:systemd:validate",
+                         "purpose":  "Validate Linux systemd timer alert refresh plan without mutating the owner host."
                      },
                      {
                          "phase":  "ops",
@@ -161,6 +256,16 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
                          "purpose":  "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:command-matrix",
+                         "purpose":  "Map bridge deploy, observe, relayer, credit, release, and emergency-control commands to owner inputs, acknowledgement gates, risk class, and evidence paths."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:no-secret-audit",
+                         "purpose":  "Scan generated bridge pilot evidence for secret-shaped material before owner-funded bridge activation."
                      },
                      {
                          "phase":  "bridge",
@@ -176,6 +281,31 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:relayer:loop:validate",
                          "purpose":  "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:runtime-credit:validate",
+                         "purpose":  "Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800",
+                         "purpose":  "Run the bounded aggregate pilot proof across contracts, bridge, runtime, wallet, control-dashboard, and ops before owner-funded pilot approval."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:reconciliation",
+                         "purpose":  "Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:reconciliation:schedule:validate",
+                         "purpose":  "Render no-secret Windows and systemd recurring bridge reconciliation schedule plans without mutating the owner host."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:release:evidence:validate",
+                         "purpose":  "Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries."
                      },
                      {
                          "phase":  "testers",
@@ -200,12 +330,17 @@
                      {
                          "phase":  "testers",
                          "command":  "npm run flowchain:dashboard:ui:readiness",
-                         "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection."
+                         "purpose":  "Run desktop and mobile browser verification for tester wallet create, faucet, send, Explorer inspection, tester launch readiness, and the L1 activation cockpit."
                      },
                      {
                          "phase":  "cutover",
                          "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-                         "purpose":  "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal."
+                         "purpose":  "Run owner-env, public deployment, local tester wallet network, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal."
+                     },
+                     {
+                         "phase":  "release",
+                         "command":  "npm run flowchain:live:capabilities",
+                         "purpose":  "Map user-facing chain capabilities to evidence and the remaining owner-input blockers."
                      },
                      {
                          "phase":  "release",

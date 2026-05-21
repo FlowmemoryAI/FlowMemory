@@ -39,6 +39,180 @@ $optionalEnvNames = @(
     "FLOWCHAIN_BASE8453_TO_BLOCK"
 )
 
+$ownerEnvSpecs = @(
+    [ordered]@{
+        name = "FLOWCHAIN_RPC_PUBLIC_URL"
+        group = "public-rpc"
+        required = $true
+        purpose = "Public HTTPS URL testers and wallets use for FlowChain RPC."
+        validation = "absolute non-local HTTPS endpoint"
+        source = "owner DNS, tunnel, or reverse proxy hostname"
+        doNotSend = "provider login password, tunnel token, or TLS private key"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_RPC_ALLOWED_ORIGINS"
+        group = "public-rpc"
+        required = $true
+        purpose = "Comma-separated HTTPS browser origins allowed to call the public RPC edge."
+        validation = "one or more explicit HTTPS origins; wildcard is rejected"
+        source = "dashboard/tester site origin list"
+        doNotSend = "wildcard origin or private browser session data"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
+        group = "public-rpc"
+        required = $true
+        purpose = "Per-origin or per-client public RPC request limit."
+        validation = "positive decimal integer"
+        source = "owner public edge rate-limit policy"
+        doNotSend = "provider account credentials"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_RPC_TLS_TERMINATED"
+        group = "public-rpc"
+        required = $true
+        purpose = "Acknowledgement that HTTPS termination is configured at the public edge."
+        validation = "must equal true"
+        source = "owner TLS edge configuration"
+        doNotSend = "TLS private key or certificate account credentials"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+        group = "backup"
+        required = $true
+        purpose = "Existing writable directory for live state backup and restore proof."
+        validation = "existing writable directory"
+        source = "owner host durable disk or mounted backup volume"
+        doNotSend = "cloud storage secret or host login password"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_TESTER_WRITE_ENABLED"
+        group = "tester-write"
+        required = $true
+        purpose = "Enables authenticated capped tester write routes."
+        validation = "must equal true"
+        source = "owner launch decision after public gates are ready"
+        doNotSend = "raw tester token"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256"
+        group = "tester-write"
+        required = $true
+        purpose = "Digest of the out-of-band tester bearer token."
+        validation = "64-character SHA-256 hex digest"
+        source = "npm run flowchain:tester:token:setup"
+        doNotSend = "raw tester token or token hash together with the raw token"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+        group = "tester-write"
+        required = $true
+        purpose = "Maximum units a tester can send per capped write request."
+        validation = "positive decimal integer"
+        source = "owner tester pilot cap"
+        doNotSend = "uncapped launch policy"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_PILOT_OPERATOR_ACK"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Explicit acknowledgement for the capped Base 8453 bridge pilot."
+        validation = "must equal I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+        source = "owner go-live decision"
+        doNotSend = "wallet recovery words or private key"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_RPC_URL"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Base chain endpoint used by the bridge observer."
+        validation = "absolute HTTP(S) endpoint"
+        source = "Base RPC provider or owner-operated Base node"
+        doNotSend = "provider URLs that embed account tokens"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Deployed Base 8453 lockbox contract address."
+        validation = "20-byte hex address"
+        source = "bridge deployment artifact or verified owner contract"
+        doNotSend = "deployer private key"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Base 8453 token address accepted by the capped pilot."
+        validation = "20-byte hex address"
+        source = "owner-approved bridge token contract"
+        doNotSend = "wallet private key"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_ASSET_DECIMALS"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Decimals for the supported Base 8453 asset."
+        validation = "integer from 0 through 255"
+        source = "token metadata or deployment checklist"
+        doNotSend = "provider account credentials"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_FROM_BLOCK"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "First Base 8453 block the bridge observer scans."
+        validation = "non-negative decimal block number"
+        source = "lockbox deployment block or chosen pilot start block"
+        doNotSend = "provider account credentials"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Maximum single deposit credited during the capped pilot."
+        validation = "positive decimal integer"
+        source = "owner pilot risk cap"
+        doNotSend = "uncapped value"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_PILOT_TOTAL_CAP_WEI"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Total bridge credit cap for the capped pilot."
+        validation = "positive decimal integer"
+        source = "owner pilot risk cap"
+        doNotSend = "uncapped value"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_PILOT_CONFIRMATIONS"
+        group = "base8453-bridge"
+        required = $true
+        purpose = "Base confirmations required before observer credit."
+        validation = "positive decimal integer"
+        source = "owner bridge finality policy"
+        doNotSend = "provider account credentials"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_CURSOR_STATE"
+        group = "base8453-bridge"
+        required = $false
+        purpose = "Optional local cursor state path for Base scan progress."
+        validation = "local path controlled by the owner host"
+        source = "default relayer state path unless overridden"
+        doNotSend = "cursor file contents if they include local paths you want private"
+    },
+    [ordered]@{
+        name = "FLOWCHAIN_BASE8453_TO_BLOCK"
+        group = "base8453-bridge"
+        required = $false
+        purpose = "Optional upper Base 8453 block for bounded observer scans."
+        validation = "non-negative decimal block number"
+        source = "owner bounded scan plan"
+        doNotSend = "provider account credentials"
+    }
+)
+
 function Get-RelativeFlowChainPath {
     param(
         [Parameter(Mandatory = $true)][string] $BasePath,
@@ -129,6 +303,10 @@ $checks = [ordered]@{
     templateIncludesAllRequiredEnvNames = $true
     requiredEnvNameCountExpected = $requiredEnvNames.Count -eq 17
     optionalEnvNameCountExpected = $optionalEnvNames.Count -eq 2
+    fieldGuideCoversAllRequiredEnvNames = @($requiredEnvNames | Where-Object { $_ -notin @($ownerEnvSpecs | Where-Object { $_.required -eq $true } | ForEach-Object { $_.name }) }).Count -eq 0
+    fieldGuideCoversAllOptionalEnvNames = @($optionalEnvNames | Where-Object { $_ -notin @($ownerEnvSpecs | Where-Object { $_.required -ne $true } | ForEach-Object { $_.name }) }).Count -eq 0
+    fieldGuideHasValidationForEveryName = @($ownerEnvSpecs | Where-Object { [string]::IsNullOrWhiteSpace([string]$_.validation) }).Count -eq 0
+    fieldGuideHasDoNotSendForEveryName = @($ownerEnvSpecs | Where-Object { [string]::IsNullOrWhiteSpace([string]$_.doNotSend) }).Count -eq 0
     valuesPrintedFalse = $true
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -153,7 +331,9 @@ $report = [ordered]@{
     writeSkippedReason = $writeSkippedReason
     requiredEnvNames = $requiredEnvNames
     optionalEnvNames = $optionalEnvNames
+    fieldGuide = @($ownerEnvSpecs)
     requiredEnvNameCount = $requiredEnvNames.Count
+    fieldGuideCount = $ownerEnvSpecs.Count
     templateIncludesAllRequiredEnvNames = $true
     flowChainOwnerEnvFileCommand = "`$env:FLOWCHAIN_OWNER_ENV_FILE=`"$templateFullPath`""
     valuesPrinted = $false
@@ -206,6 +386,17 @@ foreach ($line in $templateLines) {
     $markdownLines.Add($line)
 }
 $markdownLines.Add('```')
+$markdownLines.Add("")
+$markdownLines.Add("## Field Guide")
+$markdownLines.Add("")
+$markdownLines.Add("Use this table while filling the ignored local file. It lists names and validation rules only; keep real values in the local file or service environment.")
+$markdownLines.Add("")
+$markdownLines.Add("| Name | Group | Required | Purpose | Validation | Where to get it | Do not send |")
+$markdownLines.Add("| --- | --- | --- | --- | --- | --- | --- |")
+foreach ($spec in $ownerEnvSpecs) {
+    $requiredText = if ($spec.required -eq $true) { "yes" } else { "optional" }
+    $markdownLines.Add("| ``$($spec.name)`` | $($spec.group) | $requiredText | $($spec.purpose) | $($spec.validation) | $($spec.source) | $($spec.doNotSend) |")
+}
 
 $markdownText = $markdownLines -join "`r`n"
 Assert-FlowChainNoSecretText -Text $markdownText -Label "owner env template markdown"

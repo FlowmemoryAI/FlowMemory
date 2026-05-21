@@ -347,6 +347,8 @@ try {
         relayerPidRecorded = [int](Get-RelayerLoopProp -Object $startRelayer -Name "pid" -Default 0) -gt 0
         relayerPollSecondsRecorded = [int](Get-RelayerLoopProp -Object $startRelayer -Name "pollSeconds" -Default 0) -eq $BridgePollSeconds
         relayerQueuesRuntimeHandoffs = (Get-RelayerLoopProp -Object $startRelayer -Name "queuesRuntimeHandoffs" -Default $false) -eq $true
+        relayerUsesIsolatedOneShotChildProcess = (Get-RelayerLoopProp -Object $startRelayer -Name "oneShotIsolatedProcess" -Default $false) -eq $true
+        relayerContinuesAfterOneShotFailure = (Get-RelayerLoopProp -Object $startRelayer -Name "continuesAfterOneShotFailure" -Default $false) -eq $true
         statusCommandPassed = [int]$statusStep[0].result.exitCode -eq 0
         statusReportsRelayerRunning = [string](Get-RelayerLoopProp -Object $statusRelayer -Name "status" -Default "") -eq "running"
         statusRelayerCommandLineMatched = (Get-RelayerLoopProp -Object $statusRelayer -Name "commandLineMatched" -Default $false) -eq $true
@@ -455,7 +457,7 @@ try {
     $markdownLines.Add("Generated: $($report.generatedAt)")
     $markdownLines.Add("Status: $status")
     $markdownLines.Add("")
-    $markdownLines.Add("This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running, then stops the service and confirms the relayer loop is not left running, its PID file is removed, and no validation relayer process remains.")
+    $markdownLines.Add("This validation starts an isolated live service with the bridge relayer loop enabled, verifies the loop is reported as running with isolated one-shot child execution, then stops the service and confirms the relayer loop is not left running, its PID file is removed, and no validation relayer process remains.")
     $markdownLines.Add("")
     $markdownLines.Add("## Checks")
     $markdownLines.Add("")

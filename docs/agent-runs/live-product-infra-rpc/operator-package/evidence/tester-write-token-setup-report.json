@@ -1,0 +1,44 @@
+{
+    "schema":  "flowchain.tester_write_token_setup_report.v0",
+    "generatedAt":  "2026-05-21T16:44:45.6587034+00:00",
+    "status":  "passed",
+    "checks":  {
+                   "tokenPathGitIgnored":  true,
+                   "ownerEnvPathGitIgnored":  true,
+                   "tokenFileExists":  true,
+                   "ownerEnvFileExists":  true,
+                   "tokenLengthSufficient":  true,
+                   "tokenHashLengthValid":  true,
+                   "ownerEnvTesterEnabledWritten":  true,
+                   "ownerEnvTesterHashWritten":  true,
+                   "ownerEnvTesterCapWritten":  true,
+                   "rawTokenPrintedFalse":  true,
+                   "tokenHashPrintedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "tokenCreated":  false,
+    "tokenPreserved":  true,
+    "tokenPath":  "devnet/local/owner-inputs/tester-write-token.local.txt",
+    "ownerEnvFile":  "devnet/local/owner-inputs/flowchain-owner.local.env",
+    "tokenHashLength":  64,
+    "maxSendUnitsConfigured":  true,
+    "rawTokenPrinted":  false,
+    "tokenHashPrinted":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "nextCommands":  [
+                         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
+                         "npm run flowchain:tester:gateway:e2e",
+                         "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                     ]
+}

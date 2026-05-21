@@ -202,6 +202,7 @@ $connectPack = [ordered]@{
         status = 'npm run flowchain:devkit -- status --json --rpc $env:FLOWCHAIN_RPC_URL'
         walletBalances = 'npm run flowchain:devkit -- wallet-balances --json --rpc $env:FLOWCHAIN_RPC_URL'
         walletTransfers = 'npm run flowchain:devkit -- wallet-transfers --json --rpc $env:FLOWCHAIN_RPC_URL'
+        externalTesterClientDryRun = 'npm run flowchain:external-tester:client -- --connect-pack docs/agent-runs/live-product-infra-rpc/external-tester-connect-pack.json --base-url <OWNER_PUBLIC_ENDPOINT> --dry-run --allow-blocked'
     }
     safety = [ordered]@{
         secretsAllowedInPacket = $false

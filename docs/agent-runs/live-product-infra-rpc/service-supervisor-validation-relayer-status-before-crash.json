@@ -1,0 +1,101 @@
+{
+    "schema":  "flowchain.service_status_report.v0",
+    "generatedAt":  "2026-05-21T13:53:01.6359430Z",
+    "status":  "passed",
+    "bind":  {
+                 "host":  "127.0.0.1",
+                 "port":  8797,
+                 "localDefaultPrivate":  true
+             },
+    "node":  {
+                 "status":  "running",
+                 "pid":  11072,
+                 "pidPath":  "devnet\\local\\service-supervisor-validation\\node\\flowchain-node.pid",
+                 "pidSource":  "pid-file",
+                 "commandLineMatched":  true
+             },
+    "controlPlane":  {
+                         "status":  "running",
+                         "pid":  80404,
+                         "pidPath":  "devnet\\local\\service-supervisor-validation\\services\\control-plane.pid",
+                         "commandLineMatched":  true
+                     },
+    "controlPlanePortProcess":  null,
+    "bridgeRelayerLoop":  {
+                              "status":  "running",
+                              "pid":  18424,
+                              "pidPath":  "devnet\\local\\service-supervisor-validation\\services\\bridge-relayer-loop.pid",
+                              "commandLineMatched":  true,
+                              "report":  {
+                                             "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
+                                             "status":  "blocked",
+                                             "ageSeconds":  9.638,
+                                             "maxAgeSeconds":  180,
+                                             "fresh":  true,
+                                             "acceptableStatus":  true,
+                                             "blockedOnlyOnOwnerInputs":  true,
+                                             "codeIssueCount":  0,
+                                             "noSecrets":  true,
+                                             "noBroadcasts":  true,
+                                             "healthy":  true
+                                         }
+                          },
+    "serviceProfile":  {
+                           "liveProfile":  true,
+                           "maxBlocks":  0,
+                           "boundedLiveModeRejected":  false
+                       },
+    "publicReadinessStatus":  "blocked",
+    "backupPathStatus":  "not-configured",
+    "bridgeReadinessStatus":  {
+                                  "bridgeLiveCheck":  "blocked",
+                                  "bridgeInfraCheck":  "blocked"
+                              },
+    "chain":  {
+                  "stateFileReadable":  true,
+                  "latestHeight":  "15660",
+                  "latestHash":  "0xb5619d71ddec62c043f027900720dbf9da5e285ea3b1f3dbf9cd3b17246386e1",
+                  "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
+                  "stateFileLastWriteAgeSeconds":  2,
+                  "finalizedHeight":  "15660",
+                  "finalizedHash":  "0xb5619d71ddec62c043f027900720dbf9da5e285ea3b1f3dbf9cd3b17246386e1",
+                  "mempoolDepth":  0,
+                  "peerCount":  null
+              },
+    "stopCommand":  "npm run flowchain:service:stop",
+    "restartCommand":  "npm run flowchain:service:restart",
+    "problems":  [
+
+                 ],
+    "checks":  {
+                   "nodeRunning":  true,
+                   "nodeCommandLineMatched":  true,
+                   "controlPlaneRunning":  true,
+                   "controlPlaneCommandLineMatched":  true,
+                   "controlPlanePortPrivate":  true,
+                   "stateFileReadable":  true,
+                   "latestHeightNumeric":  true,
+                   "finalizedHeightNumeric":  true,
+                   "latestHeightPositive":  true,
+                   "stateFileFresh":  true,
+                   "serviceProfileLive":  true,
+                   "serviceProfileUnbounded":  true,
+                   "boundedLiveModeRejectedFalse":  true,
+                   "relayerLoopStoppedOrHealthy":  true,
+                   "problemsEmpty":  true,
+                   "failedProblemsEmpty":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

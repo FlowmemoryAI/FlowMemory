@@ -351,6 +351,10 @@ export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): C
       ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeRuntimeHandoffPath,
     bridgeObservationPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_OBSERVATION_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeObservationPath,
+    txIntakePath: process.env.FLOWCHAIN_CONTROL_PLANE_TX_INTAKE_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.txIntakePath,
+    bridgeObservationIntakePath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_OBSERVATION_INTAKE_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeObservationIntakePath,
     walletPublicMetadataPath: process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.walletPublicMetadataPath,
     ...overrides,

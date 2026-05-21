@@ -64,6 +64,10 @@ function statusFromOps(value: unknown): DashboardStatus {
   return "observed";
 }
 
+function isReadyFlag(value: unknown): boolean {
+  return value === true || text(value, "").toLowerCase() === "true";
+}
+
 function parseFindings(ops: UnknownRecord | null): OpsFinding[] {
   return asArray(ops?.findings).filter(isRecord).map((finding) => ({
     severity: text(finding.severity, "observed"),
@@ -107,6 +111,7 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const ops = isRecord(liveReadiness?.ops) ? liveReadiness.ops : null;
   const findings = parseFindings(ops);
   const activeRules = parseRules(ops);
+  const coveredFindingCodes = stringList(ops?.coveredFindingCodes);
   const incidentCommands = parseIncidentCommands(ops);
   const dryRunEvents = parseDryRunEvents(ops);
   const alertState = text(ops?.alertState ?? metrics.opsAlertState, "not recorded");
@@ -117,11 +122,58 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const latestHeight = text(ops?.latestHeight ?? metrics.latestHeight);
   const criticalCount = text(ops?.criticalCount ?? metrics.opsCriticalCount, "0");
   const blockedCount = text(ops?.blockedCount ?? metrics.opsBlockedCount, "0");
+  const serviceSupervisorValidationStatus = text(ops?.serviceSupervisorValidationStatus ?? metrics.serviceSupervisorValidationStatus, "not recorded");
+  const serviceSupervisorRestartAttempts = text(ops?.serviceSupervisorRestartAttempts ?? metrics.serviceSupervisorRestartAttempts, "0");
+  const serviceSupervisorNodeRestartAttempts = text(ops?.serviceSupervisorNodeRestartAttempts ?? metrics.serviceSupervisorNodeRestartAttempts, "0");
+  const serviceSupervisorRelayerRestartAttempts = text(ops?.serviceSupervisorRelayerRestartAttempts ?? metrics.serviceSupervisorRelayerRestartAttempts, "0");
+  const serviceInstallValidationStatus = text(ops?.serviceInstallValidationStatus ?? metrics.serviceInstallValidationStatus, "not recorded");
+  const serviceInstallPlanDidNotMutate = isReadyFlag(ops?.serviceInstallPlanDidNotMutate ?? metrics.serviceInstallPlanDidNotMutate);
+  const serviceInstallStatusDidNotMutate = isReadyFlag(ops?.serviceInstallStatusDidNotMutate ?? metrics.serviceInstallStatusDidNotMutate);
+  const serviceInstallRelayerOptInStartsLoop = isReadyFlag(ops?.serviceInstallRelayerOptInStartsLoop ?? metrics.serviceInstallRelayerOptInStartsLoop);
+  const systemdServiceInstallValidationStatus = text(ops?.systemdServiceInstallValidationStatus ?? metrics.systemdServiceInstallValidationStatus, "not recorded");
+  const systemdInstallPlanUsesRenderedUnits = isReadyFlag(ops?.systemdInstallPlanUsesRenderedUnits ?? metrics.systemdInstallPlanUsesRenderedUnits);
+  const systemdBridgeRelayerDefaultOff = isReadyFlag(ops?.systemdBridgeRelayerDefaultOff ?? metrics.systemdBridgeRelayerDefaultOff);
+  const systemdBridgeRelayerOptInStartsLoop = isReadyFlag(ops?.systemdBridgeRelayerOptInStartsLoop ?? metrics.systemdBridgeRelayerOptInStartsLoop);
+  const bridgeRelayerCheckContractReadyValue = ops?.bridgeRelayerCheckContractReady ?? metrics.bridgeRelayerCheckContractReady;
+  const bridgeRelayerCheckContractReady = isReadyFlag(bridgeRelayerCheckContractReadyValue)
+    ? "ready"
+    : text(bridgeRelayerCheckContractReadyValue, "not recorded");
+  const bridgeRelayerFailedChecks = text(ops?.bridgeRelayerFailedChecks ?? metrics.bridgeRelayerFailedChecks, "0");
+  const bridgeRelayerMissingChecks = text(ops?.bridgeRelayerMissingChecks ?? metrics.bridgeRelayerMissingChecks, "0");
+  const bridgeRelayerCheckRuleCovered = coveredFindingCodes.includes("bridge-relayer-check-contract-failed");
   const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
   const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
   const bridgeRelayerLoopValidationStatus = text(metrics.bridgeRelayerLoopValidationStatus, "not recorded");
-  const publicRpcDeployAutomationStatus = text(metrics.publicRpcDeploymentAutomationStatus, "not recorded");
-  const publicRpcDeployAutomationAction = text(metrics.publicRpcDeploymentAutomationAction, "not recorded");
+  const bridgeNoSecretAuditStatus = text(ops?.bridgeNoSecretAuditStatus ?? metrics.bridgeNoSecretAuditStatus, "not recorded");
+  const bridgeNoSecretAuditReady = isReadyFlag(ops?.bridgeNoSecretAuditReady ?? metrics.bridgeNoSecretAuditReady);
+  const bridgeNoSecretAuditScannedFiles = text(ops?.bridgeNoSecretAuditScannedFiles ?? metrics.bridgeNoSecretAuditScannedFiles, "0");
+  const bridgeNoSecretAuditFindings = text(ops?.bridgeNoSecretAuditFindings ?? metrics.bridgeNoSecretAuditFindings, "0");
+  const bridgeNoSecretAuditFailedChecks = text(ops?.bridgeNoSecretAuditFailedChecks ?? metrics.bridgeNoSecretAuditFailedChecks, "0");
+  const bridgeNoSecretAuditNoBroadcasts = isReadyFlag(ops?.bridgeNoSecretAuditNoBroadcasts ?? metrics.bridgeNoSecretAuditNoBroadcasts);
+  const publicRpcDeployBundleStatus = text(ops?.publicRpcDeploymentBundleStatus ?? metrics.publicRpcDeploymentBundleStatus, "not recorded");
+  const publicRpcDeployAutomationStatus = text(ops?.publicRpcDeploymentAutomationStatus ?? metrics.publicRpcDeploymentAutomationStatus, "not recorded");
+  const publicRpcDeployAutomationAction = text(ops?.publicRpcDeploymentAutomationAction ?? metrics.publicRpcDeploymentAutomationAction, "not recorded");
+  const publicRpcLiveSecurityHeaderProbe = isReadyFlag(ops?.publicRpcLiveSecurityHeaderProbe ?? metrics.publicRpcLiveSecurityHeaderProbe);
+  const publicRpcLiveSecurityHeaders = isReadyFlag(ops?.publicRpcLiveSecurityHeaders ?? metrics.publicRpcLiveSecurityHeaders);
+  const publicRpcSecurityHeaderPolicyReady = isReadyFlag(ops?.publicRpcSecurityHeaderPolicyReady ?? metrics.publicRpcSecurityHeaderPolicyReady);
+  const publicRpcSecurityHeaders = isReadyFlag(ops?.publicRpcSecurityHeaders ?? metrics.publicRpcSecurityHeaders);
+  const publicRpcRenderedSecurityHeaders = isReadyFlag(ops?.publicRpcRenderedSecurityHeaders ?? metrics.publicRpcRenderedSecurityHeaders);
+  const publicRpcLiveHeaderProofReady =
+    publicRpcLiveSecurityHeaderProbe &&
+    publicRpcLiveSecurityHeaders &&
+    publicRpcSecurityHeaderPolicyReady &&
+    publicRpcSecurityHeaders &&
+    publicRpcRenderedSecurityHeaders;
+  const publicTesterGatewayStatus = text(ops?.publicTesterGatewayStatus ?? metrics.publicTesterGatewayStatus, "not recorded");
+  const publicTesterGatewayAccountCount = text(ops?.publicTesterGatewayAccountCount ?? metrics.publicTesterGatewayAccountCount, "0");
+  const publicTesterGatewayFailedChecks = text(ops?.publicTesterGatewayFailedChecks ?? metrics.publicTesterGatewayFailedChecks, "0");
+  const publicTesterGatewayTransferApplied = isReadyFlag(ops?.publicTesterGatewayTransferApplied ?? metrics.publicTesterGatewayTransferApplied);
+  const publicTesterGatewayCapRejected = isReadyFlag(ops?.publicTesterGatewayCapRejected ?? metrics.publicTesterGatewayCapRejected);
+  const publicTesterGatewayNoSecrets = isReadyFlag(ops?.publicTesterGatewayNoSecrets ?? metrics.publicTesterGatewayNoSecrets);
+  const publicTesterGatewayNoBroadcasts = isReadyFlag(ops?.publicTesterGatewayNoBroadcasts ?? metrics.publicTesterGatewayNoBroadcasts);
+  const alertInstallValidationStatus = text(ops?.alertInstallValidationStatus ?? metrics.alertInstallValidationStatus, "not recorded");
+  const opsMetricCount = text(ops?.opsMetricCount ?? metrics.opsMetricCount, "0");
+  const opsRequiredMetricsPresent = isReadyFlag(ops?.opsRequiredMetricsPresent ?? metrics.opsRequiredMetricsPresent);
   const networkNotifications = text(ops?.sendsNetworkNotifications, "false");
   const storesSecrets = text(ops?.storesSecrets, "false");
 
@@ -167,6 +219,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>{escalationDryRunEvents} mapped events</small>
         </div>
         <div>
+          <span>Relayer checks</span>
+          <strong>{bridgeRelayerCheckContractReady}</strong>
+          <small>failed {bridgeRelayerFailedChecks} / missing {bridgeRelayerMissingChecks}</small>
+        </div>
+        <div>
           <span>Bridge guardrail</span>
           <strong>{bridgeGuardrailStatus}</strong>
           <small>fail-closed proof ready {bridgeGuardrailReady}</small>
@@ -177,9 +234,19 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>start, status, stop proof</small>
         </div>
         <div>
+          <span>Bridge audit</span>
+          <strong>{bridgeNoSecretAuditStatus}</strong>
+          <small>{bridgeNoSecretAuditScannedFiles} files; findings {bridgeNoSecretAuditFindings}</small>
+        </div>
+        <div>
           <span>RPC deploy automation</span>
           <strong>{publicRpcDeployAutomationStatus}</strong>
           <small>mode {publicRpcDeployAutomationAction}</small>
+        </div>
+        <div>
+          <span>Tester gateway E2E</span>
+          <strong>{publicTesterGatewayStatus}</strong>
+          <small>accounts {publicTesterGatewayAccountCount}; failed {publicTesterGatewayFailedChecks}</small>
         </div>
         <div>
           <span>Delivery boundary</span>
@@ -190,6 +257,77 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
 
       <section className="ops-layout">
         <div className="ops-main">
+          <section className="ops-relayer-contract" aria-label="Bridge relayer check contract">
+            <div>
+              <span>Relayer check contract</span>
+              <strong>{bridgeRelayerCheckContractReady}</strong>
+              <small>one-shot safety report</small>
+            </div>
+            <div>
+              <span>Failed checks</span>
+              <strong>{bridgeRelayerFailedChecks}</strong>
+              <small>must stay zero before launch</small>
+            </div>
+            <div>
+              <span>Missing checks</span>
+              <strong>{bridgeRelayerMissingChecks}</strong>
+              <small>required report fields</small>
+            </div>
+            <div>
+              <span>Critical rule</span>
+              <strong>{bridgeRelayerCheckRuleCovered ? "covered" : "missing"}</strong>
+              <small>bridge-relayer-check-contract-failed</small>
+            </div>
+          </section>
+
+          <section className="ops-automation-proof" aria-label="Service and deployment automation proof">
+            <div>
+              <span>Autorecovery drill</span>
+              <strong>{serviceSupervisorValidationStatus}</strong>
+              <small>control-plane {serviceSupervisorRestartAttempts} / node {serviceSupervisorNodeRestartAttempts} / relayer {serviceSupervisorRelayerRestartAttempts}</small>
+            </div>
+            <div>
+              <span>Windows service plan</span>
+              <strong>{serviceInstallValidationStatus}</strong>
+              <small>plan safe {String(serviceInstallPlanDidNotMutate)} / status safe {String(serviceInstallStatusDidNotMutate)}</small>
+            </div>
+            <div>
+              <span>Systemd service plan</span>
+              <strong>{systemdServiceInstallValidationStatus}</strong>
+              <small>rendered units {String(systemdInstallPlanUsesRenderedUnits)} / relayer off {String(systemdBridgeRelayerDefaultOff)}</small>
+            </div>
+            <div>
+              <span>Relayer opt-in</span>
+              <strong>{String(serviceInstallRelayerOptInStartsLoop && systemdBridgeRelayerOptInStartsLoop)}</strong>
+              <small>Windows and systemd install plans start the relayer loop only with owner opt-in</small>
+            </div>
+            <div>
+              <span>Bridge evidence audit</span>
+              <strong>{String(bridgeNoSecretAuditReady)}</strong>
+              <small>failed {bridgeNoSecretAuditFailedChecks} / no broadcasts {String(bridgeNoSecretAuditNoBroadcasts)}</small>
+            </div>
+            <div>
+              <span>Public RPC automation</span>
+              <strong>{publicRpcDeployAutomationStatus}</strong>
+              <small>bundle {publicRpcDeployBundleStatus} / action {publicRpcDeployAutomationAction}</small>
+            </div>
+            <div>
+              <span>Ops install proof</span>
+              <strong>{alertInstallValidationStatus}</strong>
+              <small>metrics {opsMetricCount}; required metrics {String(opsRequiredMetricsPresent)}</small>
+            </div>
+            <div>
+              <span>RPC headers</span>
+              <strong>{String(publicRpcLiveHeaderProofReady)}</strong>
+              <small>live {String(publicRpcLiveSecurityHeaders)} / probe {String(publicRpcLiveSecurityHeaderProbe)} / policy {String(publicRpcSecurityHeaderPolicyReady)} / rendered {String(publicRpcRenderedSecurityHeaders)}</small>
+            </div>
+            <div>
+              <span>Tester gateway proof</span>
+              <strong>{String(publicTesterGatewayTransferApplied && publicTesterGatewayCapRejected)}</strong>
+              <small>no secrets {String(publicTesterGatewayNoSecrets)} / no broadcasts {String(publicTesterGatewayNoBroadcasts)}</small>
+            </div>
+          </section>
+
           <article className="panel ops-findings-panel">
             <div className="panel-heading">
               <div>
@@ -200,7 +338,7 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
                 <StatusBadge status={statusFromOps(alertState)} compact />
                 <span>
                   <ShieldCheck size={15} aria-hidden="true" />
-                  relayer guardrail {bridgeGuardrailStatus}
+                  relayer checks {bridgeRelayerCheckContractReady}
                 </span>
               </div>
             </div>

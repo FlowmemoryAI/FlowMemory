@@ -1,0 +1,64 @@
+{
+    "schema":  "flowchain.alert_install_systemd_validation_report.v0",
+    "generatedAt":  "2026-05-21T10:56:04.6499864Z",
+    "status":  "passed",
+    "paths":  {
+                  "installScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-alert-install-systemd.ps1",
+                  "alertsScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-alerts.ps1",
+                  "planReport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-systemd-report.json",
+                  "planMarkdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\SYSTEMD_ALERT_INSTALL.md"
+              },
+    "checks":  {
+                   "installScriptExists":  true,
+                   "alertsScriptExists":  true,
+                   "installPackageScriptPresent":  true,
+                   "validationPackageScriptPresent":  true,
+                   "parentValidationPackageScriptPresent":  true,
+                   "planCommandPassed":  true,
+                   "planReportWritten":  true,
+                   "planReportPassed":  true,
+                   "planActionReadOnly":  true,
+                   "planDidNotMutate":  true,
+                   "serviceUnitPlanned":  true,
+                   "serviceUnitHasAllowBlocked":  true,
+                   "serviceUnitHasReportPaths":  true,
+                   "serviceUnitOwnerEnvFileInjectable":  true,
+                   "serviceUnitHardeningPresent":  true,
+                   "timerUnitPlanned":  true,
+                   "timerUnitIntervalConfigured":  true,
+                   "noExternalDelivery":  true,
+                   "commandPlanPresent":  true,
+                   "planReportEnvValuesPrintedFalse":  true,
+                   "planReportNoSecrets":  true,
+                   "planReportBroadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "childProcessResults":  [
+                                {
+                                    "name":  "alert-install-systemd-plan",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-systemd-install-validation\\20260521055601486-82940-74431603.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\alert-systemd-install-validation\\20260521055601486-82940-74431603.stderr.log"
+                                }
+                            ],
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:alerts:install:systemd -- -Action Plan",
+                     "install":  "npm run flowchain:ops:alerts:install:systemd -- -Action Install",
+                     "status":  "npm run flowchain:ops:alerts:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:alerts:install:systemd -- -Action Uninstall",
+                     "validate":  "npm run flowchain:ops:alerts:install:systemd:validate"
+                 },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

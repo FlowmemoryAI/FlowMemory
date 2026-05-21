@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.backup_owner_path_dry_run_report.v1",
-    "generatedAt":  "2026-05-18T04:44:23.9884243Z",
+    "generatedAt":  "2026-05-21T11:04:31.7512485Z",
     "status":  "passed",
     "dryRunScope":  "ignored-local-owner-path-rehearsal",
     "dryRunRoot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\backup-owner-path-dry-run",
@@ -16,6 +16,7 @@
     "checks":  {
                    "dryRunRootInsideIgnoredLocalState":  true,
                    "ownerBackupEnvRestored":  true,
+                   "ownerEnvFileRestored":  true,
                    "childReadinessCommandPassed":  true,
                    "readinessReportWritten":  true,
                    "readinessStatusPassed":  true,
@@ -26,6 +27,8 @@
                    "writeVerified":  true,
                    "latestPointerVerified":  true,
                    "latestPointerWrittenAtomically":  true,
+                   "retentionCurrentSnapshotProtected":  true,
+                   "retentionPruneErrorsEmpty":  true,
                    "stateRootCompared":  true,
                    "stateRootMatch":  true,
                    "stateFileHashMatch":  true,
@@ -33,6 +36,7 @@
                    "backupReportPassed":  true,
                    "restoreReportPassed":  true,
                    "backupSnapshotCreated":  true,
+                   "backupRetentionProtectedSnapshot":  true,
                    "restoreLiveStateProtected":  true,
                    "restoreDidNotMutateLiveState":  true,
                    "liveStateStillReadable":  true,
@@ -50,8 +54,8 @@
                                 "FlowChain backup readiness status: passed",
                                 "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run\\backup-readiness-report.json"
                             ],
-    "liveStateSha256Before":  "6a495d8b9c3f6c28999c131b6629d13ba8ea84b7a20757d735d03d91aa258048",
-    "liveStateSha256After":  "80da5128baa18cc944fbd6ef367840c08433a6a44a7b5457bf5c429eba184105",
+    "liveStateSha256Before":  "39620b50b57f4d8a265ae2e4ceb79d1b589dc5892b4f41a6a394fa5d318d58ad",
+    "liveStateSha256After":  "569347c07654b40a22f2cf5f334074dfe169e9adb319c975b8e36b382338cbe2",
     "requiredOwnerInput":  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
     "envValuesPrinted":  false,
     "noSecrets":  true,

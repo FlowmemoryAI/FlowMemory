@@ -1,0 +1,129 @@
+{
+    "schema":  "flowchain.bridge_reconciliation_report.v0",
+    "generatedAt":  "2026-05-21T14:23:21.5982831Z",
+    "status":  "passed",
+    "liveBridgeStatus":  {
+                             "relayerOnce":  "blocked",
+                             "infra":  "blocked",
+                             "live":  "blocked",
+                             "blockedOnOwnerInputs":  true
+                         },
+    "counts":  {
+                   "observedCredits":  0,
+                   "newCredits":  0,
+                   "queuedTransactions":  0,
+                   "appliedCredits":  0,
+                   "pendingCredits":  0,
+                   "localRuntimeAppliedProofs":  1,
+                   "duplicateReplayRejectedProofs":  1,
+                   "releaseEvidenceValidationProofs":  1
+               },
+    "reconciliation":  [
+                           {
+                               "lane":  "live-observed",
+                               "status":  "none-or-owner-blocked",
+                               "count":  0,
+                               "evidence":  "live relayer once observed credits"
+                           },
+                           {
+                               "lane":  "live-new",
+                               "status":  "none-or-owner-blocked",
+                               "count":  0,
+                               "evidence":  "live relayer once filtered new credits"
+                           },
+                           {
+                               "lane":  "live-queued",
+                               "status":  "none-or-owner-blocked",
+                               "count":  0,
+                               "evidence":  "live relayer once queued L1 transactions"
+                           },
+                           {
+                               "lane":  "live-applied",
+                               "status":  "none-or-owner-blocked",
+                               "count":  0,
+                               "evidence":  "live relayer once applied L1 credits"
+                           },
+                           {
+                               "lane":  "live-pending",
+                               "status":  "empty",
+                               "count":  0,
+                               "evidence":  "new credits minus applied credits"
+                           },
+                           {
+                               "lane":  "local-runtime-applied",
+                               "status":  "proved",
+                               "count":  1,
+                               "evidence":  "runtime credit validation spendable proof"
+                           },
+                           {
+                               "lane":  "local-replay-rejected",
+                               "status":  "proved",
+                               "count":  1,
+                               "evidence":  "mock pilot duplicate replay rejection proof"
+                           },
+                           {
+                               "lane":  "release-evidence",
+                               "status":  "validated",
+                               "count":  1,
+                               "evidence":  "withdrawal/release evidence validation proof"
+                           }
+                       ],
+    "cursorCommit":  {
+                         "mode":  "staged-cursor",
+                         "finalCommitRequired":  true,
+                         "finalCommitted":  false,
+                         "reason":  "not-run"
+                     },
+    "paths":  {
+                  "relayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
+                  "guardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
+                  "loopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                  "runtimeCredit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                  "releaseEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-release-evidence-validation-report.json",
+                  "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                  "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                  "pilotLocal":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\services\\bridge-relayer\\out\\real-value-pilot-e2e\\bridge-real-value-pilot-e2e-report.json"
+              },
+    "checks":  {
+                   "relayerOnceReportLoaded":  true,
+                   "relayerOnceStatusBlockedOrPassed":  true,
+                   "relayerOnceNoFailedChecks":  true,
+                   "relayerOnceNoSecrets":  true,
+                   "relayerOnceNoBroadcasts":  true,
+                   "relayerCountsNonNegative":  true,
+                   "pendingCreditsNonNegative":  true,
+                   "cursorModeStaged":  true,
+                   "cursorFinalNotCommittedWhenBlocked":  true,
+                   "relayerBlockedClassifiedOwnerInput":  true,
+                   "guardrailReportPassed":  true,
+                   "guardrailNoFailedChecks":  true,
+                   "guardrailCursorSafe":  true,
+                   "loopValidationPassedOrOwnerBlocked":  true,
+                   "runtimeCreditPassed":  true,
+                   "runtimeCreditNoFailedChecks":  true,
+                   "runtimeCreditAppliedOnce":  true,
+                   "runtimeReplayRejected":  true,
+                   "localPilotPassed":  true,
+                   "localPilotNoFailedChecks":  true,
+                   "localPilotExactValueConserved":  true,
+                   "localPilotDuplicateReplayRejected":  true,
+                   "releaseEvidenceValidationPassed":  true,
+                   "releaseEvidenceNoFailedChecks":  true,
+                   "reconciliationRowsPresent":  true,
+                   "liveReadinessBlockedOrPassed":  true,
+                   "bridgeInfraBlockedOrPassed":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

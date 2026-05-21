@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package
 
-Generated: 2026-05-18T15:16:20.0302078Z
+Generated: 2026-05-21T17:13:34.4838607Z
 Status: passed
 
 ## Package
@@ -8,8 +8,8 @@ Status: passed
 - Directory: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package`
 - Manifest: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_PACKAGE_MANIFEST.json`
 - Command matrix: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\operator-package\OPERATOR_COMMAND_MATRIX.json`
-- Runbooks copied: 27
-- Evidence reports copied: 37
+- Runbooks copied: 54
+- Evidence reports copied: 78
 
 ## Checks
 
@@ -21,6 +21,8 @@ Status: passed
 | manifestWritten | True |
 | runbookDocsCopied | True |
 | evidenceReportsCopied | True |
+| copiedFileHashesWritten | True |
+| copiedFileHashesMatch | True |
 | ownerInputNamesOnly | True |
 | flowChainRpcIsRepoOwned | True |
 | thirdPartyFlowChainRpcProviderNeededFalse | True |
@@ -54,13 +56,13 @@ Status: passed
 
 - `npm run flowchain:prereq`
 - `npm run flowchain:doctor`
+- `npm run flowchain:install:check`
 - `npm run flowchain:service:start -- -LiveProfile`
 - `npm run flowchain:service:status -- -AllowBlocked`
 - `npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30`
 - `npm run flowchain:service:restart -- -LiveProfile`
+- `npm run flowchain:upgrade:rehearse`
 - `npm run flowchain:service:stop`
 - `npm run flowchain:service:supervisor:validate`
 - `npm run flowchain:service:install:windows -- -Action Plan`
 - `npm run flowchain:service:install:validate`
-- `npm run flowchain:service:install:systemd:validate`
-- `npm run flowchain:second-computer:readiness`

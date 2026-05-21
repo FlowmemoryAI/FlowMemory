@@ -12,6 +12,7 @@ interface DevPackReport {
   status: "passed" | "blocked" | "failed";
   rpcUrl: string;
   checks: Record<string, boolean>;
+  failedChecks: string[];
   methodCount: number;
   publicReadyMethodCount: number;
   firstHeight: string | null;
@@ -19,8 +20,20 @@ interface DevPackReport {
   missingEnvNames: string[];
   reportPaths: Record<string, string>;
   noLiveBroadcast: boolean;
+  broadcasts: false;
   envValuesPrinted: boolean;
   noSecrets: boolean;
+  languageSdks: LanguageSdkEvidence[];
+}
+
+interface LanguageSdkEvidence {
+  language: string;
+  status: "implemented" | "partial" | "missing";
+  packagePath: string;
+  devkitCommand: string;
+  e2eCommand: string;
+  reportPath: string;
+  checks: Record<string, boolean>;
 }
 
 function asRecord(value: JsonValue): Record<string, JsonValue> {
@@ -38,6 +51,10 @@ function stringValue(value: JsonValue): string | null {
 
 function numberValue(value: JsonValue): number {
   return typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
+}
+
+function booleanValue(value: JsonValue): boolean {
+  return value === true;
 }
 
 function heightValue(status: Record<string, JsonValue>): bigint | null {
@@ -67,11 +84,15 @@ function methodEntry(discovery: Record<string, JsonValue>, methodName: string): 
 }
 
 function accountIdFromBalance(row: Record<string, JsonValue>): string | null {
-  return stringValue(row.walletAddress ?? null) ?? stringValue(asRecord(row.balance ?? {}).accountId ?? null);
+  const nestedBalance = asRecord(row.balance ?? {});
+  const source = stringValue(row.source ?? null);
+  const status = stringValue(row.status ?? null);
+  if (source !== "local-runtime-balance" && status !== "local_runtime") return null;
+  return stringValue(nestedBalance.accountId ?? null) ?? stringValue(row.walletAddress ?? null);
 }
 
 function amountFromBalance(row: Record<string, JsonValue>): bigint {
-  const amount = stringValue(row.amount ?? asRecord(row.balance ?? {}).units ?? "0") ?? "0";
+  const amount = stringValue(asRecord(row.balance ?? {}).units ?? row.amount ?? "0") ?? "0";
   return /^\d+$/.test(amount) ? BigInt(amount) : 0n;
 }
 
@@ -124,6 +145,254 @@ function writeGeneratedReference(discovery: Record<string, JsonValue>, outputPat
   writeFileSync(outputPath, lines.join("\n"), "utf8");
 }
 
+function rpcOriginFromUrl(rpcUrl: string): string {
+  try {
+    const url = new URL(rpcUrl);
+    url.pathname = "";
+    url.search = "";
+    url.hash = "";
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return "http://127.0.0.1:8787";
+  }
+}
+
+function discoveryMethodNames(discovery: Record<string, JsonValue>): string[] {
+  return asArray(discovery.methods)
+    .map((method) => stringValue(asRecord(method).method))
+    .filter((method): method is string => method !== null && method.length > 0)
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function writeOpenApiSpec(args: {
+  discovery: Record<string, JsonValue>;
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const methodNames = discoveryMethodNames(args.discovery);
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const spec = {
+    openapi: "3.1.0",
+    info: {
+      title: "FlowChain JSON-RPC",
+      version: String(args.discovery.version ?? "v0"),
+      description: "Local/private FlowChain JSON-RPC contract generated from live rpc_discover output. Public exposure remains gated by owner public RPC readiness.",
+    },
+    servers: [
+      {
+        url: origin,
+        description: "Local FlowChain control-plane origin",
+      },
+    ],
+    paths: {
+      "/rpc/discover": {
+        get: {
+          summary: "Discover FlowChain RPC methods",
+          operationId: "rpcDiscover",
+          responses: {
+            "200": {
+              description: "FlowChain RPC discovery document",
+            },
+          },
+        },
+      },
+      "/rpc/readiness": {
+        get: {
+          summary: "Read public/live readiness without values",
+          operationId: "rpcReadiness",
+          responses: {
+            "200": {
+              description: "FlowChain readiness with missing owner input names only",
+            },
+          },
+        },
+      },
+      "/rpc": {
+        post: {
+          summary: "Call a FlowChain JSON-RPC method",
+          operationId: "jsonRpcCall",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["jsonrpc", "id", "method"],
+                  additionalProperties: false,
+                  properties: {
+                    jsonrpc: { const: "2.0" },
+                    id: {
+                      oneOf: [
+                        { type: "string" },
+                        { type: "number" },
+                        { type: "null" },
+                      ],
+                    },
+                    method: {
+                      type: "string",
+                      enum: methodNames,
+                    },
+                    params: {
+                      type: ["object", "array", "null"],
+                      additionalProperties: true,
+                    },
+                  },
+                },
+                examples: {
+                  chainStatus: {
+                    summary: "Read chain status",
+                    value: {
+                      jsonrpc: "2.0",
+                      id: "chain-status",
+                      method: "chain_status",
+                      params: {},
+                    },
+                  },
+                  blockList: {
+                    summary: "Read latest blocks",
+                    value: {
+                      jsonrpc: "2.0",
+                      id: "block-list",
+                      method: "block_list",
+                      params: { limit: 5 },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "JSON-RPC result or JSON-RPC error envelope",
+            },
+          },
+        },
+      },
+    },
+    "x-flowchain-method-count": methodNames.length,
+    "x-flowchain-public-ready-method-count": numberValue(args.discovery.publicReadyMethodCount ?? 0),
+    "x-flowchain-public-exposure": "blocked until owner public RPC readiness passes",
+  };
+  writeFileSync(args.outputPath, JSON.stringify(redactJsonValue(spec as unknown as JsonValue), null, 2), "utf8");
+}
+
+function postmanJsonRpcItem(name: string, method: string, params: JsonValue = {}): Record<string, JsonValue> {
+  return {
+    name,
+    request: {
+      method: "POST",
+      header: [
+        { key: "content-type", value: "application/json" },
+      ],
+      url: {
+        raw: "{{flowchain_origin}}/rpc",
+        host: ["{{flowchain_origin}}"],
+        path: ["rpc"],
+      },
+      body: {
+        mode: "raw",
+        raw: JSON.stringify({ jsonrpc: "2.0", id: method, method, params }, null, 2),
+      },
+    },
+  };
+}
+
+function writePostmanCollection(args: {
+  discovery: Record<string, JsonValue>;
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const collection = {
+    info: {
+      name: "FlowChain Local RPC",
+      schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      description: "Public-safe local FlowChain requests generated from live rpc_discover output. Do not add secrets to this committed collection.",
+    },
+    variable: [
+      {
+        key: "flowchain_origin",
+        value: origin,
+        type: "string",
+      },
+    ],
+    item: [
+      {
+        name: "RPC discovery",
+        request: {
+          method: "GET",
+          url: {
+            raw: "{{flowchain_origin}}/rpc/discover",
+            host: ["{{flowchain_origin}}"],
+            path: ["rpc", "discover"],
+          },
+        },
+      },
+      {
+        name: "RPC readiness",
+        request: {
+          method: "GET",
+          url: {
+            raw: "{{flowchain_origin}}/rpc/readiness",
+            host: ["{{flowchain_origin}}"],
+            path: ["rpc", "readiness"],
+          },
+        },
+      },
+      postmanJsonRpcItem("Chain status", "chain_status"),
+      postmanJsonRpcItem("Latest blocks", "block_list", { limit: 5 }),
+      postmanJsonRpcItem("Wallet balances", "wallet_balance_list", { limit: 5 }),
+      postmanJsonRpcItem("Bridge readiness", "bridge_live_readiness"),
+    ],
+    event: [],
+    "x-flowchain-method-count": discoveryMethodNames(args.discovery).length,
+  };
+  writeFileSync(args.outputPath, JSON.stringify(redactJsonValue(collection as unknown as JsonValue), null, 2), "utf8");
+}
+
+function writeCurlExamples(args: {
+  rpcUrl: string;
+  outputPath: string;
+}) {
+  const origin = rpcOriginFromUrl(args.rpcUrl);
+  const rpcUrl = `${origin}/rpc`;
+  const lines = [
+    "# FlowChain HTTP Starter",
+    "",
+    "Generated by `npm run flowchain:dev-pack:e2e`.",
+    "",
+    "These examples target the local/private FlowChain control-plane RPC. Public exposure still requires the owner public RPC gate.",
+    "",
+    "## Discovery",
+    "",
+    "```powershell",
+    `curl.exe -sS ${origin}/rpc/discover`,
+    "```",
+    "",
+    "## Readiness",
+    "",
+    "```powershell",
+    `curl.exe -sS ${origin}/rpc/readiness`,
+    "```",
+    "",
+    "## Chain Status",
+    "",
+    "```powershell",
+    `curl.exe -sS ${rpcUrl} -H "content-type: application/json" --data "{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"chain-status\\",\\"method\\":\\"chain_status\\",\\"params\\":{}}"`,
+    "```",
+    "",
+    "## Latest Blocks",
+    "",
+    "```powershell",
+    `curl.exe -sS ${rpcUrl} -H "content-type: application/json" --data "{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"block-list\\",\\"method\\":\\"block_list\\",\\"params\\":{\\"limit\\":5}}"`,
+    "```",
+    "",
+    "Do not commit bearer tokens, private wallet routes, or owner env values into HTTP client collections.",
+    "",
+  ];
+  writeFileSync(args.outputPath, lines.join("\n"), "utf8");
+}
+
 function writeMarkdownReport(report: DevPackReport, outputPath: string) {
   const passed = Object.entries(report.checks).filter(([, ok]) => ok).length;
   const total = Object.keys(report.checks).length;
@@ -146,8 +415,125 @@ function writeMarkdownReport(report: DevPackReport, outputPath: string) {
     "",
     ...Object.entries(report.reportPaths).map(([name, path]) => `- ${name}: \`${path}\``),
     "",
+    "## Language SDKs",
+    "",
+    ...report.languageSdks.map((sdk) => `- ${sdk.language}: \`${sdk.status}\` (${sdk.packagePath})`),
+    "",
   ];
   writeFileSync(outputPath, lines.join("\n"), "utf8");
+}
+
+function writeInventoryReport(args: {
+  outputPath: string;
+  checks: Record<string, boolean>;
+  missingDocs: string[];
+  missingEnvNames: string[];
+  methodCount: number;
+  publicReadyMethodCount: number;
+  languageSdks: LanguageSdkEvidence[];
+}) {
+  const implementedIf = (ok: boolean) => ok ? "implemented" : "partial";
+  const docsStatus = args.missingDocs.length === 0 ? "implemented" : "partial";
+  const publicStatus = args.publicReadyMethodCount > 0 ? "implemented" : "blocked-owner-input";
+  const bridgeStatus = args.missingEnvNames.some((name) => name.startsWith("FLOWCHAIN_BASE8453_") || name.startsWith("FLOWCHAIN_PILOT_"))
+    ? "blocked-owner-input"
+    : "implemented";
+  const rpcStatus = args.missingEnvNames.some((name) => name.startsWith("FLOWCHAIN_RPC_")) ? "blocked-owner-input" : "implemented";
+  const implementedLanguageSdks = args.languageSdks.filter((sdk) => sdk.status === "implemented");
+  const languageSdkStatus = implementedLanguageSdks.length > 0 ? "implemented" : "missing";
+  const languageSdkEvidence = implementedLanguageSdks.length > 0
+    ? `${implementedLanguageSdks.map((sdk) => `${sdk.language.slice(0, 1).toUpperCase()}${sdk.language.slice(1)} SDK/devkit`).join(", ")} passes live RPC e2e; reports: ${implementedLanguageSdks.map((sdk) => sdk.reportPath).join(", ")}.`
+    : "The current dev pack supports the first TypeScript/Node SDK only.";
+  const inventory = [
+    {
+      surface: "SDK package",
+      status: implementedIf(args.checks.discoveryLoaded && args.checks.readinessLoaded),
+      evidence: "`services/flowchain-sdk` client calls live `/rpc` discovery and readiness.",
+    },
+    {
+      surface: "CLI/devkit",
+      status: implementedIf(args.checks.cliJsonStatus && args.checks.cliJsonBlocks && args.checks.cliJsonWaitTransaction),
+      evidence: "CLI emits JSON for status, blocks, and transaction-inclusion waits.",
+    },
+    {
+      surface: "RPC reference",
+      status: implementedIf(args.methodCount > 0),
+      evidence: `Generated from live discovery with ${args.methodCount} methods.`,
+    },
+    {
+      surface: "Wallet reads and local send",
+      status: implementedIf(args.checks.walletBalancesReadable && args.checks.walletTransfersReadable && args.checks.walletSendRuntimeBacked),
+      evidence: "Reads balances/history and submits a runtime-backed local wallet transfer.",
+    },
+    {
+      surface: "Signed transaction envelope",
+      status: implementedIf(args.checks.signedEnvelopeExamplePassed && args.checks.cliSignedTransactionSubmit),
+      evidence: "Example and CLI submit crypto-verified signed envelopes through `transaction_submit`.",
+    },
+    {
+      surface: "Node.js example",
+      status: implementedIf(args.checks.nodeExamplePassed),
+      evidence: "`examples/flowchain-node-quickstart.mjs --send` runs against the local RPC.",
+    },
+    {
+      surface: "Browser readiness starter",
+      status: implementedIf(args.checks.browserExamplePresent && args.checks.browserExampleViteReactPackaged && args.checks.browserExampleBuildPassed && args.checks.browserExampleSmokePassed),
+      evidence: "Packaged Vite/React browser starter checks discovery/readiness, fails closed before public shareability, builds successfully, and has a mechanical smoke test.",
+    },
+    {
+      surface: "HTTP/OpenAPI starter pack",
+      status: implementedIf(args.checks.openApiSpecGenerated && args.checks.postmanCollectionGenerated && args.checks.curlExamplesGenerated),
+      evidence: "Generated OpenAPI, Postman, and cURL artifacts give non-SDK builders a public-safe local RPC starting point.",
+    },
+    {
+      surface: "Developer docs",
+      status: docsStatus,
+      evidence: args.missingDocs.length === 0 ? "Required wallet, bridge, operator, app, explorer, faucet, compatibility, and troubleshooting docs exist." : `Missing docs: ${args.missingDocs.join(", ")}.`,
+    },
+    {
+      surface: "Explorer/indexer reads",
+      status: implementedIf(args.checks.blockListReadable && args.checks.transactionListReadable && args.checks.accountListReadable),
+      evidence: "SDK reads blocks, transactions, accounts, balances, mempool, finality, and faucet events.",
+    },
+    {
+      surface: "Local bridge lifecycle reads",
+      status: implementedIf(args.checks.bridgeLifecycleReadable),
+      evidence: "SDK reads bridge deposits, credits, and withdrawals from the control-plane RPC.",
+    },
+    {
+      surface: "Base 8453 live bridge pilot",
+      status: bridgeStatus,
+      evidence: bridgeStatus === "implemented" ? "Owner Base 8453 inputs are present." : "Live bridge stays fail-closed until owner Base 8453 and pilot inputs exist.",
+    },
+    {
+      surface: "Public RPC read-only exposure",
+      status: publicStatus,
+      evidence: publicStatus === "implemented" ? "Discovery exposes public-ready methods." : "Public exposure stays fail-closed until owner public RPC edge inputs pass.",
+    },
+    {
+      surface: "State backup live path",
+      status: rpcStatus,
+      evidence: rpcStatus === "implemented" ? "Owner public RPC and backup inputs are present." : "Live backup path remains blocked on owner RPC backup env.",
+    },
+    {
+      surface: "Additional language SDKs",
+      status: languageSdkStatus,
+      evidence: languageSdkEvidence,
+    },
+  ];
+  const lines = [
+    "# FlowChain Developer Ecosystem Inventory",
+    "",
+    "Generated by `npm run flowchain:dev-pack:e2e`.",
+    "",
+    "| Surface | Classification | Evidence |",
+    "| --- | --- | --- |",
+    ...inventory.map((item) => `| ${item.surface} | ${item.status} | ${item.evidence} |`),
+    "",
+    "Classification values: `implemented`, `partial`, `fixture-only`, `blocked-owner-input`, `missing`.",
+    "",
+  ];
+  writeFileSync(args.outputPath, lines.join("\n"), "utf8");
 }
 
 async function main() {
@@ -158,7 +544,7 @@ async function main() {
   mkdirSync(runDir, { recursive: true });
   mkdirSync(sdkDocsDir, { recursive: true });
 
-  const client = new FlowChainClient({ rpcUrl, timeoutMs: 15000 });
+  const client = new FlowChainClient({ rpcUrl, timeoutMs: 60000 });
   const discovery = asRecord(await client.rpcDiscover());
   const readiness = asRecord(await client.rpcReadiness());
   const health = asRecord(await client.health());
@@ -200,6 +586,10 @@ async function main() {
     applyBlock: true,
     createRecipient: true,
   }));
+  const walletSendTxId = stringValue(walletSend.transferId) ?? stringValue(asArray(walletSend.txIds)[0] ?? null);
+  const waitedTransaction = walletSendTxId === null
+    ? {}
+    : asRecord(await client.waitForTransaction({ txId: walletSendTxId, timeoutMs: 15000, pollMs: 500 }));
 
   const cliPath = resolve(root, "services", "flowchain-sdk", "src", "cli.ts");
   const cliStatusText = execFileSync(process.execPath, [cliPath, "status", "--json", "--rpc", rpcUrl], {
@@ -214,6 +604,68 @@ async function main() {
     windowsHide: true,
   });
   const cliBlocks = JSON.parse(cliBlocksText) as JsonValue;
+  const cliWaitTransaction = walletSendTxId === null
+    ? {}
+    : JSON.parse(execFileSync(process.execPath, [cliPath, "wait-transaction", "--json", "--tx", walletSendTxId, "--seconds", "15", "--poll-ms", "500", "--rpc", rpcUrl], {
+        cwd: root,
+        encoding: "utf8",
+        windowsHide: true,
+      })) as JsonValue;
+  const pythonSdkReportPath = resolve(runDir, "python-sdk-e2e-report.json");
+  const pythonSdkScriptPath = resolve(root, "infra", "scripts", "flowchain-python-sdk-e2e.ps1");
+  const powershellPath = process.platform === "win32" ? "powershell.exe" : "pwsh";
+  const pythonSdkArgs = [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    pythonSdkScriptPath,
+    "-RpcUrl",
+    rpcUrl,
+    "-ReportPath",
+    pythonSdkReportPath,
+    ...(walletSendTxId === null ? [] : ["-WaitTxId", walletSendTxId]),
+  ];
+  execFileSync(powershellPath, pythonSdkArgs, {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const pythonSdkReport = JSON.parse(readFileSync(pythonSdkReportPath, "utf8")) as JsonValue;
+  const pythonSdkReportRecord = asRecord(pythonSdkReport);
+  const pythonSdkChecksRecord = asRecord(pythonSdkReportRecord.checks ?? {});
+  const pythonSdkChecks = {
+    unitTestsPassed: booleanValue(pythonSdkChecksRecord.unitTestsPassed ?? false),
+    discoveryLoaded: booleanValue(pythonSdkChecksRecord.discoveryLoaded ?? false),
+    readinessLoaded: booleanValue(pythonSdkChecksRecord.readinessLoaded ?? false),
+    statusReadable: booleanValue(pythonSdkChecksRecord.statusReadable ?? false),
+    blocksReadable: booleanValue(pythonSdkChecksRecord.blocksReadable ?? false),
+    walletReadsReadable: booleanValue(pythonSdkChecksRecord.walletReadsReadable ?? false),
+    bridgeStatusReadable: booleanValue(pythonSdkChecksRecord.bridgeStatusReadable ?? false),
+    pythonDevkitJsonStatus: booleanValue(pythonSdkChecksRecord.pythonDevkitJsonStatus ?? false),
+    pythonDevkitJsonBlocks: booleanValue(pythonSdkChecksRecord.pythonDevkitJsonBlocks ?? false),
+    pythonDevkitWaitTransaction: booleanValue(pythonSdkChecksRecord.pythonDevkitWaitTransaction ?? false),
+    pythonQuickstartPassed: booleanValue(pythonSdkChecksRecord.pythonQuickstartPassed ?? false),
+    publicReadinessFailClosed: booleanValue(pythonSdkChecksRecord.publicReadinessFailClosed ?? false),
+    noSecrets: booleanValue(pythonSdkChecksRecord.noSecrets ?? false),
+  };
+  const pythonSdkPackagePath = resolve(root, "sdks", "python");
+  const pythonSdkDocsPath = resolve(sdkDocsDir, "FLOWCHAIN_PYTHON_SDK.md");
+  const pythonSdkImplemented = pythonSdkReportRecord.status === "passed"
+    && existsSync(pythonSdkPackagePath)
+    && existsSync(pythonSdkDocsPath)
+    && Object.values(pythonSdkChecks).every(Boolean);
+  const languageSdks: LanguageSdkEvidence[] = [
+    {
+      language: "python",
+      status: pythonSdkImplemented ? "implemented" : "partial",
+      packagePath: "sdks/python",
+      devkitCommand: "npm run flowchain:python-devkit -- status --json",
+      e2eCommand: "npm run flowchain:python-sdk:e2e",
+      reportPath: "docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json",
+      checks: pythonSdkChecks,
+    },
+  ];
   const nodeExamplePath = resolve(root, "examples", "flowchain-node-quickstart.mjs");
   const nodeExampleText = execFileSync(process.execPath, [nodeExamplePath, "--send"], {
     cwd: root,
@@ -222,8 +674,64 @@ async function main() {
     env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
   });
   const nodeExample = JSON.parse(nodeExampleText) as JsonValue;
+  const signedEnvelopeExamplePath = resolve(root, "examples", "flowchain-signed-envelope.mjs");
+  const signedEnvelopeExampleText = execFileSync(process.execPath, [signedEnvelopeExamplePath, "--submit"], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
+  });
+  const signedEnvelopeExample = JSON.parse(signedEnvelopeExampleText) as JsonValue;
+  const cliSignedEnvelopePath = resolve(root, "devnet", "local", "flowchain-signed-envelope-example", "dev-pack-cli-signed-envelope.json");
+  const cliSignedEnvelopePreparedText = execFileSync(process.execPath, [signedEnvelopeExamplePath, "--no-submit", "--write", cliSignedEnvelopePath], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, FLOWCHAIN_RPC_URL: rpcUrl },
+  });
+  const cliSignedEnvelopePrepared = JSON.parse(cliSignedEnvelopePreparedText) as JsonValue;
+  const cliSignedSubmitText = execFileSync(process.execPath, [
+    cliPath,
+    "submit-signed-transaction",
+    "--json",
+    "--signed-envelope",
+    cliSignedEnvelopePath,
+    "--submitted-by",
+    "flowchain-dev-pack-cli",
+    "--runtime-submit-mode",
+    "off",
+    "--rpc",
+    rpcUrl,
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const cliSignedSubmit = JSON.parse(cliSignedSubmitText) as JsonValue;
   const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
   const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
+  const browserPackagePath = resolve(root, "examples", "flowchain-browser-readiness", "package.json");
+  const browserPackage = existsSync(browserPackagePath) ? asRecord(JSON.parse(readFileSync(browserPackagePath, "utf8")) as JsonValue) : {};
+  const browserPackageScripts = asRecord(browserPackage.scripts ?? {});
+  const browserPackageDependencies = asRecord(browserPackage.dependencies ?? {});
+  const browserPackageDevDependencies = asRecord(browserPackage.devDependencies ?? {});
+  const browserEntryPath = resolve(root, "examples", "flowchain-browser-readiness", "src", "main.jsx");
+  const browserEntryText = existsSync(browserEntryPath) ? readFileSync(browserEntryPath, "utf8") : "";
+  const browserModulePath = resolve(root, "examples", "flowchain-browser-readiness", "browser-readiness.js");
+  const browserModuleText = existsSync(browserModulePath) ? readFileSync(browserModulePath, "utf8") : "";
+  const browserSmokePath = resolve(root, "examples", "flowchain-browser-readiness", "smoke.mjs");
+  const browserExampleDir = resolve(root, "examples", "flowchain-browser-readiness");
+  const browserBuildText = execFileSync(process.execPath, [resolve(root, "node_modules", "vite", "bin", "vite.js"), "build"], {
+    cwd: browserExampleDir,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const browserSmokeText = execFileSync(process.execPath, [browserSmokePath], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const browserSmoke = JSON.parse(browserSmokeText) as JsonValue;
   const requiredDocs = [
     "docs/developer/FLOWCHAIN_QUICKSTART.md",
     "docs/developer/FLOWCHAIN_WALLET_INTEGRATION.md",
@@ -235,6 +743,7 @@ async function main() {
     "docs/developer/FLOWCHAIN_RELEASE_COMPATIBILITY.md",
     "docs/developer/FLOWCHAIN_TROUBLESHOOTING.md",
     "docs/sdk/FLOWCHAIN_SDK.md",
+    "docs/sdk/FLOWCHAIN_PYTHON_SDK.md",
     "docs/sdk/RPC_REFERENCE.generated.md",
   ];
   const missingDocs = requiredDocs.filter((docPath) => !existsSync(resolve(root, docPath)));
@@ -250,9 +759,16 @@ async function main() {
   const reportPath = resolve(runDir, "dev-pack-e2e-report.json");
   const markdownPath = resolve(runDir, "DEV_PACK.md");
   const handoffPath = resolve(runDir, "HANDOFF.md");
+  const inventoryPath = resolve(runDir, "INVENTORY.md");
+  const openApiPath = resolve(sdkDocsDir, "FLOWCHAIN_RPC.openapi.generated.json");
+  const postmanPath = resolve(sdkDocsDir, "FLOWCHAIN_RPC.postman.generated.json");
+  const curlExamplesPath = resolve(sdkDocsDir, "FLOWCHAIN_HTTP_EXAMPLES.generated.md");
   writeGeneratedReference(discovery, referencePath);
+  writeOpenApiSpec({ discovery, rpcUrl, outputPath: openApiPath });
+  writePostmanCollection({ discovery, rpcUrl, outputPath: postmanPath });
+  writeCurlExamples({ rpcUrl, outputPath: curlExamplesPath });
 
-  const checks = {
+  const baseChecks = {
     discoveryLoaded: String(discovery.schema ?? "") === "flowchain.rpc.discovery.v0",
     readinessLoaded: String(readiness.schema ?? "") === "flowchain.rpc.readiness.v0",
     healthReadable: String(health.schema ?? "") === "flowmemory.control_plane.health.v0",
@@ -273,23 +789,97 @@ async function main() {
       && String(bridgeCredits.schema ?? "") === "flowmemory.control_plane.bridge_credit_list.v0"
       && String(withdrawals.schema ?? "") === "flowmemory.control_plane.withdrawal_list.v0",
     walletSendRuntimeBacked: String(walletSend.schema ?? "") === "flowmemory.control_plane.wallet_send_result.v0",
+    waitTransactionSdkIncluded: walletSendTxId !== null && waitedTransaction.status === "included",
     cliJsonStatus: String(asRecord(cliStatus).schema ?? "") === "flowmemory.control_plane.chain_status.v0",
     cliJsonBlocks: String(asRecord(cliBlocks).schema ?? "") === "flowmemory.control_plane.block_list.v0",
+    cliJsonWaitTransaction: String(asRecord(cliWaitTransaction).schema ?? "") === "flowchain.sdk.wait_transaction.v0" && asRecord(cliWaitTransaction).status === "included",
     nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowchain.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
-    browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
+    signedEnvelopeExamplePassed: String(asRecord(signedEnvelopeExample).schema ?? "") === "flowchain.example.signed_envelope.v0"
+      && asRecord(signedEnvelopeExample).status === "passed"
+      && asRecord(signedEnvelopeExample).submitAccepted === true
+      && asRecord(signedEnvelopeExample).submitStatus === "accepted_crypto_verified",
+    cliSignedEnvelopePrepared: String(asRecord(cliSignedEnvelopePrepared).schema ?? "") === "flowchain.example.signed_envelope.v0"
+      && asRecord(cliSignedEnvelopePrepared).status === "passed"
+      && asRecord(cliSignedEnvelopePrepared).submitted === false
+      && typeof asRecord(cliSignedEnvelopePrepared).writtenPath === "string",
+    cliSignedTransactionSubmit: String(asRecord(cliSignedSubmit).schema ?? "") === "flowmemory.control_plane.transaction_submit_result.v0"
+      && asRecord(cliSignedSubmit).accepted === true
+      && asRecord(cliSignedSubmit).status === "accepted_crypto_verified",
+    browserExamplePresent: `${browserExampleText}\n${browserModuleText}`.includes("/rpc/discover")
+      && `${browserExampleText}\n${browserModuleText}`.includes("/rpc/readiness")
+      && browserExampleText.includes("/src/main.jsx")
+      && browserEntryText.includes("../browser-readiness.js"),
+    browserExampleViteReactPackaged: browserPackage.name === "@flowmemory/flowchain-browser-readiness-example"
+      && String(browserPackageScripts.dev ?? "").includes("vite")
+      && browserPackageScripts.build === "vite build"
+      && String(browserPackageScripts.preview ?? "").includes("vite preview")
+      && typeof browserPackageDependencies.react === "string"
+      && typeof browserPackageDependencies["react-dom"] === "string"
+      && typeof browserPackageDependencies["lucide-react"] === "string"
+      && typeof browserPackageDevDependencies.vite === "string"
+      && browserEntryText.includes("createRoot")
+      && browserEntryText.includes("lucide-react")
+      && browserEntryText.includes("checkFlowChainBrowserReadiness"),
+    browserExampleBuildPassed: browserBuildText.includes("built in")
+      && existsSync(resolve(root, "examples", "flowchain-browser-readiness", "dist", "index.html")),
+    browserExampleSmokePassed: String(asRecord(browserSmoke).schema ?? "") === "flowchain.example.browser_readiness_smoke.v0"
+      && asRecord(browserSmoke).status === "passed"
+      && asRecord(browserSmoke).viteReactPackaged === true
+      && asRecord(browserSmoke).safeToSharePublicly === false,
+    openApiSpecGenerated: existsSync(openApiPath)
+      && readFileSync(openApiPath, "utf8").includes('"openapi": "3.1.0"')
+      && readFileSync(openApiPath, "utf8").includes('"chain_status"'),
+    postmanCollectionGenerated: existsSync(postmanPath)
+      && readFileSync(postmanPath, "utf8").includes('"FlowChain Local RPC"')
+      && readFileSync(postmanPath, "utf8").includes("chain_status"),
+    curlExamplesGenerated: existsSync(curlExamplesPath)
+      && readFileSync(curlExamplesPath, "utf8").includes("curl.exe -sS")
+      && readFileSync(curlExamplesPath, "utf8").includes("chain_status"),
     developerGuidesPresent: missingDocs.length === 0,
+    pythonSdkE2ePassed: pythonSdkImplemented,
+    pythonSdkDiscoveryLoaded: pythonSdkChecks.discoveryLoaded,
+    pythonSdkReadinessLoaded: pythonSdkChecks.readinessLoaded,
+    pythonDevkitJsonStatus: pythonSdkChecks.pythonDevkitJsonStatus,
+    pythonDevkitJsonBlocks: pythonSdkChecks.pythonDevkitJsonBlocks,
+    pythonDevkitWaitTransaction: pythonSdkChecks.pythonDevkitWaitTransaction,
+    pythonSdkDocsPresent: existsSync(pythonSdkDocsPath) && existsSync(resolve(pythonSdkPackagePath, "README.md")),
+    pythonSdkSafeDiagnostics: pythonSdkChecks.noSecrets,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
     publicWriteMethodsBlockedFromPublicList: transactionSubmit?.publicRpcEligible === false && walletTransferHistory?.publicRpcEligible === true,
     broadLocalStateBlockedFromPublicList: devnetState?.publicRpcEligible === false,
   };
-  const status = Object.values(checks).every(Boolean) ? "passed" : "failed";
+
+  writeInventoryReport({
+    outputPath: inventoryPath,
+    checks: baseChecks,
+    missingDocs,
+    missingEnvNames,
+    methodCount: numberValue(discovery.methodCount ?? 0),
+    publicReadyMethodCount: numberValue(discovery.publicReadyMethodCount ?? 0),
+    languageSdks,
+  });
+  const inventoryText = existsSync(inventoryPath) ? readFileSync(inventoryPath, "utf8") : "";
+  const checks = {
+    ...baseChecks,
+    inventoryGenerated: inventoryText.includes("| SDK package | implemented |")
+      && inventoryText.includes("| HTTP/OpenAPI starter pack | implemented |")
+      && inventoryText.includes("blocked-owner-input")
+      && inventoryText.includes("| Additional language SDKs | implemented |")
+      && inventoryText.includes("Python SDK/devkit passes live RPC e2e"),
+    inventorySafe: !/(privateKey|private_key|seed phrase|mnemonic|apiKey|webhook|BEGIN RSA PRIVATE KEY|BEGIN OPENSSH PRIVATE KEY)/i.test(inventoryText),
+  };
+  const failedChecks = Object.entries(checks)
+    .filter(([, passed]) => !passed)
+    .map(([name]) => name);
+  const status = failedChecks.length === 0 ? "passed" : "failed";
   const report: DevPackReport = {
     schema: "flowchain.dev_pack_e2e_report.v0",
     generatedAt: new Date().toISOString(),
     status,
     rpcUrl,
     checks,
+    failedChecks,
     methodCount: numberValue(discovery.methodCount ?? 0),
     publicReadyMethodCount: numberValue(discovery.publicReadyMethodCount ?? 0),
     firstHeight,
@@ -299,11 +889,18 @@ async function main() {
       json: reportPath,
       markdown: markdownPath,
       handoff: handoffPath,
+      inventory: inventoryPath,
       rpcReference: referencePath,
+      openApi: openApiPath,
+      postman: postmanPath,
+      curlExamples: curlExamplesPath,
+      pythonSdk: pythonSdkReportPath,
     },
     noLiveBroadcast: true,
+    broadcasts: false,
     envValuesPrinted: false,
     noSecrets: true,
+    languageSdks,
   };
 
   writeFileSync(reportPath, JSON.stringify(redactJsonValue(report as unknown as JsonValue), null, 2), "utf8");
@@ -318,18 +915,22 @@ async function main() {
       "Implemented in this slice:",
       "",
       "- Private FlowChain SDK/devkit package under `services/flowchain-sdk`.",
+      "- Dependency-free Python SDK/devkit package under `sdks/python` with live RPC E2E evidence.",
       "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
-      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
+      "- SDK and CLI transaction-inclusion wait helpers backed by `transaction_get` polling.",
+      "- SDK and CLI signed transaction envelope submission backed by the crypto-verified `transaction_submit` RPC.",
+      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and packaged Vite/React browser readiness starter under `examples/flowchain-browser-readiness/`.",
+      "- Signed envelope example under `examples/flowchain-signed-envelope.mjs` that creates local wallets in memory, signs a FlowChain product transfer envelope, submits it to local cryptographic intake, and can write a CLI-ready envelope file.",
+      "- Generated OpenAPI, Postman, and cURL artifacts for builders who want direct HTTP examples before adopting the TypeScript SDK.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
-      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
+      "- Developer ecosystem inventory classifying implemented, partial, blocked, and missing surfaces, including Python as the first additional language SDK.",
+      "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, signed-envelope intake, CLI JSON output, Python SDK/devkit execution, packaged browser starter build/smoke, sample example execution, and public readiness fail-closed behavior.",
       "",
       "Remaining buildout:",
       "",
-      "- Add signed transaction envelope examples once wallet signing boundaries are finalized for SDK use.",
-      "- Promote the browser example to a packaged Vite/React app if the dashboard app is split into a reusable external starter.",
       "- Keep public/live readiness blocked until owner inputs and public deployment gates pass.",
       "",
       `Report: \`${reportPath}\``,

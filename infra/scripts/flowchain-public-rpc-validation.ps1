@@ -12,6 +12,7 @@ $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $validationDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-validation")
 $backupDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/public-rpc-validation-backup")
+$ownerEnvPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/public-rpc-validation-owner.env")
 $stateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/state.json")
 New-Item -ItemType Directory -Force -Path $validationDir | Out-Null
 New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
@@ -120,7 +121,14 @@ $readinessReportPath = Join-Path $validationDir "public-rpc-readiness-report.jso
 $serverProcess = $null
 
 try {
-    [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $null, "Process")
+    Set-Content -LiteralPath $ownerEnvPath -Value (@(
+        "FLOWCHAIN_RPC_PUBLIC_URL=$baseUrl",
+        "FLOWCHAIN_RPC_ALLOWED_ORIGINS=$allowedOrigin",
+        "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=20",
+        "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+        "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir"
+    ) -join "`r`n") -Encoding UTF8
+    [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $ownerEnvPath, "Process")
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_RPC_PUBLIC_URL", $baseUrl, "Process")
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_RPC_ALLOWED_ORIGINS", $allowedOrigin, "Process")
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE", "20", "Process")
@@ -147,6 +155,7 @@ try {
     $checks = Get-ValidationProp -Object $readinessReport -Name "checks"
     $deploymentChecks = Get-ValidationProp -Object $readinessReport -Name "deploymentChecks"
     $cors = Get-ValidationProp -Object $readinessReport -Name "cors"
+    $securityHeaders = Get-ValidationProp -Object $readinessReport -Name "securityHeaders"
     $endpointChecks = @((Get-ValidationProp -Object $readinessReport -Name "endpointChecks" -Default @()))
     $failedEndpointChecks = @($endpointChecks | Where-Object { "$($_.status)" -ne "passed" })
     $missingEnvNames = @((Get-ValidationProp -Object $readinessReport -Name "missingEnvNames" -Default @()))
@@ -164,6 +173,8 @@ try {
         allowedOriginAccepted = (Get-ValidationProp -Object $checks -Name "corsConfiguredOriginAccepted" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "configuredOriginAccepted" -Default $false) -eq $true
         disallowedOriginProbePerformed = (Get-ValidationProp -Object $checks -Name "corsDisallowedOriginProbePerformed" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "disallowedOriginProbePerformed" -Default $false) -eq $true
         disallowedOriginRejected = (Get-ValidationProp -Object $checks -Name "corsDisallowedOriginRejected" -Default $false) -eq $true -and (Get-ValidationProp -Object $cors -Name "disallowedOriginRejected" -Default $false) -eq $true
+        securityHeaderProbeSkippedForLocalEndpoint = (Get-ValidationProp -Object $checks -Name "securityHeadersSkippedUntilPublicMode" -Default $false) -eq $true -and (Get-ValidationProp -Object $securityHeaders -Name "performed" -Default $true) -eq $false
+        securityHeaderPassRequiredOnlyForPublicMode = (Get-ValidationProp -Object $checks -Name "securityHeadersAllRequiredPresent" -Default $false) -eq $true
         rateLimitProbePerformed = (Get-ValidationProp -Object $checks -Name "rateLimitProbePerformed" -Default $false) -eq $true
         rateLimitRejected = (Get-ValidationProp -Object $checks -Name "rateLimitRejectionObserved" -Default $false) -eq $true
         rateLimitRetryAfterHeaderPresent = (Get-ValidationProp -Object $checks -Name "rateLimitRetryAfterHeaderPresent" -Default $false) -eq $true
@@ -224,6 +235,7 @@ finally {
         [Environment]::SetEnvironmentVariable($name, $originalEnv[$name], "Process")
     }
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $originalOwnerEnvFile, "Process")
+    Remove-Item -LiteralPath $ownerEnvPath -Force -ErrorAction SilentlyContinue
 }
 
 $reportText = $report | ConvertTo-Json -Depth 18

@@ -98,6 +98,37 @@ npm run flowchain:devkit -- wallet-send --json --from <account-id> --to <account
 This uses the local control-plane wallet send path. It is for local no-value
 testing only and is not a live bridge or public endpoint action.
 
+Copy the `transferId` returned by `wallet-send`, then wait for the real wallet
+activity row to appear in the Explorer/RPC transaction index:
+
+```powershell
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id> --seconds 30
+```
+
+## Submit A Signed Local Envelope
+
+Use the signed-envelope example to create two in-memory local wallets, sign a
+FlowChain product transfer document, verify the signature, and submit the
+envelope to the private `transaction_submit` cryptographic intake:
+
+```powershell
+node examples/flowchain-signed-envelope.mjs --submit
+```
+
+To generate a CLI-ready envelope without submitting it:
+
+```powershell
+node examples/flowchain-signed-envelope.mjs --no-submit --write devnet/local/flowchain-signed-envelope-example/signed-envelope.json
+npm run flowchain:devkit -- submit-signed-transaction --json --signed-envelope devnet/local/flowchain-signed-envelope-example/signed-envelope.json --submitted-by local-devkit
+```
+
+`submit-signed-transaction` posts to the private local `/transactions/submit`
+route, which dispatches the same `transaction_submit` crypto verifier used by
+the control plane. It defaults to local file intake with runtime forwarding off.
+Do not use `--runtime-submit` unless you are intentionally testing a local
+runtime adapter transaction and understand the fixture shape. The public `/rpc`
+surface stays read-gated and does not expose this write method.
+
 ## Read Bridge Readiness
 
 ```powershell
@@ -120,24 +151,36 @@ npm run flowchain:dev-pack:e2e
 These commands attach to local RPC, verify discovery/readiness, check block
 height, read block/transaction/account/wallet/bridge surfaces, submit a
 runtime-backed local wallet send, run CLI commands with JSON output, verify the
-Node.js and browser examples, and regenerate the RPC reference.
+Node.js, Python, and browser examples, and regenerate the RPC reference plus
+HTTP starter artifacts.
 
 Outputs:
 
 - `docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json`
 - `docs/agent-runs/live-product-dev-pack/DEV_PACK.md`
 - `docs/agent-runs/live-product-dev-pack/HANDOFF.md`
+- `docs/agent-runs/live-product-dev-pack/INVENTORY.md`
+- `docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json`
 - `docs/sdk/RPC_REFERENCE.generated.md`
+- `docs/sdk/FLOWCHAIN_RPC.openapi.generated.json`
+- `docs/sdk/FLOWCHAIN_RPC.postman.generated.json`
+- `docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md`
+- `docs/sdk/FLOWCHAIN_PYTHON_SDK.md`
 
 ## Run The Examples
 
 ```powershell
 node examples/flowchain-node-quickstart.mjs
 node examples/flowchain-node-quickstart.mjs --send
+python examples/flowchain-python-quickstart.py
+node examples/flowchain-signed-envelope.mjs --submit
+npm run smoke --prefix examples/flowchain-browser-readiness
 ```
 
 Open `examples/flowchain-browser-readiness/index.html` from a browser when you
-need a fetch-only readiness example for a public or local RPC origin.
+need a fetch-only readiness example for a public or local RPC origin. The smoke
+test proves the starter only calls discovery/readiness, redacts URL credentials,
+and stays not-shareable before public readiness passes.
 
 ## Current Limits
 
@@ -145,7 +188,6 @@ need a fetch-only readiness example for a public or local RPC origin.
 - Public RPC remains blocked until owner public endpoint inputs are configured.
 - Live bridge remains blocked until owner Base 8453 inputs and operator
   acknowledgement are configured.
-- Signed transaction envelope SDK examples are still a follow-up. The current
-  devkit wallet send uses the existing local control-plane wallet-send path, and
-  public tester writes use the authenticated `/tester/wallets/*` gateway instead
-  of the private local wallet routes.
+- Signed transaction envelope submission is available for local/private
+  cryptographic intake. Public tester writes still use the authenticated
+  `/tester/wallets/*` gateway instead of private local wallet routes.

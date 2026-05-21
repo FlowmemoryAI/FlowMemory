@@ -1,9 +1,11 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-18T15:12:29.5860014Z
+Generated: 2026-05-21T14:27:00.6231395Z
 Status: blocked
-Latest height: 73233
-Finalized height: 73233
+Latest height: 113229
+Finalized height: 113229
+Transaction intake rows: 187
+Runtime inbox files: 0
 
 ## Findings
 
@@ -11,8 +13,7 @@ Finalized height: 73233
 - blocked: backup-not-ready - State backup is not ready for public operation.
 - blocked: bridge-not-ready - Base 8453 bridge readiness is not ready for external funded testing.
 - blocked: bridge-relayer-not-ready - Bridge relayer one-shot proof is not ready.
-- blocked: external-tester-not-shareable - External tester packet must remain not-shareable.
-- blocked: external-tester-evidence-invalid - External tester returned evidence validation is not passed or transfer proof is inconsistent.
+- blocked: external-tester-not-shareable - External tester launch is not shareable; local rehearsal, public tester gateway, faucet route, external sharing, and live infra readiness must all pass first.
 - blocked: deployment-contract-not-ready - Public deployment contract is not ready.
 
 ## Incident Commands
@@ -33,8 +34,21 @@ Finalized height: 73233
 
 ### publicExposure
 - npm run flowchain:public-rpc:check
+- npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
 - npm run flowchain:public-rpc:abuse-test
+- npm run flowchain:public-rpc:deployment-bundle
+- npm run flowchain:public-rpc:deployment:automation
 - npm run flowchain:external-tester:packet
+
+### productSurface
+- npm run flowchain:dashboard:ui:readiness
+- npm run flowchain:tester:evidence:validate
+- npm run flowchain:external-tester:packet
+
+### ownerInputs
+- npm run flowchain:owner-inputs:validate
+- npm run flowchain:owner-inputs
+- npm run flowchain:owner-env:readiness
 
 ### drills
 - npm run flowchain:ops:incident-drill
@@ -45,7 +59,19 @@ Finalized height: 73233
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:emergency:export-evidence
 
+### bridgePilot
+- npm run flowchain:bridge:command-matrix
+- npm run flowchain:bridge:deploy:control:validate
+- npm run flowchain:bridge:relayer:guardrail:validate
+- npm run flowchain:bridge:reconciliation
+
 ### bridgeRelayerLoop
 - npm run flowchain:service:status
+- npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop
 - npm run flowchain:bridge:relayer:loop:validate
 - npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
+
+### serviceInstall
+- npm run flowchain:service:install:validate
+- npm run flowchain:service:install:systemd:validate
+- npm run flowchain:service:status

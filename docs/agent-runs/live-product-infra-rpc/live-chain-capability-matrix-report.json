@@ -1,0 +1,528 @@
+{
+    "schema":  "flowchain.live_chain_capability_matrix_report.v0",
+    "generatedAt":  "2026-05-21T17:21:55.7569045Z",
+    "status":  "passed",
+    "launchReadinessStatus":  "blocked-owner-input",
+    "productionReady":  false,
+    "latestHeight":  "114146",
+    "finalizedHeight":  "114146",
+    "capabilityCount":  14,
+    "publicLaunchCriticalCapabilityCount":  13,
+    "blockedCapabilityCount":  4,
+    "repoBlockedCapabilityCount":  0,
+    "classificationCounts":  {
+                                 "passed":  10,
+                                 "blocked-owner-input":  4,
+                                 "blocked-repo-work":  0,
+                                 "failed":  0,
+                                 "missing-evidence":  0
+                             },
+    "userRequirementIds":  [
+                               "wallet-create",
+                               "wallet-transfer",
+                               "chain-connect-public-rpc",
+                               "bridge-real-funds",
+                               "rpc-services-running",
+                               "block-production",
+                               "explorer-faucet-wallet-ui"
+                           ],
+    "missingUserCapabilityCoverage":  [
+
+                                      ],
+    "missingRequiredReports":  [
+
+                               ],
+    "missingOwnerInputs":  [
+                               "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                               "FLOWCHAIN_BASE8453_RPC_URL",
+                               "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                               "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                               "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                               "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                               "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                               "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                               "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                               "FLOWCHAIN_RPC_PUBLIC_URL",
+                               "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                               "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                               "FLOWCHAIN_RPC_TLS_TERMINATED",
+                               "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                           ],
+    "missingRequiredOwnerInputs":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+    "publicRpcBlockers":  [
+                              "FLOWCHAIN_RPC_PUBLIC_URL",
+                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                              "FLOWCHAIN_RPC_TLS_TERMINATED"
+                          ],
+    "backupBlockers":  [
+                           "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                       ],
+    "bridgeBlockers":  [
+                           "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                           "FLOWCHAIN_BASE8453_RPC_URL",
+                           "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                           "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                           "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                           "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                           "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                           "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                           "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                       ],
+    "externalTesterBlockers":  [
+                                   "FLOWCHAIN_RPC_PUBLIC_URL",
+                                   "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                   "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                   "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                   "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                   "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                   "FLOWCHAIN_BASE8453_RPC_URL",
+                                   "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                   "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                   "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                   "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                   "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                   "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                   "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                               ],
+    "blockedCapabilities":  [
+                                "chain-connect-public-rpc",
+                                "bridge-real-funds",
+                                "backup-restore",
+                                "external-tester-launch"
+                            ],
+    "repoBlockedCapabilities":  [
+
+                                ],
+    "blockedCapabilitiesMissingBlockers":  [
+
+                                           ],
+    "blockedCapabilitiesUnknownBlockers":  [
+
+                                           ],
+    "capabilities":  [
+                         {
+                             "id":  "rpc-services-running",
+                             "title":  "RPC servers are running",
+                             "userRequirement":  "RPC servers are online and readable.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "serviceStatus=passed; latestHeight=114146; finalizedHeight=114146",
+                             "commands":  [
+                                              "npm run flowchain:service:status"
+                                          ],
+                             "reportNames":  [
+                                                 "serviceStatus"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "block-production",
+                             "title":  "Chain is producing blocks",
+                             "userRequirement":  "The chain is alive and producing/finalizing blocks.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "serviceMonitor=passed; heightAdvanced=True; latestHeight=114146",
+                             "commands":  [
+                                              "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
+                                          ],
+                             "reportNames":  [
+                                                 "serviceStatus",
+                                                 "serviceMonitor"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "autorecovery-service-install",
+                             "title":  "Autorecovery and reboot persistence",
+                             "userRequirement":  "Node, control-plane, and bridge relayer can recover and be installed as owner-host services.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "supervisor=passed; windowsInstall=passed; systemdInstall=passed",
+                             "commands":  [
+                                              "npm run flowchain:service:supervisor:validate",
+                                              "npm run flowchain:service:install:validate",
+                                              "npm run flowchain:service:install:systemd:validate"
+                                          ],
+                             "reportNames":  [
+                                                 "serviceSupervisorValidation",
+                                                 "serviceInstallValidation",
+                                                 "systemdServiceInstallValidation"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "wallet-create",
+                             "title":  "Wallet creation",
+                             "userRequirement":  "People can create wallets without secret material leaking into responses or committed evidence.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "testerNetwork=passed; walletCreates=4",
+                             "commands":  [
+                                              "npm run flowchain:wallet:live-tester:e2e"
+                                          ],
+                             "reportNames":  [
+                                                 "testerNetwork"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "wallet-transfer",
+                             "title":  "Wallet-to-wallet transfers",
+                             "userRequirement":  "People can send funds from wallet to wallet and see settlement in produced blocks.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "liveWallet=passed; testerTransfers=4; latestHeight=114146",
+                             "commands":  [
+                                              "npm run flowchain:wallet:live-service:e2e",
+                                              "npm run flowchain:wallet:live-tester:e2e"
+                                          ],
+                             "reportNames":  [
+                                                 "liveWallet",
+                                                 "testerNetwork"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "explorer-faucet-wallet-ui",
+                             "title":  "Explorer, faucet, and wallet UI",
+                             "userRequirement":  "Friends and family can create a tester wallet, request faucet funds, send, and inspect Explorer on desktop and mobile.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "dashboardUi=passed; gateway=passed; routes=10; proofs=13",
+                             "commands":  [
+                                              "npm run flowchain:dashboard:ui:readiness",
+                                              "npm run flowchain:tester:gateway:e2e"
+                                          ],
+                             "reportNames":  [
+                                                 "dashboardUiReadiness",
+                                                 "publicTesterGateway"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "chain-connect-public-rpc",
+                             "title":  "Public RPC connection",
+                             "userRequirement":  "People can connect wallets/tester clients to a public HTTPS RPC edge.",
+                             "classification":  "blocked-owner-input",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "publicRpc=blocked; syntheticCanary=blocked; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED",
+                             "commands":  [
+                                              "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                                              "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                          ],
+                             "reportNames":  [
+                                                 "publicRpc",
+                                                 "publicRpcSyntheticCanary"
+                                             ],
+                             "blockers":  [
+                                              "FLOWCHAIN_RPC_PUBLIC_URL",
+                                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                              "FLOWCHAIN_RPC_TLS_TERMINATED"
+                                          ],
+                             "ownerInputBlocked":  true,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "bridge-real-funds",
+                             "title":  "Real-value bridge pilot",
+                             "userRequirement":  "People can bridge funds into FlowChain and spend the credited balance.",
+                             "classification":  "blocked-owner-input",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "bridgeLive=blocked; bridgeInfra=blocked; runtimeCredit=passed; realValuePilot=passed; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                             "commands":  [
+                                              "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                                              "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                                              "npm run flowchain:bridge:relayer:once -- -AllowBlocked"
+                                          ],
+                             "reportNames":  [
+                                                 "bridgeLive",
+                                                 "bridgeInfra",
+                                                 "bridgeRelayerOnce",
+                                                 "bridgeRuntimeCreditValidation",
+                                                 "realValuePilotAggregate",
+                                                 "bridgeReconciliation"
+                                             ],
+                             "blockers":  [
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                             "ownerInputBlocked":  true,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "bridge-relayer-hardening",
+                             "title":  "Bridge relayer hardening",
+                             "userRequirement":  "Bridge relayer is guarded against replay, unsafe cursor movement, loop failures, and release-evidence mistakes.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "guardrail=passed; loop=passed; releaseEvidence=passed",
+                             "commands":  [
+                                              "npm run flowchain:bridge:relayer:guardrail:validate",
+                                              "npm run flowchain:bridge:relayer:loop:validate",
+                                              "npm run flowchain:bridge:release:evidence:validate"
+                                          ],
+                             "reportNames":  [
+                                                 "bridgeRelayerGuardrailValidation",
+                                                 "bridgeRelayerLoopValidation",
+                                                 "bridgeReleaseEvidenceValidation"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "backup-restore",
+                             "title":  "Backup and restore",
+                             "userRequirement":  "Live state can be backed up, restored, and proven before public launch.",
+                             "classification":  "blocked-owner-input",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "backupReadiness=blocked; restoreValidation=passed; ownerPathDryRun=passed; blockers=FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                             "commands":  [
+                                              "npm run flowchain:backup:restore:validate",
+                                              "npm run flowchain:backup:owner-path:dry-run",
+                                              "npm run flowchain:backup:check -- -AllowBlocked"
+                                          ],
+                             "reportNames":  [
+                                                 "backupReadiness",
+                                                 "backupRestoreValidation",
+                                                 "backupOwnerPathDryRun",
+                                                 "backupInstallValidation"
+                                             ],
+                             "blockers":  [
+                                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                          ],
+                             "ownerInputBlocked":  true,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "observability-alerting",
+                             "title":  "Observability and alerting",
+                             "userRequirement":  "Operators can monitor chain health, public RPC, bridge, backup, testers, and incident gates without leaking secrets.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "opsSnapshot=blocked; alerts=passed; metrics=passed; monitoringBundle=passed; launchWatch=passed",
+                             "commands":  [
+                                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                                              "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                              "npm run flowchain:ops:metrics:export -- -AllowBlocked",
+                                              "npm run flowchain:ops:monitoring:bundle",
+                                              "npm run flowchain:ops:launch-watch"
+                                          ],
+                             "reportNames":  [
+                                                 "opsSnapshot",
+                                                 "opsAlertRules",
+                                                 "opsMetricsExport",
+                                                 "monitoringBundle",
+                                                 "opsLaunchWatch",
+                                                 "alertInstallValidation",
+                                                 "metricsInstallValidation"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "external-tester-launch",
+                             "title":  "External tester launch",
+                             "userRequirement":  "Friends-and-family testers receive a shareable connection pack only after public RPC, backup, bridge, and tester gates pass.",
+                             "classification":  "blocked-owner-input",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "testerReadiness=blocked; packet=blocked; packetSmoke=True; clientValidation=passed; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                             "commands":  [
+                                              "npm run flowchain:tester:readiness -- -AllowBlocked",
+                                              "npm run flowchain:external-tester:packet -- -AllowBlocked",
+                                              "npm run flowchain:external-tester:client:validate"
+                                          ],
+                             "reportNames":  [
+                                                 "externalTesterReadiness",
+                                                 "externalTesterPacket",
+                                                 "externalTesterClientValidation"
+                                             ],
+                             "blockers":  [
+                                              "FLOWCHAIN_RPC_PUBLIC_URL",
+                                              "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                              "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                              "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                              "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                              "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                              "FLOWCHAIN_BASE8453_RPC_URL",
+                                              "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                              "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                              "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                              "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                              "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                              "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                              "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                          ],
+                             "ownerInputBlocked":  true,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "developer-ecosystem",
+                             "title":  "Developer ecosystem",
+                             "userRequirement":  "Developers have SDK/devkit/docs that connect to FlowChain RPC and prove wallet reads/sends.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  false,
+                             "evidence":  "devPack=passed; methodCount=82",
+                             "commands":  [
+                                              "npm run flowchain:dev-pack:e2e"
+                                          ],
+                             "reportNames":  [
+                                                 "devPack"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         },
+                         {
+                             "id":  "owner-go-live-control",
+                             "title":  "Owner go-live control",
+                             "userRequirement":  "Owner setup has exact needs-now, go-live, deployment contract, and completion gates before any public claim.",
+                             "classification":  "passed",
+                             "publicLaunchCritical":  true,
+                             "evidence":  "ownerNeedsNow=passed; goLiveHandoff=passed; deploymentContract=blocked",
+                             "commands":  [
+                                              "npm run flowchain:owner:needs-now",
+                                              "npm run flowchain:owner:go-live-handoff",
+                                              "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                          ],
+                             "reportNames":  [
+                                                 "ownerNeedsNow",
+                                                 "ownerGoLiveHandoff",
+                                                 "publicDeploymentContract"
+                                             ],
+                             "blockers":  [
+
+                                          ],
+                             "ownerInputBlocked":  false,
+                             "repoBlocked":  false
+                         }
+                     ],
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "requiredReportsLoaded":  true,
+                   "capabilityCountMinimumMet":  true,
+                   "userRequirementCoverageComplete":  true,
+                   "publicLaunchCriticalCapabilitiesCovered":  true,
+                   "allCriticalCapabilitiesEitherPassedOrOwnerBlocked":  true,
+                   "repoBlockedCapabilitiesEmpty":  true,
+                   "blockedCapabilitiesHaveBlockers":  true,
+                   "blockedCapabilitiesUseKnownOwnerInputs":  true,
+                   "truthTableOwnerBlockersKnown":  true,
+                   "publicRpcCapabilityBlocksOnPublicRpcInputs":  true,
+                   "bridgeCapabilityBlocksOnBridgeInputs":  true,
+                   "backupCapabilityBlocksOnBackupInput":  true,
+                   "noProductionReadyClaimWhileBlocked":  true,
+                   "ownerNeedsNowLoaded":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "noLiveBroadcast":  true,
+    "reportPaths":  {
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
+                        "completionAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                        "serviceSupervisorValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-validation-report.json",
+                        "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
+                        "liveWallet":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-wallet-e2e-report.json",
+                        "testerNetwork":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-service-tester-network-e2e-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                        "dashboardUiReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
+                        "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                        "realValuePilotAggregate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\real-value-pilot-aggregate-report.json",
+                        "bridgeReconciliation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-reconciliation-report.json",
+                        "bridgeReleaseEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-release-evidence-validation-report.json",
+                        "backupReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
+                        "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",
+                        "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
+                        "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                        "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
+                        "monitoringBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\monitoring-bundle-report.json",
+                        "opsLaunchWatch":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-launch-watch-report.json",
+                        "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
+                        "metricsInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-validation-report.json",
+                        "externalTesterReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                        "externalTesterClientValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-client-validation-report.json",
+                        "ownerNeedsNow":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-needs-now-report.json",
+                        "ownerGoLiveHandoff":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
+                        "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "devPack":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-dev-pack\\dev-pack-e2e-report.json"
+                    }
+}

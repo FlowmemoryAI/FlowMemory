@@ -46,6 +46,72 @@ function stringValue(value: JsonValue | unknown): string | null {
   return null;
 }
 
+function numberValue(value: JsonValue | unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && /^\d+$/.test(value)) {
+    return Number.parseInt(value, 10);
+  }
+  return null;
+}
+
+function processIsRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function runningNodeDirForState(statePath: string): string | null {
+  const nodeDir = resolve(dirname(statePath), "node");
+  const statusPath = resolve(nodeDir, "status.json");
+  if (!existsSync(statusPath)) {
+    return null;
+  }
+  const status = asObject(JSON.parse(readFileSync(statusPath, "utf8")));
+  if (status === null || stringValue(status.status) !== "running") {
+    return null;
+  }
+  const statusStatePath = stringValue(status.statePath);
+  const pid = numberValue(status.pid);
+  if (statusStatePath !== statePath || pid === null || !processIsRunning(pid)) {
+    return null;
+  }
+  return nodeDir;
+}
+
+function transferExists(runtimeState: JsonObject, transferId: string): boolean {
+  for (const key of ["balanceTransfers", "transfers", "tokenTransfers", "tokenTransferEvents"]) {
+    const map = asObject(runtimeState[key]);
+    if (map === null) {
+      continue;
+    }
+    if (Object.prototype.hasOwnProperty.call(map, transferId)) {
+      return true;
+    }
+    if (Object.values(map).some((entry) => stringValue(asObject(entry)?.transferId) === transferId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function waitForTransfer(state: LoadedControlPlaneState, transferId: string, timeoutMs: number): JsonObject {
+  const deadline = Date.now() + timeoutMs;
+  let latest = readRuntimeState(state);
+  while (Date.now() <= deadline) {
+    if (transferExists(latest, transferId)) {
+      return latest;
+    }
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+    latest = readRuntimeState(state);
+  }
+  throw new Error(`wallet send did not settle in local runtime before timeout: ${transferId}`);
+}
+
 function requiredText(record: Record<string, unknown>, names: string[], label: string): string {
   for (const name of names) {
     const value = record[name];
@@ -272,9 +338,10 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
   const intakeDir = resolve(repoRoot(), "devnet", "local", "wallet-runtime-intake");
   const fixturePath = resolve(intakeDir, `${Date.now()}-${process.pid}-${transferId.slice(2, 12)}.json`);
   const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
-  const nodeDir = request.applyBlock
+  const liveNodeDir = request.applyBlock ? runningNodeDirForState(statePath) : null;
+  const nodeDir = liveNodeDir ?? (request.applyBlock
     ? resolve(dirname(statePath), "wallet-runtime-node")
-    : resolve(dirname(statePath), "node");
+    : resolve(dirname(statePath), "node"));
   writeTransferFixture(fixturePath, txs, request.amountUnits);
 
   const submitArgs = [
@@ -292,11 +359,11 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
     "--authorized-by",
     `wallet:${from.runtimeAccountId}`,
   ];
-  if (request.applyBlock) {
+  if (request.applyBlock && liveNodeDir === null) {
     submitArgs.push("--direct");
   }
   const submit = runCargoJson(submitArgs);
-  const block = request.applyBlock
+  const block = request.applyBlock && liveNodeDir === null
     ? runCargoJson([
         "run",
         "--manifest-path",
@@ -308,7 +375,11 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
         "--blocks",
         "1",
       ])
-    : null;
+    : liveNodeDir === null ? null : {
+        schema: "flowmemory.control_plane.live_node_settlement.v0",
+        status: "submitted_to_running_node",
+        nodeDir: liveNodeDir,
+      };
   const summary = runCargoJson([
     "run",
     "--manifest-path",
@@ -319,7 +390,8 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
     "inspect-state",
     "--summary",
   ]);
-  const after = readRuntimeState(state);
+  const after = request.applyBlock && liveNodeDir !== null ? waitForTransfer(state, transferId, 20000) : readRuntimeState(state);
+  state.devnet = after;
   const fromBalanceAfter = balanceUnits(after, from.runtimeAccountId);
   const toBalanceAfter = balanceUnits(after, to.runtimeAccountId);
 
@@ -407,6 +479,7 @@ export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unkn
     "--summary",
   ]);
   const after = readRuntimeState(state);
+  state.devnet = after;
   const balanceAfter = balanceUnits(after, request.accountId);
 
   return {

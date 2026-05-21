@@ -1,0 +1,47 @@
+{
+    "schema":  "flowchain.public_rpc_render_report_snapshot.v1",
+    "generatedAt":  "2026-05-21T12:55:28.2641241Z",
+    "source":  "flowchain-public-rpc-deployment-automation Validate",
+    "renderReportSummary":  {
+                                "schema":  "flowchain.public_rpc_owner_render_report.v0",
+                                "status":  "passed",
+                                "renderedFileCount":  5,
+                                "renderedFiles":  [
+                                                      "nginx-flowchain-rpc.conf",
+                                                      "flowchain-live.service",
+                                                      "flowchain-supervisor.service",
+                                                      "nginx-preflight.sh",
+                                                      "nginx-preflight.ps1"
+                                                  ],
+                                "requiredEnvNameCount":  8,
+                                "requiredEnvNames":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                                         "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                                         "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                                                     ],
+                                "allowedOriginCount":  2,
+                                "renderDirInsideRepo":  false,
+                                "ownerEnvFileInsideRepo":  false,
+                                "envValuesPrinted":  false,
+                                "noSecrets":  true,
+                                "broadcasts":  false
+                            },
+    "renderedFileNames":  [
+                              "nginx-flowchain-rpc.conf",
+                              "flowchain-live.service",
+                              "flowchain-supervisor.service",
+                              "nginx-preflight.sh",
+                              "nginx-preflight.ps1",
+                              "owner-host-apply.sh",
+                              "owner-host-apply.ps1"
+                          ],
+    "valuesPrinted":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

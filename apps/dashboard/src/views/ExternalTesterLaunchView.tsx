@@ -110,6 +110,29 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
   const relayerTimedOutStepCount = text(metrics.bridgeRelayerTimedOutStepCount, "0");
   const alertRuleCount = text(metrics.opsRuleCount, text(metrics.opsActiveRuleCount, "0"));
   const unmappedFindingCount = text(metrics.opsUnmappedCurrentFindingCount, "0");
+  const publicRpcHeadersReady = metrics.publicRpcSecurityHeaders === true && metrics.publicRpcRenderedSecurityHeaders === true;
+  const publicRpcHeaderPreflightReady =
+    metrics.publicRpcSecurityHeaderPreflight === true && metrics.publicRpcRenderedSecurityHeaderPreflight === true;
+  const publicRpcLiveHeaderProbeReady = metrics.publicRpcLiveSecurityHeaderProbe === true;
+  const publicRpcLiveHeadersReady = metrics.publicRpcLiveSecurityHeaders === true;
+  const publicRpcHeaderPolicyReady = metrics.publicRpcSecurityHeaderPolicyReady === true;
+  const publicRpcHeaderMetricsReady = metrics.opsPublicRpcSecurityHeaderMetricsPresent === true;
+  const publicRpcLiveHeaderProofReady =
+    publicRpcLiveHeaderProbeReady &&
+    publicRpcLiveHeadersReady &&
+    publicRpcHeadersReady &&
+    publicRpcHeaderPreflightReady &&
+    publicRpcHeaderMetricsReady;
+  const publicRpcCommandMatrixReady = metrics.publicRpcCommandMatrixReady === true;
+  const publicRpcCommandMatrixStatus = text(metrics.publicRpcCommandMatrixStatus, publicRpcCommandMatrixReady ? "passed" : "not recorded");
+  const publicRpcCommandMatrixCommands = text(metrics.publicRpcCommandMatrixCommands, "0");
+  const publicRpcCommandMatrixOwnerHostCommands = text(metrics.publicRpcCommandMatrixOwnerHostCommands, "0");
+  const publicRpcCommandMatrixMutatingOwnerHostCommands = text(metrics.publicRpcCommandMatrixMutatingOwnerHostCommands, "0");
+  const publicRpcCommandMatrixFailedChecks = text(metrics.publicRpcCommandMatrixFailedChecks, "0");
+  const publicRpcCommandMatrixUiStatus: DashboardStatus = publicRpcCommandMatrixReady
+    ? "verified"
+    : statusFromText(publicRpcCommandMatrixStatus);
+  const publicRpcCommandMatrixCommand = commandGroup(testerCommands.publicRpc, ["npm run flowchain:public-rpc:command-matrix"])[0];
 
   const readinessCards: Array<{
     id: string;
@@ -140,6 +163,30 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
       command: fact(publicRpcGate, "next command", "npm run flowchain:public-rpc:check"),
       to: "/ops",
       Icon: Server,
+    },
+    {
+      id: "rpc-headers",
+      label: "RPC headers",
+      status: publicRpcLiveHeaderProofReady ? "verified" : "pending",
+      value: boolText(publicRpcLiveHeadersReady),
+      detail: publicRpcLiveHeaderProbeReady
+        ? "Live HSTS, no-sniff, no-store, CSP"
+        : publicRpcHeaderPolicyReady
+          ? "Rendered policy ready; live probe waits for public URL; HSTS, no-sniff, no-store, CSP"
+          : "Header policy incomplete; HSTS, no-sniff, no-store, CSP",
+      command: "npm run flowchain:public-rpc:deployment:automation",
+      to: "/ops",
+      Icon: ShieldAlert,
+    },
+    {
+      id: "rpc-command-matrix",
+      label: "RPC matrix",
+      status: publicRpcCommandMatrixUiStatus,
+      value: publicRpcCommandMatrixStatus,
+      detail: `${publicRpcCommandMatrixCommands} commands; ${publicRpcCommandMatrixOwnerHostCommands} owner-host`,
+      command: publicRpcCommandMatrixCommand,
+      to: "/ops",
+      Icon: Terminal,
     },
     {
       id: "tester-gateway",
@@ -260,6 +307,10 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
 
   const commandGroups = [
     {
+      label: "RPC launch matrix",
+      commands: commandGroup(testerCommands.publicRpc, ["npm run flowchain:public-rpc:command-matrix"]),
+    },
+    {
       label: "Pre-exposure",
       commands: commandGroup(reportCommands.preExposure, ["npm run flowchain:public-deployment:contract -- -AllowBlocked"]),
     },
@@ -316,6 +367,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
         <div>
           <span>Shareable</span>
           <strong>{boolText(report?.packetShareable === true || testerLaunch.shareable === true)}</strong>
+          <small>external sharing {boolText(testerLaunch.externalSharingReady)}</small>
+        </div>
+        <div>
+          <span>Live infra</span>
+          <strong>{boolText(testerLaunch.liveInfraReady)}</strong>
+          <small>chain {boolText(testerLaunch.chainProducing)}</small>
+        </div>
+        <div>
+          <span>Missing inputs</span>
+          <strong>{text(testerLaunch.missingOwnerInputCount, "0")}</strong>
           <small>deployment {boolText(report?.deploymentReady === true)}</small>
         </div>
         <div>
@@ -334,6 +395,19 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
           <small>configured {boolText(testerLaunch.gatewayConfigured)}</small>
         </div>
         <div>
+          <span>RPC headers</span>
+          <strong>{boolText(publicRpcLiveHeaderProofReady)}</strong>
+          <small>live {boolText(publicRpcLiveHeadersReady)}; probe {boolText(publicRpcLiveHeaderProbeReady)}; metrics {boolText(publicRpcHeaderMetricsReady)}</small>
+        </div>
+        <div>
+          <span>RPC command matrix</span>
+          <strong>{boolText(publicRpcCommandMatrixReady)}</strong>
+          <small>
+            {publicRpcCommandMatrixCommands} commands; owner-host {publicRpcCommandMatrixOwnerHostCommands}; mutating{" "}
+            {publicRpcCommandMatrixMutatingOwnerHostCommands}; failed {publicRpcCommandMatrixFailedChecks}
+          </small>
+        </div>
+        <div>
           <span>Relayer timeout</span>
           <strong>{relayerTimeoutSeconds}</strong>
           <small>timed out steps {relayerTimedOutStepCount}</small>
@@ -346,7 +420,7 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
         <div>
           <span>Tester network</span>
           <strong>{boolText(testerLaunch.testerNetworkFresh)}</strong>
-          <small>rehearsal {boolText(testerLaunch.localTesterRehearsalReady)}</small>
+          <small>rehearsal {boolText(testerLaunch.localTesterRehearsalReady)}; testers {text(testerLaunch.testerCount, "0")}</small>
         </div>
         <div>
           <span>Chain head</span>

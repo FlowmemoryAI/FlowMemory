@@ -1,14 +1,14 @@
 {
     "schema":  "flowchain.bridge_relayer_guardrail_validation_report.v1",
-    "generatedAt":  "2026-05-18T04:31:12.2070538Z",
+    "generatedAt":  "2026-05-21T11:05:15.0146500Z",
     "status":  "passed",
     "validationDir":  "devnet/local/bridge-relayer-guardrail-validation",
     "relayerReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\bridge-relayer-once-report.json",
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260517233108423-52232-71492868.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260521060502153-53152-f0da56f8.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260521060502153-53152-f0da56f8.stderr.log"
                      },
     "checks":  {
                    "relayerCommandExitedZeroWithAllowBlocked":  true,
@@ -25,6 +25,20 @@
                    "noCreditsQueued":  true,
                    "noCreditsApplied":  true,
                    "ownerEnvNotImported":  true,
+                   "directObserveFailedClosed":  true,
+                   "directObserveReportWritten":  true,
+                   "directObserveStatusBlocked":  true,
+                   "directObserveUsesStagedCursorByDefault":  true,
+                   "directObserveCursorNotFinal":  true,
+                   "directObserveFinalCursorUnchanged":  true,
+                   "directObserveStagedCursorNotWritten":  true,
+                   "directObserveBroadcastsFalse":  true,
+                   "directObserveEnvValuesPrintedFalse":  true,
+                   "directObserveNoSecrets":  true,
+                   "bridgeRelayerTestsPassed":  true,
+                   "bridgeRelayerConcurrencyTestCovered":  true,
+                   "bridgeCursorAsyncLockImplemented":  true,
+                   "bridgeCursorLockUsesAsyncRetry":  true,
                    "broadcastsFalse":  true,
                    "envValuesPrintedFalse":  true,
                    "noSecrets":  true,
@@ -42,6 +56,33 @@
                    "beforeSha256":  "7808719049457DD1A2003BA7ED50A3046D2D697252B2E19B578BAC2AEDBE556E",
                    "afterSha256":  "7808719049457DD1A2003BA7ED50A3046D2D697252B2E19B578BAC2AEDBE556E"
                },
+    "directObserve":  {
+                          "reportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\direct-observe-report.json",
+                          "finalCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\direct-observe-final-cursor.json",
+                          "stagedCursorPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\direct-observe-staged-cursor.json",
+                          "finalCursorBeforeSha256":  "7808719049457DD1A2003BA7ED50A3046D2D697252B2E19B578BAC2AEDBE556E",
+                          "finalCursorAfterSha256":  "7808719049457DD1A2003BA7ED50A3046D2D697252B2E19B578BAC2AEDBE556E",
+                          "childProcess":  {
+                                               "exitCode":  0,
+                                               "timedOut":  false
+                                           },
+                          "cursor":  {
+                                         "mode":  "staged-direct-observe",
+                                         "cursorStatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\direct-observe-staged-cursor.json",
+                                         "finalCursorStatePath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\direct-observe-final-cursor.json",
+                                         "cursorStateIsFinalCursor":  false,
+                                         "ownerFinalCursorRequested":  false,
+                                         "cursorStateSupplied":  false,
+                                         "directObserveUsesStagedCursorByDefault":  true,
+                                         "finalCursorCommitAllowed":  false
+                                     }
+                      },
+    "bridgeRelayerTests":  {
+                               "exitCode":  0,
+                               "timedOut":  false,
+                               "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260521060508223-53152-2af8ed83.stdout.log",
+                               "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-relayer-guardrail-validation\\tmp\\20260521060508223-53152-2af8ed83.stderr.log"
+                           },
     "requiredEnvNamesClearedForScenario":  [
                                                "FLOWCHAIN_OWNER_ENV_FILE",
                                                "FLOWCHAIN_PILOT_OPERATOR_ACK",
@@ -52,9 +93,11 @@
                                                "FLOWCHAIN_BASE8453_FROM_BLOCK",
                                                "FLOWCHAIN_BASE8453_CURSOR_STATE",
                                                "FLOWCHAIN_BASE8453_TO_BLOCK",
+                                               "FLOWCHAIN_BASE8453_OBSERVE_CURSOR_STATE",
                                                "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                                "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-                                               "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                               "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                               "FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED"
                                            ],
     "envValuesPrinted":  false,
     "noSecrets":  true,

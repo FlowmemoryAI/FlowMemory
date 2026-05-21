@@ -1,0 +1,36 @@
+{
+    "schema":  "flowchain.external_tester_client_validation_report.v0",
+    "generatedAt":  "2026-05-21T17:21:41.5008742Z",
+    "status":  "passed",
+    "checks":  {
+                   "clientScriptExists":  true,
+                   "connectPackExists":  true,
+                   "connectPackSchemaValid":  true,
+                   "clientExitCodeZero":  true,
+                   "dryRunReportWritten":  true,
+                   "dryRunSchemaValid":  true,
+                   "dryRunStatusPlanned":  true,
+                   "dryRunNoNetwork":  true,
+                   "blockedConnectPackAllowedOnlyByFlag":  true,
+                   "plannedRoutesCoverReads":  true,
+                   "plannedRoutesCoverWrites":  true,
+                   "endpointRedacted":  true,
+                   "tokenNotConfiguredInDryRun":  true,
+                   "broadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "dryRunReportPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-client-dry-run-report.json",
+    "connectPackPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-connect-pack.json",
+    "clientPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\examples\\flowchain-external-tester-client.mjs",
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

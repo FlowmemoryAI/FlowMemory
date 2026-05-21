@@ -165,10 +165,17 @@ foreach ($name in $requiredEnvNames) {
 }
 
 $publicUrl = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_PUBLIC_URL"
-if (-not $publicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "FLOWCHAIN_RPC_PUBLIC_URL must be https before rendering public RPC files."
+[System.Uri] $publicUri = $null
+if (-not [System.Uri]::TryCreate($publicUrl, [System.UriKind]::Absolute, [ref]$publicUri) `
+    -or $publicUri.Scheme -ne "https" `
+    -or [string]::IsNullOrWhiteSpace($publicUri.Host) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Query) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Fragment) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.UserInfo) `
+    -or $publicUri.AbsolutePath -ne "/") {
+    throw "FLOWCHAIN_RPC_PUBLIC_URL must be an exact https origin without paths, query strings, fragments, or credentials before rendering public RPC files."
 }
-$publicUri = [System.Uri] $publicUrl
+$publicUrl = $publicUrl.TrimEnd("/")
 $allowedOrigins = @(Get-AllowedHttpsOrigins -Value (Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS"))
 $rateLimit = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
 if ($rateLimit -notmatch '^[1-9][0-9]*$') {
@@ -207,6 +214,7 @@ $replacements = @{
     "<FLOWCHAIN_RPC_PUBLIC_HOST>" = $publicUri.Host
     "<FLOWCHAIN_RPC_PUBLIC_URL>" = $publicUrl.TrimEnd("/")
     "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>" = $allowedOrigins[0]
+    "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>" = "https://blocked-origin.flowchain.example"
     "<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>" = $rateLimit
     "<PATH_TO_TLS_CERTIFICATE>" = (Get-RequiredParameter -Name "TlsCertificatePath" -Value $TlsCertificatePath)
     "<PATH_TO_TLS_CERTIFICATE_KEY>" = (Get-RequiredParameter -Name "TlsCertificateKeyPath" -Value $TlsCertificateKeyPath)

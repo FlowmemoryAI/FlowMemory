@@ -1,0 +1,61 @@
+{
+    "schema":  "flowchain.service_supervisor_report.v0",
+    "generatedAt":  "2026-05-17T08:05:01.1500537Z",
+    "status":  "passed",
+    "once":  true,
+    "dryRun":  false,
+    "liveProfile":  true,
+    "intervalSeconds":  30,
+    "maxRestartAttempts":  3,
+    "restartAttempts":  0,
+    "maxStateAgeSeconds":  90,
+    "statePath":  "devnet/local/state.json",
+    "nodeDir":  "devnet/local/node",
+    "servicesDir":  "devnet/local/services",
+    "controlPlane":  {
+                         "host":  "127.0.0.1",
+                         "port":  8787
+                     },
+    "reportPaths":  {
+                        "supervisor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-report.json",
+                        "status":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-status-report.json",
+                        "restart":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-restart-report.json",
+                        "stop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-supervisor-stop-report.json"
+                    },
+    "iterations":  [
+                       {
+                           "sampledAt":  "2026-05-17T08:04:29.0533559Z",
+                           "restartReasons":  [
+
+                                              ],
+                           "restartNeeded":  false,
+                           "restartPerformed":  false,
+                           "before":  {
+                                          "exitCode":  0,
+                                          "reportStatus":  "passed",
+                                          "nodeStatus":  "running",
+                                          "controlPlaneStatus":  "running",
+                                          "latestHeight":  "50965",
+                                          "finalizedHeight":  "50965",
+                                          "stateFileLastWriteAgeSeconds":  1,
+                                          "liveProfile":  true,
+                                          "maxBlocks":  0
+                                      },
+                           "restart":  null,
+                           "after":  {
+                                         "exitCode":  0,
+                                         "reportStatus":  "passed",
+                                         "nodeStatus":  "running",
+                                         "controlPlaneStatus":  "running",
+                                         "latestHeight":  "50965",
+                                         "finalizedHeight":  "50965",
+                                         "stateFileLastWriteAgeSeconds":  1,
+                                         "liveProfile":  true,
+                                         "maxBlocks":  0
+                                     }
+                       }
+                   ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

@@ -73,23 +73,38 @@ function Copy-OperatorPackageFile {
             copied = $false
             required = $Required.IsPresent
             reason = "missing"
+            sourceSha256 = ""
+            destinationSha256 = ""
+            contentHashMatches = $false
         }
     }
 
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destinationFullPath) | Out-Null
     Copy-Item -LiteralPath $sourceFullPath -Destination $destinationFullPath -Force
+    $sourceHash = (Get-FileHash -LiteralPath $sourceFullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $destinationHash = (Get-FileHash -LiteralPath $destinationFullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $sourceItem = Get-Item -LiteralPath $sourceFullPath
+    $destinationItem = Get-Item -LiteralPath $destinationFullPath
     return [ordered]@{
         source = $Source
         destination = $Destination
         copied = $true
         required = $Required.IsPresent
         reason = "copied"
+        sourceSha256 = $sourceHash
+        destinationSha256 = $destinationHash
+        contentHashMatches = $sourceHash -eq $destinationHash
+        byteLength = [int64] $destinationItem.Length
+        sourceLastWriteTimeUtc = $sourceItem.LastWriteTimeUtc.ToString("o")
+        destinationLastWriteTimeUtc = $destinationItem.LastWriteTimeUtc.ToString("o")
     }
 }
 
 $requiredScripts = @(
     "flowchain:prereq",
     "flowchain:doctor",
+    "flowchain:install:check",
+    "flowchain:upgrade:rehearse",
     "flowchain:service:start",
     "flowchain:service:status",
     "flowchain:service:monitor",
@@ -99,6 +114,7 @@ $requiredScripts = @(
     "flowchain:service:supervisor:validate",
     "flowchain:service:install:windows",
     "flowchain:service:install:validate",
+    "flowchain:service:install:systemd",
     "flowchain:service:install:systemd:validate",
     "flowchain:second-computer:bundle",
     "flowchain:second-computer:verify",
@@ -106,6 +122,8 @@ $requiredScripts = @(
     "flowchain:owner:onboarding",
     "flowchain:owner:signup-checklist",
     "flowchain:owner:activation-plan",
+    "flowchain:owner:go-live-handoff",
+    "flowchain:owner:needs-now",
     "flowchain:owner-env:template",
     "flowchain:owner-env:readiness",
     "flowchain:owner-env:readiness:validate",
@@ -113,30 +131,51 @@ $requiredScripts = @(
     "flowchain:owner-inputs:validate",
     "flowchain:public-rpc:deployment-bundle",
     "flowchain:public-rpc:deployment:automation",
+    "flowchain:public-rpc:command-matrix",
     "flowchain:public-rpc:validate",
+    "flowchain:public-rpc:synthetic-canary",
+    "flowchain:public-rpc:canary:schedule:validate",
     "flowchain:public-rpc:abuse-test",
     "flowchain:backup:create",
     "flowchain:backup:restore:verify",
     "flowchain:backup:restore:validate",
     "flowchain:backup:owner-path:dry-run",
     "flowchain:backup:install:windows",
+    "flowchain:backup:install:systemd",
+    "flowchain:backup:install:systemd:validate",
     "flowchain:backup:install:validate",
     "flowchain:ops:snapshot",
     "flowchain:ops:alerts",
     "flowchain:ops:metrics:export",
+    "flowchain:ops:monitoring:bundle",
+    "flowchain:ops:launch-watch",
+    "flowchain:ops:metrics:install:windows",
+    "flowchain:ops:metrics:install:systemd",
+    "flowchain:ops:metrics:install:systemd:validate",
+    "flowchain:ops:metrics:install:validate",
     "flowchain:ops:alerts:install:windows",
+    "flowchain:ops:alerts:install:systemd",
+    "flowchain:ops:alerts:install:systemd:validate",
     "flowchain:ops:alerts:install:validate",
     "flowchain:ops:incident-drill",
     "flowchain:bridge:relayer:once",
+    "flowchain:bridge:command-matrix",
+    "flowchain:bridge:no-secret-audit",
     "flowchain:bridge:deploy:control:validate",
     "flowchain:bridge:relayer:guardrail:validate",
     "flowchain:bridge:relayer:loop:validate",
+    "flowchain:bridge:runtime-credit:validate",
+    "flowchain:real-value-pilot:e2e",
+    "flowchain:bridge:reconciliation",
+    "flowchain:bridge:reconciliation:schedule:validate",
+    "flowchain:bridge:release:evidence:validate",
     "flowchain:external-tester:packet",
     "flowchain:external-tester:packet:validate",
     "flowchain:tester:evidence:validate",
     "flowchain:tester:token:setup",
     "flowchain:dashboard:ui:readiness",
     "flowchain:live:cutover:rehearsal",
+    "flowchain:live:capabilities",
     "flowchain:operator:package:verify",
     "flowchain:completion:audit",
     "flowchain:truth-table",
@@ -146,45 +185,72 @@ $requiredScripts = @(
 $commandMatrix = @(
     [ordered]@{ phase = "preflight"; command = "npm run flowchain:prereq"; purpose = "Check required local tooling." },
     [ordered]@{ phase = "preflight"; command = "npm run flowchain:doctor"; purpose = "Summarize repo and runtime health." },
+    [ordered]@{ phase = "preflight"; command = "npm run flowchain:install:check"; purpose = "Run the no-secret owner-host install preflight and install validation proof." },
     [ordered]@{ phase = "service"; command = "npm run flowchain:service:start -- -LiveProfile"; purpose = "Start the private live-profile node and RPC service." },
     [ordered]@{ phase = "service"; command = "npm run flowchain:service:status -- -AllowBlocked"; purpose = "Verify node, control-plane, height, and state freshness." },
     [ordered]@{ phase = "service"; command = "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"; purpose = "Observe block production over a sampling window." },
     [ordered]@{ phase = "service"; command = "npm run flowchain:service:restart -- -LiveProfile"; purpose = "Restart without deleting runtime state." },
+    [ordered]@{ phase = "service"; command = "npm run flowchain:upgrade:rehearse"; purpose = "Prove upgrade and rollback preserve local L1 state without host mutation." },
     [ordered]@{ phase = "service"; command = "npm run flowchain:service:stop"; purpose = "Stop local services without deleting state." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:supervisor:validate"; purpose = "Prove the supervisor can recover a failed local control plane." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:windows -- -Action Plan"; purpose = "Render the no-secret Windows Scheduled Task install plan." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:validate"; purpose = "Validate install/status/uninstall paths without mutating the owner host." },
+    [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"; purpose = "Render the no-secret Linux systemd install plan from owner-rendered units." },
+    [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop"; purpose = "Render the explicit Linux bridge-relayer opt-in systemd supervisor plan without mutating the owner host." },
     [ordered]@{ phase = "autorecovery"; command = "npm run flowchain:service:install:systemd:validate"; purpose = "Validate Linux systemd live-service and supervisor install plans without mutating the owner host." },
     [ordered]@{ phase = "handoff"; command = "npm run flowchain:second-computer:readiness"; purpose = "Create and verify the no-secret offline second-computer source bundle." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:onboarding"; purpose = "Regenerate the owner setup map and clarify that FlowChain public RPC is repo-owned." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:signup-checklist"; purpose = "List exactly what the owner must sign up for or create before public launch." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:activation-plan"; purpose = "Generate the current ordered launch activation plan and exact validation commands." },
+    [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:go-live-handoff"; purpose = "Generate the exact no-secret go-live handoff deck, next owner inputs, validation commands, and do-not-send list." },
+    [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner:needs-now"; purpose = "Generate the current no-secret answer to what the L1 needs now, grouped by owner action and validation command." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner-env:template"; purpose = "Create or preserve the ignored local owner env scaffold with empty values only." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner-env:readiness:validate"; purpose = "Prove unsafe owner env file paths fail before live gates run." },
     [ordered]@{ phase = "owner-setup"; command = "npm run flowchain:owner-env:readiness -- -AllowBlocked"; purpose = "Run live gates through the ignored owner env file and report only names and statuses." },
     [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:deployment-bundle"; purpose = "Generate owner-host public RPC edge artifacts." },
     [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:deployment:automation"; purpose = "Validate render, preflight, verify, and rollback phases." },
+    [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:command-matrix"; purpose = "Map public RPC launch commands to owner inputs, mutation risk, rollback coverage, and evidence paths." },
     [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:validate"; purpose = "Run local public-profile RPC readiness validation." },
+    [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"; purpose = "Run read-only public endpoint canary probes after the owner endpoint is configured." },
+    [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:canary:schedule:validate"; purpose = "Render no-secret Windows and systemd recurring public RPC canary schedule plans without mutating the owner host." },
     [ordered]@{ phase = "public-rpc"; command = "npm run flowchain:public-rpc:abuse-test"; purpose = "Run CORS, media-type, batch/body cap, rate-limit, and response hygiene probes." },
     [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:restore:validate"; purpose = "Prove restore safety and tamper rejection locally." },
     [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:owner-path:dry-run"; purpose = "Exercise backup readiness with an ignored local owner-path stand-in." },
     [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:install:windows -- -Action Plan"; purpose = "Render the daily snapshot Scheduled Task plan." },
-    [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:install:validate"; purpose = "Validate backup task plan/status/uninstall behavior." },
+    [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:install:systemd -- -Action Plan"; purpose = "Render the daily snapshot Linux systemd timer plan." },
+    [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:install:systemd:validate"; purpose = "Validate Linux systemd backup and restore-drill timer plans without mutating the owner host." },
+    [ordered]@{ phase = "backup"; command = "npm run flowchain:backup:install:validate"; purpose = "Validate Windows and Linux backup scheduler plan/status/uninstall behavior." },
     [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:snapshot -- -AllowBlocked"; purpose = "Classify critical incidents separately from owner-input blockers." },
     [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:alerts -- -AllowBlocked"; purpose = "Refresh local alert rules and finding coverage." },
     [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:metrics:export"; purpose = "Export no-secret JSON and Prometheus textfile metrics for owner collectors." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:monitoring:bundle"; purpose = "Render no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain ops metrics." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:launch-watch"; purpose = "Verify every launch-critical operations lane has evidence, metrics, alert rules, and operator commands." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:metrics:install:windows -- -Action Plan"; purpose = "Render recurring metrics export Scheduled Task plan." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:metrics:install:systemd -- -Action Plan"; purpose = "Render recurring metrics export Linux systemd timer plan." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:metrics:install:systemd:validate"; purpose = "Validate Linux systemd timer metrics export plan without mutating the owner host." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:metrics:install:validate"; purpose = "Validate Windows and Linux recurring metrics export scheduler plan/status/uninstall behavior." },
     [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:alerts:install:windows -- -Action Plan"; purpose = "Render recurring alert refresh Scheduled Task plan." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:alerts:install:systemd -- -Action Plan"; purpose = "Render recurring alert refresh Linux systemd timer plan." },
+    [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:alerts:install:systemd:validate"; purpose = "Validate Linux systemd timer alert refresh plan without mutating the owner host." },
     [ordered]@{ phase = "ops"; command = "npm run flowchain:ops:incident-drill"; purpose = "Rehearse node, RPC, stale-state, stalled-height, and no-secret incidents." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:once -- -AllowBlocked"; purpose = "Run the no-broadcast relayer gate; remains blocked until owner Base inputs exist." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:command-matrix"; purpose = "Map bridge deploy, observe, relayer, credit, release, and emergency-control commands to owner inputs, acknowledgement gates, risk class, and evidence paths." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:no-secret-audit"; purpose = "Scan generated bridge pilot evidence for secret-shaped material before owner-funded bridge activation." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:deploy:control:validate"; purpose = "Validate Base 8453 deploy, pause, resume, and emergency-stop gates fail closed without owner env and require broadcast acknowledgements." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:guardrail:validate"; purpose = "Prove missing owner inputs cannot mutate cursor state or queue credits." },
     [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:relayer:loop:validate"; purpose = "Validate relayer loop start, fresh health reporting, clean stop, PID cleanup, and no leftover validation relayer process." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:runtime-credit:validate"; purpose = "Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800"; purpose = "Run the bounded aggregate pilot proof across contracts, bridge, runtime, wallet, control-dashboard, and ops before owner-funded pilot approval." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:reconciliation"; purpose = "Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:reconciliation:schedule:validate"; purpose = "Render no-secret Windows and systemd recurring bridge reconciliation schedule plans without mutating the owner host." },
+    [ordered]@{ phase = "bridge"; command = "npm run flowchain:bridge:release:evidence:validate"; purpose = "Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet -- -AllowBlocked"; purpose = "Regenerate the friends-and-family packet and fail closed until public gates pass." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:external-tester:packet:validate"; purpose = "Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:evidence:validate"; purpose = "Validate redacted friends-and-family evidence intake for block-height advancement, wallet transfer consistency, and no-secret boundaries." },
     [ordered]@{ phase = "testers"; command = "npm run flowchain:tester:token:setup"; purpose = "Create or preserve the raw tester bearer token in ignored local storage and write only its digest to the ignored owner env file." },
-    [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, and Explorer inspection." },
-    [ordered]@{ phase = "cutover"; command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"; purpose = "Run owner-env, public deployment, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal." },
+    [ordered]@{ phase = "testers"; command = "npm run flowchain:dashboard:ui:readiness"; purpose = "Run desktop and mobile browser verification for tester wallet create, faucet, send, Explorer inspection, tester launch readiness, and the L1 activation cockpit." },
+    [ordered]@{ phase = "cutover"; command = "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"; purpose = "Run owner-env, public deployment, local tester wallet network, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal." },
+    [ordered]@{ phase = "release"; command = "npm run flowchain:live:capabilities"; purpose = "Map user-facing chain capabilities to evidence and the remaining owner-input blockers." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:operator:package:verify"; purpose = "Verify the generated operator package contents and no-secret boundary." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:completion:audit -- -AllowBlocked"; purpose = "Run the production readiness gate without false public-ready claims." },
     [ordered]@{ phase = "release"; command = "npm run flowchain:truth-table -- -AllowBlocked"; purpose = "Classify every tracked gate as passed, owner-blocked, repo-blocked, failed, or stale." },
@@ -236,22 +302,49 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_ONBOARDING.md"; target = "runbooks/OWNER_ONBOARDING.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_SIGNUP_CHECKLIST.md"; target = "runbooks/OWNER_SIGNUP_CHECKLIST.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_ACTIVATION_PLAN.md"; target = "runbooks/OWNER_ACTIVATION_PLAN.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_GO_LIVE_HANDOFF.md"; target = "runbooks/OWNER_GO_LIVE_HANDOFF.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_NEEDS_NOW.md"; target = "runbooks/OWNER_NEEDS_NOW.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_ENV_TEMPLATE.md"; target = "runbooks/OWNER_ENV_TEMPLATE.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OWNER_ENV_READINESS.md"; target = "runbooks/OWNER_ENV_READINESS.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md"; target = "runbooks/PUBLIC_RPC_DEPLOYMENT_BUNDLE.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_COMMAND_MATRIX.md"; target = "runbooks/PUBLIC_RPC_COMMAND_MATRIX.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_SYNTHETIC_CANARY.md"; target = "runbooks/PUBLIC_RPC_SYNTHETIC_CANARY.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/PUBLIC_RPC_CANARY_SCHEDULE_VALIDATION.md"; target = "runbooks/PUBLIC_RPC_CANARY_SCHEDULE_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/INSTALL_CHECK.md"; target = "runbooks/INSTALL_CHECK.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/INSTALL_UPGRADE.md"; target = "runbooks/INSTALL_UPGRADE.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_SERVICE_INSTALL.md"; target = "runbooks/WINDOWS_SERVICE_INSTALL.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"; target = "runbooks/SYSTEMD_SERVICE_INSTALL_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_BACKUP_INSTALL.md"; target = "runbooks/WINDOWS_BACKUP_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL.md"; target = "runbooks/SYSTEMD_BACKUP_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_BACKUP_INSTALL_VALIDATION.md"; target = "runbooks/SYSTEMD_BACKUP_INSTALL_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md"; target = "runbooks/WINDOWS_ALERT_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_ALERT_INSTALL.md"; target = "runbooks/SYSTEMD_ALERT_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_ALERT_INSTALL_VALIDATION.md"; target = "runbooks/SYSTEMD_ALERT_INSTALL_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OPS_METRICS_EXPORT.md"; target = "runbooks/OPS_METRICS_EXPORT.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/MONITORING_BUNDLE.md"; target = "runbooks/MONITORING_BUNDLE.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/OPS_LAUNCH_WATCH.md"; target = "runbooks/OPS_LAUNCH_WATCH.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/WINDOWS_METRICS_INSTALL.md"; target = "runbooks/WINDOWS_METRICS_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_METRICS_INSTALL.md"; target = "runbooks/SYSTEMD_METRICS_INSTALL.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_METRICS_INSTALL_VALIDATION.md"; target = "runbooks/SYSTEMD_METRICS_INSTALL_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/METRICS_INSTALL_VALIDATION.md"; target = "runbooks/METRICS_INSTALL_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_COMMAND_MATRIX.md"; target = "runbooks/BRIDGE_COMMAND_MATRIX.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_NO_SECRET_AUDIT.md"; target = "runbooks/BRIDGE_NO_SECRET_AUDIT.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_DEPLOY_CONTROL_VALIDATION.md"; target = "runbooks/BRIDGE_DEPLOY_CONTROL_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELAYER_LOOP_VALIDATION.md"; target = "runbooks/BRIDGE_RELAYER_LOOP_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_RECONCILIATION.md"; target = "runbooks/BRIDGE_RECONCILIATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_RECONCILIATION_SCHEDULE_VALIDATION.md"; target = "runbooks/BRIDGE_RECONCILIATION_SCHEDULE_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/BRIDGE_RELEASE_EVIDENCE_VALIDATION.md"; target = "runbooks/BRIDGE_RELEASE_EVIDENCE_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/SECOND_COMPUTER_READINESS.md"; target = "runbooks/SECOND_COMPUTER_READINESS.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET.md"; target = "runbooks/EXTERNAL_TESTER_PACKET.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_PACKET_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_PACKET_VALIDATION.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_CLIENT_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_CLIENT_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; target = "runbooks/EXTERNAL_TESTER_EVIDENCE_VALIDATION.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/LIVE_CUTOVER_REHEARSAL.md"; target = "runbooks/LIVE_CUTOVER_REHEARSAL.md"; required = $true },
-    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true }
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/LIVE_CHAIN_CAPABILITY_MATRIX.md"; target = "runbooks/LIVE_CHAIN_CAPABILITY_MATRIX.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/DASHBOARD_UI_READINESS.md"; target = "runbooks/DASHBOARD_UI_READINESS.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/DEV_PACK.md"; target = "runbooks/DEV_PACK.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/HANDOFF.md"; target = "runbooks/DEV_PACK_HANDOFF.md"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/INVENTORY.md"; target = "runbooks/DEV_PACK_INVENTORY.md"; required = $true }
 )) {
     [void] $copiedRunbooks.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
 }
@@ -262,39 +355,80 @@ foreach ($file in @(
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json"; target = "evidence/operator-doctor-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"; target = "evidence/service-monitor-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"; target = "evidence/service-supervisor-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/install-check-report.json"; target = "evidence/install-check-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json"; target = "evidence/upgrade-rehearsal-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"; target = "evidence/service-install-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"; target = "evidence/systemd-service-install-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/systemd-service-install-report.json"; target = "evidence/systemd-service-install-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json"; target = "evidence/second-computer-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json"; target = "evidence/owner-onboarding-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json"; target = "evidence/owner-signup-checklist-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"; target = "evidence/owner-activation-plan-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"; target = "evidence/owner-go-live-handoff-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"; target = "evidence/owner-needs-now-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json"; target = "evidence/owner-inputs-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"; target = "evidence/owner-inputs-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"; target = "evidence/owner-env-template-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json"; target = "evidence/owner-env-readiness-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"; target = "evidence/owner-env-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"; target = "evidence/public-rpc-deployment-bundle-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"; target = "evidence/public-rpc-deployment-automation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"; target = "evidence/public-rpc-command-matrix-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"; target = "evidence/public-rpc-readiness-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json"; target = "evidence/public-rpc-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"; target = "evidence/public-rpc-synthetic-canary-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json"; target = "evidence/public-rpc-canary-schedule-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json"; target = "evidence/public-rpc-abuse-test-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"; target = "evidence/backup-readiness-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"; target = "evidence/backup-restore-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"; target = "evidence/backup-owner-path-dry-run-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json"; target = "evidence/backup-install-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/backup-install-systemd-validation-report.json"; target = "evidence/backup-install-systemd-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json"; target = "evidence/ops-snapshot-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"; target = "evidence/ops-alert-rules-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"; target = "evidence/ops-metrics-export-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"; target = "evidence/metrics-install-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/metrics-install-systemd-validation-report.json"; target = "evidence/metrics-install-systemd-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-metrics.json"; target = "evidence/ops-metrics.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt"; target = "evidence/ops-metrics.prom.txt"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"; target = "evidence/monitoring-bundle-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"; target = "evidence/ops-launch-watch-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-grafana-dashboard.json"; target = "monitoring/flowchain-grafana-dashboard.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-prometheus-alerts.yml"; target = "monitoring/flowchain-prometheus-alerts.yml"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-monitoring-bundle-manifest.json"; target = "monitoring/flowchain-monitoring-bundle-manifest.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/README.md"; target = "monitoring/README.md"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"; target = "evidence/incident-drill-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"; target = "evidence/bridge-live-readiness-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"; target = "evidence/bridge-infra-readiness-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"; target = "evidence/bridge-command-matrix-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"; target = "evidence/bridge-no-secret-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"; target = "evidence/bridge-relayer-once-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"; target = "evidence/bridge-deploy-control-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"; target = "evidence/bridge-relayer-guardrail-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"; target = "evidence/bridge-relayer-loop-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"; target = "evidence/bridge-runtime-credit-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"; target = "evidence/real-value-pilot-aggregate-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json"; target = "evidence/bridge-reconciliation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"; target = "evidence/bridge-reconciliation-schedule-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"; target = "evidence/bridge-release-evidence-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"; target = "evidence/tester-write-token-setup-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"; target = "evidence/public-tester-gateway-e2e-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"; target = "evidence/live-service-tester-network-e2e-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"; target = "evidence/external-tester-packet-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"; target = "evidence/external-tester-packet-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"; target = "evidence/external-tester-client-validation-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-client-dry-run-report.json"; target = "evidence/external-tester-client-dry-run-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"; target = "evidence/external-tester-evidence-validation-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"; target = "evidence/dashboard-ui-readiness-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"; target = "evidence/public-deployment-contract-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json"; target = "evidence/live-cutover-rehearsal-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"; target = "evidence/live-chain-capability-matrix-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"; target = "evidence/flowchain-architecture-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"; target = "evidence/flowchain-completion-audit-report.json"; required = $true },
     [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"; target = "evidence/production-truth-table-report.json"; required = $true },
-    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"; target = "evidence/dev-pack-e2e-report.json"; required = $true }
+    [ordered]@{ source = "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"; target = "evidence/no-secret-scan-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json"; target = "evidence/dev-pack-e2e-report.json"; required = $true },
+    [ordered]@{ source = "docs/agent-runs/live-product-dev-pack/python-sdk-e2e-report.json"; target = "evidence/python-sdk-e2e-report.json"; required = $true }
 )) {
     [void] $copiedEvidence.Add((Copy-OperatorPackageFile -Source $file.source -Destination $file.target -Required:([bool] $file.required)))
 }
@@ -302,6 +436,12 @@ foreach ($file in @(
 $missingScripts = @($requiredScripts | Where-Object { -not (Test-OperatorPackageScript -Name $_) })
 $missingRequiredRunbooks = @($copiedRunbooks | Where-Object { $_.required -eq $true -and $_.copied -ne $true })
 $missingRequiredEvidence = @($copiedEvidence | Where-Object { $_.required -eq $true -and $_.copied -ne $true })
+$copiedFileHashMismatches = @(@($copiedRunbooks + $copiedEvidence) | Where-Object {
+        $_.required -eq $true -and ($_.copied -ne $true -or $_.contentHashMatches -ne $true)
+    } | ForEach-Object { $_.destination })
+$copiedFilesMissingHashes = @(@($copiedRunbooks + $copiedEvidence) | Where-Object {
+        $_.required -eq $true -and ($_.copied -eq $true) -and ([string]::IsNullOrWhiteSpace([string]$_.sourceSha256) -or [string]::IsNullOrWhiteSpace([string]$_.destinationSha256))
+    } | ForEach-Object { $_.destination })
 
 $ownerOnboarding = Read-FlowChainJsonIfExists -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json")
 $flowChainRpcIsOurs = (Get-OperatorPackageProp -Object $ownerOnboarding -Name "flowChainRpcIsOurs" -Default $false) -eq $true
@@ -375,7 +515,7 @@ $readmeLines.Add("- ``OPERATOR_PACKAGE_MANIFEST.json``")
 $readmeLines.Add("- ``OPERATOR_COMMAND_MATRIX.json``")
 $readmeLines.Add("- ``COMMAND_MATRIX.md``")
 $readmeLines.Add("- ``docs/`` copied developer and operations docs")
-$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, and tester packet runbooks")
+$readmeLines.Add("- ``runbooks/`` copied generated public RPC, service, backup, alert, activation, dashboard, dev-pack, and tester packet runbooks")
 $readmeLines.Add("- ``evidence/`` copied latest readiness and validation reports")
 Set-Content -LiteralPath $readmePath -Value $readmeLines -Encoding UTF8
 
@@ -393,6 +533,8 @@ $checks = [ordered]@{
     manifestWritten = Test-Path -LiteralPath $manifestPath
     runbookDocsCopied = $missingRequiredRunbooks.Count -eq 0
     evidenceReportsCopied = $missingRequiredEvidence.Count -eq 0
+    copiedFileHashesWritten = $copiedFilesMissingHashes.Count -eq 0
+    copiedFileHashesMatch = $copiedFileHashMismatches.Count -eq 0
     ownerInputNamesOnly = $ownerInputNames.Count -eq 17
     flowChainRpcIsRepoOwned = $flowChainRpcIsOurs
     thirdPartyFlowChainRpcProviderNeededFalse = -not $thirdPartyFlowChainRpcProviderNeeded
@@ -419,6 +561,8 @@ $report = [ordered]@{
     missingScripts = @($missingScripts)
     missingRequiredRunbooks = @($missingRequiredRunbooks)
     missingRequiredEvidence = @($missingRequiredEvidence)
+    copiedFileHashMismatches = @($copiedFileHashMismatches)
+    copiedFilesMissingHashes = @($copiedFilesMissingHashes)
     checks = $checks
     failedChecks = @($failedChecks)
     secretMarkerFindings = @($scanSecretFindings)

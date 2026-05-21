@@ -1,0 +1,132 @@
+{
+    "schema":  "flowchain.metrics_install_systemd_report.v0",
+    "generatedAt":  "2026-05-21T10:56:25.0176417Z",
+    "status":  "passed",
+    "action":  "Plan",
+    "serviceName":  "flowchain-ops-metrics.service",
+    "timerName":  "flowchain-ops-metrics.timer",
+    "intervalMinutes":  5,
+    "systemdUnitDir":  "/etc/systemd/system",
+    "targetPaths":  {
+                        "service":  "/etc/systemd/system/flowchain-ops-metrics.service",
+                        "timer":  "/etc/systemd/system/flowchain-ops-metrics.timer"
+                    },
+    "scheduledMetrics":  {
+                             "metricsScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-metrics-export.ps1",
+                             "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics-export-report.json",
+                             "markdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_METRICS_EXPORT.md",
+                             "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.json",
+                             "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.prom.txt",
+                             "ownerEnvFileConfigured":  true,
+                             "sendsExternalNotifications":  false
+                         },
+    "host":  {
+                 "isWindows":  true,
+                 "canQuerySystemd":  false,
+                 "systemctl":  {
+                                   "name":  "systemctl",
+                                   "available":  false,
+                                   "source":  ""
+                               },
+                 "journalctl":  {
+                                    "name":  "journalctl",
+                                    "available":  false,
+                                    "source":  ""
+                                }
+             },
+    "before":  {
+                   "service":  {
+                                   "name":  "flowchain-ops-metrics.service",
+                                   "canQuery":  false,
+                                   "active":  "",
+                                   "enabled":  "",
+                                   "exists":  false,
+                                   "queryError":  "systemctl is not available on this host."
+                               },
+                   "timer":  {
+                                 "name":  "flowchain-ops-metrics.timer",
+                                 "canQuery":  false,
+                                 "active":  "",
+                                 "enabled":  "",
+                                 "exists":  false,
+                                 "queryError":  "systemctl is not available on this host."
+                             }
+               },
+    "after":  {
+                  "service":  {
+                                  "name":  "flowchain-ops-metrics.service",
+                                  "canQuery":  false,
+                                  "active":  "",
+                                  "enabled":  "",
+                                  "exists":  false,
+                                  "queryError":  "systemctl is not available on this host."
+                              },
+                  "timer":  {
+                                "name":  "flowchain-ops-metrics.timer",
+                                "canQuery":  false,
+                                "active":  "",
+                                "enabled":  "",
+                                "exists":  false,
+                                "queryError":  "systemctl is not available on this host."
+                            }
+              },
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:metrics:install:systemd -- -Action Plan",
+                     "validate":  "npm run flowchain:ops:metrics:install:systemd:validate",
+                     "install":  "npm run flowchain:ops:metrics:install:systemd -- -Action Install",
+                     "status":  "npm run flowchain:ops:metrics:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:metrics:install:systemd -- -Action Uninstall",
+                     "metrics":  "npm run flowchain:ops:metrics:export -- -AllowBlocked",
+                     "journal":  "journalctl -u flowchain-ops-metrics.service -u flowchain-ops-metrics.timer --since -1h --no-pager"
+                 },
+    "mutationCommands":  [
+
+                         ],
+    "unitPreview":  {
+                        "service":  "[Unit]\nDescription=FlowChain ops metrics export\nWants=flowchain-live.service flowchain-supervisor.service\nAfter=network-online.target flowchain-live.service flowchain-supervisor.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-systemd-install-validation\\owner-env-path-only.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\metrics-systemd-install-validation\\owner-env-path-only.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-metrics-export.ps1 -AllowBlocked -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics-export-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_METRICS_EXPORT.md -MetricsJsonPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.json -PrometheusTextPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.prom.txt\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs E:/FlowMemory/flowmemory-live-infra-rpc/services/bridge-relayer/out\n\n[Install]\nWantedBy=multi-user.target",
+                        "timer":  "[Unit]\nDescription=Run FlowChain ops metrics export every 5 minutes\n\n[Timer]\nOnBootSec=2min\nOnUnitActiveSec=5min\nAccuracySec=30s\nPersistent=true\nUnit=flowchain-ops-metrics.service\n\n[Install]\nWantedBy=timers.target"
+                    },
+    "checks":  {
+                   "unitNamesValid":  true,
+                   "metricsScriptExists":  true,
+                   "intervalMinutesValid":  true,
+                   "serviceUnitIncludesMetricsScript":  true,
+                   "serviceUnitUsesOneshot":  true,
+                   "serviceUnitUsesRepoWorkingDirectory":  true,
+                   "serviceUnitHasAllowBlocked":  true,
+                   "serviceUnitHasReportPath":  true,
+                   "serviceUnitHasMarkdownPath":  true,
+                   "serviceUnitHasMetricsJsonPath":  true,
+                   "serviceUnitHasPrometheusTextPath":  true,
+                   "serviceUnitHasNoExternalDelivery":  true,
+                   "serviceUnitOwnerEnvFileInjectable":  true,
+                   "serviceUnitHardeningPresent":  true,
+                   "serviceUnitWritePathsScoped":  true,
+                   "timerUnitTargetsService":  true,
+                   "timerUnitPersistent":  true,
+                   "timerUnitIntervalConfigured":  true,
+                   "timerUnitInstallTarget":  true,
+                   "commandPlanPresent":  true,
+                   "planActionReadOnly":  true,
+                   "statusActionReadOnly":  true,
+                   "installRequiresSystemdHost":  true,
+                   "uninstallRequiresSystemdHost":  true,
+                   "systemctlAvailable":  null,
+                   "journalctlAvailable":  null,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "actionErrorRedacted":  "",
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "secretMarkerFindings":  [
+
+                             ]
+}

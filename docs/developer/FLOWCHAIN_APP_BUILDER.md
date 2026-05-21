@@ -29,8 +29,15 @@ transfer, and prints a public-safe summary.
 
 ## Browser Example
 
+The browser readiness starter lives in
+`examples/flowchain-browser-readiness/`. Run its checked no-dependency smoke:
+
+```powershell
+npm run smoke --prefix examples/flowchain-browser-readiness
+```
+
 Open `examples/flowchain-browser-readiness/index.html` while the local control
-plane is running. It calls:
+plane is running, or serve that directory with any static file server. It calls:
 
 - `GET /rpc/discover`
 - `GET /rpc/readiness`
@@ -38,6 +45,24 @@ plane is running. It calls:
 It does not submit transactions or bridge actions.
 The local `/state` mirror and `devnet_state` method are for private debugging
 and are intentionally excluded from the owner public edge.
+
+## HTTP Tooling
+
+Developers who are not using the TypeScript SDK can start from generated HTTP
+artifacts:
+
+- `docs/sdk/FLOWCHAIN_RPC.openapi.generated.json`
+- `docs/sdk/FLOWCHAIN_RPC.postman.generated.json`
+- `docs/sdk/FLOWCHAIN_HTTP_EXAMPLES.generated.md`
+
+These are generated from live `rpc_discover` output by:
+
+```powershell
+npm run flowchain:dev-pack:e2e
+```
+
+They are local/private starter artifacts. Do not add bearer tokens, private
+wallet routes, or owner env values to committed HTTP collections.
 
 ## Common Panels
 

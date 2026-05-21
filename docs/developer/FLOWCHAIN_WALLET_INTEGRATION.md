@@ -37,7 +37,8 @@ the external tester harness. Responses must return public metadata only:
 - no raw vault ciphertext in logs or reports
 
 The current devkit focuses on public metadata, balance reads, transfer history,
-and the existing local `wallet-send` path. It is not a hosted custody API.
+local `wallet-send`, and signed transaction envelope submission. It is not a
+hosted custody API.
 
 ## Send Flow
 
@@ -51,12 +52,28 @@ This is local no-value testing unless owner readiness gates explicitly say
 otherwise. The command must never broadcast a Base bridge transaction or expose
 a public RPC listener.
 
+## Signed Envelope Flow
+
+For wallet integrations that produce FlowChain-native signatures, use the local
+signed-envelope example and submit through `transaction_submit`:
+
+```powershell
+node examples/flowchain-signed-envelope.mjs --no-submit --write devnet/local/flowchain-signed-envelope-example/signed-envelope.json
+npm run flowchain:devkit -- submit-signed-transaction --json --signed-envelope devnet/local/flowchain-signed-envelope-example/signed-envelope.json --submitted-by wallet-integration-test
+```
+
+This path verifies the envelope cryptographically and records it into private
+local intake through `/transactions/submit`. It does not expose a public write
+endpoint, does not enable `transaction_submit` on public `/rpc`, and does not
+broadcast bridge funds.
+
 ## Activity Flow
 
 After a send, wait for block inclusion and read transfer history:
 
 ```powershell
 npm run flowchain:devkit -- watch-height --json --seconds 30
+npm run flowchain:devkit -- wait-transaction --json --tx <tx-id-or-hash> --seconds 30
 npm run flowchain:devkit -- wallet-transfers --json --limit 20
 ```
 
@@ -98,5 +115,13 @@ const send = await client.walletSend({
   amountUnits: "1",
   memo: "local-wallet-test",
   applyBlock: true
+});
+const included = await client.waitForTransaction({
+  txId: send.transferId,
+  timeoutMs: 30000
+});
+const signedSubmit = await client.submitSignedEnvelope(signedEnvelope, {
+  submittedBy: "wallet-integration-test",
+  runtimeSubmitMode: "off"
 });
 ```

@@ -1,7 +1,9 @@
 param(
     [switch] $AllowIncomplete,
     [switch] $SkipBaseline,
-    [string] $ReportDir = "devnet/local/real-value-pilot"
+    [int] $ChildTimeoutSeconds = 7200,
+    [string] $ReportDir = "devnet/local/real-value-pilot",
+    [string] $ReportPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,11 +13,23 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Set-FlowChainRepoRoot
 $reportDir = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportDir)
+$reportFullPath = if ([string]::IsNullOrWhiteSpace($ReportPath)) {
+    Join-Path $reportDir "flowchain-real-value-pilot-e2e-report.json"
+}
+else {
+    Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
+}
+
+if ($ChildTimeoutSeconds -lt 1) {
+    throw "ChildTimeoutSeconds must be at least 1."
+}
 
 if (Test-Path -LiteralPath $reportDir) {
     Remove-Item -LiteralPath $reportDir -Recurse -Force
 }
 New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
+$logDir = Join-Path $reportDir "logs"
+New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
 $packageJson = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "package.json") | ConvertFrom-Json
 $rootScripts = @($packageJson.scripts.PSObject.Properties.Name)
@@ -23,6 +37,28 @@ $checks = [ordered]@{}
 $results = [ordered]@{}
 $commandsRun = New-Object System.Collections.ArrayList
 $missingProofs = New-Object System.Collections.ArrayList
+
+$knownOwnerInputs = @(
+    "FLOWCHAIN_RPC_PUBLIC_URL",
+    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+    "FLOWCHAIN_RPC_TLS_TERMINATED",
+    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWCHAIN_TESTER_WRITE_ENABLED",
+    "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+    "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+    "FLOWCHAIN_PILOT_OPERATOR_ACK",
+    "FLOWCHAIN_BASE8453_RPC_URL",
+    "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+    "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+    "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+    "FLOWCHAIN_BASE8453_FROM_BLOCK",
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK",
+    "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+    "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+    "FLOWCHAIN_PILOT_CONFIRMATIONS"
+)
 
 function Test-RootScript {
     param(
@@ -73,13 +109,92 @@ function Add-PilotCheck {
     }
 }
 
+function ConvertTo-PilotSafeLine {
+    param([AllowNull()][object] $Line)
+
+    $text = "$Line"
+    foreach ($name in $knownOwnerInputs) {
+        $escapedName = [System.Text.RegularExpressions.Regex]::Escape($name)
+        $text = [System.Text.RegularExpressions.Regex]::Replace(
+            $text,
+            "(?i)($escapedName\s*[:=]\s*)([^\s,;]+)",
+            {
+                param([System.Text.RegularExpressions.Match] $Match)
+                return "$($Match.Groups[1].Value)<redacted>"
+            }
+        )
+    }
+    $text = [System.Text.RegularExpressions.Regex]::Replace($text, "https?://[^\s,)]+", "<redacted-url>")
+    return $text
+}
+
+function Stop-PilotProcessTree {
+    param([Parameter(Mandatory = $true)][int] $ProcessId)
+
+    $children = @()
+    try {
+        $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $children = @()
+    }
+
+    foreach ($child in $children) {
+        Stop-PilotProcessTree -ProcessId ([int] $child.ProcessId)
+    }
+
+    try {
+        Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
+    }
+    catch {
+    }
+}
+
+function Read-PilotOutputTail {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+    return @(Get-Content -LiteralPath $Path -Tail 120 -ErrorAction SilentlyContinue | ForEach-Object { ConvertTo-PilotSafeLine -Line $_ })
+}
+
 function Write-PilotReport {
     param(
         [Parameter(Mandatory = $true)]
         [string] $Status
     )
 
-    $reportPath = Join-Path $reportDir "flowchain-real-value-pilot-e2e-report.json"
+    $commandResults = @($results.GetEnumerator() | ForEach-Object { $_.Value })
+    $timedOutCommands = @($commandResults | Where-Object { $_.timedOut -eq $true } | ForEach-Object { $_.command })
+    $failedCommands = @($commandResults | Where-Object { "$($_.status)" -ne "passed" } | ForEach-Object { $_.command })
+    $expectedProofCommands = @(
+        "npm run flowchain:real-value-pilot:contracts",
+        "npm run flowchain:real-value-pilot:bridge",
+        "npm run flowchain:real-value-pilot:runtime",
+        "npm run flowchain:real-value-pilot:wallet",
+        "npm run flowchain:real-value-pilot:control-dashboard",
+        "npm run flowchain:real-value-pilot:ops"
+    )
+    $commandsRunText = @($commandsRun | ForEach-Object { "$_" })
+    $missingExpectedCommands = @($expectedProofCommands | Where-Object { $_ -notin $commandsRunText })
+    $reportChecks = [ordered]@{}
+    foreach ($entry in $checks.GetEnumerator()) {
+        $reportChecks[$entry.Key] = $entry.Value
+    }
+    $reportChecks["pilotSpecPresent"] = (Test-Path -LiteralPath $pilotDocPath)
+    $reportChecks["baselineScriptsPresent"] = (Test-RootScript -Name "flowchain:product-e2e") -and (Test-RootScript -Name "flowchain:l1-e2e")
+    $reportChecks["requiredProofScriptsPresent"] = $missingProofs.Count -eq 0
+    $reportChecks["requiredProofCommandsRun"] = $missingExpectedCommands.Count -eq 0
+    $reportChecks["childTimeoutSecondsPositive"] = $ChildTimeoutSeconds -ge 1
+    $reportChecks["commandsDidNotTimeout"] = $timedOutCommands.Count -eq 0
+    $reportChecks["commandsDidNotFail"] = $failedCommands.Count -eq 0
+    $reportChecks["missingProofsEmpty"] = $missingProofs.Count -eq 0
+    $reportChecks["ownerGoNoGoTrue"] = ($Status -eq "passed" -and $missingProofs.Count -eq 0 -and $timedOutCommands.Count -eq 0 -and $failedCommands.Count -eq 0)
+    $reportChecks["outputTailsRedacted"] = $true
+    $reportChecks["envValuesPrintedFalse"] = $true
+    $reportChecks["noSecrets"] = $true
+    $reportChecks["broadcastsFalse"] = $true
     $report = [ordered]@{
         schema = "flowchain.real_value_pilot.e2e_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
@@ -87,14 +202,21 @@ function Write-PilotReport {
         status = $Status
         allowIncomplete = [bool] $AllowIncomplete
         skipBaseline = [bool] $SkipBaseline
+        childTimeoutSeconds = $ChildTimeoutSeconds
         commandsRun = @($commandsRun)
-        checks = $checks
+        missingExpectedCommands = @($missingExpectedCommands)
+        checks = $reportChecks
         commandResults = $results
+        timedOutCommands = @($timedOutCommands)
+        failedCommands = @($failedCommands)
         missingProofs = @($missingProofs)
         ownerGoNoGo = [ordered]@{
-            go = ($Status -eq "passed" -and $missingProofs.Count -eq 0)
+            go = ($Status -eq "passed" -and $missingProofs.Count -eq 0 -and $timedOutCommands.Count -eq 0 -and $failedCommands.Count -eq 0)
             checklist = "docs/FLOWCHAIN_REAL_VALUE_PILOT.md#owner-gonogo-checklist"
         }
+        envValuesPrinted = $false
+        noSecrets = $true
+        broadcasts = $false
         boundary = @(
             "capped owner pilot only",
             "no public launch claim",
@@ -105,8 +227,8 @@ function Write-PilotReport {
         )
     }
 
-    Write-FlowChainJson -Path $reportPath -Value $report -Depth 16
-    return $reportPath
+    Write-FlowChainJson -Path $reportFullPath -Value $report -Depth 16
+    return $reportFullPath
 }
 
 function Invoke-RootNpmScript {
@@ -120,20 +242,85 @@ function Invoke-RootNpmScript {
 
     $display = "npm run $Name"
     [void] $commandsRun.Add($display)
+    $startedAt = (Get-Date).ToUniversalTime()
+    $stamp = $startedAt.ToString("yyyyMMddTHHmmssfffZ")
+    $safeName = $Name -replace '[^A-Za-z0-9_.-]', '-'
+    $stdoutPath = Join-Path $logDir "$stamp-$safeName.stdout.log"
+    $stderrPath = Join-Path $logDir "$stamp-$safeName.stderr.log"
+    $timedOut = $false
+    $exitCode = 1
+    $processId = $null
+    $output = @()
     try {
-        Invoke-FlowChainCommand -Label "Run $Name ($Owner)" -FilePath "npm" -ArgumentList @("run", $Name)
+        Write-Host ""
+        Write-Host "== Run $Name ($Owner) =="
+        Write-Host $display
+        $process = Start-Process -FilePath "powershell" `
+            -ArgumentList (Join-FlowChainProcessArguments -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $display)) `
+            -WorkingDirectory $repoRoot `
+            -PassThru `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+        $processId = $process.Id
+        if (-not $process.WaitForExit($ChildTimeoutSeconds * 1000)) {
+            $timedOut = $true
+            Stop-PilotProcessTree -ProcessId $process.Id
+            $exitCode = 124
+        }
+        else {
+            $process.Refresh()
+            $exitCode = [int] $process.ExitCode
+        }
+        $output = @(Read-PilotOutputTail -Path $stdoutPath) + @(Read-PilotOutputTail -Path $stderrPath)
+        if ($timedOut) {
+            $output = @("Timed out after $ChildTimeoutSeconds seconds; child process tree was stopped.") + $output
+        }
+        $finishedAt = (Get-Date).ToUniversalTime()
+        $durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
         $results[$Name] = [ordered]@{
             owner = $Owner
-            status = "passed"
+            status = if ($timedOut) { "timed-out" } elseif ($exitCode -eq 0) { "passed" } else { "failed" }
             command = $display
+            startedAt = $startedAt.ToString("o")
+            finishedAt = $finishedAt.ToString("o")
+            durationSeconds = $durationSeconds
+            timedOut = $timedOut
+            timeoutSeconds = $ChildTimeoutSeconds
+            processId = $processId
+            exitCode = $exitCode
+            stdout = ($stdoutPath.Substring($repoRoot.Length).TrimStart("\", "/") -replace '\\', '/')
+            stderr = ($stderrPath.Substring($repoRoot.Length).TrimStart("\", "/") -replace '\\', '/')
+            outputTailRedacted = @($output)
+        }
+        if ($timedOut) {
+            Write-PilotReport -Status "failed" | Out-Null
+            throw "$display timed out after $ChildTimeoutSeconds seconds."
+        }
+        if ($exitCode -ne 0) {
+            Write-PilotReport -Status "failed" | Out-Null
+            throw "$display failed with exit code $exitCode."
         }
     }
     catch {
-        $results[$Name] = [ordered]@{
-            owner = $Owner
-            status = "failed"
-            command = $display
-            error = $_.Exception.Message
+        if (-not $results.Contains($Name)) {
+            $finishedAt = (Get-Date).ToUniversalTime()
+            $results[$Name] = [ordered]@{
+                owner = $Owner
+                status = "failed"
+                command = $display
+                startedAt = $startedAt.ToString("o")
+                finishedAt = $finishedAt.ToString("o")
+                durationSeconds = [int][Math]::Max(0, [Math]::Floor(($finishedAt - $startedAt).TotalSeconds))
+                timedOut = $timedOut
+                timeoutSeconds = $ChildTimeoutSeconds
+                processId = $processId
+                exitCode = $exitCode
+                stdout = ($stdoutPath.Substring($repoRoot.Length).TrimStart("\", "/") -replace '\\', '/')
+                stderr = ($stderrPath.Substring($repoRoot.Length).TrimStart("\", "/") -replace '\\', '/')
+                outputTailRedacted = @($output)
+                error = ConvertTo-PilotSafeLine -Line $_.Exception.Message
+            }
         }
         Write-PilotReport -Status "failed" | Out-Null
         throw

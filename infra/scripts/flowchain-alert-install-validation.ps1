@@ -3,7 +3,9 @@ param(
     [string] $ReportPath = "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json",
     [string] $MarkdownPath = "docs/agent-runs/live-product-infra-rpc/ALERT_INSTALL_VALIDATION.md",
     [string] $PlanReportPath = "docs/agent-runs/live-product-infra-rpc/alert-install-windows-report.json",
-    [string] $PlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md"
+    [string] $PlanMarkdownPath = "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL.md",
+    [string] $SystemdValidationReportPath = "docs/agent-runs/live-product-infra-rpc/alert-install-systemd-validation-report.json",
+    [string] $SystemdValidationMarkdownPath = "docs/agent-runs/live-product-infra-rpc/SYSTEMD_ALERT_INSTALL_VALIDATION.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,11 +19,15 @@ $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Reso
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 $planReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanReportPath)
 $planMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $PlanMarkdownPath)
+$systemdValidationReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $SystemdValidationReportPath)
+$systemdValidationMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $SystemdValidationMarkdownPath)
 $statusReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-status-report.json")
 $statusMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL_STATUS.md")
 $uninstallAbsentReportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-uninstall-absent-report.json")
 $uninstallAbsentMarkdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/WINDOWS_ALERT_INSTALL_UNINSTALL_ABSENT.md")
 $installScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-alert-install-windows.ps1")
+$systemdInstallScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-alert-install-systemd.ps1")
+$systemdValidationScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-alert-install-systemd-validation.ps1")
 $alertsScriptPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "infra/scripts/flowchain-ops-alerts.ps1")
 $validationTmpDir = Join-Path $repoRoot "devnet/local/tmp/alert-install-validation"
 New-Item -ItemType Directory -Force -Path $validationTmpDir | Out-Null
@@ -206,9 +212,25 @@ $statusTaskAfter = Get-AlertInstallValidationProp -Object $statusReport -Name "t
 $uninstallAbsentTaskBefore = Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "taskBefore"
 $uninstallAbsentTaskAfter = Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "taskAfter"
 
+$systemdValidationResult = Invoke-AlertInstallValidationChild -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $systemdValidationScriptPath,
+    "-ReportPath",
+    $systemdValidationReportFullPath,
+    "-MarkdownPath",
+    $systemdValidationMarkdownFullPath
+)
+$systemdValidationReport = Read-FlowChainJsonIfExists -Path $systemdValidationReportFullPath
+$systemdChecks = Get-AlertInstallValidationProp -Object $systemdValidationReport -Name "checks"
+
 $requiredScripts = @(
     "flowchain:ops:alerts",
     "flowchain:ops:alerts:install:windows",
+    "flowchain:ops:alerts:install:systemd",
+    "flowchain:ops:alerts:install:systemd:validate",
     "flowchain:ops:alerts:install:validate",
     "flowchain:ops:snapshot",
     "flowchain:service:monitor",
@@ -222,6 +244,8 @@ $planPassed = [int]$planResult.exitCode -eq 0 -and $planStatus -eq "passed" -and
 
 $checks = [ordered]@{
     installScriptExists = Test-Path -LiteralPath $installScriptPath
+    systemdInstallScriptExists = Test-Path -LiteralPath $systemdInstallScriptPath
+    systemdValidationScriptExists = Test-Path -LiteralPath $systemdValidationScriptPath
     alertsScriptExists = Test-Path -LiteralPath $alertsScriptPath
     packageScriptsPresent = $missingPackageScripts.Count -eq 0
     planCommandPassed = $planPassed
@@ -250,10 +274,20 @@ $checks = [ordered]@{
         -and -not [string]::IsNullOrWhiteSpace([string](Get-AlertInstallValidationProp -Object $planCommands -Name "validate" -Default ""))
     scheduledCommandKeepsBlockedAlertsVisible = $scheduledTaskArguments -match "(^|\s)-AllowBlocked(\s|$)"
     scheduledCommandDoesNotDisableRefresh = $scheduledTaskArguments -notmatch "(^|\s)-NoRefresh(\s|$)"
+    systemdValidationCommandPassed = [int]$systemdValidationResult.exitCode -eq 0
+    systemdValidationPassed = [string](Get-AlertInstallValidationProp -Object $systemdValidationReport -Name "status" -Default "missing") -eq "passed"
+    systemdPlanDidNotMutate = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "planDidNotMutate" -Default $false) -eq $true
+    systemdServiceUnitPlanned = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "serviceUnitPlanned" -Default $false) -eq $true
+    systemdTimerUnitPlanned = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "timerUnitPlanned" -Default $false) -eq $true
+    systemdTimerIntervalConfigured = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "timerUnitIntervalConfigured" -Default $false) -eq $true
+    systemdOwnerEnvFileInjectable = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "serviceUnitOwnerEnvFileInjectable" -Default $false) -eq $true
+    systemdNoExternalDelivery = (Get-AlertInstallValidationProp -Object $systemdChecks -Name "noExternalDelivery" -Default $false) -eq $true
+    systemdChildReportNoSecrets = (Get-AlertInstallValidationProp -Object $systemdValidationReport -Name "noSecrets" -Default $false) -eq $true
     envValuesPrintedFalse = (Get-AlertInstallValidationProp -Object $planReport -Name "envValuesPrinted" -Default $true) -eq $false
     childReportsNoSecrets = (Get-AlertInstallValidationProp -Object $planReport -Name "noSecrets" -Default $false) -eq $true `
         -and (Get-AlertInstallValidationProp -Object $statusReport -Name "noSecrets" -Default $false) -eq $true `
-        -and (Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "noSecrets" -Default $false) -eq $true
+        -and (Get-AlertInstallValidationProp -Object $uninstallAbsentReport -Name "noSecrets" -Default $false) -eq $true `
+        -and (Get-AlertInstallValidationProp -Object $systemdValidationReport -Name "noSecrets" -Default $false) -eq $true
     childReportsSecretMarkerFindingsEmpty = $true
     secretMarkerFindingsEmpty = $true
     noSecrets = $true
@@ -295,10 +329,19 @@ $report = [ordered]@{
             timedOut = [bool]$uninstallAbsentResult.timedOut
             stdoutPath = [string]$uninstallAbsentResult.stdoutPath
             stderrPath = [string]$uninstallAbsentResult.stderrPath
+        },
+        [ordered]@{
+            name = "alert-install-systemd-validation"
+            exitCode = [int]$systemdValidationResult.exitCode
+            timedOut = [bool]$systemdValidationResult.timedOut
+            stdoutPath = [string]$systemdValidationResult.stdoutPath
+            stderrPath = [string]$systemdValidationResult.stderrPath
         }
     )
     commands = [ordered]@{
         plan = "npm run flowchain:ops:alerts:install:windows -- -Action Plan"
+        systemdPlan = "npm run flowchain:ops:alerts:install:systemd -- -Action Plan"
+        systemdValidate = "npm run flowchain:ops:alerts:install:systemd:validate"
         install = "npm run flowchain:ops:alerts:install:windows -- -Action Install"
         status = "npm run flowchain:ops:alerts:install:windows -- -Action Status"
         uninstall = "npm run flowchain:ops:alerts:install:windows -- -Action Uninstall"
@@ -318,6 +361,9 @@ $childReportSecretMarkerFindings = @(
     }
     if ($null -ne $uninstallAbsentReport) {
         Get-AlertInstallSecretMarkerFindings -Text ($uninstallAbsentReport | ConvertTo-Json -Depth 18) -Label "alert install uninstall absent report"
+    }
+    if ($null -ne $systemdValidationReport) {
+        Get-AlertInstallSecretMarkerFindings -Text ($systemdValidationReport | ConvertTo-Json -Depth 18) -Label "systemd alert install validation report"
     }
 )
 $preliminaryReportText = $report | ConvertTo-Json -Depth 18
@@ -347,7 +393,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery.")
+$markdownLines.Add("This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery. It covers both Windows Scheduled Task and Linux systemd timer paths.")
 $markdownLines.Add("")
 $markdownLines.Add("## Checks")
 $markdownLines.Add("")

@@ -2,7 +2,7 @@
 
 Status: HQ coordination spec for a capped owner pilot.
 
-Last updated: 2026-05-14.
+Last updated: 2026-05-20.
 
 ## Purpose
 
@@ -74,14 +74,33 @@ During coordination, run the same gate in report-only mode:
 npm run flowchain:real-value-pilot:e2e -- -AllowIncomplete
 ```
 
+Every child proof command is bounded by `-ChildTimeoutSeconds`, which defaults
+to `7200`. A timeout writes `timedOutCommands`, redacted stdout/stderr tails,
+and `status: "failed"` to the report, then stops the child process tree. To
+exercise only the dedicated pilot proofs after separate baseline runs:
+
+```powershell
+npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800
+```
+
 The script writes:
 
 ```text
 devnet/local/real-value-pilot/flowchain-real-value-pilot-e2e-report.json
 ```
 
+Production readiness automation may keep logs in an ignored local report
+directory while writing the machine-readable gate report into committed
+evidence:
+
+```powershell
+npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800 -ReportPath docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json
+```
+
 The report must show `status: "passed"` before the owner can mark the capped
-pilot go. Until then, missing proof rows are blockers, not warnings.
+pilot go, with empty `missingProofs`, `failedCommands`, and
+`timedOutCommands`. Until then, missing proof rows and timed-out proof commands
+are blockers, not warnings.
 
 ## Ops Command Surface
 
@@ -160,7 +179,7 @@ the proof is branch-local or verified from `main`.
 | Dashboard labels the flow as capped owner testing and shows live/degraded/error state plus exact next operator commands. | Control plane/dashboard | `npm run flowchain:real-value-pilot:control-dashboard` | Merged on `main` by PR #142; latest local main-equivalent proof passed. |
 | Browser stores no private keys or RPC credentials. | Control plane/dashboard + Wallet/operator | `npm run flowchain:real-value-pilot:control-dashboard`; `npm run flowchain:real-value-pilot:wallet` | Control-dashboard and wallet proofs are merged. |
 | Ops path verifies required env, tiny caps, explicit owner ack, emergency stop, export evidence, restart recovery, and no-secret scans. | Ops/installer | `npm run flowchain:real-value-pilot:ops` | Merged on `main` by PR #144; latest local main-equivalent proof passed. |
-| Final pilot gate runs baseline commands plus every available dedicated proof command. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Strict mode passes on this branch with the runtime proof command present; `main` remains blocked until issue #134 merges. |
+| Final pilot gate runs baseline commands plus every available dedicated proof command with bounded child timeouts and redacted child logs. | HQ/Ops | `npm run flowchain:real-value-pilot:e2e` | Strict mode passes on this branch with the runtime proof command present; `main` remains blocked until issue #134 merges. A skip-baseline validation passed locally with `-ChildTimeoutSeconds 1800` and no timed-out commands. |
 
 ## In-Flight Implementation Status
 
@@ -251,7 +270,7 @@ The owner should mark the pilot `go` only when all rows are true:
 - [ ] `npm run flowchain:product-e2e` passes from a clean `main` checkout.
 - [ ] `npm run flowchain:l1-e2e` passes from the same checkout.
 - [ ] `npm run flowchain:real-value-pilot:e2e` passes without `-AllowIncomplete`.
-- [ ] The pilot report has empty `missingProofs` and no failed command results.
+- [ ] The pilot report has empty `missingProofs`, `failedCommands`, and `timedOutCommands`.
 - [ ] Base chain ID `8453` is verified in the live observer path.
 - [ ] Per-deposit and total pilot caps are tiny, nonzero, enforced, and recorded.
 - [ ] Supported asset and lockbox address are read from explicit local config or env.

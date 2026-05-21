@@ -70,6 +70,74 @@ test("submits wallet send through control-plane HTTP path", async () => {
   ]);
 });
 
+test("submits signed envelopes through transaction_submit", async () => {
+  const calls: { url: string; body: unknown }[] = [];
+  const client = new FlowChainClient({
+    rpcUrl: "http://127.0.0.1:8787/rpc",
+    fetchImpl: (async (url, init) => {
+      calls.push({ url: String(url), body: JSON.parse(String(init?.body)) });
+      return new Response(JSON.stringify({
+        schema: "flowmemory.control_plane.transaction_submit_result.v0",
+        accepted: true,
+      }), { status: 200 });
+    }) as typeof fetch,
+  });
+  const signedEnvelope = {
+    document: { schema: "flowchain.product_transfer.v0" },
+    envelope: { schema: "flowchain.local_transaction_envelope.v0" },
+  };
+
+  const result = await client.submitSignedEnvelope(signedEnvelope, {
+    submittedBy: "sdk-test",
+    runtimeSubmitMode: "off",
+  }) as Record<string, unknown>;
+
+  assert.equal(result.accepted, true);
+  assert.deepEqual(calls, [
+    {
+      url: "http://127.0.0.1:8787/transactions/submit",
+      body: {
+        signedEnvelope,
+        submittedBy: "sdk-test",
+        runtimeSubmitMode: "off",
+      },
+    },
+  ]);
+});
+
+test("waits for transaction inclusion through transaction_get", async () => {
+  const calls: unknown[] = [];
+  let attempts = 0;
+  const client = new FlowChainClient({
+    fetchImpl: (async (_url, init) => {
+      attempts += 1;
+      const body = JSON.parse(String(init?.body));
+      calls.push(body);
+      if (attempts === 1) {
+        return new Response(JSON.stringify({
+          jsonrpc: "2.0",
+          id: "wait",
+          error: { code: -32004, message: "transaction not found: tx:wait" },
+        }), { status: 200 });
+      }
+      return new Response(JSON.stringify({
+        jsonrpc: "2.0",
+        id: "wait",
+        result: {
+          schema: "flowmemory.control_plane.transaction_detail.v0",
+          transaction: { transactionId: "tx:wait", status: "applied" },
+        },
+      }), { status: 200 });
+    }) as typeof fetch,
+  });
+
+  const result = await client.waitForTransaction({ txId: "tx:wait", timeoutMs: 1000, pollMs: 1 }) as Record<string, unknown>;
+  assert.equal(result.schema, "flowchain.sdk.wait_transaction.v0");
+  assert.equal(result.status, "included");
+  assert.equal(result.attempts, 2);
+  assert.deepEqual(calls.map((call) => (call as { method?: string }).method), ["transaction_get", "transaction_get"]);
+});
+
 test("wraps explorer, wallet, finality, and bridge read methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
   const client = new FlowChainClient({

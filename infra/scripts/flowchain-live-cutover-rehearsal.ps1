@@ -52,8 +52,14 @@ $optionalOwnerInputs = @(
 $paths = [ordered]@{
     ownerEnvReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    testerNetwork = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json"
+    testerWriteTokenSetup = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
+    externalTesterPacketValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
+    externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
+    liveCapabilityMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
+    opsLaunchWatch = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -196,10 +202,18 @@ function Invoke-CutoverStep {
 
     $childReport = Read-FlowChainJsonIfExists -Path $ExpectedReportPath
     $childStatus = Get-CutoverReportStatus -Report $childReport
+    $terminalChildStatuses = @(
+        "passed",
+        "blocked",
+        "blocked-owner-input",
+        "blocked-repo-work",
+        "failed",
+        "stale"
+    )
     $status = if ($timedOut) {
         "failed"
     }
-    elseif ($childStatus -in @("passed", "blocked", "failed")) {
+    elseif ($childStatus -in $terminalChildStatuses) {
         $childStatus
     }
     elseif ($exitCode -eq 0) {
@@ -219,6 +233,7 @@ function Invoke-CutoverStep {
         exitCode = [int] $exitCode
         timedOut = $timedOut
         status = $status
+        childStatus = $childStatus
         reportPath = $ExpectedReportPath
         stdoutPath = $stdoutPath
         stderrPath = $stderrPath
@@ -269,16 +284,52 @@ try {
         -ExpectedReportPath $paths.publicDeploymentContract))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Local tester wallet network E2E" `
+        -Command "npm run flowchain:wallet:live-tester:e2e" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-service-tester-network-e2e.ps1")) `
+        -ExpectedReportPath $paths.testerNetwork))
+
+    [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Tester write token setup" `
+        -Command "npm run flowchain:tester:token:setup" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-tester-write-token-setup.ps1"), "-ReportPath", $paths.testerWriteTokenSetup) `
+        -ExpectedReportPath $paths.testerWriteTokenSetup))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "External tester packet" `
         -Command "npm run flowchain:external-tester:packet -- -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked") `
         -ExpectedReportPath $paths.externalTesterPacket))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "External tester packet validation" `
+        -Command "npm run flowchain:external-tester:packet:validate" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet-validation.ps1")) `
+        -ExpectedReportPath $paths.externalTesterPacketValidation))
+
+    [void] $steps.Add((Invoke-CutoverStep `
+        -Name "External tester client validation" `
+        -Command "npm run flowchain:external-tester:client:validate" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-client-validation.ps1")) `
+        -ExpectedReportPath $paths.externalTesterClientValidation))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "Completion audit" `
         -Command "npm run flowchain:completion:audit -- -NoRefresh -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-completion-audit.ps1"), "-NoRefresh", "-AllowBlocked") `
         -ExpectedReportPath $paths.completionAudit))
+
+    [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Live chain capability matrix" `
+        -Command "npm run flowchain:live:capabilities" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-capability-matrix.ps1")) `
+        -ExpectedReportPath $paths.liveCapabilityMatrix))
+
+    [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Ops launch watch" `
+        -Command "npm run flowchain:ops:launch-watch -- -NoRefresh" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-launch-watch.ps1"), "-NoRefresh") `
+        -ExpectedReportPath $paths.opsLaunchWatch))
 
     [void] $steps.Add((Invoke-CutoverStep `
         -Name "Production truth table" `
@@ -337,18 +388,48 @@ $missingEnvNames = $filteredMissingEnvNames
 $invalidEnvNames = $filteredInvalidEnvNames
 
 $unknownMissingEnvNames = @($missingEnvNames | Where-Object { $_ -notin $knownOwnerInputs })
-$failedSteps = @($steps | Where-Object { "$($_.status)" -eq "failed" -or [int] $_.exitCode -eq 124 -or $_.timedOut -eq $true })
+$truthTableReportStatus = Get-CutoverReportStatus -Report $reports.truthTable
+$truthTableStaleItemIds = @((Get-CutoverProp -Object $reports.truthTable -Name "items" -Default @()) | Where-Object {
+        [string](Get-CutoverProp -Object $_ -Name "classification" -Default "") -eq "stale"
+    } | ForEach-Object {
+        [string](Get-CutoverProp -Object $_ -Name "id" -Default "")
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$truthTableSelfReferenceStale = $truthTableReportStatus -eq "stale" `
+    -and @($truthTableStaleItemIds).Count -eq 1 `
+    -and $truthTableStaleItemIds[0] -eq "live-cutover-rehearsal"
+$truthTableAccepted = $truthTableReportStatus -in @("passed", "blocked-owner-input") -or $truthTableSelfReferenceStale
+$failedSteps = @($steps | Where-Object {
+        "$($_.status)" -eq "failed" `
+            -or "$($_.status)" -eq "blocked-repo-work" `
+            -or ("$($_.status)" -eq "stale" -and -not ("$($_.name)" -eq "Production truth table" -and $truthTableAccepted)) `
+            -or [int] $_.exitCode -eq 124 `
+            -or $_.timedOut -eq $true
+    })
 $ready = [ordered]@{
     ownerEnvReady = (Get-CutoverProp -Object (Get-CutoverProp -Object $reports.ownerEnvReadiness -Name "readiness") -Name "ownerInputsReady" -Default $false) -eq $true
     publicDeploymentReady = (Get-CutoverProp -Object $reports.publicDeploymentContract -Name "deploymentReady" -Default $false) -eq $true
+    testerNetworkE2ePassed = (Get-CutoverReportStatus -Report $reports.testerNetwork) -eq "passed"
+    testerWriteTokenSetupPassed = (Get-CutoverReportStatus -Report $reports.testerWriteTokenSetup) -eq "passed"
     testerPacketShareable = (Get-CutoverProp -Object $reports.externalTesterPacket -Name "packetShareable" -Default $false) -eq $true
+    testerPacketValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterPacketValidation) -eq "passed"
+    testerClientValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterClientValidation) -eq "passed"
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
-    truthTableCompleted = (Get-CutoverReportStatus -Report $reports.truthTable) -in @("passed", "blocked-owner-input")
+    liveCapabilityMatrixPassed = (Get-CutoverReportStatus -Report $reports.liveCapabilityMatrix) -eq "passed" -and @((Get-CutoverProp -Object $reports.liveCapabilityMatrix -Name "repoBlockedCapabilities" -Default @())).Count -eq 0
+    opsLaunchWatchPassed = (Get-CutoverReportStatus -Report $reports.opsLaunchWatch) -eq "passed" `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "failedChecks" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingReports" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingMetrics" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingAlertRules" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "blockedLaneUnknownBlockers" -Default @())).Count -eq 0
+    truthTableCompleted = $truthTableReportStatus -in @("passed", "blocked-owner-input")
+    truthTableAccepted = $truthTableAccepted
+    truthTableSelfReferenceStaleAccepted = $truthTableReportStatus -ne "stale" -or $truthTableSelfReferenceStale
     noSecretScanPassed = (Get-CutoverReportStatus -Report $reports.noSecret) -eq "passed"
 }
 $allReady = @($ready.GetEnumerator() | Where-Object { $_.Value -ne $true }).Count -eq 0
 $blockedOnlyOnKnownOwnerInputs = $ownerEnvPathSafe `
     -and $failedSteps.Count -eq 0 `
+    -and $truthTableAccepted `
     -and @($invalidEnvNames).Count -eq 0 `
     -and @($unknownMissingEnvNames).Count -eq 0 `
     -and @($missingEnvNames).Count -gt 0
@@ -368,7 +449,7 @@ $checks = [ordered]@{
     ownerEnvFileExists = $ownerEnvExists
     ownerEnvFileIsFile = $ownerEnvIsFile
     ownerEnvFileGitIgnored = $ownerEnvGitIgnore.ignored -eq $true
-    stepsRan = @($steps).Count -eq 6
+    stepsRan = @($steps).Count -eq 12
     stepCommandsSucceeded = @($steps | Where-Object { [int] $_.exitCode -ne 0 -and "$($_.status)" -ne "blocked" }).Count -eq 0
     noFailedSteps = $failedSteps.Count -eq 0
     missingEnvNamesEmpty = @($missingEnvNames).Count -eq 0
@@ -377,9 +458,17 @@ $checks = [ordered]@{
     blockedOnlyOnKnownOwnerInputs = $blockedOnlyOnKnownOwnerInputs
     ownerEnvReady = $ready.ownerEnvReady
     publicDeploymentReady = $ready.publicDeploymentReady
+    testerNetworkE2ePassed = $ready.testerNetworkE2ePassed
+    testerWriteTokenSetupPassed = $ready.testerWriteTokenSetupPassed
     testerPacketShareable = $ready.testerPacketShareable
+    testerPacketValidationPassed = $ready.testerPacketValidationPassed
+    testerClientValidationPassed = $ready.testerClientValidationPassed
     completionReady = $ready.completionReady
+    liveCapabilityMatrixPassed = $ready.liveCapabilityMatrixPassed
+    opsLaunchWatchPassed = $ready.opsLaunchWatchPassed
     truthTableCompleted = $ready.truthTableCompleted
+    truthTableAccepted = $ready.truthTableAccepted
+    truthTableSelfReferenceStaleAccepted = $ready.truthTableSelfReferenceStaleAccepted
     noSecretScanPassed = $ready.noSecretScanPassed
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -417,6 +506,9 @@ $report = [ordered]@{
     missingEnvNames = @($missingEnvNames)
     invalidEnvNames = @($invalidEnvNames)
     unknownMissingEnvNames = @($unknownMissingEnvNames)
+    truthTableStatus = $truthTableReportStatus
+    truthTableStaleItemIds = @($truthTableStaleItemIds)
+    truthTableSelfReferenceStaleAccepted = $truthTableSelfReferenceStale
     steps = @($steps)
     reportPaths = $paths
     checks = $checks
@@ -424,6 +516,12 @@ $report = [ordered]@{
     nextCommands = @(
         "npm run flowchain:owner-env:readiness -- -AllowBlocked",
         "npm run flowchain:public-deployment:contract -- -AllowBlocked",
+        "npm run flowchain:wallet:live-tester:e2e",
+        "npm run flowchain:tester:token:setup",
+        "npm run flowchain:external-tester:packet:validate",
+        "npm run flowchain:external-tester:client:validate",
+        "npm run flowchain:live:capabilities",
+        "npm run flowchain:ops:launch-watch",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
     )
@@ -442,11 +540,13 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This command runs the owner-env, public deployment, tester packet, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
+$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, ops launch watch, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
 $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")
 $markdownLines.Add("Blocked only on known owner inputs: $blockedOnlyOnKnownOwnerInputs")
+$markdownLines.Add("Truth table status observed inside rehearsal: $truthTableReportStatus")
+$markdownLines.Add("Truth table self-reference stale accepted: $truthTableSelfReferenceStale")
 $markdownLines.Add("")
 $markdownLines.Add("## Gate Status")
 $markdownLines.Add("")
@@ -462,6 +562,17 @@ $markdownLines.Add("| Step | Status | Report |")
 $markdownLines.Add("| --- | --- | --- |")
 foreach ($step in @($steps)) {
     $markdownLines.Add("| $($step.name) | $($step.status) | ``$($step.reportPath)`` |")
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Truth Table Stale Items")
+$markdownLines.Add("")
+if (@($truthTableStaleItemIds).Count -eq 0) {
+    $markdownLines.Add("- none")
+}
+else {
+    foreach ($id in @($truthTableStaleItemIds)) {
+        $markdownLines.Add("- ``$id``")
+    }
 }
 $markdownLines.Add("")
 $markdownLines.Add("## Missing Owner Env Names")

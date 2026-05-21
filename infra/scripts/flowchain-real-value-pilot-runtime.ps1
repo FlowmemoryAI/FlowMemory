@@ -1,6 +1,7 @@
 param(
     [string] $HandoffPath = "",
-    [string] $RunDir = "devnet/local/production-l1-real-funds-readiness"
+    [string] $RunDir = "devnet/local/production-l1-real-funds-readiness",
+    [int] $TargetSettlementSeconds = 60
 )
 
 $ErrorActionPreference = "Stop"
@@ -196,6 +197,38 @@ function Add-Check {
     }
 }
 
+function Get-ProofUtcNow {
+    return (Get-Date).ToUniversalTime().ToString("o")
+}
+
+function ConvertTo-ProofDateTimeOffset {
+    param([AllowNull()][object] $Value)
+
+    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace("$Value")) {
+        return $null
+    }
+    try {
+        return [System.DateTimeOffset]::Parse("$Value", [System.Globalization.CultureInfo]::InvariantCulture).ToUniversalTime()
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-ProofSecondsBetween {
+    param(
+        [AllowNull()][object] $Start,
+        [AllowNull()][object] $End
+    )
+
+    $startAt = ConvertTo-ProofDateTimeOffset -Value $Start
+    $endAt = ConvertTo-ProofDateTimeOffset -Value $End
+    if ($null -eq $startAt -or $null -eq $endAt) {
+        return $null
+    }
+    return [math]::Round(($endAt - $startAt).TotalSeconds, 3)
+}
+
 $handoff = Read-JsonObject -Path $handoffFullPath
 if ($handoff.schema -ne "flowmemory.bridge_runtime_handoff.v0") {
     throw "Unsupported bridge handoff schema: $($handoff.schema)"
@@ -230,6 +263,20 @@ $pilotMaxDeposit = if ($null -ne $pilotCapProof) { [UInt64] $pilotCapProof.maxDe
 $pilotTotalCap = if ($null -ne $pilotCapProof) { [UInt64] $pilotCapProof.totalCapAmount } else { [UInt64] 0 }
 
 $checks = @{}
+$timing = [ordered]@{
+    runStartedAt = Get-ProofUtcNow
+    handoffQueuedAt = $null
+    creditAppliedAt = $null
+    firstSpendableAt = $null
+    transferQueuedAt = $null
+    transferSpendableAt = $null
+    completedAt = $null
+    queueToSpendableSeconds = $null
+    transferSettlementSeconds = $null
+    totalSeconds = $null
+    targetSettlementSeconds = $TargetSettlementSeconds
+    latencyGate = "not-run"
+}
 Add-Check -Checks $checks -Name "handoff-live-runtime-flags" -Passed (Test-LiveRuntimeHandoff -Handoff $handoff) -Evidence "handoffSource=$handoffSource, mode=$($handoff.mode), localOnly=$($handoff.localOnly), productionReady=$($handoff.productionReady)"
 Add-Check -Checks $checks -Name "deposit-source-chain" -Passed ($pilotSourceChainId -eq 8453) -Evidence "sourceChainId=$pilotSourceChainId"
 Add-Check -Checks $checks -Name "confirmation-proof-present" -Passed ($null -ne $confirmationProof -and [bool] $confirmationProof.satisfied) -Evidence "confirmation=$($confirmationProof | ConvertTo-Json -Compress)"
@@ -249,6 +296,7 @@ $firstQueue = Invoke-FlowChainJsonCargo -Label "Queue live bridge handoff" -Runt
     "--direct"
 )
 $creditTxId = Get-LastQueuedTxId -QueueResult $firstQueue -Label "Queue live bridge handoff"
+$timing.handoffQueuedAt = Get-ProofUtcNow
 
 Invoke-FlowChainJsonCargo -Label "Include live bridge credit in block" -RuntimeArgs @(
     "--state", $statePath, "run-block"
@@ -263,11 +311,17 @@ $bridgeAccountId = if ($null -eq $bridgeCreditRecord) { "" } else { [string] $br
 $postCreditBalance = Get-LocalBalanceUnits -Balances $stateAfterCredit.localTestUnitBalances -AccountId $bridgeAccountId
 $amountAppliedToWallet = $postCreditBalance
 $stateRootAfterCredit = [string] (Invoke-FlowChainJsonCargo -Label "Inspect post-credit state" -RuntimeArgs @("--state", $statePath, "inspect-state", "--summary")).stateRoot
+$timing.creditAppliedAt = Get-ProofUtcNow
+$timing.firstSpendableAt = $timing.creditAppliedAt
+$timing.queueToSpendableSeconds = Get-ProofSecondsBetween -Start $timing.handoffQueuedAt -End $timing.firstSpendableAt
+$timing.latencyGate = if ($null -ne $timing.queueToSpendableSeconds -and [double]$timing.queueToSpendableSeconds -le $TargetSettlementSeconds) { "passed" } else { "failed" }
 
 Add-Check -Checks $checks -Name "credit-applied-once" -Passed ($appliedCreditReceipts.Count -eq 1) -Evidence "creditTxId=$creditTxId applied=$($appliedCreditReceipts.Count)"
 Add-Check -Checks $checks -Name "wallet-delta-equals-credit-amount" -Passed ($amountAppliedToWallet -eq $pilotAmount) -Evidence "amountBeforeRuntime=$pilotAmount,amountAppliedToWallet=$amountAppliedToWallet,postCreditBalance=$postCreditBalance"
 Add-Check -Checks $checks -Name "live-credit-record-flags" -Passed ($null -ne $bridgeCreditRecord -and [bool] $bridgeCreditRecord.productionReady -and -not [bool] $bridgeCreditRecord.localOnly -and -not [bool] $bridgeCreditRecord.noValue) -Evidence "credit localOnly=$($bridgeCreditRecord.localOnly), productionReady=$($bridgeCreditRecord.productionReady), noValue=$($bridgeCreditRecord.noValue)"
 Add-Check -Checks $checks -Name "live-receipt-record-flags" -Passed ($null -ne $bridgeReceiptRecord -and [bool] $bridgeReceiptRecord.productionReady -and -not [bool] $bridgeReceiptRecord.localOnly) -Evidence "receipt localOnly=$($bridgeReceiptRecord.localOnly), productionReady=$($bridgeReceiptRecord.productionReady)"
+Add-Check -Checks $checks -Name "runtime-credit-latency-recorded" -Passed ($null -ne $timing.queueToSpendableSeconds) -Evidence "queueToSpendableSeconds=$($timing.queueToSpendableSeconds)"
+Add-Check -Checks $checks -Name "runtime-credit-latency-under-target" -Passed ($timing.latencyGate -eq "passed") -Evidence "queueToSpendableSeconds=$($timing.queueToSpendableSeconds),target=$TargetSettlementSeconds"
 
 $secondQueue = Invoke-FlowChainJsonCargo -Label "Queue duplicate live bridge handoff" -RuntimeArgs @(
     "--state", $statePath,
@@ -320,6 +374,7 @@ $transferQueue = Invoke-FlowChainJsonCargo -Label "Queue transfer from credited 
     "--direct"
 )
 $transferTxId = Get-LastQueuedTxId -QueueResult $transferQueue -Label "Queue transfer from credited wallet"
+$timing.transferQueuedAt = Get-ProofUtcNow
 Invoke-FlowChainJsonCargo -Label "Apply transfer from credited wallet" -RuntimeArgs @(
     "--state", $statePath, "run-block"
 ) | Out-Null
@@ -329,7 +384,10 @@ $recipientBalance = Get-LocalBalanceUnits -Balances $stateAfterTransfer.localTes
 $senderBalanceAfterTransfer = Get-LocalBalanceUnits -Balances $stateAfterTransfer.localTestUnitBalances -AccountId $bridgeAccountId
 $transferRecord = Get-ObjectMemberValue -Object $stateAfterTransfer.balanceTransfers -Name "transfer:runtime-credit-proof:001"
 $stateRootAfterTransfer = [string] (Invoke-FlowChainJsonCargo -Label "Inspect post-transfer state" -RuntimeArgs @("--state", $statePath, "inspect-state", "--summary")).stateRoot
+$timing.transferSpendableAt = Get-ProofUtcNow
+$timing.transferSettlementSeconds = Get-ProofSecondsBetween -Start $timing.transferQueuedAt -End $timing.transferSpendableAt
 Add-Check -Checks $checks -Name "credited-balance-transferable" -Passed ($recipientBalance -eq $transferAmount -and $senderBalanceAfterTransfer -eq ($postCreditBalance - $transferAmount) -and -not [bool] $transferRecord.noValue) -Evidence "transferTxId=$transferTxId,transferAmount=$transferAmount,recipientBalance=$recipientBalance,senderBalance=$senderBalanceAfterTransfer,noValue=$($transferRecord.noValue)"
+Add-Check -Checks $checks -Name "runtime-transfer-latency-under-target" -Passed ($null -ne $timing.transferSettlementSeconds -and [double]$timing.transferSettlementSeconds -le $TargetSettlementSeconds) -Evidence "transferSettlementSeconds=$($timing.transferSettlementSeconds),target=$TargetSettlementSeconds"
 
 Invoke-FlowChainJsonCargo -Label "Restart runtime for one block" -RuntimeArgs @(
     "--state", $statePath, "start", "--blocks", "1"
@@ -353,6 +411,9 @@ $imported = Invoke-FlowChainJsonCargo -Label "Inspect imported runtime" -Runtime
 )
 Add-Check -Checks $checks -Name "export-import-preserves-state-root" -Passed ($exported.stateRoot -eq $imported.stateRoot -and $restartSummary.stateRoot -eq $imported.stateRoot) -Evidence "restart=$($restartSummary.stateRoot),exported=$($exported.stateRoot),imported=$($imported.stateRoot)"
 Add-Check -Checks $checks -Name "export-import-preserves-replay-protection" -Passed ($restartSummary.mapRoots.bridgeReplayIndexRoot -eq $imported.mapRoots.bridgeReplayIndexRoot -and $restartSummary.mapRoots.bridgeEventReceiptIndexRoot -eq $imported.mapRoots.bridgeEventReceiptIndexRoot) -Evidence "replayRoot=$($imported.mapRoots.bridgeReplayIndexRoot),eventRoot=$($imported.mapRoots.bridgeEventReceiptIndexRoot)"
+
+$timing.completedAt = Get-ProofUtcNow
+$timing.totalSeconds = Get-ProofSecondsBetween -Start $timing.runStartedAt -End $timing.completedAt
 
 $failedChecks = @($checks.GetEnumerator() | Where-Object { -not [bool] $_.Value.passed })
 $classification = if ($failedChecks.Count -eq 0) {
@@ -384,6 +445,8 @@ $report = [ordered]@{
     confirmationProof = $confirmationProof
     pilotCapProof = $pilotCapProof
     amountStorage = "u64"
+    targetSettlementSeconds = $TargetSettlementSeconds
+    timing = $timing
     amountBeforeRuntime = "$pilotAmount"
     amountAppliedToWallet = "$amountAppliedToWallet"
     postCreditBalance = "$postCreditBalance"
@@ -403,6 +466,9 @@ $report = [ordered]@{
     checks = $checks
     failedChecks = @($failedChecks | ForEach-Object { $_.Key })
     noSecretDataInReports = $true
+    broadcasts = $false
+    envValuesPrinted = $false
+    noSecrets = $true
 }
 
 Write-FlowChainJson -Path $reportPath -Value $report -Depth 24

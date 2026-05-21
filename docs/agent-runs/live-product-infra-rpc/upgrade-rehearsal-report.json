@@ -1,0 +1,67 @@
+{
+    "schema":  "flowchain.upgrade_rehearsal_report.v0",
+    "generatedAt":  "2026-05-21T13:57:53.8837476Z",
+    "status":  "passed",
+    "runDir":  "retained under ignored local temp path until operator cleanup",
+    "source":  {
+                   "statePath":  "devnet/local/state.json",
+                   "stateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                   "chainId":  "flowmemory-local-devnet-v0",
+                   "genesisHash":  "0x0f23c892cbd2d00c10839d97ddab833698a83f8df8d6df27ceac03cfdd4b7bc9",
+                   "nextBlockNumber":  113187,
+                   "packageHash":  "1bf0e16969ae2e4e8ab4939c6c499f79c67ad64d62449c955bbc2d7249d8680a",
+                   "packageLockHash":  "0255ae4e3249d24f660ee7c67641726a6243ffd882d9da2948d649c3fd78bf63"
+               },
+    "rehearsal":  {
+                      "previousStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "nextStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "rollbackStateHash":  "5ac00a9701c0c50dcc7d38b67a8d873ac19f25cdad8743f7572be25bfdadc90e",
+                      "migrationManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260521T135713957Z-23052\\next-release\\MIGRATION_MANIFEST.json",
+                      "rollbackManifestPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\upgrade-rehearsal\\run-20260521T135713957Z-23052\\rollback-restore\\ROLLBACK_MANIFEST.json"
+                  },
+    "commands":  {
+                     "preflight":  "npm run flowchain:install:check",
+                     "stop":  "npm run flowchain:service:stop",
+                     "backup":  "npm run flowchain:backup:create",
+                     "upgrade":  "git pull --ff-only \u0026\u0026 npm install \u0026\u0026 npm run flowchain:service:start -- -LiveProfile",
+                     "verify":  "npm run flowchain:service:status -- -AllowBlocked \u0026\u0026 npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                     "rollback":  "restore the previous package checkout and backup state, then run npm run flowchain:service:restart -- -LiveProfile",
+                     "reAudit":  "npm run flowchain:completion:audit -- -AllowBlocked"
+                 },
+    "checks":  {
+                   "stateSourceExists":  true,
+                   "sourceStateReadable":  true,
+                   "previousReleaseStateCopied":  true,
+                   "backupStateCopied":  true,
+                   "nextReleaseStateCopied":  true,
+                   "rollbackStateCopied":  true,
+                   "sourceStateHashPresent":  true,
+                   "previousStateHashMatchesSource":  true,
+                   "nextStateHashMatchesSource":  true,
+                   "rollbackStateHashMatchesSource":  true,
+                   "chainIdPreserved":  true,
+                   "genesisHashPreserved":  true,
+                   "nextBlockNumberPreserved":  true,
+                   "packageManifestCaptured":  true,
+                   "migrationManifestWritten":  true,
+                   "rollbackManifestWritten":  true,
+                   "rollbackCommandsPresent":  true,
+                   "verifyCommandsPresent":  true,
+                   "workDirInsideRepo":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

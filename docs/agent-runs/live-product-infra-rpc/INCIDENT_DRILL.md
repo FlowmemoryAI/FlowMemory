@@ -1,6 +1,6 @@
 ﻿# FlowChain Incident Drill
 
-Generated: 2026-05-18T15:14:02.2188427Z
+Generated: 2026-05-21T14:28:29.7640209Z
 Status: passed
 Incident drill ready: True
 
@@ -12,12 +12,21 @@ This drill uses synthetic ops input reports for incident conditions, then checks
 | --- | --- | --- |
 | baseline-owner-blockers-only | passed | expectedStatus=blocked, actualStatus=blocked, exitCode=0, missingCodes=0, commandsPresent=True, safeFlags=True |
 | deployment-refresh-aborted-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| truth-table-stale-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | node-down-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | control-plane-down-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | stale-state-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | height-not-advancing-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | no-secret-scan-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| dashboard-ui-readiness-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| public-tester-gateway-e2e-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True, alertStatus=passed, alertExitCode=0, alertMissingCodes=0, unmappedAlertCodes=0, activeRulesWithoutCommands=0, alertSafeFlags=True |
+| owner-inputs-validation-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| public-rpc-edge-hardening-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| bridge-relayer-check-contract-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-guardrail-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| bridge-direct-observe-cursor-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | bridge-relayer-loop-unhealthy-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| supervisor-relayer-recovery-failed-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
+| supervisor-node-recovery-validation-critical | passed | expectedStatus=failed, actualStatus=failed, exitCode=1, missingCodes=0, commandsPresent=True, safeFlags=True |
 | recovery-command-print | passed | exitCode=0, recoverySteps=8, emergencyCommands=4 |
 | post-drill-live-status | passed | exitCode=0, status=passed, node=running, controlPlane=running |

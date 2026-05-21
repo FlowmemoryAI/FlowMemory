@@ -1,0 +1,70 @@
+{
+    "schema":  "flowchain.public_tester_gateway_e2e_report.v0",
+    "generatedAt":  "2026-05-21T13:09:17.6556003Z",
+    "status":  "failed",
+    "localOnly":  true,
+    "originRestricted":  true,
+    "testerGatewayConfigured":  true,
+    "testerWriteTokenHashConfigured":  true,
+    "maxSendUnits":  "10",
+    "walletCreateSchema":  "flowmemory.control_plane.tester_wallet_create_result.v0",
+    "testerFaucetSchema":  "flowmemory.control_plane.tester_faucet_result.v0",
+    "walletSendSchema":  "flowmemory.control_plane.tester_wallet_send_result.v0",
+    "accountCount":  1,
+    "transferAccepted":  false,
+    "transferStatus":  "synthetic_gateway_failure",
+    "transferId":  "",
+    "capRejected":  false,
+    "capRejectStatusCode":  200,
+    "capRejectSchema":  "flowmemory.control_plane.tester_wallet_send_error.v0",
+    "routes":  [
+                   "/tester/status",
+                   "/tester/wallets/create"
+               ],
+    "balancesAfter":  {
+                          "sender":  "10",
+                          "recipient":  "10"
+                      },
+    "checks":  {
+                   "localOnly":  true,
+                   "originRestricted":  true,
+                   "testerGatewayConfigured":  true,
+                   "testerWriteTokenHashConfigured":  true,
+                   "walletCreateSchemaOk":  true,
+                   "testerFaucetSchemaOk":  true,
+                   "walletSendSchemaOk":  true,
+                   "accountCountAtLeastTwo":  false,
+                   "transferAccepted":  false,
+                   "transferAppliedLocalRuntime":  false,
+                   "transferIdPresent":  false,
+                   "capRejected":  false,
+                   "capRejectStatusCode400":  false,
+                   "capRejectSchemaOk":  false,
+                   "capRejectNoSecrets":  true,
+                   "routesCoverRequired":  false,
+                   "balancesMatchExpected":  false,
+                   "noLiveBroadcast":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+                         "accountCountAtLeastTwo",
+                         "transferAccepted",
+                         "transferAppliedLocalRuntime",
+                         "transferIdPresent",
+                         "capRejected",
+                         "capRejectStatusCode400",
+                         "capRejectSchemaOk",
+                         "routesCoverRequired",
+                         "balancesMatchExpected"
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "noLiveBroadcast":  true,
+    "broadcasts":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true
+}

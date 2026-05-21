@@ -1,0 +1,113 @@
+{
+    "schema":  "flowchain.metrics_install_windows_report.v0",
+    "generatedAt":  "2026-05-21T10:56:17.2077829Z",
+    "status":  "passed",
+    "action":  "Status",
+    "plannedOnly":  false,
+    "taskMutationPerformed":  false,
+    "taskRegistered":  false,
+    "taskRemoved":  false,
+    "taskName":  "FlowChainOpsMetrics",
+    "taskPath":  "\\",
+    "intervalMinutes":  5,
+    "taskBefore":  {
+                       "exists":  false,
+                       "schedulerAvailable":  true,
+                       "taskName":  "FlowChainOpsMetrics",
+                       "taskPath":  "\\",
+                       "state":  "",
+                       "lastRunTime":  "",
+                       "nextRunTime":  "",
+                       "lastTaskResult":  "",
+                       "queryError":  ""
+                   },
+    "taskAfter":  {
+                      "exists":  false,
+                      "schedulerAvailable":  true,
+                      "taskName":  "FlowChainOpsMetrics",
+                      "taskPath":  "\\",
+                      "state":  "",
+                      "lastRunTime":  "",
+                      "nextRunTime":  "",
+                      "lastTaskResult":  "",
+                      "queryError":  ""
+                  },
+    "schedulerCmdlets":  [
+                             {
+                                 "name":  "Get-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Get-ScheduledTaskInfo",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskAction",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskTrigger",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "New-ScheduledTaskSettingsSet",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Register-ScheduledTask",
+                                 "available":  true
+                             },
+                             {
+                                 "name":  "Unregister-ScheduledTask",
+                                 "available":  true
+                             }
+                         ],
+    "scheduledTask":  {
+                          "trigger":  "Interval",
+                          "intervalMinutes":  5,
+                          "execute":  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                          "arguments":  "-NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-metrics-export.ps1 -AllowBlocked -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics-export-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_METRICS_EXPORT.md -MetricsJsonPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.json -PrometheusTextPath docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.prom.txt",
+                          "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                          "metricsScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-ops-metrics-export.ps1",
+                          "ownerEnvFileConfigured":  false,
+                          "sendsExternalNotifications":  false
+                      },
+    "metrics":  {
+                    "reportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics-export-report.json",
+                    "markdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_OPS_METRICS_EXPORT.md",
+                    "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.json",
+                    "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-ops-metrics.prom.txt"
+                },
+    "commands":  {
+                     "plan":  "npm run flowchain:ops:metrics:install:windows -- -Action Plan",
+                     "validate":  "npm run flowchain:ops:metrics:install:validate",
+                     "install":  "npm run flowchain:ops:metrics:install:windows -- -Action Install",
+                     "status":  "npm run flowchain:ops:metrics:install:windows -- -Action Status",
+                     "uninstall":  "npm run flowchain:ops:metrics:install:windows -- -Action Uninstall",
+                     "metrics":  "npm run flowchain:ops:metrics:export -- -AllowBlocked"
+                 },
+    "checks":  {
+                   "metricsScriptExists":  true,
+                   "schedulerCmdletsAvailable":  true,
+                   "scheduledTaskActionSupportsWorkingDirectory":  true,
+                   "scheduledTaskTriggerSupportsRepetition":  true,
+                   "actionUsesMetricsScript":  true,
+                   "actionUsesRepoWorkingDirectory":  true,
+                   "hasAllowBlocked":  true,
+                   "hasReportPath":  true,
+                   "hasMarkdownPath":  true,
+                   "hasMetricsJsonPath":  true,
+                   "hasPrometheusTextPath":  true,
+                   "intervalMinutesValid":  true,
+                   "noExternalDelivery":  true,
+                   "installStatusUninstallCommandsPresent":  true,
+                   "planDoesNotMutate":  null,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "actionErrorRedacted":  "",
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

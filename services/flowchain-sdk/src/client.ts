@@ -28,6 +28,28 @@ export interface WalletSendRequest {
   createRecipient?: boolean;
 }
 
+export interface WaitForTransactionRequest {
+  txId?: string;
+  txHash?: string;
+  transactionId?: string;
+  timeoutMs?: number;
+  pollMs?: number;
+}
+
+export interface SignedTransactionSubmitRequest {
+  signedEnvelope?: JsonValue;
+  signedTransaction?: JsonValue;
+  submittedBy?: string;
+  expectedNonce?: string;
+  runtimeSubmit?: boolean;
+  forwardToRuntime?: boolean;
+  runtimeSubmitMode?: "off" | "direct" | "node-inbox";
+  runtimeTransaction?: JsonValue;
+  runtimeTx?: JsonValue;
+}
+
+export type SubmitSignedEnvelopeOptions = Omit<SignedTransactionSubmitRequest, "signedEnvelope" | "signedTransaction">;
+
 export class FlowChainRpcError extends Error {
   readonly code: number;
   readonly data?: JsonValue;
@@ -38,6 +60,18 @@ export class FlowChainRpcError extends Error {
     this.code = code;
     this.data = data;
   }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function transactionLookupParams(request: WaitForTransactionRequest): Record<string, JsonValue> {
+  const key = request.txHash ?? request.txId ?? request.transactionId;
+  if (key === undefined || key.trim().length === 0) {
+    throw new FlowChainRpcError("waitForTransaction requires txId, txHash, or transactionId", -32602);
+  }
+  return request.txHash !== undefined || key.startsWith("0x") ? { txHash: key } : { txId: key };
 }
 
 export class FlowChainClient {
@@ -170,6 +204,66 @@ export class FlowChainClient {
 
   transactionGet(params: JsonValue) {
     return this.call("transaction_get", params);
+  }
+
+  submitSignedTransaction(request: SignedTransactionSubmitRequest) {
+    return this.postControlPlane("/transactions/submit", request as unknown as JsonValue);
+  }
+
+  submitSignedEnvelope(signedEnvelope: JsonValue, options: SubmitSignedEnvelopeOptions = {}) {
+    return this.submitSignedTransaction({ ...options, signedEnvelope });
+  }
+
+  async waitForTransaction(request: WaitForTransactionRequest) {
+    const params = transactionLookupParams(request);
+    const txId = typeof params.txId === "string" ? params.txId : null;
+    const txHash = typeof params.txHash === "string" ? params.txHash : null;
+    const timeoutMs = request.timeoutMs ?? 30000;
+    const pollMs = Math.max(100, request.pollMs ?? 1000);
+    const startedAt = Date.now();
+    let attempts = 0;
+    let lastNotFound: FlowChainRpcError | null = null;
+
+    while (Date.now() - startedAt <= timeoutMs) {
+      attempts += 1;
+      try {
+        const transaction = await this.transactionGet(params);
+        return {
+          schema: "flowchain.sdk.wait_transaction.v0",
+          status: "included",
+          txId,
+          txHash,
+          attempts,
+          elapsedMs: Date.now() - startedAt,
+          transaction,
+        } satisfies JsonValue;
+      } catch (error) {
+        if (!(error instanceof FlowChainRpcError) || error.code !== -32004) {
+          throw error;
+        }
+        lastNotFound = error;
+      }
+
+      const elapsedMs = Date.now() - startedAt;
+      if (elapsedMs >= timeoutMs) break;
+      await sleep(Math.min(pollMs, timeoutMs - elapsedMs));
+    }
+
+    return {
+      schema: "flowchain.sdk.wait_transaction.v0",
+      status: "timeout",
+      txId,
+      txHash,
+      attempts,
+      elapsedMs: Date.now() - startedAt,
+      transaction: null,
+      lastError: lastNotFound === null
+        ? null
+        : {
+            code: lastNotFound.code,
+            message: lastNotFound.message,
+          },
+    } satisfies JsonValue;
   }
 
   mempoolList(params: JsonValue = { limit: 10 }) {

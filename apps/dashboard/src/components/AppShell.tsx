@@ -8,6 +8,7 @@ import {
   BrainCircuit,
   Boxes,
   ClipboardCheck,
+  ClipboardList,
   ArrowRightLeft,
   Compass,
   GitBranch,
@@ -34,6 +35,7 @@ interface AppShellProps {
 
 const NAV_ITEMS = [
   { to: "/", label: "Workbench", icon: Monitor },
+  { to: "/activation", label: "Activation", icon: ClipboardList },
   { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/tester", label: "Tester launch", icon: UserPlus },
   { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },

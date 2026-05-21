@@ -23,6 +23,8 @@ $MaxSingleDepositWeiLimit = [UInt64] 100000000000000
 $TotalCapWeiLimit = [UInt64] 1000000000000000
 $MaxBlockRange = [UInt64] 5000
 $ZeroAddress = "0x0000000000000000000000000000000000000000"
+$DefaultPilotCursorState = "services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+$DefaultPilotRuntimeState = "services/bridge-relayer/out/base8453-pilot-credit-application-state.json"
 
 function Get-PilotEnv {
     param([Parameter(Mandatory = $true)][string] $Name)
@@ -191,20 +193,76 @@ function Assert-Base8453Chain {
     return $actual
 }
 
-function Assert-PilotBlockRange {
+function Get-PilotBridgePolicy {
+    $supportedToken = Require-PilotAddressEnv -Name "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN"
+    $assetDecimals = Convert-PilotUInt64 -Name "FLOWCHAIN_BASE8453_ASSET_DECIMALS" -Value (Require-PilotEnv -Name "FLOWCHAIN_BASE8453_ASSET_DECIMALS")
+    if ($assetDecimals -gt 255) {
+        throw "FLOWCHAIN_BASE8453_ASSET_DECIMALS must be between 0 and 255."
+    }
+    $confirmations = Convert-PilotUInt64 -Name "FLOWCHAIN_PILOT_CONFIRMATIONS" -Value (Require-PilotEnv -Name "FLOWCHAIN_PILOT_CONFIRMATIONS")
+    if ($confirmations -eq 0) {
+        throw "FLOWCHAIN_PILOT_CONFIRMATIONS must be nonzero."
+    }
+    if ($confirmations -gt 256) {
+        throw "FLOWCHAIN_PILOT_CONFIRMATIONS must be <= 256 for this pilot."
+    }
+    $caps = Assert-PilotCaps
+
+    return [ordered]@{
+        supportedToken = $supportedToken
+        assetDecimals = $assetDecimals.ToString()
+        confirmations = $confirmations.ToString()
+        maxDepositWei = $caps.maxDepositWei
+        totalCapWei = $caps.totalCapWei
+        summary = [ordered]@{
+            supportedToken = "valid"
+            assetDecimals = $assetDecimals.ToString()
+            confirmations = $confirmations.ToString()
+            caps = "valid"
+        }
+    }
+}
+
+function Get-PilotScanPlan {
+    param([Parameter(Mandatory = $true)][string] $RepoRoot)
+
     $fromBlock = Convert-PilotUInt64 -Name "FLOWCHAIN_BASE8453_FROM_BLOCK" -Value (Require-PilotEnv -Name "FLOWCHAIN_BASE8453_FROM_BLOCK")
-    $toBlock = Convert-PilotUInt64 -Name "FLOWCHAIN_BASE8453_TO_BLOCK" -Value (Require-PilotEnv -Name "FLOWCHAIN_BASE8453_TO_BLOCK")
-    if ($fromBlock -gt $toBlock) {
-        throw "FLOWCHAIN_BASE8453_FROM_BLOCK must be <= FLOWCHAIN_BASE8453_TO_BLOCK."
+    $toBlockValue = Get-PilotEnv -Name "FLOWCHAIN_BASE8453_TO_BLOCK"
+    $toBlock = $null
+    if (-not [string]::IsNullOrWhiteSpace($toBlockValue)) {
+        $toBlock = Convert-PilotUInt64 -Name "FLOWCHAIN_BASE8453_TO_BLOCK" -Value $toBlockValue
+        if ($fromBlock -gt $toBlock) {
+            throw "FLOWCHAIN_BASE8453_FROM_BLOCK must be <= FLOWCHAIN_BASE8453_TO_BLOCK."
+        }
+        if (($toBlock - $fromBlock) -gt $MaxBlockRange) {
+            throw "Base 8453 observer range is too wide. Max range is $MaxBlockRange blocks."
+        }
     }
-    if (($toBlock - $fromBlock) -gt $MaxBlockRange) {
-        throw "Base 8453 observer range is too wide. Max range is $MaxBlockRange blocks."
+
+    $cursorState = Get-PilotEnv -Name "FLOWCHAIN_BASE8453_CURSOR_STATE"
+    if ([string]::IsNullOrWhiteSpace($cursorState)) {
+        $cursorState = $DefaultPilotCursorState
     }
+    $cursorStateFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $RepoRoot -Path (Resolve-FlowChainPath -RepoRoot $RepoRoot -Path $cursorState)
 
     return [ordered]@{
         fromBlock = $fromBlock.ToString()
-        toBlock = $toBlock.ToString()
+        toBlock = if ($null -eq $toBlock) { $null } else { $toBlock.ToString() }
+        toBlockConfigured = $null -ne $toBlock
+        toBlockRequired = $false
+        mode = if ($null -eq $toBlock) { "cursor-confirmed-head" } else { "bounded-upper-block" }
+        cursorState = $cursorStateFullPath
     }
+}
+
+function Get-PilotRuntimeStatePath {
+    param([Parameter(Mandatory = $true)][string] $RepoRoot)
+
+    $runtimeState = Get-PilotEnv -Name "FLOWCHAIN_BASE8453_RUNTIME_STATE"
+    if ([string]::IsNullOrWhiteSpace($runtimeState)) {
+        $runtimeState = $DefaultPilotRuntimeState
+    }
+    return (Assert-FlowChainPathInsideRepo -RepoRoot $RepoRoot -Path (Resolve-FlowChainPath -RepoRoot $RepoRoot -Path $runtimeState))
 }
 
 function Get-PilotMaxUsd {
@@ -286,9 +344,6 @@ function Invoke-PilotBridgeObserver {
         [string] $FromBlock,
 
         [Parameter(Mandatory = $true)]
-        [string] $ToBlock,
-
-        [Parameter(Mandatory = $true)]
         [string] $OutPath,
 
         [Parameter(Mandatory = $true)]
@@ -298,6 +353,12 @@ function Invoke-PilotBridgeObserver {
         [string] $HandoffOutPath,
 
         [string] $WithdrawalOutPath = "",
+
+        [Parameter(Mandatory = $true)]
+        [object] $BridgePolicy,
+
+        [Parameter(Mandatory = $true)]
+        [object] $ScanPlan,
 
         [switch] $ApplyCredit,
 
@@ -309,20 +370,35 @@ function Invoke-PilotBridgeObserver {
         "bridge:observe",
         "--",
         "--mode",
-        "base-mainnet-canary",
+        "base-mainnet-pilot",
         "--rpc-url",
         $RpcUrl,
         "--lockbox-address",
         $LockboxAddress,
+        "--approved-lockbox",
+        $LockboxAddress,
+        "--supported-token",
+        $BridgePolicy["supportedToken"],
+        "--asset-decimals",
+        $BridgePolicy["assetDecimals"],
         "--from-block",
         $FromBlock,
-        "--to-block",
-        $ToBlock,
+        "--cursor-state",
+        $ScanPlan["cursorState"],
+        "--runtime-state",
+        (Get-PilotRuntimeStatePath -RepoRoot $RepoRoot),
+        "--confirmations",
+        $BridgePolicy["confirmations"],
         "--expected-chain-id",
         "$Base8453ChainId",
+        "--acknowledge-pilot",
         "--acknowledge-real-funds",
         "--max-usd",
         ((Get-PilotMaxUsd).ToString([System.Globalization.CultureInfo]::InvariantCulture)),
+        "--max-deposit-amount",
+        $BridgePolicy["maxDepositWei"],
+        "--total-cap-amount",
+        $BridgePolicy["totalCapWei"],
         "--out",
         $OutPath,
         "--credit-out",
@@ -330,6 +406,10 @@ function Invoke-PilotBridgeObserver {
         "--handoff-out",
         $HandoffOutPath
     )
+
+    if ($null -ne $ScanPlan["toBlock"] -and -not [string]::IsNullOrWhiteSpace("$($ScanPlan["toBlock"])")) {
+        $args += @("--to-block", $ScanPlan["toBlock"])
+    }
 
     if ($ApplyCredit) {
         $args += "--apply-credit"
@@ -342,7 +422,7 @@ function Invoke-PilotBridgeObserver {
         $args += @("--withdrawal-intent", "--withdrawal-base-recipient", $recipient, "--withdrawal-out", $WithdrawalOutPath)
     }
 
-    Write-Host "Running Base 8453 bridge observer. RPC URL is supplied from env and is not printed."
+    Write-Host "Running Base 8453 pilot bridge observer. RPC URL is supplied from env and is not printed."
     & npm @args
     if ($LASTEXITCODE -ne 0) {
         throw "Base 8453 bridge observer failed."
@@ -516,14 +596,16 @@ function Invoke-PilotAction {
             $rpcUrl = Require-PilotRpcUrl
             Assert-Base8453Chain -RpcUrl $rpcUrl | Out-Null
             $lockbox = Require-PilotAddressEnv -Name "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
-            $range = Assert-PilotBlockRange
+            $policy = Get-PilotBridgePolicy
+            $range = Get-PilotScanPlan -RepoRoot $RepoRoot
             $result.checks.chainId = "$Base8453ChainId"
             $result.checks.lockboxAddress = "valid"
-            $result.checks.blockRange = $range
+            $result.checks.bridgePolicy = $policy.summary
+            $result.checks.scanPlan = $range
             $out = Join-Path $EvidenceFullDir "base8453-observation.json"
             $creditOut = Join-Path $EvidenceFullDir "base8453-credit-pending.json"
             $handoffOut = Join-Path $EvidenceFullDir "base8453-handoff-pending.json"
-            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -ToBlock $range.toBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut
+            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut -BridgePolicy $policy -ScanPlan $range
             $result.status = "executed"
             $result.outputs.observation = $out
             $result.outputs.credit = $creditOut
@@ -533,11 +615,14 @@ function Invoke-PilotAction {
             $rpcUrl = Require-PilotRpcUrl
             Assert-Base8453Chain -RpcUrl $rpcUrl | Out-Null
             $lockbox = Require-PilotAddressEnv -Name "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
-            $range = Assert-PilotBlockRange
+            $policy = Get-PilotBridgePolicy
+            $range = Get-PilotScanPlan -RepoRoot $RepoRoot
+            $result.checks.bridgePolicy = $policy.summary
+            $result.checks.scanPlan = $range
             $out = Join-Path $EvidenceFullDir "base8453-observation-for-credit.json"
             $creditOut = Join-Path $EvidenceFullDir "base8453-credit-applied.json"
             $handoffOut = Join-Path $EvidenceFullDir "base8453-handoff-applied.json"
-            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -ToBlock $range.toBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut -ApplyCredit
+            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut -BridgePolicy $policy -ScanPlan $range -ApplyCredit
             $result.status = "executed"
             $result.outputs.observation = $out
             $result.outputs.credit = $creditOut
@@ -547,12 +632,15 @@ function Invoke-PilotAction {
             $rpcUrl = Require-PilotRpcUrl
             Assert-Base8453Chain -RpcUrl $rpcUrl | Out-Null
             $lockbox = Require-PilotAddressEnv -Name "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
-            $range = Assert-PilotBlockRange
+            $policy = Get-PilotBridgePolicy
+            $range = Get-PilotScanPlan -RepoRoot $RepoRoot
+            $result.checks.bridgePolicy = $policy.summary
+            $result.checks.scanPlan = $range
             $out = Join-Path $EvidenceFullDir "base8453-observation-for-withdrawal.json"
             $creditOut = Join-Path $EvidenceFullDir "base8453-credit-for-withdrawal.json"
             $handoffOut = Join-Path $EvidenceFullDir "base8453-handoff-with-withdrawal.json"
             $withdrawalOut = Join-Path $EvidenceFullDir "base8453-withdrawal-intent.json"
-            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -ToBlock $range.toBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut -WithdrawalOutPath $withdrawalOut -ApplyCredit -WithdrawalIntent
+            Invoke-PilotBridgeObserver -RepoRoot $RepoRoot -RpcUrl $rpcUrl -LockboxAddress $lockbox -FromBlock $range.fromBlock -OutPath $out -CreditOutPath $creditOut -HandoffOutPath $handoffOut -WithdrawalOutPath $withdrawalOut -BridgePolicy $policy -ScanPlan $range -ApplyCredit -WithdrawalIntent
             $result.status = "executed"
             $result.outputs.withdrawalIntent = $withdrawalOut
         }
@@ -628,10 +716,15 @@ $report = [ordered]@{
         "FLOWCHAIN_BASE8453_RPC_URL",
         "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+        "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+        "FLOWCHAIN_BASE8453_CURSOR_STATE",
         "FLOWCHAIN_BASE8453_TO_BLOCK",
+        "FLOWCHAIN_BASE8453_RUNTIME_STATE",
         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+        "FLOWCHAIN_PILOT_CONFIRMATIONS",
         "FLOWCHAIN_PILOT_OWNER_ADDRESS",
         "FLOWCHAIN_PILOT_RELEASE_AUTHORITY_ADDRESS",
         "FLOWCHAIN_PILOT_SETTLEMENT_SUBMITTER_ADDRESS",
@@ -641,6 +734,8 @@ $report = [ordered]@{
     boundaries = @(
         "capped owner pilot only",
         "Base public network chain id 8453 is checked before live observer/deploy actions",
+        "live observer actions use explicit base-mainnet-pilot guardrails, approved lockbox, supported token, confirmations, cursor state, and persistent runtime credit state",
+        "FLOWCHAIN_BASE8453_TO_BLOCK is optional; without it the pilot scans from the cursor to the confirmed Base head",
         "dry-run uses no RPC URL or private key",
         "private keys and RPC URLs are read from the local shell only and are not written to reports"
     )

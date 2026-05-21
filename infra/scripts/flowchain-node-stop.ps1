@@ -29,19 +29,34 @@ if (-not ($pidStatus.running -and $pidStatus.commandLineMatched)) {
     }
 }
 if ($pidStatus.running -and -not $pidStatus.commandLineMatched) {
+    Remove-Item -LiteralPath $pidPath -Force -ErrorAction SilentlyContinue
+    $status = [ordered]@{
+        schema = "flowmemory.local_devnet.node_status.v0"
+        status = "stopped"
+        note = "stale pid file removed; matching FlowChain node process was not found"
+        nodeId = "node:local:unknown"
+        pid = $pidStatus.pid
+        statePath = $stateFullPath
+        nodeDir = $nodeFullDir
+    }
+    Write-FlowChainJson -Path $statusPath -Value $status -Depth 10
+
     $report = [ordered]@{
         schema = "flowchain.private_testnet.node_stop_report.v0"
         generatedAt = (Get-Date).ToUniversalTime().ToString("o")
-        status = "pid-mismatch-not-stopped"
+        status = "stale-pid-removed"
         pid = $pidStatus.pid
         statePath = $stateFullPath
         nodeDir = $nodeFullDir
         stopFile = $stopPath
+        forceStopped = $false
         envValuesPrinted = $false
         noSecrets = $true
     }
     Write-FlowChainJson -Path $reportPath -Value $report -Depth 10
-    throw "FlowChain node pid file points at a non-node process."
+    Write-Host "FlowChain node stop status: stale-pid-removed"
+    Write-Host "Report: $reportPath"
+    exit 0
 }
 
 Set-Content -LiteralPath $stopPath -Value "stop" -Encoding ascii

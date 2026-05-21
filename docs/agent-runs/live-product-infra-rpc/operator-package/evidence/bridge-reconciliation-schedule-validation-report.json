@@ -1,0 +1,78 @@
+{
+    "schema":  "flowchain.bridge_reconciliation_schedule_validation_report.v0",
+    "generatedAt":  "2026-05-21T11:07:58.8465436Z",
+    "status":  "passed",
+    "intervalMinutes":  5,
+    "scheduledReportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-bridge-reconciliation-report.json",
+    "scheduledMarkdownPath":  "docs/agent-runs/live-product-infra-rpc/SCHEDULED_BRIDGE_RECONCILIATION.md",
+    "ownerEnvFileConfigured":  true,
+    "windowsTaskPlan":  {
+                            "taskName":  "FlowChainBridgeReconciliation",
+                            "taskPath":  "\\",
+                            "intervalMinutes":  5,
+                            "execute":  "powershell.exe",
+                            "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$env:FLOWCHAIN_OWNER_ENV_FILE=\u0027devnet/local/owner-inputs/flowchain-owner.local.env\u0027; \u0026 \u0027E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-reconciliation.ps1\u0027 -ReportPath \u0027docs/agent-runs/live-product-infra-rpc/scheduled-bridge-reconciliation-report.json\u0027 -MarkdownPath \u0027docs/agent-runs/live-product-infra-rpc/SCHEDULED_BRIDGE_RECONCILIATION.md\u0027\"",
+                            "workingDirectory":  "E:/FlowMemory/flowmemory-live-infra-rpc",
+                            "ownerEnvFileConfigured":  true,
+                            "mutatesDuringValidation":  false
+                        },
+    "systemdPlan":  {
+                        "serviceName":  "flowchain-bridge-reconciliation.service",
+                        "timerName":  "flowchain-bridge-reconciliation.timer",
+                        "intervalMinutes":  5,
+                        "unitPreview":  {
+                                            "service":  "[Unit]\nDescription=FlowChain bridge reconciliation refresh\nWants=flowchain-live.service flowchain-supervisor.service\nAfter=network-online.target flowchain-live.service flowchain-supervisor.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-devnet/local/owner-inputs/flowchain-owner.local.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=devnet/local/owner-inputs/flowchain-owner.local.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-reconciliation.ps1 -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-bridge-reconciliation-report.json -MarkdownPath docs/agent-runs/live-product-infra-rpc/SCHEDULED_BRIDGE_RECONCILIATION.md\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs E:/FlowMemory/flowmemory-live-infra-rpc/services/bridge-relayer/out\n\n[Install]\nWantedBy=multi-user.target",
+                                            "timer":  "[Unit]\nDescription=Run FlowChain bridge reconciliation every 5 minutes\n\n[Timer]\nOnBootSec=2min\nOnUnitActiveSec=5min\nAccuracySec=30s\nPersistent=true\nUnit=flowchain-bridge-reconciliation.service\n\n[Install]\nWantedBy=timers.target"
+                                        }
+                    },
+    "commands":  {
+                     "validate":  "npm run flowchain:bridge:reconciliation:schedule:validate",
+                     "reconciliation":  "npm run flowchain:bridge:reconciliation",
+                     "windowsPlan":  "Register Windows Scheduled Task FlowChainBridgeReconciliation using the rendered action in this report",
+                     "systemdPlan":  "Install flowchain-bridge-reconciliation.service and flowchain-bridge-reconciliation.timer from the rendered units in this report",
+                     "status":  "Check the Windows task or systemd timer, then inspect docs/agent-runs/live-product-infra-rpc/scheduled-bridge-reconciliation-report.json"
+                 },
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "reconciliationPackageScriptPresent":  true,
+                   "reconciliationScriptExists":  true,
+                   "reconciliationScriptReadsRelayerEvidence":  true,
+                   "reconciliationScriptReadsRuntimeEvidence":  true,
+                   "intervalMinutesValid":  true,
+                   "scheduledReportPathInsideRepo":  true,
+                   "scheduledMarkdownPathInsideRepo":  true,
+                   "windowsPlanRendered":  true,
+                   "windowsPlanUsesReconciliationScript":  true,
+                   "windowsPlanUsesOwnerEnvFile":  true,
+                   "windowsPlanHasReportPath":  true,
+                   "windowsPlanHasMarkdownPath":  true,
+                   "windowsPlanUsesRepoWorkingDirectory":  true,
+                   "windowsPlanDoesNotMutateHost":  true,
+                   "systemdServiceRendered":  true,
+                   "systemdServiceUsesOneshot":  true,
+                   "systemdServiceUsesOwnerEnvFile":  true,
+                   "systemdServiceHasReportPath":  true,
+                   "systemdServiceHasMarkdownPath":  true,
+                   "systemdServiceHardeningPresent":  true,
+                   "systemdServiceWritePathsScoped":  true,
+                   "systemdTimerRendered":  true,
+                   "systemdTimerPersistent":  true,
+                   "systemdTimerIntervalConfigured":  true,
+                   "noExternalDelivery":  true,
+                   "hostMutationPerformedFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

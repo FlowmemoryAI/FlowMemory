@@ -416,8 +416,10 @@ FLOWCHAIN_BASE8453_TO_BLOCK
 FLOWCHAIN_PILOT_MAX_USD
 ```
 
-When `FLOWCHAIN_BASE8453_TO_BLOCK` is absent, the Base 8453 pilot observer uses
-the cursor state file and advances only after a confirmed successful log scan.
+When `FLOWCHAIN_BASE8453_TO_BLOCK` is absent, the production relayer uses the
+final cursor state file and advances it only after confirmed logs are safely
+queued into the L1. The standalone observer writes to a staged direct-observe
+cursor by default so inspection runs cannot skip deposits before credit proof.
 
 Deterministic fixture mode, no external RPC:
 

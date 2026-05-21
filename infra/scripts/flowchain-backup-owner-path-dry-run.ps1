@@ -105,13 +105,18 @@ New-Item -ItemType Directory -Force -Path $childReportDir | Out-Null
 
 $backupRoot = Join-Path $dryRunFullRoot "owner-path"
 New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
+$dryRunOwnerEnvFile = Join-Path $dryRunFullRoot "flowchain-backup-dry-run.owner.env"
+Set-Content -LiteralPath $dryRunOwnerEnvFile -Value "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupRoot" -Encoding UTF8
 $stateHashBefore = Get-BackupDryRunFileSha256 -Path $stateFullPath
 $hadPreviousBackupEnv = Test-Path Env:\FLOWCHAIN_RPC_STATE_BACKUP_PATH
 $previousBackupEnv = $env:FLOWCHAIN_RPC_STATE_BACKUP_PATH
+$hadPreviousOwnerEnvFile = Test-Path Env:\FLOWCHAIN_OWNER_ENV_FILE
+$previousOwnerEnvFile = $env:FLOWCHAIN_OWNER_ENV_FILE
 $childOutput = @()
 $childExitCode = 1
 try {
     $env:FLOWCHAIN_RPC_STATE_BACKUP_PATH = $backupRoot
+    $env:FLOWCHAIN_OWNER_ENV_FILE = $dryRunOwnerEnvFile
     $childOutput = (& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "flowchain-public-rpc-backup-readiness.ps1") `
         -StatePath $stateFullPath `
         -ReportPath $childReadinessReportPath 2>&1) | ForEach-Object { ConvertTo-BackupDryRunSafeLine -Line $_ }
@@ -124,6 +129,12 @@ finally {
     else {
         Remove-Item Env:\FLOWCHAIN_RPC_STATE_BACKUP_PATH -ErrorAction SilentlyContinue
     }
+    if ($hadPreviousOwnerEnvFile) {
+        $env:FLOWCHAIN_OWNER_ENV_FILE = $previousOwnerEnvFile
+    }
+    else {
+        Remove-Item Env:\FLOWCHAIN_OWNER_ENV_FILE -ErrorAction SilentlyContinue
+    }
 }
 $stateHashAfter = Get-BackupDryRunFileSha256 -Path $stateFullPath
 $ownerEnvRestored = if ($hadPreviousBackupEnv) {
@@ -131,6 +142,12 @@ $ownerEnvRestored = if ($hadPreviousBackupEnv) {
 }
 else {
     -not (Test-Path Env:\FLOWCHAIN_RPC_STATE_BACKUP_PATH)
+}
+$ownerEnvFileRestored = if ($hadPreviousOwnerEnvFile) {
+    $env:FLOWCHAIN_OWNER_ENV_FILE -eq $previousOwnerEnvFile
+}
+else {
+    -not (Test-Path Env:\FLOWCHAIN_OWNER_ENV_FILE)
 }
 
 $readinessReport = Read-FlowChainJsonIfExists -Path $childReadinessReportPath
@@ -143,6 +160,7 @@ $restore = Get-BackupDryRunProp -Object $restoreReport -Name "restore"
 $checks = [ordered]@{
     dryRunRootInsideIgnoredLocalState = Test-BackupDryRunPathUnder -Parent (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local") -Child $dryRunFullRoot
     ownerBackupEnvRestored = $ownerEnvRestored
+    ownerEnvFileRestored = $ownerEnvFileRestored
     childReadinessCommandPassed = [int]$childExitCode -eq 0
     readinessReportWritten = $null -ne $readinessReport
     readinessStatusPassed = [string](Get-BackupDryRunProp -Object $readinessReport -Name "status" -Default "missing") -eq "passed"
@@ -153,6 +171,8 @@ $checks = [ordered]@{
     writeVerified = (Get-BackupDryRunProp -Object $readinessBackup -Name "writeVerified" -Default $false) -eq $true
     latestPointerVerified = (Get-BackupDryRunProp -Object $readinessBackup -Name "latestPointerVerified" -Default $false) -eq $true
     latestPointerWrittenAtomically = (Get-BackupDryRunProp -Object $readinessBackup -Name "latestPointerWrittenAtomically" -Default $false) -eq $true
+    retentionCurrentSnapshotProtected = (Get-BackupDryRunProp -Object $readinessBackup -Name "retentionCurrentSnapshotProtected" -Default $false) -eq $true
+    retentionPruneErrorsEmpty = [int](Get-BackupDryRunProp -Object $readinessBackup -Name "retentionPruneErrorCount" -Default 1) -eq 0
     stateRootCompared = (Get-BackupDryRunProp -Object $readinessBackup -Name "stateRootCompared" -Default $false) -eq $true
     stateRootMatch = (Get-BackupDryRunProp -Object $readinessBackup -Name "stateRootMatch" -Default $false) -eq $true
     stateFileHashMatch = (Get-BackupDryRunProp -Object $readinessBackup -Name "stateFileHashMatch" -Default $false) -eq $true
@@ -160,6 +180,7 @@ $checks = [ordered]@{
     backupReportPassed = [string](Get-BackupDryRunProp -Object $backupReport -Name "status" -Default "missing") -eq "passed"
     restoreReportPassed = [string](Get-BackupDryRunProp -Object $restoreReport -Name "status" -Default "missing") -eq "passed"
     backupSnapshotCreated = (Get-BackupDryRunProp -Object $backupSnapshot -Name "created" -Default $false) -eq $true
+    backupRetentionProtectedSnapshot = (Get-BackupDryRunProp -Object (Get-BackupDryRunProp -Object $backupReport -Name "retention") -Name "currentSnapshotProtected" -Default $false) -eq $true
     restoreLiveStateProtected = (Get-BackupDryRunProp -Object $restore -Name "liveStatePathProtected" -Default $false) -eq $true
     restoreDidNotMutateLiveState = (Get-BackupDryRunProp -Object $restore -Name "liveStateMutated" -Default $true) -eq $false
     liveStateStillReadable = (Get-FlowChainStateFacts -StatePath $stateFullPath).readable -eq $true

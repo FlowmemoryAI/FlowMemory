@@ -1,0 +1,101 @@
+{
+    "schema":  "flowchain.monitoring_bundle_report.v0",
+    "generatedAt":  "2026-05-21T17:05:58.4769952Z",
+    "status":  "passed",
+    "bundleDir":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle",
+    "dashboardPath":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-grafana-dashboard.json",
+    "prometheusRulesPath":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-prometheus-alerts.yml",
+    "manifestPath":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-monitoring-bundle-manifest.json",
+    "sourceMetricCount":  334,
+    "sourceAlertRuleCount":  44,
+    "dashboardPanelCount":  20,
+    "prometheusRuleCount":  12,
+    "missingDashboardMetricNames":  [
+
+                                    ],
+    "missingPrometheusMetricNames":  [
+
+                                     ],
+    "missingSourceRuleIds":  [
+
+                             ],
+    "missingPanelTitles":  [
+
+                           ],
+    "rulesWithoutCommands":  [
+
+                             ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "commandsWithUrls":  [
+
+                         ],
+    "artifactHashGaps":  [
+
+                         ],
+    "artifacts":  [
+                      {
+                          "path":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-grafana-dashboard.json",
+                          "sha256":  "34a066020715a97aeee657d6320113b531e4633209d57d94cced0f018906bee0",
+                          "byteLength":  77464
+                      },
+                      {
+                          "path":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-prometheus-alerts.yml",
+                          "sha256":  "4c83bd377bbd421f87c679243dafe458e70501bd50c07aff7d357983cf7a43e9",
+                          "byteLength":  5734
+                      },
+                      {
+                          "path":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/README.md",
+                          "sha256":  "8735165c40a91065a4d2c3adcb3befd32385c678750f330e938a9192e477f26b",
+                          "byteLength":  975
+                      },
+                      {
+                          "path":  "docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-monitoring-bundle-manifest.json",
+                          "sha256":  "ff06131cd6a4cda63a270f16290ecdc6922f73fedfcd9af17494352df080729c",
+                          "byteLength":  1986
+                      }
+                  ],
+    "notificationPlan":  {
+                             "storesSecrets":  false,
+                             "sendsNetworkNotifications":  false
+                         },
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "metricsJsonLoaded":  true,
+                   "metricsExportReportLoaded":  true,
+                   "alertRulesLoaded":  true,
+                   "sourceMetricsSufficient":  true,
+                   "sourceAlertRulesSufficient":  true,
+                   "dashboardWritten":  true,
+                   "dashboardJsonValid":  true,
+                   "dashboardPanelCountSufficient":  true,
+                   "dashboardTargetsHaveKnownMetrics":  true,
+                   "dashboardIncludesCorePanels":  true,
+                   "prometheusRulesWritten":  true,
+                   "prometheusYamlHasRules":  true,
+                   "prometheusRuleCountSufficient":  true,
+                   "prometheusRulesReferenceKnownMetrics":  true,
+                   "prometheusRulesReferenceKnownAlertRuleIds":  true,
+                   "prometheusRulesHaveRunbookCommands":  true,
+                   "prometheusCommandsAvoidInlineEnvAssignment":  true,
+                   "prometheusCommandsAvoidUrls":  true,
+                   "readmeWritten":  true,
+                   "manifestWritten":  true,
+                   "artifactHashesPresent":  true,
+                   "filesNoSecretMarkers":  true,
+                   "noNetworkDelivery":  true,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

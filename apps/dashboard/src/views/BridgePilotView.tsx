@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
   ArrowRightLeft,
   ChevronDown,
@@ -7,6 +8,7 @@ import {
   Copy,
   ExternalLink,
   Info,
+  ListChecks,
   Lock,
   ShieldCheck,
   Wallet,
@@ -82,6 +84,35 @@ function statusFromReadiness(readiness: BridgeReadiness | null): DashboardStatus
   }
 
   return "pending";
+}
+
+function text(value: unknown, fallback = "not recorded"): string {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+  return String(value);
+}
+
+function statusFromMetric(value: unknown, fallback: DashboardStatus = "pending"): DashboardStatus {
+  const normalized = text(value, "").toLowerCase();
+  if (normalized === "passed" || normalized === "ready" || normalized === "verified" || normalized === "true") {
+    return "verified";
+  }
+  if (normalized === "failed" || normalized === "failure") {
+    return "failed";
+  }
+  if (normalized === "stale") {
+    return "stale";
+  }
+  if (normalized === "blocked" || normalized === "pending" || normalized === "false") {
+    return "pending";
+  }
+  return fallback;
+}
+
+function secondsLabel(value: unknown): string {
+  const parsed = text(value);
+  return parsed === "not recorded" ? parsed : `${parsed}s`;
 }
 
 function isBytes32(value: string): boolean {
@@ -310,6 +341,8 @@ function errorMessage(error: unknown): string {
 
 export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const readiness = asReadiness(workbench.controlPlane.bridgeLiveReadiness);
+  const liveReadinessReport = isRecord(workbench.raw.liveReadinessReport) ? workbench.raw.liveReadinessReport : null;
+  const liveMetrics = isRecord(liveReadinessReport?.metrics) ? liveReadinessReport.metrics : {};
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
   const [amountEth, setAmountEth] = useState("0.00001");
@@ -349,6 +382,96 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const usdEstimateLabel =
     usdEstimate ??
     (priceStatus === "loading" ? "Loading ETH/USD quote" : "USD quote unavailable");
+  const runtimeCreditStatus = liveMetrics.bridgeRuntimeCreditValidationStatus ?? liveMetrics.bridgeRuntimeCreditStatus;
+  const pilotAggregateStatus = liveMetrics.realValuePilotAggregateStatus;
+  const pilotAggregateReady = liveMetrics.realValuePilotAggregateReady === true;
+  const pilotAggregateCommandCount = text(liveMetrics.realValuePilotAggregateCommandsRun, "0");
+  const bridgeCommandMatrixStatus = text(liveMetrics.bridgeCommandMatrixStatus);
+  const bridgeCommandMatrixReady = liveMetrics.bridgeCommandMatrixReady === true;
+  const bridgeCommandMatrixCommands = text(liveMetrics.bridgeCommandMatrixCommands, "0");
+  const bridgeCommandMatrixLiveBroadcastCommands = text(liveMetrics.bridgeCommandMatrixLiveBroadcastCommands, "0");
+  const bridgeCommandMatrixAckGaps = text(liveMetrics.bridgeCommandMatrixBroadcastAckGaps, "0");
+  const bridgeNoSecretAuditStatus = text(liveMetrics.bridgeNoSecretAuditStatus);
+  const bridgeNoSecretAuditReady = liveMetrics.bridgeNoSecretAuditReady === true;
+  const bridgeNoSecretAuditScannedFiles = text(liveMetrics.bridgeNoSecretAuditScannedFiles, "0");
+  const bridgeNoSecretAuditFindings = text(liveMetrics.bridgeNoSecretAuditFindings, "0");
+  const bridgeNoSecretAuditFailedChecks = text(liveMetrics.bridgeNoSecretAuditFailedChecks, "0");
+  const bridgeProofCards = [
+    {
+      label: "Bridge command matrix",
+      value: bridgeCommandMatrixStatus,
+      detail: `${bridgeCommandMatrixCommands} commands; ${bridgeCommandMatrixLiveBroadcastCommands} live-broadcast gated; ack gaps ${bridgeCommandMatrixAckGaps}`,
+      command: "npm run flowchain:bridge:command-matrix",
+      status: bridgeCommandMatrixReady ? "verified" : statusFromMetric(bridgeCommandMatrixStatus),
+      Icon: ListChecks,
+    },
+    {
+      label: "No-secret audit",
+      value: bridgeNoSecretAuditStatus,
+      detail: `${bridgeNoSecretAuditScannedFiles} files scanned; findings ${bridgeNoSecretAuditFindings}; failed ${bridgeNoSecretAuditFailedChecks}`,
+      command: "npm run flowchain:bridge:no-secret-audit",
+      status: bridgeNoSecretAuditReady ? "verified" : statusFromMetric(bridgeNoSecretAuditStatus),
+      Icon: ShieldCheck,
+    },
+    {
+      label: "Pilot aggregate",
+      value: text(pilotAggregateStatus),
+      detail: `${pilotAggregateCommandCount} proof commands`,
+      command: "npm run flowchain:real-value-pilot:e2e",
+      status: pilotAggregateReady ? "verified" : statusFromMetric(pilotAggregateStatus),
+      Icon: ListChecks,
+    },
+    {
+      label: "Runtime credit",
+      value: text(runtimeCreditStatus),
+      detail: `${secondsLabel(liveMetrics.bridgeRuntimeCreditLatencySeconds)} to spendable credit`,
+      command: "npm run flowchain:bridge:runtime-credit:validate",
+      status: statusFromMetric(runtimeCreditStatus),
+      Icon: Activity,
+    },
+    {
+      label: "Transfer settlement",
+      value: secondsLabel(liveMetrics.bridgeRuntimeCreditTransferSeconds),
+      detail: "wallet credit transfer proof",
+      command: "npm run flowchain:bridge:runtime-credit:validate",
+      status: liveMetrics.bridgeRuntimeCreditReady === true ? "verified" : statusFromMetric(runtimeCreditStatus),
+      Icon: ArrowRightLeft,
+    },
+    {
+      label: "Relayer guardrail",
+      value: text(liveMetrics.bridgeRelayerGuardrailStatus),
+      detail: "fail-closed cursor and broadcast checks",
+      command: "npm run flowchain:bridge:relayer:guardrail:validate",
+      status: statusFromMetric(liveMetrics.bridgeRelayerGuardrailStatus),
+      Icon: ShieldCheck,
+    },
+    {
+      label: "Relayer loop",
+      value: text(liveMetrics.bridgeRelayerLoopValidationStatus),
+      detail: "start, health, stop, and cleanup proof",
+      command: "npm run flowchain:bridge:relayer:loop:validate",
+      status: statusFromMetric(liveMetrics.bridgeRelayerLoopValidationStatus),
+      Icon: ListChecks,
+    },
+    {
+      label: "Reconciliation schedule",
+      value: text(liveMetrics.bridgeReconciliationScheduleStatus),
+      detail: `${text(liveMetrics.bridgeReconciliationScheduleIntervalMinutes, "not recorded")} minute cadence; no mutation ${text(liveMetrics.bridgeReconciliationScheduleNoMutation, "false")}`,
+      command: "npm run flowchain:bridge:reconciliation:schedule:validate",
+      status:
+        liveMetrics.bridgeReconciliationScheduleReady === true
+          ? "verified"
+          : statusFromMetric(liveMetrics.bridgeReconciliationScheduleStatus),
+      Icon: Activity,
+    },
+  ] satisfies Array<{
+    label: string;
+    value: string;
+    detail: string;
+    command: string;
+    status: DashboardStatus;
+    Icon: typeof Activity;
+  }>;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -522,6 +645,31 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
         </section>
 
         <section className="flowchain-bridge-layout" aria-label="Flowchain bridge">
+          <section className="bridge-proof-rail" aria-label="Bridge runtime proof">
+            <div className="bridge-proof-intro">
+              <span>Bridge runtime proof</span>
+              <strong>Relayer and credit checks</strong>
+              <small>Latest no-secret launch evidence.</small>
+            </div>
+            {bridgeProofCards.map((card) => {
+              const Icon = card.Icon;
+              return (
+                <article className="bridge-proof-item" key={card.label}>
+                  <div className="bridge-proof-item-heading">
+                    <span aria-hidden="true">
+                      <Icon size={18} />
+                    </span>
+                    <StatusBadge status={card.status} compact />
+                  </div>
+                  <strong>{card.label}</strong>
+                  <p>{card.value}</p>
+                  <small>{card.detail}</small>
+                  <code>{card.command}</code>
+                </article>
+              );
+            })}
+          </section>
+
           <article className="bridge-console" aria-label="Bridge transaction form">
             <div className="bridge-route-row">
               <label>

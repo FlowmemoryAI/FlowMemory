@@ -1,0 +1,38 @@
+{
+  "schema": "flowchain.external_tester_client_report.v0",
+  "generatedAt": "2026-05-21T17:21:41.085Z",
+  "status": "planned",
+  "dryRun": true,
+  "shareable": false,
+  "blockedReason": null,
+  "connectPackPath": "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-connect-pack.json",
+  "endpoint": "https://flowchain.example.invalid",
+  "token": {
+    "configured": false,
+    "source": ""
+  },
+  "plannedRoutes": [
+    "/health",
+    "/rpc/discover",
+    "/rpc/readiness",
+    "/chain/status",
+    "/tester/status",
+    "/tester/wallets/create",
+    "/tester/faucet",
+    "/tester/wallets/send"
+  ],
+  "missingReadRoutes": [],
+  "missingWriteRoutes": [],
+  "networkResults": {},
+  "checks": {
+    "connectPackLoaded": true,
+    "shareableOrAllowedBlocked": true,
+    "readRoutesCovered": true,
+    "writeRoutesCovered": true,
+    "dryRunAvoidedNetwork": true,
+    "noSecrets": true
+  },
+  "broadcasts": false,
+  "envValuesPrinted": false,
+  "noSecrets": true
+}

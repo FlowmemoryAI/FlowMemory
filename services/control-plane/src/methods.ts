@@ -1078,6 +1078,44 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
     });
   }
 
+  const existingRuntimeBlockKeys = new Set(devnetBlocksArray(state).map((block) => {
+    return `${stringValue(block.blockNumber) ?? "0"}:${stringValue(block.blockHash) ?? ZERO_ROOT}`;
+  }));
+  const existingTxIds = new Set(rows.map((row) => stringValue(row.transactionId)).filter((value): value is string => value !== undefined));
+  for (const block of activeRuntimeBlocksArray(state)) {
+    const blockNumber = stringValue(block.blockNumber) ?? "0";
+    const blockHash = stringValue(block.blockHash) ?? ZERO_ROOT;
+    const blockKey = `${blockNumber}:${blockHash}`;
+    if (existingRuntimeBlockKeys.has(blockKey)) {
+      continue;
+    }
+    const receipts = asJsonArray(block.receipts)
+      .map((entry) => asJsonObject(entry))
+      .filter((entry): entry is JsonObject => entry !== null);
+    stringList(block.txIds).forEach((txId, transactionIndex) => {
+      if (existingTxIds.has(txId)) {
+        return;
+      }
+      const receipt = receipts.find((entry) => stringValue(entry.txId) === txId) ?? null;
+      rows.push({
+        schema: "flowmemory.control_plane.transaction.v0",
+        transactionId: txId,
+        txHash: txId,
+        blockNumber,
+        blockHash,
+        transactionIndex: String(transactionIndex),
+        status: stringValue(receipt?.status) ?? "unknown",
+        type: stringValue(asJsonObject(receipt?.payload)?.type) ?? "unknown",
+        payload: asJsonObject(receipt?.payload),
+        receipt,
+        source: "active-local-runtime",
+        runtimeStateSource: runtimeSourcePath(state),
+        localOnly: true,
+      });
+      existingTxIds.add(txId);
+    });
+  }
+
   const byHash = new Map<string, JsonObject>();
   for (const observation of state.indexer.state.observations) {
     const existing = byHash.get(observation.txHash) ?? {
@@ -1132,6 +1170,33 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
   }
 
   rows.push(...byHash.values());
+  for (const transfer of tokenTransferRows(state)) {
+    const transferId = stringValue(transfer.transferId);
+    const txId = stringValue(transfer.txId) ?? transferId;
+    if (txId === undefined || existingTxIds.has(txId)) {
+      continue;
+    }
+    const transferPayload = asJsonObject(transfer.transfer) ?? transfer;
+    const transferBlockNumber = stringValue(transfer.blockNumber) ?? stringValue(transferPayload.transferredAtBlock);
+    const transferStatus = stringValue(transfer.status);
+    rows.push({
+      schema: "flowmemory.control_plane.transaction.v0",
+      transactionId: txId,
+      txHash: txId,
+      transferId,
+      blockNumber: transferBlockNumber ?? "0",
+      blockHash: null,
+      transactionIndex: "0",
+      status: transferStatus === undefined || (transferStatus === "local" && transferBlockNumber !== undefined) ? "applied" : transferStatus,
+      type: "WalletTransfer",
+      payload: transferPayload,
+      receipt: null,
+      source: "wallet-transfer-history",
+      sourceTransferKind: stringValue(transfer.source) ?? null,
+      localOnly: true,
+    });
+    existingTxIds.add(txId);
+  }
   return rows.sort((left, right) => {
     const byBlock = compareStringNumbers(stringValue(left.blockNumber) ?? "0", stringValue(right.blockNumber) ?? "0");
     if (byBlock !== 0) {
@@ -1181,7 +1246,9 @@ function blockRows(state: LoadedControlPlaneState, includeTransactions = false):
       txIds: stringList(block.txIds),
       receiptCount: asJsonArray(block.receipts).length,
       receipts: asJsonArray(block.receipts),
-      transactions: includeTransactions ? [] : undefined,
+      transactions: includeTransactions
+        ? txs.filter((tx) => tx.source === "active-local-runtime" && tx.blockHash === blockHash && tx.blockNumber === blockNumber)
+        : undefined,
       source: "active-local-runtime",
       runtimeStateSource: runtimeSourcePath(state),
       localOnly: true,

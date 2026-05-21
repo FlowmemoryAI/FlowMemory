@@ -326,6 +326,12 @@ function buildExactValueReport(firstRun: BridgePipelineResult): Record<string, u
   };
 }
 
+function failedCheckNames(checks: Record<string, boolean>): string[] {
+  return Object.entries(checks)
+    .filter(([, passed]) => passed !== true)
+    .map(([name]) => name);
+}
+
 async function assertNegativeCoverage(options: PilotE2EOptions): Promise<{
   wrongChainRejected: boolean;
   wrongChainRejectionReason: string;
@@ -389,6 +395,9 @@ async function main(): Promise<void> {
   const evidence = first(firstRun.pilotEvidence, "pilot evidence");
   const withdrawal = first(firstRun.withdrawalIntents, "withdrawal intents");
   const releaseEvidence = first(firstRun.releaseEvidences, "release evidence");
+  const firstApplication = first(firstRun.runtimeApplications, "first applications");
+  const replayApplication = first(replayRun.runtimeApplications, "replay applications");
+  const replayCredit = first(replayRun.credits, "replay credits");
 
   const observationPath = resolve(options.outDir, "bridge-observation.json");
   const creditPath = resolve(options.outDir, "bridge-credit.json");
@@ -421,9 +430,28 @@ async function main(): Promise<void> {
     exactValueReport,
   ].forEach((artifact) => assertNoSecrets(artifact));
 
+  const checks = {
+    sourceChainIsBase8453: observation.deposit.sourceChainId === BASE_MAINNET_CHAIN_ID,
+    firstCreditApplied: credit.status === "applied",
+    firstApplicationAppliedOnce: firstApplication.status === "applied" && firstApplication.applyCount === 1,
+    replayCreditRejected: replayCredit.status === "rejected",
+    replayApplicationIdempotent: replayApplication.status === "idempotent_replay" && replayApplication.applyCount === 0,
+    duplicateReplayRejected: duplicateRun.handoff.replayProtection.duplicateReplayKeys.length > 0,
+    exactValueConserved: (exactValueReport as { allAmountsEqual?: unknown }).allAmountsEqual === true,
+    wrongChainRejected: negativeCoverage.wrongChainRejected === true,
+    unapprovedContractRejected: negativeCoverage.unapprovedContractRejected === true,
+    withdrawalIntentCreated: withdrawal.status === "requested",
+    releaseEvidenceNoBroadcast: releaseEvidence.releaseCall.broadcast === false,
+    noLiveBroadcast: releaseEvidence.releaseCall.broadcast === false,
+    noSecrets: true,
+  };
+  const failedChecks = failedCheckNames(checks);
+  assert.deepEqual(failedChecks, [], canonicalJson({ failedChecks, checks }));
+
   const report = {
     schema: "flowmemory.bridge_real_value_pilot_e2e_report.v0",
     generatedAt: new Date().toISOString(),
+    status: "passed",
     mode: options.mode,
     sourceChain: {
       chainId: BASE_MAINNET_CHAIN_ID,
@@ -484,6 +512,8 @@ async function main(): Promise<void> {
     ],
     liveObserverCommand: "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -OperatorAck -ApplyCredit -WithdrawalIntent",
     noSecrets: true,
+    checks,
+    failedChecks,
   };
   assertNoSecrets(report);
 

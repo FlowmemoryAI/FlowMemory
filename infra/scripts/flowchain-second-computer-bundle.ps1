@@ -21,6 +21,7 @@ function Get-BundleExclusionReason {
     }
     if ($lower -in @(
         "crypto/attestations.md",
+        "docs/agent-runs/production-l1-explorer-dashboard/no_secret_browser_proof.md",
         "fixtures/deployments/base-canary-indexer-checkpoint.json"
     )) {
         return "nonessential source-bundle file with secret-marker field names"

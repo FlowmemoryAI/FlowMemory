@@ -14,7 +14,8 @@ $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 $defaultOwnerEnvFile = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/owner-inputs/flowchain-owner.local.env"
-if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")) -and (Test-Path -LiteralPath $defaultOwnerEnvFile)) {
+$defaultImportDisabled = [Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_DEFAULT_IMPORT_DISABLED", "Process")
+if ($defaultImportDisabled -notin @("1", "true", "TRUE", "yes", "YES") -and [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", "Process")) -and (Test-Path -LiteralPath $defaultOwnerEnvFile)) {
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $defaultOwnerEnvFile, "Process")
 }
 

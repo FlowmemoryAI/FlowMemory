@@ -17,15 +17,36 @@ New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
 $baseReportPaths = [ordered]@{
     "service-status-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-status-report.json"
+    "service-supervisor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-report.json"
+    "service-supervisor-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json"
     "service-monitor-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json"
+    "service-install-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json"
+    "systemd-service-install-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
     "public-rpc-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json"
+    "public-rpc-synthetic-canary-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json"
+    "public-rpc-deployment-bundle-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json"
+    "public-rpc-deployment-automation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
+    "public-rpc-command-matrix-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json"
     "backup-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json"
     "bridge-live-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     "bridge-infra-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
+    "bridge-command-matrix-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+    "bridge-no-secret-audit-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
+    "bridge-deploy-control-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     "bridge-relayer-once-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     "bridge-relayer-guardrail-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
+    "bridge-runtime-credit-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    "real-value-pilot-aggregate-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json"
     "external-tester-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
+    "public-tester-gateway-e2e-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json"
+    "external-tester-evidence-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json"
+    "dashboard-ui-readiness-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json"
+    "owner-inputs-validation-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-inputs-validation-report.json"
+    "owner-activation-plan-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json"
+    "owner-go-live-handoff-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json"
+    "owner-needs-now-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json"
     "public-deployment-contract-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    "production-truth-table-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     "no-secret-scan-report.json" = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
 
@@ -92,6 +113,61 @@ function New-DrillFallbackReport {
                 broadcasts = $false
             }
         }
+        "service-supervisor-report.json" {
+            return [ordered]@{
+                schema = "flowchain.service_supervisor_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                restartAttempts = 0
+                bridgeRelayerLoop = [ordered]@{
+                    requested = $false
+                    pollSeconds = 30
+                    postRestartSettleSeconds = 20
+                    postRestartPollSeconds = 1
+                }
+                iterations = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "service-supervisor-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.service_supervisor_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                restartAttempts = 1
+                nodeRecovery = [ordered]@{
+                    afterCrash = [ordered]@{
+                        status = "failed"
+                        nodeStatus = "stopped"
+                        detected = $true
+                    }
+                    afterRecovery = [ordered]@{
+                        status = "passed"
+                        nodeRunning = $true
+                        controlPlaneRunning = $true
+                        latestHeight = "100"
+                        liveProfile = $true
+                        maxBlocks = 0
+                    }
+                    restartAttempts = 1
+                }
+                checks = [ordered]@{
+                    nodeCrashDetected = $true
+                    nodeRestartAttemptsExactlyOne = $true
+                    afterNodeRecoveryNodeRunning = $true
+                    afterNodeRecoveryControlPlaneRunning = $true
+                    afterNodeRecoveryLiveProfile = $true
+                    afterNodeRecoveryMaxBlocksUnbounded = $true
+                }
+                failedChecks = @()
+                secretMarkerFindings = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
         "no-secret-scan-report.json" {
             return [ordered]@{
                 schema = "flowchain.no_secret_scan_report.v0"
@@ -99,6 +175,228 @@ function New-DrillFallbackReport {
                 status = "passed"
                 noSecrets = $true
                 envValuesPrinted = $false
+            }
+        }
+        "production-truth-table-report.json" {
+            return [ordered]@{
+                schema = "flowchain.production_truth_table_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "blocked-owner-input"
+                completionReady = $false
+                blockedOnlyOnKnownOwnerInputs = $true
+                classificationCounts = [ordered]@{
+                    passed = 1
+                    "blocked-owner-input" = 1
+                    "blocked-repo-work" = 0
+                    failed = 0
+                    stale = 0
+                }
+                productionGateCount = 2
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "external-tester-evidence-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.external_tester_evidence_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    transferFound = $true
+                    transferMatchesAccounts = $true
+                    transferAmountMatches = $true
+                    transactionIdMatches = $true
+                    senderDebited = $true
+                    recipientCredited = $true
+                    blockHeightAdvanced = $true
+                }
+                failedChecks = @()
+                missingRequiredFiles = @()
+                invalidJsonFiles = @()
+                secretMarkerFindings = @()
+                credentialUrlFindings = @()
+                envAssignmentFindings = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "public-tester-gateway-e2e-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_tester_gateway_e2e_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "failed"
+                localOnly = $true
+                originRestricted = $true
+                testerGatewayConfigured = $false
+                testerWriteTokenHashConfigured = $false
+                maxSendUnits = ""
+                walletCreateSchema = ""
+                testerFaucetSchema = ""
+                walletSendSchema = ""
+                accountCount = 0
+                transferAccepted = $false
+                transferStatus = "missing"
+                transferId = ""
+                capRejected = $false
+                capRejectStatusCode = 0
+                capRejectSchema = ""
+                routes = @()
+                balancesAfter = [ordered]@{}
+                checks = [ordered]@{
+                    localOnly = $true
+                    originRestricted = $true
+                    testerGatewayConfigured = $false
+                    testerWriteTokenHashConfigured = $false
+                    walletCreateSchemaOk = $false
+                    testerFaucetSchemaOk = $false
+                    walletSendSchemaOk = $false
+                    accountCountAtLeastTwo = $false
+                    transferAccepted = $false
+                    transferAppliedLocalRuntime = $false
+                    transferIdPresent = $false
+                    capRejected = $false
+                    capRejectStatusCode400 = $false
+                    capRejectSchemaOk = $false
+                    capRejectNoSecrets = $true
+                    routesCoverRequired = $false
+                    balancesMatchExpected = $false
+                    noLiveBroadcast = $true
+                    envValuesPrintedFalse = $true
+                    noSecrets = $true
+                    broadcastsFalse = $true
+                    secretMarkerFindingsEmpty = $true
+                }
+                failedChecks = @("testerGatewayConfigured", "testerWriteTokenHashConfigured", "walletCreateSchemaOk", "testerFaucetSchemaOk", "walletSendSchemaOk", "accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")
+                secretMarkerFindings = @()
+                noLiveBroadcast = $true
+                broadcasts = $false
+                envValuesPrinted = $false
+                noSecrets = $true
+            }
+        }
+        "dashboard-ui-readiness-report.json" {
+            return [ordered]@{
+                schema = "flowchain.dashboard_ui_readiness_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    testerWalletCreateCovered = $true
+                    testerFaucetCovered = $true
+                    testerSendCovered = $true
+                    explorerRouteCovered = $true
+                    noSecretLeakageAsserted = $true
+                    dashboardBrowserE2ePassed = $true
+                    dashboardBuildPassed = $true
+                }
+                failedChecks = @()
+                secretMarkerFindings = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "owner-inputs-validation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.owner_inputs_validation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                requiredEnvNames = @("FLOWCHAIN_RPC_PUBLIC_URL", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_RPC_STATE_BACKUP_PATH")
+                scenarios = @(
+                    [ordered]@{ name = "missing"; passed = $true },
+                    [ordered]@{ name = "invalid"; passed = $true },
+                    [ordered]@{ name = "valid-structure"; passed = $true },
+                    [ordered]@{ name = "valid-owner-env-file"; passed = $true },
+                    [ordered]@{ name = "missing-owner-env-file"; passed = $true },
+                    [ordered]@{ name = "malformed-owner-env-file"; passed = $true }
+                )
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "public-rpc-deployment-bundle-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_rpc_deployment_bundle_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    includesDisallowedOriginPreflight = $true
+                    includesBroadStateBlockedPreflight = $true
+                    includesPrivateWalletCreateBlockedPreflight = $true
+                    authorizationForwardingScopedToTesterWrite = $true
+                    includesSecurityHeaders = $true
+                    preflightsCheckSecurityHeaders = $true
+                }
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "public-rpc-deployment-automation-report.json" {
+            return [ordered]@{
+                schema = "flowchain.public_rpc_deployment_automation_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "passed"
+                checks = [ordered]@{
+                    renderedPreflightHasDisallowedOriginProbe = $true
+                    renderedPreflightBlocksBroadStatePath = $true
+                    renderedPreflightBlocksPrivateWalletCreate = $true
+                    renderedNginxAuthorizationForwardingScoped = $true
+                    renderedNginxHasSecurityHeaders = $true
+                    renderedPreflightChecksSecurityHeaders = $true
+                }
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
+            }
+        }
+        "bridge-relayer-once-report.json" {
+            return [ordered]@{
+                schema = "flowchain.bridge_relayer_once_report.v0"
+                generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+                status = "blocked"
+                queueDisabled = $false
+                childTimeoutSeconds = 300
+                readiness = [ordered]@{ infra = "blocked"; live = "not-run" }
+                counts = [ordered]@{ observedCredits = 0; newCredits = 0; queuedTransactions = 0; appliedCredits = 0 }
+                timing = [ordered]@{ latencyGate = "not-run"; handoffToSpendableSeconds = $null }
+                cursorCommit = [ordered]@{
+                    mode = "staged-cursor"
+                    finalCommitRequired = $true
+                    finalCommitted = $false
+                    reason = "not-run"
+                }
+                checks = [ordered]@{
+                    statusKnown = $true
+                    requiredEnvNamesPresent = $true
+                    childTimeoutRecorded = $true
+                    childProcessesDidNotTimeout = $true
+                    broadcastsFalse = $true
+                    envValuesPrintedFalse = $true
+                    noSecrets = $true
+                    readinessInfraChecked = $true
+                    readinessLiveCheckedWhenInfraPassed = $true
+                    blockedBeforeLiveReadinessWhenInfraBlocked = $true
+                    blockedBeforeObservationWhenReadinessBlocked = $true
+                    noQueuedTransactionsWhenBlocked = $true
+                    noAppliedCreditsWhenBlocked = $true
+                    cursorModeStaged = $true
+                    finalCursorNotCommittedWhenBlocked = $true
+                    finalCursorPathInsideRepo = $true
+                    stagedCursorPathInsideRepo = $true
+                    issuesClassified = $true
+                    externalBlockerClassifiedWhenBlocked = $true
+                    latencyGateRecorded = $true
+                    latencyGatePassedWhenApplied = $true
+                    queueAndApplyMatchWhenPassed = $true
+                    cursorSafeWhenPassed = $true
+                }
+                failedChecks = @()
+                envValuesPrinted = $false
+                noSecrets = $true
+                broadcasts = $false
             }
         }
         "bridge-relayer-guardrail-validation-report.json" {
@@ -113,6 +411,16 @@ function New-DrillFallbackReport {
                     noCreditsQueued = $false
                     noCreditsApplied = $false
                     ownerEnvNotImported = $false
+                    directObserveFailedClosed = $false
+                    directObserveReportWritten = $false
+                    directObserveStatusBlocked = $false
+                    directObserveUsesStagedCursorByDefault = $false
+                    directObserveCursorNotFinal = $false
+                    directObserveFinalCursorUnchanged = $false
+                    directObserveStagedCursorNotWritten = $false
+                    directObserveBroadcastsFalse = $false
+                    directObserveEnvValuesPrintedFalse = $false
+                    directObserveNoSecrets = $false
                     broadcastsFalse = $false
                     envValuesPrintedFalse = $false
                     noSecrets = $false
@@ -142,7 +450,10 @@ function Copy-DrillBaseReports {
     New-Item -ItemType Directory -Force -Path $InputDir | Out-Null
     foreach ($entry in $baseReportPaths.GetEnumerator()) {
         $target = Join-Path $InputDir $entry.Key
-        if (Test-Path -LiteralPath $entry.Value) {
+        if ($entry.Key -eq "production-truth-table-report.json") {
+            Write-FlowChainJson -Path $target -Value (New-DrillFallbackReport -LeafName $entry.Key) -Depth 12
+        }
+        elseif (Test-Path -LiteralPath $entry.Value) {
             Copy-Item -LiteralPath $entry.Value -Destination $target -Force
         }
         else {
@@ -199,7 +510,7 @@ function Test-DrillCommandGroups {
     param([AllowNull()][object] $Report)
 
     $commands = Get-DrillProp -Object $Report -Name "incidentCommands"
-    foreach ($name in @("status", "restart", "backupRecovery", "publicExposure", "emergency")) {
+    foreach ($name in @("status", "restart", "backupRecovery", "publicExposure", "productSurface", "ownerInputs", "emergency")) {
         $group = Get-DrillProp -Object $commands -Name $name -Default @()
         if (@($group).Count -eq 0) {
             return $false
@@ -286,6 +597,7 @@ function Invoke-SyntheticOpsCase {
         [Parameter(Mandatory = $true)][string] $Requirement,
         [Parameter(Mandatory = $true)][string] $ExpectedStatus,
         [string[]] $ExpectedCodes = @(),
+        [switch] $RequireAlertMapping,
         [scriptblock] $Mutate = $null
     )
 
@@ -323,16 +635,54 @@ function Invoke-SyntheticOpsCase {
         -and (Get-DrillProp -Object $caseReport -Name "noSecrets" -Default $false) -eq $true `
         -and (Get-DrillProp -Object $caseReport -Name "broadcasts" -Default $true) -eq $false
     $commandsPresent = Test-DrillCommandGroups -Report $caseReport
+    $alertMappingPassed = $true
+    $alertEvidence = ""
+    if ($RequireAlertMapping.IsPresent) {
+        $caseAlertRulesPath = Join-Path $caseDir "ops-alert-rules-report.json"
+        $caseAlertMarkdownPath = Join-Path $caseDir "OPS_ALERT_RULES.md"
+        $alertChild = Invoke-DrillChild -Name "$Id-alerts" -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            (Join-Path $PSScriptRoot "flowchain-ops-alerts.ps1"),
+            "-AllowBlocked",
+            "-NoRefresh",
+            "-OpsSnapshotPath",
+            $caseReportPath,
+            "-ReportPath",
+            $caseAlertRulesPath,
+            "-MarkdownPath",
+            $caseAlertMarkdownPath
+        )
+        $alertReport = Read-FlowChainJsonIfExists -Path $caseAlertRulesPath
+        $alertStatus = [string](Get-DrillProp -Object $alertReport -Name "status" -Default "missing")
+        $alertCurrentCodes = @((Get-DrillProp -Object $alertReport -Name "currentFindingCodes" -Default @()) | ForEach-Object { "$_" })
+        $alertMissingCodes = @($ExpectedCodes | Where-Object { $_ -notin $alertCurrentCodes })
+        $unmappedAlertCodes = @((Get-DrillProp -Object $alertReport -Name "unmappedCurrentFindingCodes" -Default @()))
+        $activeRulesWithoutCommands = @((Get-DrillProp -Object $alertReport -Name "activeRuleIdsWithoutCommands" -Default @()))
+        $alertSafeFlags = (Get-DrillProp -Object $alertReport -Name "envValuesPrinted" -Default $true) -eq $false `
+            -and (Get-DrillProp -Object $alertReport -Name "noSecrets" -Default $false) -eq $true `
+            -and (Get-DrillProp -Object $alertReport -Name "broadcasts" -Default $true) -eq $false
+        $alertMappingPassed = $alertChild.exitCode -eq 0 `
+            -and $alertStatus -eq "passed" `
+            -and $alertMissingCodes.Count -eq 0 `
+            -and $unmappedAlertCodes.Count -eq 0 `
+            -and $activeRulesWithoutCommands.Count -eq 0 `
+            -and $alertSafeFlags
+        $alertEvidence = ", alertStatus=$alertStatus, alertExitCode=$($alertChild.exitCode), alertMissingCodes=$($alertMissingCodes.Count), unmappedAlertCodes=$($unmappedAlertCodes.Count), activeRulesWithoutCommands=$($activeRulesWithoutCommands.Count), alertSafeFlags=$alertSafeFlags"
+    }
     $passed = $actualStatus -eq $ExpectedStatus `
         -and $missingCodes.Count -eq 0 `
         -and $exitMatches `
         -and $safeFlags `
-        -and $commandsPresent
+        -and $commandsPresent `
+        -and $alertMappingPassed
 
     Add-DrillResult -Id $Id `
         -Requirement $Requirement `
         -Passed $passed `
-        -Evidence "expectedStatus=$ExpectedStatus, actualStatus=$actualStatus, exitCode=$($child.exitCode), missingCodes=$($missingCodes.Count), commandsPresent=$commandsPresent, safeFlags=$safeFlags" `
+        -Evidence "expectedStatus=$ExpectedStatus, actualStatus=$actualStatus, exitCode=$($child.exitCode), missingCodes=$($missingCodes.Count), commandsPresent=$commandsPresent, safeFlags=$safeFlags$alertEvidence" `
         -Child $child `
         -Report $caseReport `
         -ExpectedCodes $ExpectedCodes
@@ -365,6 +715,32 @@ Invoke-SyntheticOpsCase -Id "deployment-refresh-aborted-critical" `
             Set-DrillProp -Object $refresh -Name "failedStepNames" -Value @("service-status")
             Set-DrillProp -Object $refresh -Name "timedOutStepNames" -Value @("service-status")
             Set-DrillProp -Object $refresh -Name "skippedStepNames" -Value @("service-monitor")
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "truth-table-stale-critical" `
+    -Requirement "A stale or failed production truth table is classified as a critical incident before release readiness is trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("truth-table-stale-or-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "production-truth-table-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "stale"
+            $counts = Get-DrillProp -Object $report -Name "classificationCounts"
+            if ($null -eq $counts) {
+                $counts = [ordered]@{}
+                Set-DrillProp -Object $report -Name "classificationCounts" -Value $counts
+            }
+            Set-DrillProp -Object $counts -Name "passed" -Value 1
+            Set-DrillProp -Object $counts -Name "blocked-owner-input" -Value 1
+            Set-DrillProp -Object $counts -Name "blocked-repo-work" -Value 0
+            Set-DrillProp -Object $counts -Name "failed" -Value 0
+            Set-DrillProp -Object $counts -Name "stale" -Value 1
+            Set-DrillProp -Object $report -Name "blockedOnlyOnKnownOwnerInputs" -Value $false
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
         }
     }
 
@@ -440,6 +816,145 @@ Invoke-SyntheticOpsCase -Id "no-secret-scan-critical" `
         }
     }
 
+Invoke-SyntheticOpsCase -Id "dashboard-ui-readiness-critical" `
+    -Requirement "A failed dashboard wallet/faucet/send/explorer readiness proof is classified as a critical incident before tester launch." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("dashboard-ui-readiness-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "dashboard-ui-readiness-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            Set-DrillProp -Object $checks -Name "testerWalletCreateCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "testerFaucetCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "testerSendCovered" -Value $false
+            Set-DrillProp -Object $checks -Name "dashboardBrowserE2ePassed" -Value $false
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("testerWalletCreateCovered", "testerFaucetCovered", "testerSendCovered", "dashboardBrowserE2ePassed")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "public-tester-gateway-e2e-critical" `
+    -Requirement "A failed public tester gateway wallet create, faucet, capped send, cap rejection, route, no-secret, or no-broadcast proof is classified and mapped to the critical alert rule before friends-and-family access is shared." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("public-tester-gateway-e2e-failed") `
+    -RequireAlertMapping `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "public-tester-gateway-e2e-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "testerGatewayConfigured" -Value $true
+            Set-DrillProp -Object $report -Name "testerWriteTokenHashConfigured" -Value $true
+            Set-DrillProp -Object $report -Name "accountCount" -Value 1
+            Set-DrillProp -Object $report -Name "transferAccepted" -Value $false
+            Set-DrillProp -Object $report -Name "transferStatus" -Value "synthetic_gateway_failure"
+            Set-DrillProp -Object $report -Name "transferId" -Value ""
+            Set-DrillProp -Object $report -Name "capRejected" -Value $false
+            Set-DrillProp -Object $report -Name "capRejectStatusCode" -Value 200
+            Set-DrillProp -Object $report -Name "routes" -Value @("/tester/status", "/tester/wallets/create")
+            Set-DrillProp -Object $report -Name "balancesAfter" -Value ([ordered]@{
+                sender = "10"
+                recipient = "10"
+            })
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("localOnly", "originRestricted", "testerGatewayConfigured", "testerWriteTokenHashConfigured", "walletCreateSchemaOk", "testerFaucetSchemaOk", "walletSendSchemaOk", "capRejectNoSecrets", "noLiveBroadcast", "envValuesPrintedFalse", "noSecrets", "broadcastsFalse", "secretMarkerFindingsEmpty")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("accountCountAtLeastTwo", "transferAccepted", "transferAppliedLocalRuntime", "transferIdPresent", "capRejected", "capRejectStatusCode400", "capRejectSchemaOk", "routesCoverRequired", "balancesMatchExpected")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "noLiveBroadcast" -Value $true
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "owner-inputs-validation-critical" `
+    -Requirement "A broken owner-input validator is classified as a critical incident before live cutover instructions are trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("owner-inputs-validation-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "owner-inputs-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "requiredEnvNames" -Value @()
+            Set-DrillProp -Object $report -Name "scenarios" -Value @(
+                [ordered]@{ name = "missing"; passed = $true },
+                [ordered]@{ name = "invalid"; passed = $false }
+            )
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "public-rpc-edge-hardening-critical" `
+    -Requirement "A public RPC edge bundle missing deny-origin, blocked-private-path, scoped authorization, or defensive response-header proof is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("public-rpc-edge-hardening-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "public-rpc-deployment-bundle-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            Set-DrillProp -Object $checks -Name "includesDisallowedOriginPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "includesBroadStateBlockedPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "includesPrivateWalletCreateBlockedPreflight" -Value $false
+            Set-DrillProp -Object $checks -Name "authorizationForwardingScopedToTesterWrite" -Value $false
+            Set-DrillProp -Object $checks -Name "includesSecurityHeaders" -Value $false
+            Set-DrillProp -Object $checks -Name "preflightsCheckSecurityHeaders" -Value $false
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "bridge-relayer-check-contract-critical" `
+    -Requirement "A bridge relayer one-shot report with missing or failed safety checks is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-relayer-check-contract-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "bridge-relayer-once-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "blocked"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("noQueuedTransactionsWhenBlocked", "noAppliedCreditsWhenBlocked", "finalCursorNotCommittedWhenBlocked", "externalBlockerClassifiedWhenBlocked")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("noQueuedTransactionsWhenBlocked", "noAppliedCreditsWhenBlocked", "finalCursorNotCommittedWhenBlocked", "externalBlockerClassifiedWhenBlocked")
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
 Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
     -Requirement "A failed bridge relayer guardrail proof is classified as a critical incident before any relayer loop can be trusted." `
     -ExpectedStatus "failed" `
@@ -455,6 +970,52 @@ Invoke-SyntheticOpsCase -Id "bridge-relayer-guardrail-critical" `
             }
             Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
             Set-DrillProp -Object $report -Name "noSecrets" -Value $false
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "bridge-direct-observe-cursor-critical" `
+    -Requirement "A standalone Base observer that does not default to staged cursor state is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("bridge-direct-observe-cursor-unsafe") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "bridge-relayer-guardrail-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "passed"
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("finalCursorUnchanged", "stagedCursorNotWritten", "finalCursorNotCommitted", "noCreditsQueued", "noCreditsApplied", "ownerEnvNotImported", "broadcastsFalse", "envValuesPrintedFalse", "noSecrets", "secretMarkerFindingsEmpty")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("directObserveFailedClosed", "directObserveReportWritten", "directObserveStatusBlocked", "directObserveBroadcastsFalse", "directObserveEnvValuesPrintedFalse", "directObserveNoSecrets")) {
+                Set-DrillProp -Object $checks -Name $name -Value $true
+            }
+            foreach ($name in @("directObserveUsesStagedCursorByDefault", "directObserveCursorNotFinal", "directObserveFinalCursorUnchanged", "directObserveStagedCursorNotWritten")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            $directObserve = Get-DrillProp -Object $report -Name "directObserve"
+            if ($null -eq $directObserve) {
+                $directObserve = [ordered]@{}
+                Set-DrillProp -Object $report -Name "directObserve" -Value $directObserve
+            }
+            Set-DrillProp -Object $directObserve -Name "finalCursorAfterSha256" -Value "synthetic-final-cursor-changed"
+            $cursor = Get-DrillProp -Object $directObserve -Name "cursor"
+            if ($null -eq $cursor) {
+                $cursor = [ordered]@{}
+                Set-DrillProp -Object $directObserve -Name "cursor" -Value $cursor
+            }
+            Set-DrillProp -Object $cursor -Name "mode" -Value "unsafe-final-cursor"
+            Set-DrillProp -Object $cursor -Name "cursorStateIsFinalCursor" -Value $true
+            Set-DrillProp -Object $cursor -Name "directObserveUsesStagedCursorByDefault" -Value $false
+            Set-DrillProp -Object $cursor -Name "ownerFinalCursorRequested" -Value $false
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @()
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
             Set-DrillProp -Object $report -Name "broadcasts" -Value $false
         }
     }
@@ -488,6 +1049,93 @@ Invoke-SyntheticOpsCase -Id "bridge-relayer-loop-unhealthy-critical" `
                 noBroadcasts = $true
                 healthy = $false
             })
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "supervisor-relayer-recovery-failed-critical" `
+    -Requirement "A supervisor configured for bridge relayer loop recovery that still reports an unhealthy relayer after restart is classified as a critical incident." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("supervisor-relayer-recovery-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "service-supervisor-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            Set-DrillProp -Object $report -Name "restartAttempts" -Value 1
+            Set-DrillProp -Object $report -Name "bridgeRelayerLoop" -Value ([ordered]@{
+                requested = $true
+                pollSeconds = 5
+                postRestartSettleSeconds = 30
+                postRestartPollSeconds = 1
+            })
+            Set-DrillProp -Object $report -Name "iterations" -Value @(
+                [ordered]@{
+                    sampledAt = (Get-Date).ToUniversalTime().ToString("o")
+                    restartReasons = @("bridge-relayer-loop-not-running")
+                    restartNeeded = $true
+                    restartPerformed = $true
+                    after = [ordered]@{
+                        exitCode = 0
+                        reportStatus = "passed"
+                        nodeStatus = "running"
+                        controlPlaneStatus = "running"
+                        latestHeight = "100"
+                        finalizedHeight = "100"
+                        stateFileLastWriteAgeSeconds = 1
+                        liveProfile = $true
+                        maxBlocks = 0
+                        bridgeRelayerLoopStatus = "stopped"
+                        bridgeRelayerLoopPid = 0
+                        bridgeRelayerLoopCommandLineMatched = $false
+                        bridgeRelayerLoopReportStatus = "missing"
+                        bridgeRelayerLoopReportHealthy = $false
+                    }
+                }
+            )
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
+        }
+    }
+
+Invoke-SyntheticOpsCase -Id "supervisor-node-recovery-validation-critical" `
+    -Requirement "A missing or failed supervisor node crash recovery proof is classified as a critical incident before live service autorecovery is trusted." `
+    -ExpectedStatus "failed" `
+    -ExpectedCodes @("supervisor-node-recovery-validation-failed") `
+    -Mutate {
+        param([string] $InputDir)
+        Update-DrillJsonReport -Path (Join-Path $InputDir "service-supervisor-validation-report.json") -Mutator {
+            param($report)
+            Set-DrillProp -Object $report -Name "status" -Value "failed"
+            $nodeRecovery = Get-DrillProp -Object $report -Name "nodeRecovery"
+            if ($null -eq $nodeRecovery) {
+                $nodeRecovery = [ordered]@{}
+                Set-DrillProp -Object $report -Name "nodeRecovery" -Value $nodeRecovery
+            }
+            Set-DrillProp -Object $nodeRecovery -Name "restartAttempts" -Value 0
+            $afterRecovery = Get-DrillProp -Object $nodeRecovery -Name "afterRecovery"
+            if ($null -eq $afterRecovery) {
+                $afterRecovery = [ordered]@{}
+                Set-DrillProp -Object $nodeRecovery -Name "afterRecovery" -Value $afterRecovery
+            }
+            Set-DrillProp -Object $afterRecovery -Name "status" -Value "failed"
+            Set-DrillProp -Object $afterRecovery -Name "nodeRunning" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "controlPlaneRunning" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "liveProfile" -Value $false
+            Set-DrillProp -Object $afterRecovery -Name "maxBlocks" -Value 1
+            $checks = Get-DrillProp -Object $report -Name "checks"
+            if ($null -eq $checks) {
+                $checks = [ordered]@{}
+                Set-DrillProp -Object $report -Name "checks" -Value $checks
+            }
+            foreach ($name in @("nodeCrashDetected", "nodeRestartAttemptsExactlyOne", "afterNodeRecoveryNodeRunning", "afterNodeRecoveryControlPlaneRunning", "afterNodeRecoveryLiveProfile", "afterNodeRecoveryMaxBlocksUnbounded")) {
+                Set-DrillProp -Object $checks -Name $name -Value $false
+            }
+            Set-DrillProp -Object $report -Name "failedChecks" -Value @("nodeCrashDetected", "nodeRestartAttemptsExactlyOne", "afterNodeRecoveryNodeRunning", "afterNodeRecoveryControlPlaneRunning", "afterNodeRecoveryLiveProfile", "afterNodeRecoveryMaxBlocksUnbounded")
+            Set-DrillProp -Object $report -Name "secretMarkerFindings" -Value @()
+            Set-DrillProp -Object $report -Name "envValuesPrinted" -Value $false
+            Set-DrillProp -Object $report -Name "noSecrets" -Value $true
+            Set-DrillProp -Object $report -Name "broadcasts" -Value $false
         }
     }
 
@@ -541,16 +1189,30 @@ Add-DrillResult -Id "post-drill-live-status" `
 
 $liveStateAfter = Get-FlowChainStateFacts -StatePath (Resolve-FlowChainPath -RepoRoot $repoRoot -Path "devnet/local/state.json")
 $failedCases = @($cases | Where-Object { $_.status -ne "passed" })
+$publicTesterGatewayIncidentCase = $cases | Where-Object { $_.id -eq "public-tester-gateway-e2e-critical" } | Select-Object -First 1
+$publicTesterGatewayIncidentFindingCodes = @()
+if ($null -ne $publicTesterGatewayIncidentCase) {
+    $publicTesterGatewayIncidentFindingCodes = @((Get-DrillProp -Object $publicTesterGatewayIncidentCase -Name "findingCodes" -Default @()))
+}
 $requiredScenarios = @(
     "baseline-owner-blockers-only",
     "deployment-refresh-aborted-critical",
+    "truth-table-stale-critical",
     "node-down-critical",
     "control-plane-down-critical",
     "stale-state-critical",
     "height-not-advancing-critical",
     "no-secret-scan-critical",
+    "dashboard-ui-readiness-critical",
+    "public-tester-gateway-e2e-critical",
+    "owner-inputs-validation-critical",
+    "public-rpc-edge-hardening-critical",
+    "bridge-relayer-check-contract-critical",
     "bridge-relayer-guardrail-critical",
+    "bridge-direct-observe-cursor-critical",
     "bridge-relayer-loop-unhealthy-critical",
+    "supervisor-relayer-recovery-failed-critical",
+    "supervisor-node-recovery-validation-critical",
     "recovery-command-print",
     "post-drill-live-status"
 )
@@ -566,7 +1228,10 @@ $checks = [ordered]@{
     allRequiredScenariosCovered = $missingRequiredScenarios.Count -eq 0
     allCasesPassed = $failedCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
-    minimumCaseCountMet = $cases.Count -ge 11
+    minimumCaseCountMet = $cases.Count -ge 20
+    publicTesterGatewayIncidentCovered = $null -ne $publicTesterGatewayIncidentCase `
+        -and [string](Get-DrillProp -Object $publicTesterGatewayIncidentCase -Name "status" -Default "") -eq "passed" `
+        -and ("public-tester-gateway-e2e-failed" -in $publicTesterGatewayIncidentFindingCodes)
     recoveryCommandPrinted = $recoveryPassed
     postDrillLiveStatusPassed = $postStatusPassed
     liveStateBeforeReadable = (Get-DrillProp -Object $liveStateBefore -Name "readable" -Default $false) -eq $true

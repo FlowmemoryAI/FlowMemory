@@ -49,6 +49,8 @@ $missingArtifactRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -P
 $missingSnapshotManifestRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-missing-snapshot-manifest-report.json"
 $latestPointerTamperRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-latest-pointer-tamper-report.json"
 $wrongChainStateMismatchRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-wrong-chain-state-mismatch-report.json"
+$retentionBackupReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-retention-backup-report.json"
+$retentionRestoreReportPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-retention-restore-report.json"
 
 $script:ValidationChildResults = New-Object System.Collections.ArrayList
 
@@ -385,6 +387,57 @@ if (-not [string]::IsNullOrWhiteSpace($selectedSnapshotName)) {
     $wrongChainStateMismatchDetected = Test-ValidationRestoreFailed -ReportPath $wrongChainStateMismatchRestoreReportPath
 }
 
+$retentionBackupResult = [ordered]@{ exitCode = 1; output = @("not-run"); timedOut = $false }
+$retentionRestoreResult = [ordered]@{ exitCode = 1; output = @("not-run"); timedOut = $false }
+$retentionBackupReport = $null
+$retentionRestoreReport = $null
+$retentionThirdSnapshotName = ""
+$retentionRemainingSnapshotNames = @()
+$retentionBackupPassed = $false
+$retentionPrunedOldestSnapshot = $false
+$retentionRetainedNewestSnapshots = $false
+$retentionLatestManifestMatchesThirdSnapshot = $false
+$retentionReportShowsPrunedSnapshot = $false
+$retentionReportProtectsCurrentSnapshot = $false
+$retentionRestorePassed = $false
+$retentionRestoreUsedThirdSnapshot = $false
+if (-not [string]::IsNullOrWhiteSpace($firstSnapshotName) -and -not [string]::IsNullOrWhiteSpace($secondSnapshotName) -and $firstSnapshotName -ne $secondSnapshotName) {
+    Start-Sleep -Milliseconds 20
+    $retentionBackupResult = Invoke-ValidationChild -Name "retention-backup" -ArgumentList @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path $PSScriptRoot "flowchain-state-backup.ps1"),
+        "-StatePath",
+        $stateFullPath,
+        "-BackupRoot",
+        $backupRoot,
+        "-ReportPath",
+        $retentionBackupReportPath,
+        "-CreateBackupRoot",
+        "-RetentionCount",
+        "2"
+    )
+    $retentionBackupReport = Read-FlowChainJsonIfExists -Path $retentionBackupReportPath
+    $retentionBackupPassed = $retentionBackupResult.exitCode -eq 0 -and $null -ne $retentionBackupReport -and "$($retentionBackupReport.status)" -eq "passed"
+    if ($retentionBackupPassed) {
+        $retentionThirdSnapshotName = Get-FlowChainJsonString -Object $retentionBackupReport.snapshot -Names @("snapshotName")
+        $retentionRemainingSnapshotNames = @(Get-ChildItem -LiteralPath $backupRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "flowchain-state-snapshot-*" } | ForEach-Object { $_.Name })
+        $retentionPrunedOldestSnapshot = -not ($retentionRemainingSnapshotNames -contains $firstSnapshotName)
+        $retentionRetainedNewestSnapshots = ($retentionRemainingSnapshotNames -contains $secondSnapshotName) -and ($retentionRemainingSnapshotNames -contains $retentionThirdSnapshotName) -and $retentionRemainingSnapshotNames.Count -eq 2
+        $retentionLatestManifest = Read-FlowChainJsonIfExists -Path (Join-Path $backupRoot "latest-manifest.json")
+        $retentionLatestManifestMatchesThirdSnapshot = (Get-FlowChainJsonString -Object $retentionLatestManifest -Names @("snapshotName")) -eq $retentionThirdSnapshotName
+        $retentionReportShowsPrunedSnapshot = @($retentionBackupReport.retention.prunedSnapshotNames).Count -ge 1 -and @($retentionBackupReport.retention.prunedSnapshotNames) -contains $firstSnapshotName
+        $retentionReportProtectsCurrentSnapshot = $retentionBackupReport.retention.currentSnapshotProtected -eq $true
+
+        $retentionRestoreResult = Invoke-ValidationRestore -Name "retention-latest-restore" -BackupRootPath $backupRoot -RestoreRootPath (Join-Path $validationRoot "retention-restore-root") -ReportPath $retentionRestoreReportPath
+        $retentionRestoreReport = Read-FlowChainJsonIfExists -Path $retentionRestoreReportPath
+        $retentionRestorePassed = $retentionRestoreResult.exitCode -eq 0 -and $null -ne $retentionRestoreReport -and "$($retentionRestoreReport.status)" -eq "passed"
+        $retentionRestoreUsedThirdSnapshot = $retentionRestorePassed -and (Get-FlowChainJsonString -Object $retentionRestoreReport.restore -Names @("snapshotName")) -eq $retentionThirdSnapshotName
+    }
+}
+
 $backupPassed = $backupResult.exitCode -eq 0 -and $null -ne $backupReport -and "$($backupReport.status)" -eq "passed"
 $restorePassed = $restoreResult.exitCode -eq 0 -and $null -ne $restoreReport -and "$($restoreReport.status)" -eq "passed"
 $secondBackupPassed = $secondBackupResult.exitCode -eq 0 -and $null -ne $secondBackupReport -and "$($secondBackupReport.status)" -eq "passed"
@@ -400,7 +453,8 @@ if ($backupPassed -and $restorePassed) {
     $hashRoundTrip = "$($backupReport.snapshot.stateFileSha256)" -eq "$($restoreReport.restore.restoredStateFileSha256)"
 }
 
-$coreStatus = if ($backupPassed -and $restorePassed -and $hashRoundTrip -and $secondBackupPassed -and $latestManifestMatchesSecondSnapshot -and $latestRestorePassed -and $latestRestoreUsedLatestSnapshot -and $restoreTargetProtected -and $liveStateNonMutationProven -and $corruptionDetected -and $tamperedManifestDetected -and $missingStateArtifactDetected -and $missingSnapshotManifestDetected -and $latestPointerTamperDetected -and $wrongChainStateMismatchDetected) { "passed" } else { "failed" }
+$retentionRotationProven = $retentionBackupPassed -and $retentionPrunedOldestSnapshot -and $retentionRetainedNewestSnapshots -and $retentionLatestManifestMatchesThirdSnapshot -and $retentionReportShowsPrunedSnapshot -and $retentionReportProtectsCurrentSnapshot -and $retentionRestorePassed -and $retentionRestoreUsedThirdSnapshot
+$coreStatus = if ($backupPassed -and $restorePassed -and $hashRoundTrip -and $secondBackupPassed -and $latestManifestMatchesSecondSnapshot -and $latestRestorePassed -and $latestRestoreUsedLatestSnapshot -and $restoreTargetProtected -and $liveStateNonMutationProven -and $corruptionDetected -and $tamperedManifestDetected -and $missingStateArtifactDetected -and $missingSnapshotManifestDetected -and $latestPointerTamperDetected -and $wrongChainStateMismatchDetected -and $retentionRotationProven) { "passed" } else { "failed" }
 $checks = [ordered]@{
     backupCommandPassed = $backupPassed
     restoreCommandPassed = $restorePassed
@@ -417,6 +471,14 @@ $checks = [ordered]@{
     missingSnapshotManifestDetected = $missingSnapshotManifestDetected
     latestPointerTamperDetected = $latestPointerTamperDetected
     wrongChainStateMismatchDetected = $wrongChainStateMismatchDetected
+    retentionBackupCommandPassed = $retentionBackupPassed
+    retentionPrunedOldestSnapshot = $retentionPrunedOldestSnapshot
+    retentionRetainedNewestSnapshots = $retentionRetainedNewestSnapshots
+    retentionLatestManifestMatchesNewest = $retentionLatestManifestMatchesThirdSnapshot
+    retentionReportShowsPrunedSnapshot = $retentionReportShowsPrunedSnapshot
+    retentionReportProtectsCurrentSnapshot = $retentionReportProtectsCurrentSnapshot
+    retentionRestoreCommandPassed = $retentionRestorePassed
+    retentionRestoreUsedNewestSnapshot = $retentionRestoreUsedThirdSnapshot
     valuesPrintedFalse = $true
     envValuesPrintedFalse = $true
     noSecrets = $true
@@ -446,6 +508,8 @@ $report = [ordered]@{
         missingSnapshotManifest = $missingSnapshotManifestRestoreReportPath
         latestPointerTamper = $latestPointerTamperRestoreReportPath
         wrongChainStateMismatch = $wrongChainStateMismatchRestoreReportPath
+        retentionBackup = $retentionBackupReportPath
+        retentionRestore = $retentionRestoreReportPath
     }
     requiredCommands = @(
         "npm run flowchain:backup:create",

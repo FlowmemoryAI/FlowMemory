@@ -82,7 +82,10 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     : activeDefinition;
   const sourceStatus: DashboardStatus = workbench.source === "control-plane" ? "verified" : "stale";
   const bridgeRecordCount =
-    workbench.sections.bridgeDeposits.length + workbench.sections.bridgeCredits.length + workbench.sections.bridgeWithdrawals.length;
+    workbench.sections.bridgeDeposits.length +
+    workbench.sections.bridgeCredits.length +
+    workbench.sections.bridgeWithdrawals.length +
+    workbench.sections.bridgeReleases.length;
   const liveReadinessRecords = workbench.sections.liveReadiness;
   const liveReadinessSummary = liveReadinessRecords.find((record) => record.kind === "Public launch readiness") ?? liveReadinessRecords[0];
   const liveReadinessGates = liveReadinessRecords.filter((record) => record.kind === "Launch gate");
@@ -94,11 +97,9 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const backupGate = liveReadinessGates.find((record) => record.id === "state-backup");
   const backupDryRunGate = liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
   const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
+  const bridgeRuntimeCreditGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-runtime-credit-proof");
+  const bridgeReleaseEvidenceGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-release-evidence-validation");
   const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
-    workbench.sections.bridgeDeposits.length +
-    workbench.sections.bridgeCredits.length +
-    workbench.sections.bridgeWithdrawals.length +
-    workbench.sections.bridgeReleases.length;
   const pilotRecords = workbench.sections.realValuePilot;
   const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
   const bridgeReadiness = pilotRecords.find((record) => record.kind === "Bridge live readiness");
@@ -267,6 +268,8 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     { label: "Backup proof", record: backupGate, Icon: HardDrive },
     { label: "Backup dry run", record: backupDryRunGate, Icon: ListChecks },
     { label: "Bridge relayer", record: bridgeRelayerGate, Icon: ShieldAlert },
+    { label: "Bridge runtime credit", record: bridgeRuntimeCreditGate, Icon: Activity },
+    { label: "Bridge release evidence", record: bridgeReleaseEvidenceGate, Icon: ListChecks },
     { label: "Tester packet", record: testerPacketGate, Icon: KeyRound },
   ];
 

@@ -1,6 +1,8 @@
+import { existsSync, readFileSync } from "node:fs";
+import { isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { FlowChainClient, FlowChainRpcError, type JsonValue } from "./client.ts";
+import { FlowChainClient, FlowChainRpcError, type JsonValue, type SignedTransactionSubmitRequest } from "./client.ts";
 import { redactJsonValue } from "./redact.ts";
 
 interface CliOptions {
@@ -25,6 +27,13 @@ interface CliOptions {
   toAccountId?: string;
   amountUnits?: string;
   memo?: string;
+  pollMs: number;
+  signedEnvelopeInput?: string;
+  runtimeTransactionInput?: string;
+  submittedBy?: string;
+  expectedNonce?: string;
+  runtimeSubmit: boolean;
+  runtimeSubmitMode?: "off" | "direct" | "node-inbox";
 }
 
 const COMMANDS = new Set([
@@ -60,6 +69,8 @@ const COMMANDS = new Set([
   "withdrawals",
   "withdrawal",
   "wallet-send",
+  "submit-signed-transaction",
+  "wait-transaction",
   "diagnostics",
   "help",
 ]);
@@ -71,6 +82,8 @@ function parseArgs(argv: string[]): CliOptions {
   let json = false;
   let limit = 10;
   let seconds = 20;
+  let pollMs = 1000;
+  let runtimeSubmit = false;
   const options: Partial<CliOptions> = {};
   while (args.length > 0) {
     const arg = args.shift();
@@ -82,6 +95,8 @@ function parseArgs(argv: string[]): CliOptions {
       limit = Number.parseInt(args.shift() ?? "10", 10);
     } else if (arg === "--seconds") {
       seconds = Number.parseInt(args.shift() ?? "20", 10);
+    } else if (arg === "--poll-ms") {
+      pollMs = Number.parseInt(args.shift() ?? "1000", 10);
     } else if (arg === "--id") {
       options.id = args.shift();
     } else if (arg === "--account") {
@@ -122,12 +137,28 @@ function parseArgs(argv: string[]): CliOptions {
       options.amountUnits = args.shift();
     } else if (arg === "--memo") {
       options.memo = args.shift();
+    } else if (arg === "--signed-envelope" || arg === "--signed-transaction") {
+      options.signedEnvelopeInput = args.shift();
+    } else if (arg === "--runtime-transaction" || arg === "--runtime-tx") {
+      options.runtimeTransactionInput = args.shift();
+    } else if (arg === "--submitted-by") {
+      options.submittedBy = args.shift();
+    } else if (arg === "--expected-nonce") {
+      options.expectedNonce = args.shift();
+    } else if (arg === "--runtime-submit") {
+      runtimeSubmit = true;
+    } else if (arg === "--runtime-submit-mode") {
+      const mode = args.shift();
+      if (mode !== "off" && mode !== "direct" && mode !== "node-inbox") {
+        throw new Error("--runtime-submit-mode must be off, direct, or node-inbox");
+      }
+      options.runtimeSubmitMode = mode;
     } else if (arg !== undefined) {
       throw new Error(`unknown argument: ${arg}`);
     }
   }
   if (!COMMANDS.has(command)) throw new Error(`unknown command: ${command}`);
-  return { command, rpcUrl, json, limit, seconds, ...options };
+  return { command, rpcUrl, json, limit, seconds, pollMs, runtimeSubmit, ...options };
 }
 
 function printHelp() {
@@ -160,6 +191,8 @@ Commands:
   finality          List finality rows
   finality-get      Get finality by --object or --id
   wallet-send       Submit a local wallet send through the real control-plane wallet path
+  submit-signed-transaction Submit a signed local envelope from --signed-envelope <path-or-json>
+  wait-transaction  Wait for transaction/activity inclusion by --tx, --tx-id, --tx-hash, or --id
   bridge-readiness  Print bridge live readiness
   bridge-status     Print bridge status
   bridge-deposits   List bridge deposits
@@ -238,6 +271,44 @@ function withdrawalParams(options: CliOptions): JsonValue {
   if (options.depositId !== undefined) return { depositId: value };
   if (options.accountId !== undefined) return { accountId: value };
   return { withdrawalId: value };
+}
+
+function parseJsonInput(input: string, label: string): JsonValue {
+  const trimmed = input.trim();
+  const pathCandidates = isAbsolute(input)
+    ? [input]
+    : [
+        resolve(process.cwd(), input),
+        ...(process.env.INIT_CWD === undefined ? [] : [resolve(process.env.INIT_CWD, input)]),
+      ];
+  const resolvedPath = pathCandidates.find((candidate) => existsSync(candidate));
+  const source = trimmed.startsWith("{") || trimmed.startsWith("[")
+    ? trimmed
+    : readFileSync(resolvedPath ?? pathCandidates[0] ?? input, "utf8");
+  try {
+    return JSON.parse(source) as JsonValue;
+  } catch (error) {
+    const origin = resolvedPath ?? label;
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${label} must be a JSON object or a path to JSON: ${origin}: ${message}`);
+  }
+}
+
+function signedTransactionSubmitParams(options: CliOptions): SignedTransactionSubmitRequest {
+  if (options.signedEnvelopeInput === undefined || options.signedEnvelopeInput.trim().length === 0) {
+    throw new Error("submit-signed-transaction requires --signed-envelope <path-or-json>");
+  }
+  const params: SignedTransactionSubmitRequest = {
+    signedEnvelope: parseJsonInput(options.signedEnvelopeInput, "--signed-envelope"),
+    submittedBy: options.submittedBy ?? "flowchain-devkit-cli",
+  };
+  if (options.expectedNonce !== undefined) params.expectedNonce = options.expectedNonce;
+  if (options.runtimeSubmit) params.runtimeSubmit = true;
+  if (options.runtimeSubmitMode !== undefined) params.runtimeSubmitMode = options.runtimeSubmitMode;
+  if (options.runtimeTransactionInput !== undefined) {
+    params.runtimeTransaction = parseJsonInput(options.runtimeTransactionInput, "--runtime-transaction");
+  }
+  return params;
 }
 
 function heightFromStatus(status: JsonValue): bigint | null {
@@ -358,6 +429,20 @@ async function run(argv = process.argv.slice(2)) {
           applyBlock: true,
           createRecipient: true,
         });
+      case "submit-signed-transaction":
+        return client.submitSignedTransaction(signedTransactionSubmitParams(options));
+      case "wait-transaction": {
+        const waited = await client.waitForTransaction({
+          ...(transactionParams(options) as Record<string, string>),
+          timeoutMs: options.seconds * 1000,
+          pollMs: options.pollMs,
+        });
+        const waitedRecord = waited as Record<string, JsonValue>;
+        if (waitedRecord.status !== "included") {
+          process.exitCode = 1;
+        }
+        return waited;
+      }
       case "diagnostics":
         return {
           schema: "flowchain.sdk.diagnostics.v0",

@@ -1,0 +1,72 @@
+{
+    "schema":  "flowchain.backup_install_systemd_validation_report.v0",
+    "generatedAt":  "2026-05-21T11:04:44.6824991Z",
+    "status":  "passed",
+    "paths":  {
+                  "installScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-backup-install-systemd.ps1",
+                  "backupScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1",
+                  "restoreDrillScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-restore-verify.ps1",
+                  "planReport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-systemd-report.json",
+                  "planMarkdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\SYSTEMD_BACKUP_INSTALL.md"
+              },
+    "checks":  {
+                   "installScriptExists":  true,
+                   "backupScriptExists":  true,
+                   "restoreDrillScriptExists":  true,
+                   "installPackageScriptPresent":  true,
+                   "validationPackageScriptPresent":  true,
+                   "parentValidationPackageScriptPresent":  true,
+                   "planCommandPassed":  true,
+                   "planReportWritten":  true,
+                   "planReportPassed":  true,
+                   "planActionReadOnly":  true,
+                   "planDidNotMutate":  true,
+                   "backupServiceUnitPlanned":  true,
+                   "backupServiceOmitsAllowBlocked":  true,
+                   "backupServiceHasRetentionCount":  true,
+                   "backupTimerUnitPlanned":  true,
+                   "backupTimerCalendarConfigured":  true,
+                   "restoreDrillServiceUnitPlanned":  true,
+                   "restoreDrillServiceOmitsAllowBlocked":  true,
+                   "restoreDrillTimerUnitPlanned":  true,
+                   "restoreDrillTimerCalendarConfigured":  true,
+                   "servicesOwnerEnvFileInjectable":  true,
+                   "servicesHardeningPresent":  true,
+                   "backupRootWritePathConfigurable":  true,
+                   "ownerBackupEnvRequiredByRuntime":  true,
+                   "restoreDrillOwnerBackupEnvRequiredByRuntime":  true,
+                   "commandPlanPresent":  true,
+                   "planReportEnvValuesPrintedFalse":  true,
+                   "planReportNoSecrets":  true,
+                   "planReportBroadcastsFalse":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "childProcessResults":  [
+                                {
+                                    "name":  "backup-install-systemd-plan",
+                                    "exitCode":  0,
+                                    "timedOut":  false,
+                                    "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\20260521060442147-58292-f10cc05d.stdout.log",
+                                    "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\20260521060442147-58292-f10cc05d.stderr.log"
+                                }
+                            ],
+    "commands":  {
+                     "plan":  "npm run flowchain:backup:install:systemd -- -Action Plan",
+                     "install":  "npm run flowchain:backup:install:systemd -- -Action Install",
+                     "status":  "npm run flowchain:backup:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:backup:install:systemd -- -Action Uninstall",
+                     "validate":  "npm run flowchain:backup:install:systemd:validate"
+                 },
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false
+}

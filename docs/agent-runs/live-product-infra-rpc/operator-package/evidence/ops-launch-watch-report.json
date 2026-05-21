@@ -1,0 +1,604 @@
+{
+    "schema":  "flowchain.ops_launch_watch_report.v0",
+    "generatedAt":  "2026-05-21T17:13:03.9961343Z",
+    "status":  "passed",
+    "launchWatchStatus":  "blocked-owner-input",
+    "laneCount":  7,
+    "blockedLaneCount":  5,
+    "criticalOpsFindingCount":  0,
+    "blockedOpsFindingCount":  6,
+    "missingOwnerInputs":  [
+                               "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                               "FLOWCHAIN_BASE8453_RPC_URL",
+                               "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                               "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                               "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                               "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                               "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                               "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                               "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                               "FLOWCHAIN_RPC_PUBLIC_URL",
+                               "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                               "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                               "FLOWCHAIN_RPC_TLS_TERMINATED",
+                               "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                           ],
+    "currentFindingCodes":  [
+                                "public-rpc-not-ready",
+                                "backup-not-ready",
+                                "bridge-not-ready",
+                                "bridge-relayer-not-ready",
+                                "external-tester-not-shareable",
+                                "deployment-contract-not-ready"
+                            ],
+    "unexpectedCurrentFindingCodes":  [
+
+                                      ],
+    "activeAlertRuleIds":  [
+                               "public-rpc-not-shareable",
+                               "backup-not-ready",
+                               "bridge-not-ready",
+                               "bridge-relayer-not-ready",
+                               "external-tester-not-shareable",
+                               "deployment-contract-not-ready"
+                           ],
+    "missingReports":  [
+
+                       ],
+    "missingMetrics":  [
+
+                       ],
+    "missingAlertRules":  [
+
+                          ],
+    "missingPackageScripts":  [
+
+                              ],
+    "blockedLaneUnknownBlockers":  [
+
+                                   ],
+    "commandsWithInlineEnvAssignment":  [
+
+                                        ],
+    "commandsWithUrls":  [
+
+                         ],
+    "refresh":  {
+                    "performed":  false,
+                    "steps":  [
+
+                              ]
+                },
+    "reportPaths":  {
+                        "opsSnapshot":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-snapshot-report.json",
+                        "opsAlerts":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                        "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
+                        "opsMetricsJson":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics.json",
+                        "monitoringBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\monitoring-bundle-report.json",
+                        "serviceStatus":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-status-report.json",
+                        "serviceMonitor":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-monitor-report.json",
+                        "serviceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\service-install-validation-report.json",
+                        "systemdServiceInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\systemd-service-install-validation-report.json",
+                        "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
+                        "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
+                        "publicRpcCommandMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-command-matrix-report.json",
+                        "backup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-readiness-report.json",
+                        "backupRestoreValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-restore-validation-report.json",
+                        "backupOwnerPathDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-owner-path-dry-run-report.json",
+                        "backupInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\backup-install-validation-report.json",
+                        "bridgeLive":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-live-readiness-report.json",
+                        "bridgeInfra":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-infra-readiness-report.json",
+                        "bridgeRelayerOnce":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-once-report.json",
+                        "bridgeRelayerGuardrail":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
+                        "bridgeRelayerLoop":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
+                        "bridgeRuntimeCredit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                        "bridgeReconciliation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-reconciliation-report.json",
+                        "bridgeReleaseEvidence":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-release-evidence-validation-report.json",
+                        "realValuePilotAggregate":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\real-value-pilot-aggregate-report.json",
+                        "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
+                        "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
+                        "externalTesterClientValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-client-validation-report.json",
+                        "externalTesterEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-evidence-validation-report.json",
+                        "publicTesterGateway":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-tester-gateway-e2e-report.json",
+                        "dashboardUi":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\dashboard-ui-readiness-report.json",
+                        "ownerGoLiveHandoff":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-go-live-handoff-report.json",
+                        "ownerNeedsNow":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\owner-needs-now-report.json",
+                        "publicDeploymentContract":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-deployment-contract-report.json",
+                        "liveCapabilityMatrix":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-chain-capability-matrix-report.json",
+                        "completionAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-completion-audit-report.json",
+                        "liveCutover":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\live-cutover-rehearsal-report.json",
+                        "truthTable":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\production-truth-table-report.json",
+                        "noSecret":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\no-secret-scan-report.json"
+                    },
+    "lanes":  [
+                  {
+                      "id":  "service-autorecovery",
+                      "title":  "Service install and autorecovery",
+                      "status":  "passed",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "serviceStatus":  "passed",
+                                             "serviceMonitor":  "passed",
+                                             "serviceInstallValidation":  "passed",
+                                             "systemdServiceInstallValidation":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "serviceStatus",
+                                              "serviceMonitor",
+                                              "serviceInstallValidation",
+                                              "systemdServiceInstallValidation"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_service_status_ready",
+                                              "flowchain_service_monitor_ready",
+                                              "flowchain_height_advanced",
+                                              "flowchain_service_install_validation_ready",
+                                              "flowchain_systemd_service_install_validation_ready"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "node-process-down",
+                                                 "control-plane-down",
+                                                 "block-production-stalled",
+                                                 "state-file-stale",
+                                                 "supervisor-node-recovery-validation-failed",
+                                                 "service-install-validation-failed"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:service:status",
+                                       "npm run flowchain:service:monitor",
+                                       "npm run flowchain:service:supervisor:validate",
+                                       "npm run flowchain:service:install:validate",
+                                       "npm run flowchain:service:install:systemd:validate"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-deployment",
+                      "title":  "Public RPC deployment watch",
+                      "status":  "blocked-owner-input",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "publicRpc":  "blocked",
+                                             "publicRpcSyntheticCanary":  "blocked",
+                                             "publicRpcDeploymentAutomation":  "passed",
+                                             "publicRpcCommandMatrix":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "publicRpc",
+                                              "publicRpcSyntheticCanary",
+                                              "publicRpcDeploymentAutomation",
+                                              "publicRpcCommandMatrix"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_public_rpc_ready",
+                                              "flowchain_public_rpc_synthetic_canary_ready",
+                                              "flowchain_public_rpc_deployment_automation_ready",
+                                              "flowchain_public_rpc_command_matrix_ready",
+                                              "flowchain_public_rpc_owner_host_apply_plan_ready",
+                                              "flowchain_public_rpc_owner_host_apply_script_post_deploy"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "public-rpc-not-shareable",
+                                                 "public-rpc-edge-hardening-failed",
+                                                 "public-rpc-command-matrix-failed",
+                                                 "public-rpc-synthetic-canary-failed"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:deployment:automation",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:command-matrix",
+                                       "npm run flowchain:public-rpc:abuse-test"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED"
+                                   ]
+                  },
+                  {
+                      "id":  "backup-restore",
+                      "title":  "Backup and restore watch",
+                      "status":  "blocked-owner-input",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "backup":  "blocked",
+                                             "backupRestoreValidation":  "passed",
+                                             "backupOwnerPathDryRun":  "passed",
+                                             "backupInstallValidation":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "backup",
+                                              "backupRestoreValidation",
+                                              "backupOwnerPathDryRun",
+                                              "backupInstallValidation"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_backup_ready",
+                                              "flowchain_backup_restore_validation_ready",
+                                              "flowchain_backup_owner_path_dry_run_ready",
+                                              "flowchain_backup_owner_path_dry_run_snapshot_proof",
+                                              "flowchain_backup_owner_path_dry_run_restore_proof"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "backup-not-ready",
+                                                 "backup-retention-unsafe",
+                                                 "backup-restore-validation-failed",
+                                                 "backup-owner-path-dry-run-failed"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:backup:restore:validate",
+                                       "npm run flowchain:backup:owner-path:dry-run",
+                                       "npm run flowchain:backup:install:validate",
+                                       "npm run flowchain:backup:check -- -AllowBlocked"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-pilot-relayer",
+                      "title":  "Bridge pilot and relayer watch",
+                      "status":  "blocked-owner-input",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "bridgeLive":  "blocked",
+                                             "bridgeInfra":  "blocked",
+                                             "bridgeRelayerOnce":  "blocked",
+                                             "bridgeRelayerGuardrail":  "passed",
+                                             "bridgeRelayerLoop":  "passed",
+                                             "bridgeRuntimeCredit":  "passed",
+                                             "bridgeReconciliation":  "passed",
+                                             "bridgeReleaseEvidence":  "passed",
+                                             "realValuePilotAggregate":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "bridgeLive",
+                                              "bridgeInfra",
+                                              "bridgeRelayerOnce",
+                                              "bridgeRelayerGuardrail",
+                                              "bridgeRelayerLoop",
+                                              "bridgeRuntimeCredit",
+                                              "bridgeReconciliation",
+                                              "bridgeReleaseEvidence",
+                                              "realValuePilotAggregate"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_bridge_live_ready",
+                                              "flowchain_bridge_infra_ready",
+                                              "flowchain_bridge_relayer_guardrail_ready",
+                                              "flowchain_bridge_runtime_credit_ready",
+                                              "flowchain_bridge_reconciliation_ready",
+                                              "flowchain_bridge_release_evidence_validation_ready",
+                                              "flowchain_real_value_pilot_aggregate_ready"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "bridge-not-ready",
+                                                 "bridge-relayer-not-ready",
+                                                 "bridge-relayer-guardrail-failed",
+                                                 "bridge-relayer-loop-unhealthy",
+                                                 "bridge-runtime-credit-validation-failed",
+                                                 "bridge-reconciliation-failed",
+                                                 "bridge-release-evidence-validation-failed",
+                                                 "real-value-pilot-aggregate-failed"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
+                                       "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:bridge:runtime-credit:validate",
+                                       "npm run flowchain:bridge:reconciliation",
+                                       "npm run flowchain:bridge:release:evidence:validate"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "explorer-faucet-wallet-ui",
+                      "title":  "Explorer, faucet, and wallet UI watch",
+                      "status":  "blocked-owner-input",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "externalTester":  "blocked",
+                                             "externalTesterPacket":  "blocked",
+                                             "externalTesterClientValidation":  "passed",
+                                             "externalTesterEvidenceValidation":  "passed",
+                                             "publicTesterGateway":  "passed",
+                                             "dashboardUi":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "externalTester",
+                                              "externalTesterPacket",
+                                              "externalTesterClientValidation",
+                                              "externalTesterEvidenceValidation",
+                                              "publicTesterGateway",
+                                              "dashboardUi"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_external_tester_ready",
+                                              "flowchain_external_tester_wallet_network_ready",
+                                              "flowchain_external_tester_public_gateway_ready",
+                                              "flowchain_external_tester_faucet_route_validated",
+                                              "flowchain_public_tester_gateway_e2e_ready",
+                                              "flowchain_dashboard_ui_ready",
+                                              "flowchain_dashboard_ui_tester_flow_covered"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "external-tester-not-shareable",
+                                                 "external-tester-evidence-unsafe",
+                                                 "external-tester-evidence-invalid",
+                                                 "public-tester-gateway-e2e-failed",
+                                                 "dashboard-ui-readiness-failed"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:dashboard:ui:readiness",
+                                       "npm run flowchain:tester:gateway:e2e",
+                                       "npm run flowchain:external-tester:client:validate",
+                                       "npm run flowchain:tester:evidence:validate",
+                                       "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                   ]
+                  },
+                  {
+                      "id":  "observability-alerting",
+                      "title":  "Observability and alerting watch",
+                      "status":  "passed",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "opsSnapshot":  "blocked",
+                                             "opsAlerts":  "passed",
+                                             "opsMetricsExport":  "passed",
+                                             "monitoringBundle":  "passed",
+                                             "noSecret":  "passed",
+                                             "truthTable":  "blocked-owner-input"
+                                         },
+                      "requiredReports":  [
+                                              "opsSnapshot",
+                                              "opsAlerts",
+                                              "opsMetricsExport",
+                                              "monitoringBundle",
+                                              "noSecret",
+                                              "truthTable"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_ops_critical_findings",
+                                              "flowchain_ops_blocked_findings",
+                                              "flowchain_ops_alert_rules_total",
+                                              "flowchain_ops_active_alert_rules",
+                                              "flowchain_no_secret_ready",
+                                              "flowchain_truth_gates_failed",
+                                              "flowchain_truth_gates_stale",
+                                              "flowchain_truth_gates_repo_blocked"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "secret-boundary-breach",
+                                                 "truth-table-stale-or-failed",
+                                                 "deployment-refresh-aborted"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:ops:snapshot -- -AllowBlocked",
+                                       "npm run flowchain:ops:alerts -- -AllowBlocked",
+                                       "npm run flowchain:ops:metrics:export -- -AllowBlocked",
+                                       "npm run flowchain:ops:monitoring:bundle",
+                                       "npm run flowchain:no-secret:scan"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "release-governance",
+                      "title":  "Release governance watch",
+                      "status":  "blocked-owner-input",
+                      "coverageReady":  true,
+                      "reportStatuses":  {
+                                             "liveCapabilityMatrix":  "passed",
+                                             "completionAudit":  "blocked",
+                                             "liveCutover":  "blocked",
+                                             "publicDeploymentContract":  "blocked",
+                                             "ownerGoLiveHandoff":  "passed",
+                                             "ownerNeedsNow":  "passed"
+                                         },
+                      "requiredReports":  [
+                                              "liveCapabilityMatrix",
+                                              "completionAudit",
+                                              "liveCutover",
+                                              "publicDeploymentContract",
+                                              "ownerGoLiveHandoff",
+                                              "ownerNeedsNow"
+                                          ],
+                      "missingReports":  [
+
+                                         ],
+                      "requiredMetrics":  [
+                                              "flowchain_owner_go_live_handoff_ready",
+                                              "flowchain_owner_go_live_release_ready",
+                                              "flowchain_owner_go_live_launch_sequence_ready",
+                                              "flowchain_owner_go_live_rollback_ready",
+                                              "flowchain_live_cutover_owner_blocked",
+                                              "flowchain_live_cutover_missing_owner_inputs"
+                                          ],
+                      "missingMetrics":  [
+
+                                         ],
+                      "requiredAlertRules":  [
+                                                 "owner-go-live-handoff-failed",
+                                                 "owner-needs-now-failed",
+                                                 "deployment-contract-not-ready"
+                                             ],
+                      "missingAlertRules":  [
+
+                                            ],
+                      "commands":  [
+                                       "npm run flowchain:owner:needs-now",
+                                       "npm run flowchain:owner:go-live-handoff",
+                                       "npm run flowchain:live:capabilities",
+                                       "npm run flowchain:completion:audit -- -AllowBlocked",
+                                       "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
+                                   ],
+                      "missingPackageScripts":  [
+
+                                                ],
+                      "blockers":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ]
+                  }
+              ],
+    "checks":  {
+                   "packageScriptPresent":  true,
+                   "refreshStepsSucceeded":  true,
+                   "metricsJsonLoaded":  true,
+                   "laneCountSufficient":  true,
+                   "everyLaneHasEvidence":  true,
+                   "everyLaneHasMetrics":  true,
+                   "everyLaneHasAlertRules":  true,
+                   "everyLaneHasCommands":  true,
+                   "everyLaneCommandHasPackageScript":  true,
+                   "commandsAvoidInlineEnvAssignment":  true,
+                   "commandsAvoidUrls":  true,
+                   "opsSnapshotLoaded":  true,
+                   "opsSnapshotHasNoCriticalFindings":  true,
+                   "opsSnapshotBlockedFindingsAreExpected":  true,
+                   "opsAlertRulesPassed":  true,
+                   "opsAlertsMapCurrentFindings":  true,
+                   "activeAlertRulesPresent":  true,
+                   "opsMetricsExportPassed":  true,
+                   "monitoringBundlePassed":  true,
+                   "noSecretScanPassed":  true,
+                   "truthTableNoRepoBlocked":  true,
+                   "truthTableNoFailed":  true,
+                   "truthTableNoStale":  true,
+                   "capabilityMatrixNoRepoBlocked":  true,
+                   "blockedLanesHaveKnownOwnerInputs":  true,
+                   "noProductionReadyClaimWhileBlocked":  true,
+                   "opsCriticalMetricZero":  true,
+                   "truthFailedMetricZero":  true,
+                   "truthStaleMetricZero":  true,
+                   "truthRepoBlockedMetricZero":  true,
+                   "envValuesPrintedFalse":  true,
+                   "secretMarkerFindingsEmpty":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "secretMarkerFindings":  [
+
+                             ],
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "noLiveBroadcast":  true
+}

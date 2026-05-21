@@ -61,6 +61,18 @@ $deploymentChecks = [ordered]@{
     discoverDeploymentModeMatchesReadiness = $null
     publicReadyMethodCountNonzeroWhenReady = $null
 }
+$securityHeaderCheck = [ordered]@{
+    performed = $false
+    skippedUntilPublicMode = $true
+    strictTransportSecurity = $null
+    contentTypeOptionsNosniff = $null
+    cacheControlNoStore = $null
+    referrerPolicyNoReferrer = $null
+    frameOptionsDeny = $null
+    contentSecurityPolicyDefaultNone = $null
+    allRequiredPresent = $null
+    headerValuesPrinted = $false
+}
 
 function Get-FlowChainJsonPropertyValue {
     param(
@@ -72,6 +84,54 @@ function Get-FlowChainJsonPropertyValue {
         return $Object.$Name
     }
     return $null
+}
+
+function New-FlowChainSkippedStateFacts {
+    param([Parameter(Mandatory = $true)][string] $Reason)
+
+    return [ordered]@{
+        readable = $null
+        skipped = $true
+        skipReason = $Reason
+        statePathConfigured = $true
+        chainId = $null
+        latestHeight = $null
+        latestHash = $null
+        latestRoot = $null
+        latestBlockAgeSeconds = $null
+        stateFileLastWriteAgeSeconds = $null
+        finalizedHeight = $null
+        finalizedHash = $null
+        mempoolDepth = $null
+        peerCount = $null
+    }
+}
+
+function Get-FlowChainHeaderValue {
+    param(
+        [AllowNull()][object] $Headers,
+        [Parameter(Mandatory = $true)][string] $Name
+    )
+
+    if ($null -eq $Headers) {
+        return ""
+    }
+
+    try {
+        $value = $Headers[$Name]
+        if ($null -ne $value) {
+            return "$value"
+        }
+    }
+    catch {
+    }
+
+    foreach ($key in @($Headers.Keys)) {
+        if ("$key" -eq $Name -or "$key".Equals($Name, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return "$($Headers[$key])"
+        }
+    }
+    return ""
 }
 
 foreach ($name in $requiredEnv) {
@@ -167,8 +227,14 @@ if (-not [string]::IsNullOrWhiteSpace($backupPathRaw)) {
     }
 }
 
-$stateFacts = Get-FlowChainStateFacts -StatePath $stateFullPath
-if (-not $stateFacts.readable) {
+$stateFactsShouldLoad = $null -ne $publicUri
+$stateFacts = if ($stateFactsShouldLoad) {
+    Get-FlowChainStateFacts -StatePath $stateFullPath
+}
+else {
+    New-FlowChainSkippedStateFacts -Reason "Public RPC URL is not configured or valid, so endpoint-to-state comparison is not actionable."
+}
+if ($stateFactsShouldLoad -and -not $stateFacts.readable) {
     Add-FlowChainReadinessProblem -Problems $problems -Name "devnet/local/state.json" -Reason "local node state file is missing or unreadable" -Category "artifact"
 }
 
@@ -261,6 +327,48 @@ if ($null -ne $publicUri -and $allowedOrigins.Count -gt 0) {
     }
     catch {
         Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS" -Reason "configured endpoint CORS probe failed" -Kind "failed" -Category "endpoint"
+    }
+}
+
+if ($null -ne $publicUri -and $publicMode) {
+    $securityHeaderCheck.performed = $true
+    $securityHeaderCheck.skippedUntilPublicMode = $false
+    try {
+        $securityProbeUrl = Join-FlowChainEndpointUri -PublicUrl $publicUrl -EndpointPath "/rpc/readiness"
+        $securityProbeHeaders = @{}
+        if ($allowedOrigins.Count -gt 0) {
+            $securityProbeHeaders["Origin"] = $allowedOrigins[0]
+        }
+        $securityProbe = Invoke-WebRequest -Uri $securityProbeUrl -Method Get -Headers $securityProbeHeaders -TimeoutSec 10 -UseBasicParsing
+        $strictTransportSecurity = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "Strict-Transport-Security"
+        $contentTypeOptions = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "X-Content-Type-Options"
+        $cacheControl = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "Cache-Control"
+        $referrerPolicy = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "Referrer-Policy"
+        $frameOptions = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "X-Frame-Options"
+        $contentSecurityPolicy = Get-FlowChainHeaderValue -Headers $securityProbe.Headers -Name "Content-Security-Policy"
+
+        $securityHeaderCheck.strictTransportSecurity = $strictTransportSecurity -match "(^|;)\s*max-age\s*="
+        $securityHeaderCheck.contentTypeOptionsNosniff = $contentTypeOptions.Equals("nosniff", [System.StringComparison]::OrdinalIgnoreCase)
+        $securityHeaderCheck.cacheControlNoStore = $cacheControl.IndexOf("no-store", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+        $securityHeaderCheck.referrerPolicyNoReferrer = $referrerPolicy.Equals("no-referrer", [System.StringComparison]::OrdinalIgnoreCase)
+        $securityHeaderCheck.frameOptionsDeny = $frameOptions.Equals("DENY", [System.StringComparison]::OrdinalIgnoreCase)
+        $securityHeaderCheck.contentSecurityPolicyDefaultNone = $contentSecurityPolicy.IndexOf("default-src 'none'", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+            -and $contentSecurityPolicy.IndexOf("frame-ancestors 'none'", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+        $securityHeaderCheck.allRequiredPresent = @(
+            $securityHeaderCheck.strictTransportSecurity,
+            $securityHeaderCheck.contentTypeOptionsNosniff,
+            $securityHeaderCheck.cacheControlNoStore,
+            $securityHeaderCheck.referrerPolicyNoReferrer,
+            $securityHeaderCheck.frameOptionsDeny,
+            $securityHeaderCheck.contentSecurityPolicyDefaultNone
+        ) -notcontains $false
+
+        if ($securityHeaderCheck.allRequiredPresent -ne $true) {
+            Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "configured public endpoint is missing one or more defensive security headers" -Kind "failed" -Category "endpoint"
+        }
+    }
+    catch {
+        Add-FlowChainReadinessProblem -Problems $problems -Name "FLOWCHAIN_RPC_PUBLIC_URL" -Reason "configured public endpoint security-header probe failed" -Kind "failed" -Category "endpoint"
     }
 }
 
@@ -504,9 +612,20 @@ $report = [ordered]@{
         corsDisallowedOriginProbePerformed = $corsCheck.disallowedOriginProbePerformed
         corsDisallowedOriginRejected = $corsCheck.disallowedOriginRejected
         corsWildcardRejectedForPublicMode = $corsCheck.wildcardRejectedForPublicMode
+        securityHeadersProbePerformed = $securityHeaderCheck.performed
+        securityHeadersSkippedUntilPublicMode = $securityHeaderCheck.skippedUntilPublicMode
+        securityHeadersAllRequiredPresent = if ($publicMode) { $securityHeaderCheck.allRequiredPresent -eq $true } else { $true }
+        securityHeadersStrictTransportSecurity = if ($publicMode) { $securityHeaderCheck.strictTransportSecurity -eq $true } else { $true }
+        securityHeadersContentTypeOptionsNosniff = if ($publicMode) { $securityHeaderCheck.contentTypeOptionsNosniff -eq $true } else { $true }
+        securityHeadersCacheControlNoStore = if ($publicMode) { $securityHeaderCheck.cacheControlNoStore -eq $true } else { $true }
+        securityHeadersReferrerPolicyNoReferrer = if ($publicMode) { $securityHeaderCheck.referrerPolicyNoReferrer -eq $true } else { $true }
+        securityHeadersFrameOptionsDeny = if ($publicMode) { $securityHeaderCheck.frameOptionsDeny -eq $true } else { $true }
+        securityHeadersContentSecurityPolicyDefaultNone = if ($publicMode) { $securityHeaderCheck.contentSecurityPolicyDefaultNone -eq $true } else { $true }
         backupPathConfigured = $backupCheck.configured
         backupPathExists = $backupCheck.exists
         backupPathWritable = $backupCheck.writable
+        stateFactsLoaded = $stateFactsShouldLoad
+        stateFactsSkippedUntilPublicUrlConfigured = -not $stateFactsShouldLoad
         stateFileReadable = $stateFacts.readable
         responseHygienePassed = $hygiene.passed
         readinessDeploymentFlagsConsistent = $deploymentChecks.readinessStatusReady -ne $true -or (
@@ -528,6 +647,8 @@ $report = [ordered]@{
     chainChecks = $chainChecks
     localState = [ordered]@{
         statePath = $StatePath
+        skipped = (Get-FlowChainJsonPropertyValue -Object $stateFacts -Name "skipped")
+        skipReason = (Get-FlowChainJsonPropertyValue -Object $stateFacts -Name "skipReason")
         chainId = $stateFacts.chainId
         latestHeight = $stateFacts.latestHeight
         latestHash = $stateFacts.latestHash
@@ -542,6 +663,7 @@ $report = [ordered]@{
     maxBlockAgeSeconds = $MaxBlockAgeSeconds
     responseHygiene = $hygiene
     cors = $corsCheck
+    securityHeaders = $securityHeaderCheck
     rateLimit = $rateLimitCheck
     problems = @($problems)
     noSecrets = $hygiene.passed

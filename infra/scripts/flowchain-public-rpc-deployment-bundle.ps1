@@ -144,6 +144,7 @@ function Invoke-PublicRpcBundleRenderValidation {
         renderedNginxHasRateLimit = $false
         renderedSystemdUsesOwnerEnv = $false
         renderedPreflightsUsePublicUrl = $false
+        renderedPreflightsRejectWrongMethods = $false
         renderedReportPassed = $false
         renderedReportAllowedOriginCount = $false
         renderedReportKeepsOwnerPathsOutsideRepo = $false
@@ -153,6 +154,8 @@ function Invoke-PublicRpcBundleRenderValidation {
         renderedReportNoSecrets = $false
         wildcardOriginRenderRejected = $false
         wildcardOriginRenderOutputNoSecrets = $false
+        publicUrlPathRenderRejected = $false
+        publicUrlPathRenderOutputNoSecrets = $false
         cleanupAttempted = $false
         broadcastsFalse = $true
     }
@@ -226,8 +229,11 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.renderedFilesHaveNoPlaceholders = $renderedAllText -notmatch "<FLOWCHAIN_|<PATH_TO_"
         $checks.renderedNginxHasHttpsHost = $renderedAllText.Contains("server_name rpc.flowchain.example;") -and $renderedAllText.Contains("https://rpc.flowchain.example")
         $checks.renderedNginxHasRateLimit = $renderedAllText.Contains("rate=60r/m") -and $renderedAllText.Contains("limit_req zone=flowchain_rpc_per_ip")
+        $checks.renderedNginxHasSecurityHeaders = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcSecurityHeaderTokens
+        $checks.renderedNginxHasTimeoutGuardrails = Test-TextContainsAllTokens -Text $renderedAllText -Tokens $publicRpcTimeoutGuardrailTokens
         $checks.renderedSystemdUsesOwnerEnv = $renderedAllText.Contains("EnvironmentFile=$ownerEnvFile") -and $renderedAllText.Contains("FLOWCHAIN_OWNER_ENV_FILE=$ownerEnvFile")
         $checks.renderedPreflightsUsePublicUrl = $renderedAllText.Contains("https://rpc.flowchain.example") -and $renderedAllText.Contains("https://wallet.flowchain.example")
+        $checks.renderedPreflightsRejectWrongMethods = $renderedAllText.Contains('test "${rpc_get_status}" = "405"') -and $renderedAllText.Contains('test "${readonly_post_status}" = "405"') -and $renderedAllText.Contains('$rpcGetStatusCode -ne 405') -and $renderedAllText.Contains('$readOnlyPostStatusCode -ne 405')
         $checks.renderOutputDoesNotPrintTokenHash = -not $renderOutputText.Contains($safeTokenHash)
         $checks.renderedFilesDoNotContainTokenHash = -not $renderedAllText.Contains($safeTokenHash)
 
@@ -285,6 +291,49 @@ function Invoke-PublicRpcBundleRenderValidation {
         $checks.wildcardOriginRenderRejected = $wildcardRenderExitCode -ne 0
         $checks.wildcardOriginRenderOutputNoSecrets = -not $wildcardRenderOutputText.Contains($safeTokenHash)
 
+        $pathPublicUrlOwnerEnvFile = Join-Path $tempRoot "owner-public-rpc-path-url.env"
+        $pathPublicUrlRenderDir = Join-Path $tempRoot "path-url-rendered"
+        New-Item -ItemType Directory -Force -Path $pathPublicUrlRenderDir | Out-Null
+        Set-Content -LiteralPath $pathPublicUrlOwnerEnvFile -Value (@(
+            "FLOWCHAIN_RPC_PUBLIC_URL=https://rpc.flowchain.example/rpc",
+            "FLOWCHAIN_RPC_ALLOWED_ORIGINS=https://wallet.flowchain.example,https://dashboard.flowchain.example",
+            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE=60",
+            "FLOWCHAIN_RPC_TLS_TERMINATED=true",
+            "FLOWCHAIN_RPC_STATE_BACKUP_PATH=$backupDir",
+            "FLOWCHAIN_TESTER_WRITE_ENABLED=true",
+            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256=$safeTokenHash",
+            "FLOWCHAIN_TESTER_MAX_SEND_UNITS=10"
+        ) -join "`r`n") -Encoding UTF8
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $pathPublicUrlRenderOutput = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $renderScriptPath `
+                -BundleDir $BundleDir `
+                -RenderDir $pathPublicUrlRenderDir `
+                -OwnerEnvFile $pathPublicUrlOwnerEnvFile `
+                -RepoRoot $RepoRoot `
+                -ServiceUser "flowchain" `
+                -ServiceGroup "flowchain" `
+                -TlsCertificatePath $tlsCertPath `
+                -TlsCertificateKeyPath $tlsKeyPath `
+                -NginxExe $nginxExe 2>&1 | ForEach-Object { "$_" })
+            $pathPublicUrlRenderExitCode = $LASTEXITCODE
+            if ($null -eq $pathPublicUrlRenderExitCode) {
+                $pathPublicUrlRenderExitCode = 0
+            }
+        }
+        catch {
+            $pathPublicUrlRenderOutput = @($_.Exception.Message)
+            $pathPublicUrlRenderExitCode = 1
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        $pathPublicUrlRenderOutputText = @($pathPublicUrlRenderOutput) -join "`n"
+        Assert-FlowChainNoSecretText -Text $pathPublicUrlRenderOutputText -Label "public RPC pathful public URL render output"
+        $checks.publicUrlPathRenderRejected = $pathPublicUrlRenderExitCode -ne 0
+        $checks.publicUrlPathRenderOutputNoSecrets = -not $pathPublicUrlRenderOutputText.Contains($safeTokenHash)
+
         Assert-FlowChainNoSecretText -Text $renderOutputText -Label "public RPC owner render output"
         Assert-FlowChainNoSecretText -Text $renderedAllText -Label "public RPC rendered owner files"
     }
@@ -302,6 +351,14 @@ function Invoke-PublicRpcBundleRenderValidation {
     }
 
     $failedChecks = @($checks.GetEnumerator() | Where-Object { $_.Value -ne $true } | ForEach-Object { $_.Key })
+    $secretSafetyChecks = @(
+        "renderOutputDoesNotPrintTokenHash",
+        "renderedFilesDoNotContainTokenHash",
+        "renderedReportDoesNotContainTokenHash",
+        "renderedReportNoSecrets",
+        "wildcardOriginRenderOutputNoSecrets",
+        "publicUrlPathRenderOutputNoSecrets"
+    )
     return [ordered]@{
         schema = "flowchain.public_rpc_owner_render_validation.v0"
         status = if ($failedChecks.Count -eq 0) { "passed" } else { "failed" }
@@ -318,7 +375,7 @@ function Invoke-PublicRpcBundleRenderValidation {
             "public-rpc-render-report.json"
         )
         envValuesPrinted = $false
-        noSecrets = $failedChecks -notcontains "renderedReportNoSecrets"
+        noSecrets = @($secretSafetyChecks | Where-Object { $failedChecks -contains $_ }).Count -eq 0
         broadcasts = $false
     }
 }
@@ -354,6 +411,7 @@ $requiredPlaceholders = @(
     "<FLOWCHAIN_RPC_PUBLIC_HOST>",
     "<FLOWCHAIN_RPC_PUBLIC_URL>",
     "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>",
+    "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>",
     "<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>",
     "<PATH_TO_TLS_CERTIFICATE>",
     "<PATH_TO_TLS_CERTIFICATE_KEY>",
@@ -376,18 +434,27 @@ $requiredCommands = @(
     "npm run flowchain:service:restart -- -LiveProfile",
     "npm run flowchain:service:supervisor -- -Once",
     "npm run flowchain:service:supervisor:validate",
+    "npm run flowchain:service:install:systemd:validate",
     "npm run flowchain:service:status",
     "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
     "npm run flowchain:ops:snapshot -- -AllowBlocked",
     "npm run flowchain:public-rpc:validate",
     "npm run flowchain:public-rpc:check",
+    "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+    "npm run flowchain:tester:gateway:e2e",
+    "npm run flowchain:wallet:live-tester:e2e",
     "npm run flowchain:backup:restore:validate",
     "npm run flowchain:backup:check",
     "npm run flowchain:public-deployment:contract -- -AllowBlocked",
-    "npm run flowchain:external-tester:packet -- -AllowBlocked"
+    "npm run flowchain:external-tester:packet -- -AllowBlocked",
+    "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
+    "npm run flowchain:truth-table -- -AllowBlocked",
+    "npm run flowchain:no-secret:scan"
 )
 
 $ownerPreflightCommands = @(
+    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>",
+    "npm run flowchain:service:install:systemd -- -Action Plan -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR> -StartBridgeRelayerLoop",
     "systemd-analyze verify <FLOWCHAIN_SYSTEMD_RENDERED_UNIT>",
     "systemd-analyze verify <FLOWCHAIN_SUPERVISOR_SYSTEMD_RENDERED_UNIT>",
     "nginx -t",
@@ -419,6 +486,25 @@ $ownerRollbackCommands = @(
 
 $rollbackCommands = @($localRollbackCommands + $ownerRollbackCommands)
 
+$publicRpcSecurityHeaderTokens = @(
+    "server_tokens off;",
+    'add_header Strict-Transport-Security "max-age=31536000" always;',
+    'add_header X-Content-Type-Options "nosniff" always;',
+    'add_header Cache-Control "no-store" always;',
+    'add_header Referrer-Policy "no-referrer" always;',
+    'add_header X-Frame-Options "DENY" always;',
+    "add_header Content-Security-Policy `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'`" always;"
+)
+
+$publicRpcTimeoutGuardrailTokens = @(
+    "client_max_body_size 256k;",
+    "client_body_timeout 10s;",
+    "send_timeout 30s;",
+    "proxy_connect_timeout 5s;",
+    "proxy_send_timeout 30s;",
+    "proxy_read_timeout 60s;"
+)
+
 $nginxRequiredTokens = @(
     "server_name <FLOWCHAIN_RPC_PUBLIC_HOST>;",
     "ssl_certificate <PATH_TO_TLS_CERTIFICATE>;",
@@ -432,7 +518,7 @@ $nginxRequiredTokens = @(
     'proxy_set_header X-Forwarded-Proto https;',
     'proxy_set_header X-Forwarded-For $remote_addr;',
     '/tester/(faucet|wallets/(create|send))'
-)
+) + $publicRpcSecurityHeaderTokens + $publicRpcTimeoutGuardrailTokens
 
 $systemdRequiredTokens = @(
     "[Unit]",
@@ -474,16 +560,29 @@ $preflightRequiredTokens = @(
     'public_host="<FLOWCHAIN_RPC_PUBLIC_HOST>"',
     'public_url="<FLOWCHAIN_RPC_PUBLIC_URL>"',
     'allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    'disallowed_origin="<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     'grep -Fq "proxy_pass http://127.0.0.1:8787;" "${rendered_conf}"',
+    'grep -Fq "client_body_timeout 10s;" "${rendered_conf}"',
+    'grep -Fq "proxy_connect_timeout 5s;" "${rendered_conf}"',
     "grep -Eq '<(FLOWCHAIN_|PATH_TO_TLS_)' `"`${rendered_conf}`"",
     "nginx -t",
     'curl -fsS --max-time 5 "http://127.0.0.1:8787/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null',
+    'disallowed_status=',
+    'test "${disallowed_status}" = "403"',
+    '${public_url%/}/devnet/local/state.json',
+    'test "${broad_state_status}" = "404"',
+    '${public_url%/}/wallets/create',
+    'test "${private_wallet_status}" = "404"',
     '${public_url%/}/tester/status',
     'tester_unauth_status=',
     '${public_url%/}/tester/wallets/create',
     'test "${tester_unauth_status}" = "401"',
-    'flowmemory.control_plane.tester_write_auth_required.v0'
+    'flowmemory.control_plane.tester_write_auth_required.v0',
+    'rpc_get_status=',
+    'test "${rpc_get_status}" = "405"',
+    'readonly_post_status=',
+    'test "${readonly_post_status}" = "405"'
 )
 
 $windowsPreflightRequiredTokens = @(
@@ -492,16 +591,26 @@ $windowsPreflightRequiredTokens = @(
     '[string] $NginxExe = "<FLOWCHAIN_NGINX_EXE>"',
     '[string] $PublicUrl = "<FLOWCHAIN_RPC_PUBLIC_URL>"',
     '[string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    '[string] $DisallowedOrigin = "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     'proxy_pass http://127.0.0.1:8787;',
+    'client_body_timeout 10s;',
+    'proxy_connect_timeout 5s;',
     'proxy_set_header Origin $http_origin;',
     'proxy_set_header X-Forwarded-Proto https;',
     '& $NginxExe -t',
     'Invoke-RestMethod -Uri "http://127.0.0.1:8787/health"',
     '$publicBase = $PublicUrl.TrimEnd("/")',
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness"',
+    '$disallowedStatusCode -ne 403',
+    '/devnet/local/state.json',
+    '/wallets/create',
+    '$blockedPathStatusCodes["/devnet/local/state.json"] -ne 404',
+    '$blockedPathStatusCodes["/wallets/create"] -ne 404',
     '$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status"',
     '$testerUnauthStatusCode -ne 401',
     'flowmemory.control_plane.tester_write_auth_required.v0',
+    '$rpcGetStatusCode -ne 405',
+    '$readOnlyPostStatusCode -ne 405',
     '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
     '"method":"rpc_readiness"'
 )
@@ -515,6 +624,7 @@ $renderScriptRequiredTokens = @(
     'function Get-FlowChainEnvValue',
     'function Get-AllowedHttpsOrigins',
     'FLOWCHAIN_RPC_PUBLIC_URL',
+    'FLOWCHAIN_RPC_PUBLIC_URL must be an exact https origin',
     'FLOWCHAIN_RPC_ALLOWED_ORIGINS',
     'FLOWCHAIN_RPC_ALLOWED_ORIGINS must contain only exact https origins',
     'FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE',
@@ -639,11 +749,13 @@ $nginxPreflightScriptLines = @(
     'public_host="<FLOWCHAIN_RPC_PUBLIC_HOST>"',
     'public_url="<FLOWCHAIN_RPC_PUBLIC_URL>"',
     'allowed_origin="<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    'disallowed_origin="<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     "",
     'test -n "${rendered_conf}"',
     'test -n "${public_host}"',
     'test -n "${public_url}"',
     'test -n "${allowed_origin}"',
+    'test -n "${disallowed_origin}"',
     'test -f "${rendered_conf}"',
     "",
     'case "${public_url}" in',
@@ -660,8 +772,21 @@ $nginxPreflightScriptLines = @(
     'grep -Fq "proxy_pass http://127.0.0.1:8787;" "${rendered_conf}"',
     'grep -Fq "limit_req_zone" "${rendered_conf}"',
     'grep -Fq "limit_req zone=flowchain_rpc_per_ip" "${rendered_conf}"',
+    'grep -Fq "client_max_body_size 256k;" "${rendered_conf}"',
+    'grep -Fq "client_body_timeout 10s;" "${rendered_conf}"',
+    'grep -Fq "proxy_connect_timeout 5s;" "${rendered_conf}"',
+    'grep -Fq "proxy_send_timeout 30s;" "${rendered_conf}"',
+    'grep -Fq "proxy_read_timeout 60s;" "${rendered_conf}"',
+    'grep -Fq "send_timeout 30s;" "${rendered_conf}"',
     'grep -Fq "ssl_certificate " "${rendered_conf}"',
     'grep -Fq "ssl_certificate_key " "${rendered_conf}"',
+    'grep -Fq "server_tokens off;" "${rendered_conf}"',
+    'grep -Fq "add_header Strict-Transport-Security " "${rendered_conf}"',
+    'grep -Fq "add_header X-Content-Type-Options " "${rendered_conf}"',
+    'grep -Fq "add_header Cache-Control " "${rendered_conf}"',
+    'grep -Fq "add_header Referrer-Policy " "${rendered_conf}"',
+    'grep -Fq "add_header X-Frame-Options " "${rendered_conf}"',
+    'grep -Fq "add_header Content-Security-Policy " "${rendered_conf}"',
     'grep -Fq ''proxy_set_header Origin $http_origin;'' "${rendered_conf}"',
     'grep -Fq ''proxy_set_header X-Forwarded-Proto https;'' "${rendered_conf}"',
     'grep -Fq ''proxy_set_header X-Forwarded-For $remote_addr;'' "${rendered_conf}"',
@@ -671,8 +796,23 @@ $nginxPreflightScriptLines = @(
     'curl -fsS --max-time 10 "${public_url%/}/health" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc/readiness" >/dev/null',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}'' "${public_url%/}/rpc" >/dev/null',
+    'rpc_get_body="$(mktemp)"',
+    'readonly_post_body="$(mktemp)"',
+    'disallowed_body="$(mktemp)"',
+    'broad_state_body="$(mktemp)"',
     'tester_unauth_body="$(mktemp)"',
-    'trap ''rm -f "${tester_unauth_body}"'' EXIT',
+    'private_wallet_body="$(mktemp)"',
+    'trap ''rm -f "${rpc_get_body}" "${readonly_post_body}" "${disallowed_body}" "${broad_state_body}" "${tester_unauth_body}" "${private_wallet_body}"'' EXIT',
+    'rpc_get_status="$(curl -sS -o "${rpc_get_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/rpc")"',
+    'test "${rpc_get_status}" = "405"',
+    'readonly_post_status="$(curl -sS -o "${readonly_post_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{}'' "${public_url%/}/rpc/readiness")"',
+    'test "${readonly_post_status}" = "405"',
+    'disallowed_status="$(curl -sS -o "${disallowed_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${disallowed_origin}" "${public_url%/}/rpc/readiness")"',
+    'test "${disallowed_status}" = "403"',
+    'broad_state_status="$(curl -sS -o "${broad_state_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/devnet/local/state.json")"',
+    'test "${broad_state_status}" = "404"',
+    'private_wallet_status="$(curl -sS -o "${private_wallet_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{}'' "${public_url%/}/wallets/create")"',
+    'test "${private_wallet_status}" = "404"',
     'curl -fsS --max-time 10 -H "Origin: ${allowed_origin}" "${public_url%/}/tester/status" >/dev/null',
     'tester_unauth_status="$(curl -sS -o "${tester_unauth_body}" -w "%{http_code}" --max-time 10 -H "Origin: ${allowed_origin}" -H "Content-Type: application/json" --data ''{}'' "${public_url%/}/tester/wallets/create")"',
     'test "${tester_unauth_status}" = "401"',
@@ -691,7 +831,7 @@ $nginxPreflightChecklistLines = @(
     '- Render the Nginx template to `<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>`.',
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
-    "- Confirm TLS, rate limiting, Origin forwarding, and X-Forwarded headers are present.",
+    "- Confirm TLS, rate limiting, timeout guardrails, Origin forwarding, X-Forwarded headers, and defensive response headers are present.",
     '- Run `nginx -t` before every reload.',
     '- Run `bash <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
@@ -703,7 +843,8 @@ $windowsNginxPreflightScriptLines = @(
     '    [string] $RenderedConfig = "<FLOWCHAIN_RPC_NGINX_RENDERED_CONF>",',
     '    [string] $NginxExe = "<FLOWCHAIN_NGINX_EXE>",',
     '    [string] $PublicUrl = "<FLOWCHAIN_RPC_PUBLIC_URL>",',
-    '    [string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>"',
+    '    [string] $AllowedOrigin = "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>",',
+    '    [string] $DisallowedOrigin = "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>"',
     ")",
     "",
     '$ErrorActionPreference = "Stop"',
@@ -713,6 +854,7 @@ $windowsNginxPreflightScriptLines = @(
     'if (-not (Test-Path -LiteralPath $NginxExe)) { throw "nginx.exe was not found." }',
     'if (-not $PublicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_PUBLIC_URL must be https." }',
     'if ([string]::IsNullOrWhiteSpace($AllowedOrigin) -or -not $AllowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_ALLOWED_ORIGIN must be an exact https origin." }',
+    'if ([string]::IsNullOrWhiteSpace($DisallowedOrigin) -or -not $DisallowedOrigin.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { throw "FLOWCHAIN_RPC_DISALLOWED_ORIGIN must be an exact https origin." }',
     "",
     '$rendered = Get-Content -Raw -LiteralPath $RenderedConfig',
     '$placeholderPattern = [regex]::Escape("<") + "(FLOWCHAIN_|PATH_TO_TLS_|FLOWCHAIN_NGINX_)"',
@@ -721,8 +863,21 @@ $windowsNginxPreflightScriptLines = @(
     '    "proxy_pass http://127.0.0.1:8787;",',
     '    "limit_req_zone",',
     '    "limit_req zone=flowchain_rpc_per_ip",',
+    '    "client_max_body_size 256k;",',
+    '    "client_body_timeout 10s;",',
+    '    "proxy_connect_timeout 5s;",',
+    '    "proxy_send_timeout 30s;",',
+    '    "proxy_read_timeout 60s;",',
+    '    "send_timeout 30s;",',
     '    "ssl_certificate ",',
     '    "ssl_certificate_key ",',
+    '    "server_tokens off;",',
+    '    "add_header Strict-Transport-Security ",',
+    '    "add_header X-Content-Type-Options ",',
+    '    "add_header Cache-Control ",',
+    '    "add_header Referrer-Policy ",',
+    '    "add_header X-Frame-Options ",',
+    '    "add_header Content-Security-Policy ",',
     '    ''proxy_set_header Origin $http_origin;'',',
     '    ''proxy_set_header X-Forwarded-Proto https;'',',
     '    ''proxy_set_header X-Forwarded-For $remote_addr;''',
@@ -740,6 +895,53 @@ $windowsNginxPreflightScriptLines = @(
     'Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
     '$body = ''{"jsonrpc":"2.0","id":1,"method":"rpc_readiness","params":{}}''',
     'Invoke-WebRequest -Uri "$publicBase/rpc" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 10 | Out-Null',
+    '$rpcGetStatusCode = 0',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/rpc" -Method Get -Headers $headers -TimeoutSec 10 | Out-Null',
+    '    $rpcGetStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $rpcGetStatusCode = [int]$_.Exception.Response.StatusCode',
+    '    } else { throw }',
+    '}',
+    'if ($rpcGetStatusCode -ne 405) { throw "RPC endpoint GET preflight did not return HTTP 405." }',
+    '$readOnlyPostStatusCode = 0',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null',
+    '    $readOnlyPostStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $readOnlyPostStatusCode = [int]$_.Exception.Response.StatusCode',
+    '    } else { throw }',
+    '}',
+    'if ($readOnlyPostStatusCode -ne 405) { throw "Read-only RPC readiness POST preflight did not return HTTP 405." }',
+    '$disallowedStatusCode = 0',
+    'try {',
+    '    Invoke-WebRequest -Uri "$publicBase/rpc/readiness" -Method Get -Headers @{ Origin = $DisallowedOrigin } -TimeoutSec 10 | Out-Null',
+    '    $disallowedStatusCode = 200',
+    '}',
+    'catch {',
+    '    if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '        $disallowedStatusCode = [int]$_.Exception.Response.StatusCode',
+    '    } else { throw }',
+    '}',
+    'if ($disallowedStatusCode -ne 403) { throw "Disallowed origin public preflight did not return HTTP 403." }',
+    '$blockedPathStatusCodes = @{}',
+    'foreach ($blockedPath in @("/devnet/local/state.json", "/wallets/create")) {',
+    '    try {',
+    '        Invoke-WebRequest -Uri "$publicBase$blockedPath" -Method Post -ContentType "application/json" -Headers $headers -Body "{}" -TimeoutSec 10 | Out-Null',
+    '        $blockedPathStatusCodes[$blockedPath] = 200',
+    '    }',
+    '    catch {',
+    '        if ($_.Exception.PSObject.Properties.Name -contains "Response" -and $null -ne $_.Exception.Response) {',
+    '            $blockedPathStatusCodes[$blockedPath] = [int]$_.Exception.Response.StatusCode',
+    '        } else { throw }',
+    '    }',
+    '}',
+    'if ($blockedPathStatusCodes["/devnet/local/state.json"] -ne 404) { throw "Broad local state path public preflight did not return HTTP 404." }',
+    'if ($blockedPathStatusCodes["/wallets/create"] -ne 404) { throw "Private wallet create path public preflight did not return HTTP 404." }',
     '$testerStatus = Invoke-WebRequest -Uri "$publicBase/tester/status" -Method Get -Headers $headers -TimeoutSec 10',
     'if ([int]$testerStatus.StatusCode -ne 200) { throw "Tester status preflight did not return HTTP 200." }',
     '$testerUnauthStatusCode = 0',
@@ -775,6 +977,7 @@ $windowsNginxPreflightChecklistLines = @(
     '- Replace `<FLOWCHAIN_RPC_PUBLIC_HOST>`, `<PATH_TO_TLS_CERTIFICATE>`, `<PATH_TO_TLS_CERTIFICATE_KEY>`, and `<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>` only on the owner host.',
     '- Set `<FLOWCHAIN_NGINX_EXE>` to the local `nginx.exe` path.',
     '- Confirm the private origin remains `127.0.0.1:8787`.',
+    '- Confirm TLS, rate limiting, timeout guardrails, Origin forwarding, X-Forwarded headers, and defensive response headers are present.',
     '- Run `powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_NGINX_PREFLIGHT_SCRIPT>` after installing the rendered config.',
     "",
     "The PowerShell preflight uses local health and public read/readiness requests only. It does not send live transactions."
@@ -948,10 +1151,17 @@ foreach ($name in $requiredEnvNames) {
 }
 
 $publicUrl = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_PUBLIC_URL"
-if (-not $publicUrl.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "FLOWCHAIN_RPC_PUBLIC_URL must be https before rendering public RPC files."
+[System.Uri] $publicUri = $null
+if (-not [System.Uri]::TryCreate($publicUrl, [System.UriKind]::Absolute, [ref]$publicUri) `
+    -or $publicUri.Scheme -ne "https" `
+    -or [string]::IsNullOrWhiteSpace($publicUri.Host) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Query) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.Fragment) `
+    -or -not [string]::IsNullOrWhiteSpace($publicUri.UserInfo) `
+    -or $publicUri.AbsolutePath -ne "/") {
+    throw "FLOWCHAIN_RPC_PUBLIC_URL must be an exact https origin without paths, query strings, fragments, or credentials before rendering public RPC files."
 }
-$publicUri = [System.Uri] $publicUrl
+$publicUrl = $publicUrl.TrimEnd("/")
 $allowedOrigins = @(Get-AllowedHttpsOrigins -Value (Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_ALLOWED_ORIGINS"))
 $rateLimit = Get-FlowChainEnvValue -OwnerValues $ownerValues -Name "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
 if ($rateLimit -notmatch '^[1-9][0-9]*$') {
@@ -990,6 +1200,7 @@ $replacements = @{
     "<FLOWCHAIN_RPC_PUBLIC_HOST>" = $publicUri.Host
     "<FLOWCHAIN_RPC_PUBLIC_URL>" = $publicUrl.TrimEnd("/")
     "<FLOWCHAIN_RPC_ALLOWED_ORIGIN>" = $allowedOrigins[0]
+    "<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>" = "https://blocked-origin.flowchain.example"
     "<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>" = $rateLimit
     "<PATH_TO_TLS_CERTIFICATE>" = (Get-RequiredParameter -Name "TlsCertificatePath" -Value $TlsCertificatePath)
     "<PATH_TO_TLS_CERTIFICATE_KEY>" = (Get-RequiredParameter -Name "TlsCertificateKeyPath" -Value $TlsCertificateKeyPath)
@@ -1196,15 +1407,29 @@ $checks = [ordered]@{
     ownerRenderWritesWindowsPreflight = ($renderValidation.checks.renderedWindowsPreflightWritten -eq $true)
     ownerRenderDoesNotPrintTokenHash = ($renderValidation.checks.renderOutputDoesNotPrintTokenHash -eq $true)
     ownerRenderFilesDoNotContainTokenHash = ($renderValidation.checks.renderedFilesDoNotContainTokenHash -eq $true)
+    ownerRenderIncludesSecurityHeaders = ($renderValidation.checks.renderedNginxHasSecurityHeaders -eq $true)
+    ownerRenderIncludesTimeoutGuardrails = ($renderValidation.checks.renderedNginxHasTimeoutGuardrails -eq $true)
+    ownerRenderPreflightsRejectWrongMethods = ($renderValidation.checks.renderedPreflightsRejectWrongMethods -eq $true)
+    ownerRenderRejectsPublicUrlPath = ($renderValidation.checks.publicUrlPathRenderRejected -eq $true)
+    ownerRenderPublicUrlPathRejectOutputNoSecrets = ($renderValidation.checks.publicUrlPathRenderOutputNoSecrets -eq $true)
     includesPrivateOrigin = ($nginxText.Contains("127.0.0.1:8787") -and $nginxPreflightScriptText.Contains("127.0.0.1:8787") -and $windowsNginxPreflightScriptText.Contains("127.0.0.1:8787"))
     includesRateLimitPlaceholder = $nginxText.Contains("<FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE>")
     includesTlsPlaceholders = ($nginxText.Contains("<PATH_TO_TLS_CERTIFICATE>") -and $nginxText.Contains("<PATH_TO_TLS_CERTIFICATE_KEY>"))
+    includesSecurityHeaders = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcSecurityHeaderTokens
+    includesTimeoutGuardrails = Test-TextContainsAllTokens -Text $nginxText -Tokens $publicRpcTimeoutGuardrailTokens
+    preflightsCheckSecurityHeaders = ($nginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $nginxPreflightScriptText.Contains("add_header Content-Security-Policy") -and $windowsNginxPreflightScriptText.Contains("add_header Strict-Transport-Security") -and $windowsNginxPreflightScriptText.Contains("add_header Content-Security-Policy"))
+    preflightsCheckTimeoutGuardrails = ($nginxPreflightScriptText.Contains("client_body_timeout 10s") -and $nginxPreflightScriptText.Contains("proxy_connect_timeout 5s") -and $windowsNginxPreflightScriptText.Contains("client_body_timeout 10s") -and $windowsNginxPreflightScriptText.Contains("proxy_connect_timeout 5s"))
+    includesMethodRejectionPreflight = ($nginxPreflightScriptText.Contains('test "${rpc_get_status}" = "405"') -and $nginxPreflightScriptText.Contains('test "${readonly_post_status}" = "405"') -and $windowsNginxPreflightScriptText.Contains("RPC endpoint GET preflight did not return HTTP 405.") -and $windowsNginxPreflightScriptText.Contains("Read-only RPC readiness POST preflight did not return HTTP 405."))
     includesCorsOriginForwarding = ($nginxText.Contains('proxy_set_header Origin $http_origin;') -and $nginxPreflightScriptText.Contains('Origin: ${allowed_origin}'))
     publicStateMirrorExcluded = (-not $nginxText.Contains("|state|")) -and (-not $nginxText.Contains("/state")) -and (-not @($edgeTemplateReport.publicReadMirrorPaths).Contains("/state"))
     devnetStatePublicRpcExcluded = (-not @($edgeTemplateReport.publicSafeJsonRpcMethods).Contains("devnet_state"))
     includesNginxConfigTest = ($nginxPreflightScriptText.Contains("nginx -t") -and $nginxPreflightChecklistText.Contains("nginx -t"))
     includesWindowsNginxConfigTest = ($windowsNginxPreflightScriptText.Contains('& $NginxExe -t') -and $windowsNginxPreflightChecklistText.Contains("<FLOWCHAIN_NGINX_EXE>"))
     includesTesterWritePreflight = ($nginxPreflightScriptText.Contains('/tester/status') -and $nginxPreflightScriptText.Contains('/tester/wallets/create') -and $nginxPreflightScriptText.Contains('flowmemory.control_plane.tester_write_auth_required.v0') -and $windowsNginxPreflightScriptText.Contains('/tester/status') -and $windowsNginxPreflightScriptText.Contains('/tester/wallets/create') -and $windowsNginxPreflightScriptText.Contains('flowmemory.control_plane.tester_write_auth_required.v0'))
+    includesDisallowedOriginPreflight = ($nginxPreflightScriptText.Contains("<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>") -and $nginxPreflightScriptText.Contains('test "${disallowed_status}" = "403"') -and $windowsNginxPreflightScriptText.Contains("<FLOWCHAIN_RPC_DISALLOWED_ORIGIN>") -and $windowsNginxPreflightScriptText.Contains("Disallowed origin public preflight did not return HTTP 403."))
+    includesBroadStateBlockedPreflight = ($nginxPreflightScriptText.Contains('/devnet/local/state.json') -and $nginxPreflightScriptText.Contains('test "${broad_state_status}" = "404"') -and $windowsNginxPreflightScriptText.Contains("Broad local state path public preflight did not return HTTP 404."))
+    includesPrivateWalletCreateBlockedPreflight = ($nginxPreflightScriptText.Contains('/wallets/create') -and $nginxPreflightScriptText.Contains('test "${private_wallet_status}" = "404"') -and $windowsNginxPreflightScriptText.Contains("Private wallet create path public preflight did not return HTTP 404."))
+    authorizationForwardingScopedToTesterWrite = ([regex]::Matches($nginxText, 'proxy_set_header\s+Authorization\s+\$http_authorization;')).Count -eq 1
     includesVerificationCommands = ((@(Get-MissingTextTokens -Text $verifyText -Tokens $requiredCommands).Count -eq 0) -and (@(Get-MissingTextTokens -Text $verifyText -Tokens $ownerRenderCommands).Count -eq 0) -and (@(Get-MissingTextTokens -Text $verifyText -Tokens $ownerPreflightCommands).Count -eq 0))
     includesRollbackCommands = (@(Get-MissingTextTokens -Text $rollbackText -Tokens $rollbackCommands).Count -eq 0)
     envExampleHasAllRequiredNames = (@(Get-MissingTextTokens -Text $ownerEnvText -Tokens $requiredEnvNames).Count -eq 0)

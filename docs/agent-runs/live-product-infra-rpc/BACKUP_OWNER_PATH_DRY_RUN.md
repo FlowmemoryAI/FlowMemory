@@ -1,6 +1,6 @@
 ﻿# FlowChain Backup Owner Path Dry Run
 
-Generated: 2026-05-18T04:44:23.9884243Z
+Generated: 2026-05-21T11:04:31.7512485Z
 Status: passed
 
 This dry run sets FLOWCHAIN_RPC_STATE_BACKUP_PATH to an ignored local directory and runs the same backup readiness gate used for production. It does not use or record the owner's real backup path.
@@ -9,6 +9,7 @@ This dry run sets FLOWCHAIN_RPC_STATE_BACKUP_PATH to an ignored local directory 
 
 - dryRunRootInsideIgnoredLocalState: True
 - ownerBackupEnvRestored: True
+- ownerEnvFileRestored: True
 - childReadinessCommandPassed: True
 - readinessReportWritten: True
 - readinessStatusPassed: True
@@ -19,6 +20,8 @@ This dry run sets FLOWCHAIN_RPC_STATE_BACKUP_PATH to an ignored local directory 
 - writeVerified: True
 - latestPointerVerified: True
 - latestPointerWrittenAtomically: True
+- retentionCurrentSnapshotProtected: True
+- retentionPruneErrorsEmpty: True
 - stateRootCompared: True
 - stateRootMatch: True
 - stateFileHashMatch: True
@@ -26,6 +29,7 @@ This dry run sets FLOWCHAIN_RPC_STATE_BACKUP_PATH to an ignored local directory 
 - backupReportPassed: True
 - restoreReportPassed: True
 - backupSnapshotCreated: True
+- backupRetentionProtectedSnapshot: True
 - restoreLiveStateProtected: True
 - restoreDidNotMutateLiveState: True
 - liveStateStillReadable: True

@@ -8,6 +8,8 @@ param(
         "devnet/local/production-l1-wallet",
         "devnet/local/real-value-pilot",
         "docs/agent-runs/live-product-infra-rpc",
+        "docs/agent-runs/live-product-dev-pack",
+        "docs/sdk",
         "fixtures/dashboard",
         "services/bridge-relayer/out",
         "services/control-plane/out"
@@ -60,6 +62,26 @@ function Add-ReadFailureFinding {
     }
 
     Add-Finding -Path $Path -Reason "$Operation failed ($errorKind)"
+}
+
+function ConvertTo-SecretScanComparablePath {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    $candidate = $Path
+    try {
+        $resolved = Resolve-FlowChainPath -RepoRoot $repoRoot -Path $Path
+        $fullPath = [System.IO.Path]::GetFullPath($resolved)
+        $fullRoot = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+        $prefix = $fullRoot + [System.IO.Path]::DirectorySeparatorChar
+        if ($fullPath.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $candidate = $fullPath.Substring($prefix.Length)
+        }
+    }
+    catch {
+        $candidate = $Path
+    }
+
+    return ($candidate -replace "\\", "/").TrimStart("./").ToLowerInvariant()
 }
 
 function Read-SecretScanFileText {
@@ -187,11 +209,13 @@ foreach ($path in $Paths) {
     }
 }
 
-$normalizedScanPaths = @($Paths | ForEach-Object { ("$_" -replace "\\", "/").TrimStart("./").ToLowerInvariant() })
-$normalizedReportPath = ($ReportPath -replace "\\", "/").TrimStart("./").ToLowerInvariant()
+$normalizedScanPaths = @($Paths | ForEach-Object { ConvertTo-SecretScanComparablePath -Path "$_" })
+$normalizedReportPath = ConvertTo-SecretScanComparablePath -Path $ReportPath
 $checks = [ordered]@{
     scansDashboardPublicData = $normalizedScanPaths -contains "apps/dashboard/public/data"
     scansGeneratedLiveProductReports = $normalizedScanPaths -contains "docs/agent-runs/live-product-infra-rpc"
+    scansGeneratedDevPackReports = $normalizedScanPaths -contains "docs/agent-runs/live-product-dev-pack"
+    scansGeneratedSdkDocs = $normalizedScanPaths -contains "docs/sdk"
     reportPathMatchesProductionGate = $normalizedReportPath -eq "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
     scannedCountPositive = $scanned.Count -gt 0
     findingsEmpty = $findings.Count -eq 0
@@ -203,6 +227,8 @@ $checks = [ordered]@{
 $productionGateCoverageCheckNames = @(
     "scansDashboardPublicData",
     "scansGeneratedLiveProductReports",
+    "scansGeneratedDevPackReports",
+    "scansGeneratedSdkDocs",
     "reportPathMatchesProductionGate"
 )
 $enforceProductionGateCoverage = $normalizedReportPath -eq "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"

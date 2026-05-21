@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.external_tester_packet_validation_report.v0",
-    "generatedAt":  "2026-05-18T14:48:46.8200703Z",
+    "generatedAt":  "2026-05-21T17:21:39.2133303Z",
     "status":  "passed",
     "packetStatus":  "blocked",
     "packetShareable":  false,
@@ -10,8 +10,11 @@
     "checks":  {
                    "packageScriptPacketPresent":  true,
                    "packageScriptValidationPresent":  true,
+                   "packageScriptClientPresent":  true,
+                   "packageScriptClientValidationPresent":  true,
                    "packetScriptExists":  true,
                    "readinessScriptExists":  true,
+                   "externalTesterClientExists":  true,
                    "testerNetworkReportExists":  true,
                    "publicTesterGatewayReportExists":  true,
                    "packetCommandAllowsBlocked":  true,
@@ -79,6 +82,7 @@
     "reportPaths":  {
                         "packetScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-external-tester-packet.ps1",
                         "readinessScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-external-tester-readiness.ps1",
+                        "externalTesterClient":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\examples\\flowchain-external-tester-client.mjs",
                         "packageJson":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\package.json",
                         "packetReport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "packetMarkdown":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\EXTERNAL_TESTER_PACKET.md",

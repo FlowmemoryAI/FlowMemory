@@ -1,0 +1,203 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FlowChain JSON-RPC",
+    "version": "v0",
+    "description": "Local/private FlowChain JSON-RPC contract generated from live rpc_discover output. Public exposure remains gated by owner public RPC readiness."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Local FlowChain control-plane origin"
+    }
+  ],
+  "paths": {
+    "/rpc/discover": {
+      "get": {
+        "summary": "Discover FlowChain RPC methods",
+        "operationId": "rpcDiscover",
+        "responses": {
+          "200": {
+            "description": "FlowChain RPC discovery document"
+          }
+        }
+      }
+    },
+    "/rpc/readiness": {
+      "get": {
+        "summary": "Read public/live readiness without values",
+        "operationId": "rpcReadiness",
+        "responses": {
+          "200": {
+            "description": "FlowChain readiness with missing owner input names only"
+          }
+        }
+      }
+    },
+    "/rpc": {
+      "post": {
+        "summary": "Call a FlowChain JSON-RPC method",
+        "operationId": "jsonRpcCall",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonrpc",
+                  "id",
+                  "method"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "jsonrpc": {
+                    "const": "2.0"
+                  },
+                  "id": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "account_get",
+                      "account_list",
+                      "agent_get",
+                      "agent_list",
+                      "artifact_availability_get",
+                      "artifact_availability_list",
+                      "artifact_get",
+                      "balance_get",
+                      "block_get",
+                      "block_list",
+                      "bridge_credit_get",
+                      "bridge_credit_list",
+                      "bridge_credit_status",
+                      "bridge_deposit_get",
+                      "bridge_deposit_list",
+                      "bridge_live_readiness",
+                      "bridge_observation_get",
+                      "bridge_observation_list",
+                      "bridge_observation_submit",
+                      "bridge_status",
+                      "chain_status",
+                      "challenge_get",
+                      "challenge_list",
+                      "devnet_state",
+                      "explorer_search",
+                      "faucet_event_list",
+                      "finality_get",
+                      "finality_list",
+                      "health",
+                      "lp_position_get",
+                      "lp_position_list",
+                      "memory_cell_get",
+                      "memory_cell_list",
+                      "mempool_list",
+                      "model_get",
+                      "model_list",
+                      "node_status",
+                      "peer_list",
+                      "pilot_cap_status",
+                      "pilot_credit_list",
+                      "pilot_deposit_observation_list",
+                      "pilot_emergency_status",
+                      "pilot_lifecycle_record_list",
+                      "pilot_pause_status",
+                      "pilot_release_evidence_list",
+                      "pilot_retry_status",
+                      "pilot_status",
+                      "pilot_withdrawal_intent_list",
+                      "pool_get",
+                      "pool_list",
+                      "product_flow_status",
+                      "provenance_get",
+                      "raw_json_get",
+                      "receipt_get",
+                      "receipt_list",
+                      "rootfield_get",
+                      "rootfield_list",
+                      "rpc_discover",
+                      "rpc_readiness",
+                      "swap_get",
+                      "swap_list",
+                      "token_balance_get",
+                      "token_balance_list",
+                      "token_get",
+                      "token_list",
+                      "token_transfer_get",
+                      "token_transfer_list",
+                      "transaction_get",
+                      "transaction_list",
+                      "transaction_submit",
+                      "verifier_module_get",
+                      "verifier_module_list",
+                      "verifier_report_get",
+                      "verifier_report_list",
+                      "wallet_balance_list",
+                      "wallet_metadata_get",
+                      "wallet_metadata_list",
+                      "wallet_transfer_history",
+                      "withdrawal_get",
+                      "withdrawal_list",
+                      "work_receipt_get",
+                      "work_receipt_list"
+                    ]
+                  },
+                  "params": {
+                    "type": [
+                      "object",
+                      "array",
+                      "null"
+                    ],
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "examples": {
+                "chainStatus": {
+                  "summary": "Read chain status",
+                  "value": {
+                    "jsonrpc": "2.0",
+                    "id": "chain-status",
+                    "method": "chain_status",
+                    "params": {}
+                  }
+                },
+                "blockList": {
+                  "summary": "Read latest blocks",
+                  "value": {
+                    "jsonrpc": "2.0",
+                    "id": "block-list",
+                    "method": "block_list",
+                    "params": {
+                      "limit": 5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC result or JSON-RPC error envelope"
+          }
+        }
+      }
+    }
+  },
+  "x-flowchain-method-count": 82,
+  "x-flowchain-public-ready-method-count": 0,
+  "x-flowchain-public-exposure": "blocked until owner public RPC readiness passes"
+}

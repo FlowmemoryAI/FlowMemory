@@ -1,0 +1,189 @@
+{
+    "schema":  "flowchain.backup_install_systemd_report.v0",
+    "generatedAt":  "2026-05-21T11:04:44.0318187Z",
+    "status":  "passed",
+    "action":  "Plan",
+    "backupServiceName":  "flowchain-state-backup.service",
+    "backupTimerName":  "flowchain-state-backup.timer",
+    "restoreDrillServiceName":  "flowchain-state-restore-drill.service",
+    "restoreDrillTimerName":  "flowchain-state-restore-drill.timer",
+    "dailyAt":  "03:00",
+    "restoreDrillDailyAt":  "03:15",
+    "backupCalendar":  "*-*-* 03:00:00",
+    "restoreDrillCalendar":  "*-*-* 03:15:00",
+    "systemdUnitDir":  "/etc/systemd/system",
+    "targetPaths":  {
+                        "backupService":  "/etc/systemd/system/flowchain-state-backup.service",
+                        "backupTimer":  "/etc/systemd/system/flowchain-state-backup.timer",
+                        "restoreDrillService":  "/etc/systemd/system/flowchain-state-restore-drill.service",
+                        "restoreDrillTimer":  "/etc/systemd/system/flowchain-state-restore-drill.timer"
+                    },
+    "scheduledBackup":  {
+                            "backupScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1",
+                            "restoreDrillScript":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-restore-verify.ps1",
+                            "statePath":  "devnet/local/state.json",
+                            "backupReportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json",
+                            "restoreDrillReportPath":  "docs/agent-runs/live-product-infra-rpc/scheduled-state-restore-verify-report.json",
+                            "restoreDrillRestoreRoot":  "devnet/local/restore-rehearsal/scheduled",
+                            "retentionCount":  14,
+                            "ownerEnvFileConfigured":  true,
+                            "backupRootWritePathConfigured":  true,
+                            "requiredEnvNames":  [
+                                                     "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                 ]
+                        },
+    "host":  {
+                 "isWindows":  true,
+                 "canQuerySystemd":  false,
+                 "systemctl":  {
+                                   "name":  "systemctl",
+                                   "available":  false,
+                                   "source":  ""
+                               },
+                 "journalctl":  {
+                                    "name":  "journalctl",
+                                    "available":  false,
+                                    "source":  ""
+                                }
+             },
+    "before":  {
+                   "backupService":  {
+                                         "name":  "flowchain-state-backup.service",
+                                         "canQuery":  false,
+                                         "active":  "",
+                                         "enabled":  "",
+                                         "exists":  false,
+                                         "queryError":  "systemctl is not available on this host."
+                                     },
+                   "backupTimer":  {
+                                       "name":  "flowchain-state-backup.timer",
+                                       "canQuery":  false,
+                                       "active":  "",
+                                       "enabled":  "",
+                                       "exists":  false,
+                                       "queryError":  "systemctl is not available on this host."
+                                   },
+                   "restoreDrillService":  {
+                                               "name":  "flowchain-state-restore-drill.service",
+                                               "canQuery":  false,
+                                               "active":  "",
+                                               "enabled":  "",
+                                               "exists":  false,
+                                               "queryError":  "systemctl is not available on this host."
+                                           },
+                   "restoreDrillTimer":  {
+                                             "name":  "flowchain-state-restore-drill.timer",
+                                             "canQuery":  false,
+                                             "active":  "",
+                                             "enabled":  "",
+                                             "exists":  false,
+                                             "queryError":  "systemctl is not available on this host."
+                                         }
+               },
+    "after":  {
+                  "backupService":  {
+                                        "name":  "flowchain-state-backup.service",
+                                        "canQuery":  false,
+                                        "active":  "",
+                                        "enabled":  "",
+                                        "exists":  false,
+                                        "queryError":  "systemctl is not available on this host."
+                                    },
+                  "backupTimer":  {
+                                      "name":  "flowchain-state-backup.timer",
+                                      "canQuery":  false,
+                                      "active":  "",
+                                      "enabled":  "",
+                                      "exists":  false,
+                                      "queryError":  "systemctl is not available on this host."
+                                  },
+                  "restoreDrillService":  {
+                                              "name":  "flowchain-state-restore-drill.service",
+                                              "canQuery":  false,
+                                              "active":  "",
+                                              "enabled":  "",
+                                              "exists":  false,
+                                              "queryError":  "systemctl is not available on this host."
+                                          },
+                  "restoreDrillTimer":  {
+                                            "name":  "flowchain-state-restore-drill.timer",
+                                            "canQuery":  false,
+                                            "active":  "",
+                                            "enabled":  "",
+                                            "exists":  false,
+                                            "queryError":  "systemctl is not available on this host."
+                                        }
+              },
+    "commands":  {
+                     "plan":  "npm run flowchain:backup:install:systemd -- -Action Plan",
+                     "validate":  "npm run flowchain:backup:install:systemd:validate",
+                     "install":  "npm run flowchain:backup:install:systemd -- -Action Install",
+                     "status":  "npm run flowchain:backup:install:systemd -- -Action Status",
+                     "uninstall":  "npm run flowchain:backup:install:systemd -- -Action Uninstall",
+                     "backupCheck":  "npm run flowchain:backup:check -- -AllowBlocked",
+                     "journal":  "journalctl -u flowchain-state-backup.service -u flowchain-state-backup.timer -u flowchain-state-restore-drill.service -u flowchain-state-restore-drill.timer --since -24h --no-pager"
+                 },
+    "mutationCommands":  [
+
+                         ],
+    "unitPreview":  {
+                        "backupService":  "[Unit]\nDescription=FlowChain state backup\nAfter=network-online.target flowchain-live.service\nWants=flowchain-live.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\owner-env-path-only.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\owner-env-path-only.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-backup.ps1 -StatePath devnet/local/state.json -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-backup-report.json -RetentionCount 14\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs /var/backups/flowchain-validation\n\n[Install]\nWantedBy=multi-user.target",
+                        "backupTimer":  "[Unit]\nDescription=Run FlowChain state backup daily\n\n[Timer]\nOnCalendar=*-*-* 03:00:00\nAccuracySec=1min\nPersistent=true\nUnit=flowchain-state-backup.service\n\n[Install]\nWantedBy=timers.target",
+                        "restoreDrillService":  "[Unit]\nDescription=FlowChain state restore drill\nAfter=network-online.target flowchain-live.service\nWants=flowchain-live.service\n\n[Service]\nType=oneshot\nWorkingDirectory=E:/FlowMemory/flowmemory-live-infra-rpc\nEnvironmentFile=-E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\owner-env-path-only.env\nEnvironment=FLOWCHAIN_OWNER_ENV_FILE=E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\backup-systemd-install-validation\\owner-env-path-only.env\nExecStart=/usr/bin/env pwsh -NoProfile -ExecutionPolicy Bypass -File E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-state-restore-verify.ps1 -ReportPath docs/agent-runs/live-product-infra-rpc/scheduled-state-restore-verify-report.json -RestoreRoot devnet/local/restore-rehearsal/scheduled -StatePath devnet/local/state.json\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=full\nProtectHome=read-only\nReadWritePaths=E:/FlowMemory/flowmemory-live-infra-rpc/devnet E:/FlowMemory/flowmemory-live-infra-rpc/docs/agent-runs /var/backups/flowchain-validation\n\n[Install]\nWantedBy=multi-user.target",
+                        "restoreDrillTimer":  "[Unit]\nDescription=Run FlowChain state restore drill daily\n\n[Timer]\nOnCalendar=*-*-* 03:15:00\nAccuracySec=1min\nPersistent=true\nUnit=flowchain-state-restore-drill.service\n\n[Install]\nWantedBy=timers.target"
+                    },
+    "checks":  {
+                   "unitNamesValid":  true,
+                   "backupScriptExists":  true,
+                   "restoreDrillScriptExists":  true,
+                   "retentionCountValid":  true,
+                   "backupServiceUsesOneshot":  true,
+                   "backupServiceUsesBackupScript":  true,
+                   "backupServiceHasStatePath":  true,
+                   "backupServiceHasReportPath":  true,
+                   "backupServiceHasRetentionCount":  true,
+                   "backupServiceOmitsAllowBlocked":  true,
+                   "restoreDrillServiceUsesOneshot":  true,
+                   "restoreDrillServiceUsesRestoreScript":  true,
+                   "restoreDrillServiceHasRestoreRoot":  true,
+                   "restoreDrillServiceHasStatePath":  true,
+                   "restoreDrillServiceHasReportPath":  true,
+                   "restoreDrillServiceOmitsAllowBlocked":  true,
+                   "servicesUseRepoWorkingDirectory":  true,
+                   "servicesOwnerEnvFileInjectable":  true,
+                   "servicesHardeningPresent":  true,
+                   "servicesWritePathsScoped":  true,
+                   "backupRootWritePathConfigurable":  true,
+                   "backupTimerTargetsService":  true,
+                   "restoreDrillTimerTargetsService":  true,
+                   "backupTimerCalendarConfigured":  true,
+                   "restoreDrillTimerCalendarConfigured":  true,
+                   "backupTimerPersistent":  true,
+                   "restoreDrillTimerPersistent":  true,
+                   "timerInstallTargetsPresent":  true,
+                   "ownerBackupEnvRequiredByRuntime":  true,
+                   "restoreDrillOwnerBackupEnvRequiredByRuntime":  true,
+                   "commandPlanPresent":  true,
+                   "planActionReadOnly":  true,
+                   "statusActionReadOnly":  true,
+                   "installRequiresSystemdHost":  true,
+                   "uninstallRequiresSystemdHost":  true,
+                   "systemctlAvailable":  null,
+                   "journalctlAvailable":  null,
+                   "envValuesPrintedFalse":  true,
+                   "noSecrets":  true,
+                   "broadcastsFalse":  true,
+                   "secretMarkerFindingsEmpty":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "actionErrorRedacted":  "",
+    "hostMutationPerformed":  false,
+    "envValuesPrinted":  false,
+    "noSecrets":  true,
+    "broadcasts":  false,
+    "secretMarkerFindings":  [
+
+                             ]
+}
