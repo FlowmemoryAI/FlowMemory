@@ -318,6 +318,9 @@ $ownerActivationPlanReady = (Get-MetricsStatus -Report $ownerActivationPlan) -eq
 $ownerGoLiveHandoffFailedChecks = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "failedChecks" -Default @()))
 $ownerGoLiveHandoffSecretFindings = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "secretMarkerFindings" -Default @()))
 $ownerGoLiveHandoffNextInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "nextOwnerInputNames" -Default @()))
+$ownerGoLiveHandoffMissingRequiredInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingRequiredEnvNames" -Default @()))
+$ownerGoLiveHandoffMissingOptionalInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "missingOptionalEnvNames" -Default @()))
+$ownerGoLiveHandoffNextOptionalInputs = @((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "nextOwnerOptionalInputNames" -Default @()))
 $ownerGoLiveHandoffChecks = Get-MetricsProp -Object $ownerGoLiveHandoff -Name "checks"
 $ownerGoLiveHandoffStageCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-MetricsProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
@@ -347,6 +350,9 @@ $ownerGoLiveHandoffRollbackReady = ((Get-MetricsProp -Object $ownerGoLiveHandoff
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackCoversOpsSnapshot" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "rollbackPackageScriptsPresent" -Default $false) -eq $true) `
     -and $ownerGoLiveHandoffMissingRollbackPackageScripts.Count -eq 0
+$ownerGoLiveHandoffInputSeparationReady = ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "requiredAndOptionalOwnerInputsSeparated" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $ownerGoLiveHandoffChecks -Name "neededNowExcludesOptionalOwnerInputs" -Default $false) -eq $true) `
+    -and $ownerGoLiveHandoffNextOptionalInputs.Count -eq 0
 $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "passed" `
     -and $ownerGoLiveHandoffFailedChecks.Count -eq 0 `
     -and $ownerGoLiveHandoffSecretFindings.Count -eq 0 `
@@ -357,6 +363,7 @@ $ownerGoLiveHandoffReady = (Get-MetricsStatus -Report $ownerGoLiveHandoff) -eq "
     -and $ownerGoLiveHandoffRollbackCommandCount -ge 4 `
     -and $ownerGoLiveHandoffLaunchSequenceReady `
     -and $ownerGoLiveHandoffRollbackReady `
+    -and $ownerGoLiveHandoffInputSeparationReady `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $ownerGoLiveHandoff -Name "broadcasts" -Default $true) -eq $false)
@@ -795,6 +802,10 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_handoff_ready" 
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_release_ready" -Help "One when the owner go-live handoff says public release readiness is clear." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveReleaseReady" -Default (Get-MetricsProp -Object $ownerGoLiveHandoff -Name "releaseReady" -Default $false)))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_stages_total" -Help "Owner go-live handoff stage count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveStageCount" -Default $ownerGoLiveHandoffStageCount))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_next_inputs_total" -Help "Owner input names still listed as needed by the go-live handoff." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveNextInputCount" -Default $ownerGoLiveHandoffNextInputs.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_missing_required_inputs" -Help "Required owner input names still missing in the go-live handoff." -Value (ConvertTo-MetricNumber -Value $ownerGoLiveHandoffMissingRequiredInputs.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_missing_optional_inputs" -Help "Optional owner input names mentioned by the go-live handoff." -Value (ConvertTo-MetricNumber -Value $ownerGoLiveHandoffMissingOptionalInputs.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_next_optional_inputs" -Help "Optional owner input names that incorrectly leaked into Needed Now." -Value (ConvertTo-MetricNumber -Value $ownerGoLiveHandoffNextOptionalInputs.Count)
+Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_input_separation_ready" -Help "One when required and optional owner inputs are separated and Needed Now excludes optional inputs." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffInputSeparationReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_failed_checks" -Help "Failed checks in the owner go-live handoff report." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveFailedChecks" -Default $ownerGoLiveHandoffFailedChecks.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_ready" -Help "One when the owner go-live launch sequence has commands, expected statuses, stop-on-failure gates, final audits, and no unsafe command text." -Value (ConvertTo-MetricBool -Value $ownerGoLiveHandoffLaunchSequenceReady)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_owner_go_live_launch_sequence_steps" -Help "Ordered owner go-live launch sequence step count." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "ownerGoLiveLaunchSequenceCount" -Default $ownerGoLiveHandoffLaunchSequenceCount))
@@ -1115,6 +1126,10 @@ $requiredMetricNames = @(
     "flowchain_owner_go_live_release_ready",
     "flowchain_owner_go_live_stages_total",
     "flowchain_owner_go_live_next_inputs_total",
+    "flowchain_owner_go_live_missing_required_inputs",
+    "flowchain_owner_go_live_missing_optional_inputs",
+    "flowchain_owner_go_live_next_optional_inputs",
+    "flowchain_owner_go_live_input_separation_ready",
     "flowchain_owner_go_live_failed_checks",
     "flowchain_owner_go_live_launch_sequence_ready",
     "flowchain_owner_go_live_launch_sequence_steps",
@@ -1456,6 +1471,10 @@ $checks = [ordered]@{
         "flowchain_owner_go_live_release_ready",
         "flowchain_owner_go_live_stages_total",
         "flowchain_owner_go_live_next_inputs_total",
+        "flowchain_owner_go_live_missing_required_inputs",
+        "flowchain_owner_go_live_missing_optional_inputs",
+        "flowchain_owner_go_live_next_optional_inputs",
+        "flowchain_owner_go_live_input_separation_ready",
         "flowchain_owner_go_live_failed_checks",
         "flowchain_owner_go_live_launch_sequence_ready",
         "flowchain_owner_go_live_launch_sequence_steps",

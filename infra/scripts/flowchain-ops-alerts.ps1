@@ -342,7 +342,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("owner-go-live-handoff-failed")
         signal = "Owner go-live handoff is missing or unsafe."
-        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
+        threshold = "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, fails to separate required and optional owner inputs, lets optional owner inputs leak into Needed Now, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear"
         commands = @("npm run flowchain:owner:go-live-handoff", "npm run flowchain:owner:activation-plan", "npm run flowchain:truth-table -- -AllowBlocked")
     },
     [ordered]@{
@@ -535,6 +535,9 @@ $ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRule.Count -
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("rollback commands", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("missing package scripts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($ownerGoLiveHandoffRule[0].commands) -contains "npm run flowchain:owner:go-live-handoff")
+$ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRule.Count -eq 1 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("required and optional owner inputs", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$ownerGoLiveHandoffRule[0].threshold).IndexOf("Needed Now", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $devPackRule = @($rules | Where-Object { $_.id -eq "developer-dev-pack-readiness-failed" } | Select-Object -First 1)
 $devPackRuleCoversBrowserStarter = $devPackRule.Count -eq 1 `
     -and ([string]$devPackRule[0].threshold).IndexOf("Vite/React", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -577,6 +580,7 @@ $checks = [ordered]@{
     secondComputerRuleCoversBundleVerifyNoSecret = $secondComputerRuleCoversBundleVerifyNoSecret
     ownerGoLiveHandoffRuleCoversReleaseReady = $ownerGoLiveHandoffRuleCoversReleaseReady
     ownerGoLiveHandoffRuleCoversLaunchAndRollback = $ownerGoLiveHandoffRuleCoversLaunchAndRollback
+    ownerGoLiveHandoffRuleCoversInputSeparation = $ownerGoLiveHandoffRuleCoversInputSeparation
     devPackRuleCoversBrowserStarter = $devPackRuleCoversBrowserStarter
     notificationPlanStoresNoSecrets = $true
     notificationPlanNoNetworkDelivery = $true

@@ -15,7 +15,7 @@ $repoRoot = Set-FlowChainRepoRoot
 $reportFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $ReportPath)
 $markdownFullPath = Assert-FlowChainPathInsideRepo -RepoRoot $repoRoot -Path (Resolve-FlowChainPath -RepoRoot $repoRoot -Path $MarkdownPath)
 
-$knownOwnerInputs = @(
+$requiredOwnerInputs = @(
     "FLOWCHAIN_RPC_PUBLIC_URL",
     "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
     "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
@@ -30,12 +30,15 @@ $knownOwnerInputs = @(
     "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
     "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
     "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_CURSOR_STATE",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
     "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
     "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
     "FLOWCHAIN_PILOT_CONFIRMATIONS"
 )
+$optionalOwnerInputs = @(
+    "FLOWCHAIN_BASE8453_CURSOR_STATE",
+    "FLOWCHAIN_BASE8453_TO_BLOCK"
+)
+$knownOwnerInputs = @($requiredOwnerInputs + $optionalOwnerInputs)
 
 $definitions = @(
     [ordered]@{
@@ -722,6 +725,8 @@ $definitions = @(
             "everyStageHasOwnerMustNotSend",
             "nonReadyStagesExplainBlockers",
             "requiredEnvCoverageComplete",
+            "requiredAndOptionalOwnerInputsSeparated",
+            "neededNowExcludesOptionalOwnerInputs",
             "knownOwnerInputBlockersOnly",
             "nextOwnerInputsPresentWhenBlocked",
             "nextCommandsPresent",
@@ -2925,6 +2930,8 @@ function ConvertTo-TruthEvidence {
             "pythonSdkE2ePassed",
             "pythonDevkitWaitTransaction",
             "publicReadinessFailClosed",
+            "requiredAndOptionalOwnerInputsSeparated",
+            "neededNowExcludesOptionalOwnerInputs",
             "inventoryGenerated",
             "inventorySafe",
             "scansGeneratedDevPackReports",
@@ -2967,6 +2974,10 @@ function ConvertTo-TruthEvidence {
         "commandsWithUrls",
         "findingsWithoutCommands",
         "unmappedFindingCodes",
+        "missingRequiredEnvNames",
+        "missingOptionalEnvNames",
+        "missingRequiredOwnerInputs",
+        "missingOptionalOwnerInputs",
         "browserProjects",
         "coveredRoutes",
         "coveredProofs",
@@ -3146,6 +3157,10 @@ foreach ($definition in $definitions) {
     $classification = Get-TruthClassification -Definition $definition -Report $report -Blockers $blockers -IsStale (@($staleReasons).Count -gt 0)
     $evidence = ConvertTo-TruthEvidence -Report $report -RawStatus $rawStatus -Blockers $blockers
 
+    $ownerInputBlockers = @($blockers | Where-Object { $_ -in $knownOwnerInputs })
+    $requiredOwnerInputBlockers = @($ownerInputBlockers | Where-Object { $_ -in $requiredOwnerInputs })
+    $optionalOwnerInputBlockers = @($ownerInputBlockers | Where-Object { $_ -in $optionalOwnerInputs })
+
     [void] $items.Add([ordered]@{
         id = $id
         requirement = [string] $definition.requirement
@@ -3159,7 +3174,9 @@ foreach ($definition in $definitions) {
         ageSeconds = $ageSeconds
         staleReasons = @($staleReasons)
         blockers = @($blockers)
-        ownerInputBlockers = @($blockers | Where-Object { $_ -in $knownOwnerInputs })
+        ownerInputBlockers = @($ownerInputBlockers)
+        requiredOwnerInputBlockers = @($requiredOwnerInputBlockers)
+        optionalOwnerInputBlockers = @($optionalOwnerInputBlockers)
         productionGate = [bool] $definition.productionGate
     })
 }
@@ -3170,9 +3187,13 @@ foreach ($classification in @("passed", "blocked-owner-input", "blocked-repo-wor
 }
 
 $missingOwnerInputs = New-Object System.Collections.ArrayList
+$missingOptionalOwnerInputs = New-Object System.Collections.ArrayList
 foreach ($item in @($items)) {
-    foreach ($name in @($item.ownerInputBlockers)) {
+    foreach ($name in @($item.requiredOwnerInputBlockers)) {
         Add-UniqueTruthValue -Target $missingOwnerInputs -Value $name
+    }
+    foreach ($name in @($item.optionalOwnerInputBlockers)) {
+        Add-UniqueTruthValue -Target $missingOptionalOwnerInputs -Value $name
     }
 }
 
@@ -3224,7 +3245,11 @@ $report = [ordered]@{
     productionGateCount = @($items | Where-Object { $_.productionGate -eq $true }).Count
     completionReady = $overallStatus -eq "passed"
     blockedOnlyOnKnownOwnerInputs = $overallStatus -eq "blocked-owner-input"
+    requiredOwnerInputs = @($requiredOwnerInputs)
+    optionalOwnerInputs = @($optionalOwnerInputs)
     missingOwnerInputs = @($missingOwnerInputs)
+    missingRequiredOwnerInputs = @($missingOwnerInputs)
+    missingOptionalOwnerInputs = @($missingOptionalOwnerInputs)
     nextRepoOwnedTasks = @($nextRepoTasks)
     items = @($items)
 }
@@ -3249,9 +3274,20 @@ foreach ($entry in $classificationCounts.GetEnumerator()) {
 [void] $lines.Add("")
 
 if (@($missingOwnerInputs).Count -gt 0) {
-    [void] $lines.Add("## Missing Owner Inputs")
+    [void] $lines.Add("## Missing Required Owner Inputs")
     [void] $lines.Add("")
     foreach ($name in @($missingOwnerInputs)) {
+        [void] $lines.Add("- $name")
+    }
+    [void] $lines.Add("")
+}
+
+if (@($missingOptionalOwnerInputs).Count -gt 0) {
+    [void] $lines.Add("## Optional Owner Inputs Mentioned")
+    [void] $lines.Add("")
+    [void] $lines.Add("These names are accepted owner-provided overrides, but they are not required for go-live readiness.")
+    [void] $lines.Add("")
+    foreach ($name in @($missingOptionalOwnerInputs)) {
         [void] $lines.Add("- $name")
     }
     [void] $lines.Add("")

@@ -1307,6 +1307,8 @@ $ownerGoLiveHandoffRequiredChecks = @(
     "everyStageHasOwnerMustNotSend",
     "nonReadyStagesExplainBlockers",
     "requiredEnvCoverageComplete",
+    "requiredAndOptionalOwnerInputsSeparated",
+    "neededNowExcludesOptionalOwnerInputs",
     "knownOwnerInputBlockersOnly",
     "nextOwnerInputsPresentWhenBlocked",
     "nextCommandsPresent",
@@ -1347,6 +1349,9 @@ $ownerGoLiveHandoffSecretFindings = @((Get-AuditProp -Object $ownerGoLiveHandoff
 $ownerGoLiveHandoffUnknownMissing = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "unknownMissingEnvNames" -Default @()))
 $ownerGoLiveHandoffUnknownInvalid = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "unknownInvalidEnvNames" -Default @()))
 $ownerGoLiveHandoffInvalid = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "invalidEnvNames" -Default @()))
+$ownerGoLiveHandoffMissingRequired = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "missingRequiredEnvNames" -Default @()))
+$ownerGoLiveHandoffMissingOptional = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "missingOptionalEnvNames" -Default @()))
+$ownerGoLiveHandoffNextOptionalInputs = @((Get-AuditProp -Object $ownerGoLiveHandoff -Name "nextOwnerOptionalInputNames" -Default @()))
 $ownerGoLiveHandoffStageCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "stageCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCount" -Default 0)
 $ownerGoLiveHandoffLaunchSequenceCommandCount = [int](Get-AuditProp -Object $ownerGoLiveHandoff -Name "launchSequenceCommandCount" -Default 0)
@@ -3284,7 +3289,7 @@ Add-AuditItem -Items $items -Id "owner-activation-plan" `
 Add-AuditItem -Items $items -Id "owner-go-live-handoff" `
     -Requirement "Owner go-live handoff converts the remaining owner inputs and activation stages into one ordered launch sequence with expected statuses, stop-on-failure gates, rollback commands, and no-secret boundaries." `
     -Status $(if ($ownerGoLiveHandoffPassed) { "passed" } else { "failed" }) `
-    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, releaseReady=$ownerGoLiveHandoffReleaseReady, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, evidenceReports=$ownerGoLiveHandoffExpectedReportPathCount, invalidEvidenceReports=$($ownerGoLiveHandoffInvalidExpectedReportPaths.Count), missingLaunchScripts=$($ownerGoLiveHandoffMissingLaunchPackageScripts.Count), rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, missingRollbackScripts=$($ownerGoLiveHandoffMissingRollbackPackageScripts.Count), failedChecks=$ownerGoLiveHandoffFailedCheckCount, secretFindings=$ownerGoLiveHandoffSecretFindingCount, missingChecks=$ownerGoLiveHandoffMissingCheckCount, report=$($paths.ownerGoLiveHandoff)" `
+    -Evidence "handoffStatus=$ownerGoLiveHandoffStatus, releaseReady=$ownerGoLiveHandoffReleaseReady, stages=$ownerGoLiveHandoffStageCount, launchSteps=$ownerGoLiveHandoffLaunchSequenceCount, launchCommands=$ownerGoLiveHandoffLaunchSequenceCommandCount, evidenceReports=$ownerGoLiveHandoffExpectedReportPathCount, invalidEvidenceReports=$($ownerGoLiveHandoffInvalidExpectedReportPaths.Count), missingRequiredInputs=$($ownerGoLiveHandoffMissingRequired.Count), missingOptionalInputs=$($ownerGoLiveHandoffMissingOptional.Count), neededNowOptionalInputs=$($ownerGoLiveHandoffNextOptionalInputs.Count), missingLaunchScripts=$($ownerGoLiveHandoffMissingLaunchPackageScripts.Count), rollbackCommands=$ownerGoLiveHandoffRollbackCommandCount, missingRollbackScripts=$($ownerGoLiveHandoffMissingRollbackPackageScripts.Count), failedChecks=$ownerGoLiveHandoffFailedCheckCount, secretFindings=$ownerGoLiveHandoffSecretFindingCount, missingChecks=$ownerGoLiveHandoffMissingCheckCount, report=$($paths.ownerGoLiveHandoff)" `
     -Commands @("npm run flowchain:owner:go-live-handoff")
 
 Add-AuditItem -Items $items -Id "owner-env-template" `

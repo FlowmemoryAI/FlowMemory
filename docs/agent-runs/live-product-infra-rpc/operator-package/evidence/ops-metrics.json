@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T00:17:45.4695658Z",
+    "generatedAt":  "2026-05-21T00:44:06.7682119Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -1580,6 +1580,30 @@
                         "value":  14
                     },
                     {
+                        "name":  "flowchain_owner_go_live_missing_required_inputs",
+                        "type":  "gauge",
+                        "help":  "Required owner input names still missing in the go-live handoff.",
+                        "value":  14
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_missing_optional_inputs",
+                        "type":  "gauge",
+                        "help":  "Optional owner input names mentioned by the go-live handoff.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_next_optional_inputs",
+                        "type":  "gauge",
+                        "help":  "Optional owner input names that incorrectly leaked into Needed Now.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_owner_go_live_input_separation_ready",
+                        "type":  "gauge",
+                        "help":  "One when required and optional owner inputs are separated and Needed Now excludes optional inputs.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_owner_go_live_failed_checks",
                         "type":  "gauge",
                         "help":  "Failed checks in the owner go-live handoff report.",
@@ -1712,7 +1736,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  280,
+    "metricCount":  284,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

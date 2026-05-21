@@ -1,6 +1,6 @@
 # FlowChain Owner Go-Live Handoff
 
-Generated: 2026-05-20T23:37:21.5841614Z
+Generated: 2026-05-21T00:43:23.4676365Z
 Status: passed
 Release ready: False
 
@@ -22,6 +22,11 @@ This handoff records names, statuses, resource boundaries, and validation comman
 - `FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI`
 - `FLOWCHAIN_PILOT_TOTAL_CAP_WEI`
 - `FLOWCHAIN_PILOT_CONFIRMATIONS`
+
+## Optional Owner Inputs
+
+These names can tune bridge scanning, but they are not required go-live blockers.
+- `FLOWCHAIN_BASE8453_TO_BLOCK`
 
 ## Stage Deck
 

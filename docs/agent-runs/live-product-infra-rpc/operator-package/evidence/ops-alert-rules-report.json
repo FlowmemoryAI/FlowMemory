@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T00:16:46.2865357Z",
+    "generatedAt":  "2026-05-21T00:44:05.8051916Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -121,6 +121,7 @@
                    "secondComputerRuleCoversBundleVerifyNoSecret":  true,
                    "ownerGoLiveHandoffRuleCoversReleaseReady":  true,
                    "ownerGoLiveHandoffRuleCoversLaunchAndRollback":  true,
+                   "ownerGoLiveHandoffRuleCoversInputSeparation":  true,
                    "devPackRuleCoversBrowserStarter":  true,
                    "notificationPlanStoresNoSecrets":  true,
                    "notificationPlanNoNetworkDelivery":  true,
@@ -577,7 +578,7 @@
                                            "owner-go-live-handoff-failed"
                                        ],
                       "signal":  "Owner go-live handoff is missing or unsafe.",
-                      "threshold":  "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear",
+                      "threshold":  "handoff report is not passed, has failedChecks or secretMarkerFindings, has fewer than eight stages, lacks an ordered launch sequence, lacks expected evidence report paths, references missing package scripts, lacks rollback commands, lacks next owner-input commands, fails to separate required and optional owner inputs, lets optional owner inputs leak into Needed Now, prints env values, broadcasts, reports secrets, or claims release readiness before the truth table is clear",
                       "commands":  [
                                        "npm run flowchain:owner:go-live-handoff",
                                        "npm run flowchain:owner:activation-plan",

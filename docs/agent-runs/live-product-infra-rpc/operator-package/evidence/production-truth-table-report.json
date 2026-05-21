@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.production_truth_table_report.v1",
-    "generatedAt":  "2026-05-21T00:28:01.4247905+00:00",
+    "generatedAt":  "2026-05-21T00:50:33.1426348+00:00",
     "status":  "blocked-owner-input",
     "maxReportAgeHours":  24,
     "classificationCounts":  {
@@ -13,6 +13,29 @@
     "productionGateCount":  64,
     "completionReady":  false,
     "blockedOnlyOnKnownOwnerInputs":  true,
+    "requiredOwnerInputs":  [
+                                "FLOWCHAIN_RPC_PUBLIC_URL",
+                                "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+                                "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                "FLOWCHAIN_BASE8453_RPC_URL",
+                                "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                            ],
+    "optionalOwnerInputs":  [
+                                "FLOWCHAIN_BASE8453_CURSOR_STATE",
+                                "FLOWCHAIN_BASE8453_TO_BLOCK"
+                            ],
     "missingOwnerInputs":  [
                                "FLOWCHAIN_PILOT_OPERATOR_ACK",
                                "FLOWCHAIN_BASE8453_RPC_URL",
@@ -27,9 +50,27 @@
                                "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
                                "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
                                "FLOWCHAIN_RPC_TLS_TERMINATED",
-                               "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
-                               "FLOWCHAIN_BASE8453_TO_BLOCK"
+                               "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                            ],
+    "missingRequiredOwnerInputs":  [
+                                       "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                       "FLOWCHAIN_BASE8453_RPC_URL",
+                                       "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                       "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                       "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                       "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                       "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                       "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                       "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                       "FLOWCHAIN_RPC_PUBLIC_URL",
+                                       "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                       "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                       "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                       "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                   ],
+    "missingOptionalOwnerInputs":  [
+                                       "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                   ],
     "nextRepoOwnedTasks":  [
                                {
                                    "id":  "owner-inputs",
@@ -44,12 +85,12 @@
                       "requirement":  "Private FlowChain node and control-plane services are running and readable.",
                       "classification":  "passed",
                       "rawStatus":  "passed",
-                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; latestHeight=107763; finalizedHeight=107763; failedChecksCount=0",
+                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; latestHeight=107937; finalizedHeight=107937; failedChecksCount=0",
                       "command":  "npm run flowchain:service:status",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:06.1034403+00:00",
-                      "ageSeconds":  175,
+                      "generatedAt":  "2026-05-21T00:49:18.5052608+00:00",
+                      "ageSeconds":  74,
                       "staleReasons":  [
 
                                        ],
@@ -59,6 +100,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -71,7 +118,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T00:17:33.3717058+00:00",
-                      "ageSeconds":  628,
+                      "ageSeconds":  1980,
                       "staleReasons":  [
 
                                        ],
@@ -81,6 +128,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -88,12 +141,12 @@
                       "requirement":  "Operator doctor reports host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=107508; finalizedHeight=107508; blockedOnlyOnOwnerInputs=True; failedChecksCount=0",
+                      "evidence":  "status=blocked; latestHeight=107763; finalizedHeight=107763; blockedOnlyOnOwnerInputs=True; failedChecksCount=0",
                       "command":  "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-20T23:52:46.6504038+00:00",
-                      "ageSeconds":  2115,
+                      "generatedAt":  "2026-05-21T00:28:17.0523141+00:00",
+                      "ageSeconds":  1336,
                       "staleReasons":  [
 
                                        ],
@@ -103,6 +156,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -115,7 +174,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:48:13.2466361+00:00",
-                      "ageSeconds":  38388,
+                      "ageSeconds":  39740,
                       "staleReasons":  [
 
                                        ],
@@ -125,6 +184,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -137,7 +202,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:35.1180552+00:00",
-                      "ageSeconds":  38306,
+                      "ageSeconds":  39658,
                       "staleReasons":  [
 
                                        ],
@@ -147,6 +212,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -159,7 +230,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:41.0304117+00:00",
-                      "ageSeconds":  38300,
+                      "ageSeconds":  39652,
                       "staleReasons":  [
 
                                        ],
@@ -169,6 +240,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -181,7 +258,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:15.6956902+00:00",
-                      "ageSeconds":  38326,
+                      "ageSeconds":  39677,
                       "staleReasons":  [
 
                                        ],
@@ -191,6 +268,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -203,7 +286,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/install-check-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:41.3809158+00:00",
-                      "ageSeconds":  38300,
+                      "ageSeconds":  39652,
                       "staleReasons":  [
 
                                        ],
@@ -213,6 +296,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -225,7 +314,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:42:00.5046787+00:00",
-                      "ageSeconds":  38761,
+                      "ageSeconds":  40113,
                       "staleReasons":  [
 
                                        ],
@@ -261,6 +350,25 @@
                                                  "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -272,8 +380,8 @@
                       "command":  "npm run flowchain:live-infra:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:23.2503399+00:00",
-                      "ageSeconds":  158,
+                      "generatedAt":  "2026-05-21T00:49:33.7107589+00:00",
+                      "ageSeconds":  60,
                       "staleReasons":  [
 
                                        ],
@@ -309,6 +417,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -321,7 +448,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:50:50.3086926+00:00",
-                      "ageSeconds":  38231,
+                      "ageSeconds":  39583,
                       "staleReasons":  [
 
                                        ],
@@ -331,6 +458,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -342,8 +475,8 @@
                       "command":  "npm run flowchain:wallet:live-tester:e2e",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:21:42.0564047+00:00",
-                      "ageSeconds":  380,
+                      "generatedAt":  "2026-05-21T00:48:16.2174204+00:00",
+                      "ageSeconds":  137,
                       "staleReasons":  [
 
                                        ],
@@ -353,6 +486,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -364,8 +503,8 @@
                       "command":  "npm run flowchain:owner-inputs -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:25.8191139+00:00",
-                      "ageSeconds":  156,
+                      "generatedAt":  "2026-05-21T00:49:36.0074753+00:00",
+                      "ageSeconds":  57,
                       "staleReasons":  [
 
                                        ],
@@ -401,6 +540,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -413,7 +571,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:54.4798263+00:00",
-                      "ageSeconds":  37147,
+                      "ageSeconds":  38499,
                       "staleReasons":  [
 
                                        ],
@@ -449,6 +607,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -461,7 +638,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:55.7858313+00:00",
-                      "ageSeconds":  37146,
+                      "ageSeconds":  38498,
                       "staleReasons":  [
 
                                        ],
@@ -497,6 +674,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -509,7 +705,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T23:05:40.5458704+00:00",
-                      "ageSeconds":  4941,
+                      "ageSeconds":  6293,
                       "staleReasons":  [
 
                                        ],
@@ -545,6 +741,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -552,12 +767,12 @@
                       "requirement":  "Owner go-live handoff converts activation stages, remaining owner inputs, external resources, validation commands, and do-not-send boundaries into one machine-readable launch deck without printing owner values.",
                       "classification":  "passed",
                       "rawStatus":  "passed",
-                      "evidence":  "status=passed; deploymentReady=False; packetShareable=False; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; failedChecksCount=0; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_BASE8453_TO_BLOCK",
+                      "evidence":  "status=passed; deploymentReady=False; packetShareable=False; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; broadcasts=False; requiredAndOptionalOwnerInputsSeparated=True; neededNowExcludesOptionalOwnerInputs=True; failedChecksCount=0; missingRequiredEnvNamesCount=14; missingOptionalEnvNamesCount=1; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_BASE8453_TO_BLOCK",
                       "command":  "npm run flowchain:owner:go-live-handoff",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-20T23:37:21.5841614+00:00",
-                      "ageSeconds":  3040,
+                      "generatedAt":  "2026-05-21T00:43:23.4676365+00:00",
+                      "ageSeconds":  430,
                       "staleReasons":  [
 
                                        ],
@@ -595,6 +810,25 @@
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS",
                                                  "FLOWCHAIN_BASE8453_TO_BLOCK"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -607,7 +841,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:56.9731051+00:00",
-                      "ageSeconds":  37145,
+                      "ageSeconds":  38497,
                       "staleReasons":  [
 
                                        ],
@@ -617,6 +851,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -629,7 +869,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:09:01.3702452+00:00",
-                      "ageSeconds":  37141,
+                      "ageSeconds":  38492,
                       "staleReasons":  [
 
                                        ],
@@ -639,6 +879,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -650,8 +896,8 @@
                       "command":  "npm run flowchain:owner-env:readiness -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:19:29.5435731+00:00",
-                      "ageSeconds":  512,
+                      "generatedAt":  "2026-05-21T00:46:07.3748261+00:00",
+                      "ageSeconds":  266,
                       "staleReasons":  [
 
                                        ],
@@ -687,6 +933,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -698,8 +963,8 @@
                       "command":  "npm run flowchain:tester:token:setup",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:21:44.6861324+00:00",
-                      "ageSeconds":  377,
+                      "generatedAt":  "2026-05-21T00:48:18.5193765+00:00",
+                      "ageSeconds":  135,
                       "staleReasons":  [
 
                                        ],
@@ -709,6 +974,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -721,7 +992,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T00:24:38.1672331+00:00",
-                      "ageSeconds":  204,
+                      "ageSeconds":  1556,
                       "staleReasons":  [
 
                                        ],
@@ -731,6 +1002,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -742,8 +1019,8 @@
                       "command":  "npm run flowchain:public-rpc:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:24:57.8239716+00:00",
-                      "ageSeconds":  184,
+                      "generatedAt":  "2026-05-21T00:49:11.1186175+00:00",
+                      "ageSeconds":  83,
                       "staleReasons":  [
 
                                        ],
@@ -761,6 +1038,16 @@
                                                  "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -773,7 +1060,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T00:17:34.9448357+00:00",
-                      "ageSeconds":  627,
+                      "ageSeconds":  1979,
                       "staleReasons":  [
 
                                        ],
@@ -783,6 +1070,12 @@
                       "ownerInputBlockers":  [
                                                  "FLOWCHAIN_RPC_PUBLIC_URL"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -795,7 +1088,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:55:20.8561448+00:00",
-                      "ageSeconds":  37961,
+                      "ageSeconds":  39313,
                       "staleReasons":  [
 
                                        ],
@@ -805,6 +1098,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -817,7 +1116,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:55:36.3626971+00:00",
-                      "ageSeconds":  37946,
+                      "ageSeconds":  39297,
                       "staleReasons":  [
 
                                        ],
@@ -827,6 +1126,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -839,7 +1144,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T18:53:17.0154340+00:00",
-                      "ageSeconds":  20085,
+                      "ageSeconds":  21437,
                       "staleReasons":  [
 
                                        ],
@@ -849,6 +1154,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -861,7 +1172,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T00:08:52.4694960+00:00",
-                      "ageSeconds":  1150,
+                      "ageSeconds":  2501,
                       "staleReasons":  [
 
                                        ],
@@ -871,6 +1182,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -882,8 +1199,8 @@
                       "command":  "npm run flowchain:operator:package",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-package-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-20T23:52:52.9181098+00:00",
-                      "ageSeconds":  2109,
+                      "generatedAt":  "2026-05-21T00:28:22.1132257+00:00",
+                      "ageSeconds":  1332,
                       "staleReasons":  [
 
                                        ],
@@ -893,6 +1210,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -904,8 +1227,8 @@
                       "command":  "npm run flowchain:operator:package:verify",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-20T23:53:02.9545677+00:00",
-                      "ageSeconds":  2099,
+                      "generatedAt":  "2026-05-21T00:28:30.8781252+00:00",
+                      "ageSeconds":  1323,
                       "staleReasons":  [
 
                                        ],
@@ -915,6 +1238,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -927,7 +1256,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T22:18:50.2128640+00:00",
-                      "ageSeconds":  7752,
+                      "ageSeconds":  9104,
                       "staleReasons":  [
 
                                        ],
@@ -937,6 +1266,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -949,7 +1284,7 @@
                       "reportPath":  "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T21:08:30.9030000+00:00",
-                      "ageSeconds":  11971,
+                      "ageSeconds":  13323,
                       "staleReasons":  [
 
                                        ],
@@ -983,6 +1318,23 @@
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
                                                  "FLOWCHAIN_RPC_TLS_TERMINATED"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_BASE8453_TO_BLOCK"
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -994,8 +1346,8 @@
                       "command":  "npm run flowchain:backup:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:12.6210216+00:00",
-                      "ageSeconds":  170,
+                      "generatedAt":  "2026-05-21T00:49:24.1156228+00:00",
+                      "ageSeconds":  70,
                       "staleReasons":  [
 
                                        ],
@@ -1005,6 +1357,12 @@
                       "ownerInputBlockers":  [
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1017,7 +1375,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T22:40:38.1137392+00:00",
-                      "ageSeconds":  6444,
+                      "ageSeconds":  7796,
                       "staleReasons":  [
 
                                        ],
@@ -1027,6 +1385,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1039,7 +1403,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T22:41:48.8534756+00:00",
-                      "ageSeconds":  6374,
+                      "ageSeconds":  7725,
                       "staleReasons":  [
 
                                        ],
@@ -1049,6 +1413,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1061,7 +1431,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:04:35.7435065+00:00",
-                      "ageSeconds":  37407,
+                      "ageSeconds":  38758,
                       "staleReasons":  [
 
                                        ],
@@ -1071,6 +1441,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1082,8 +1458,8 @@
                       "command":  "npm run flowchain:bridge:live:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:13.9181718+00:00",
-                      "ageSeconds":  169,
+                      "generatedAt":  "2026-05-21T00:49:25.4858823+00:00",
+                      "ageSeconds":  69,
                       "staleReasons":  [
 
                                        ],
@@ -1109,6 +1485,20 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1120,8 +1510,8 @@
                       "command":  "npm run flowchain:bridge:infra:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:15.3732106+00:00",
-                      "ageSeconds":  167,
+                      "generatedAt":  "2026-05-21T00:49:26.9808415+00:00",
+                      "ageSeconds":  67,
                       "staleReasons":  [
 
                                        ],
@@ -1147,6 +1537,20 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1159,7 +1563,7 @@
                       "reportPath":  "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:53:37.4320000+00:00",
-                      "ageSeconds":  38065,
+                      "ageSeconds":  39417,
                       "staleReasons":  [
 
                                        ],
@@ -1178,6 +1582,16 @@
                                                  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1190,7 +1604,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T20:37:09.7537192+00:00",
-                      "ageSeconds":  13853,
+                      "ageSeconds":  15205,
                       "staleReasons":  [
 
                                        ],
@@ -1200,6 +1614,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1212,7 +1632,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:04:53.8443676+00:00",
-                      "ageSeconds":  37389,
+                      "ageSeconds":  38741,
                       "staleReasons":  [
 
                                        ],
@@ -1222,6 +1642,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1234,7 +1660,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:06:10.1228819+00:00",
-                      "ageSeconds":  37313,
+                      "ageSeconds":  38664,
                       "staleReasons":  [
 
                                        ],
@@ -1244,6 +1670,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1256,7 +1688,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:06:59.4922642+00:00",
-                      "ageSeconds":  37263,
+                      "ageSeconds":  38615,
                       "staleReasons":  [
 
                                        ],
@@ -1266,6 +1698,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1278,7 +1716,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:36.1065683+00:00",
-                      "ageSeconds":  37167,
+                      "ageSeconds":  38518,
                       "staleReasons":  [
 
                                        ],
@@ -1288,6 +1726,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1300,7 +1744,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:37.4224405+00:00",
-                      "ageSeconds":  37165,
+                      "ageSeconds":  38517,
                       "staleReasons":  [
 
                                        ],
@@ -1310,6 +1754,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1317,12 +1767,12 @@
                       "requirement":  "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=107763; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "evidence":  "status=blocked; latestHeight=107937; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
                       "command":  "npm run flowchain:tester:readiness -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:24.3138795+00:00",
-                      "ageSeconds":  159,
+                      "generatedAt":  "2026-05-21T00:49:34.5139831+00:00",
+                      "ageSeconds":  60,
                       "staleReasons":  [
 
                                        ],
@@ -1358,6 +1808,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1370,7 +1839,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:50.6010160+00:00",
-                      "ageSeconds":  37152,
+                      "ageSeconds":  38504,
                       "staleReasons":  [
 
                                        ],
@@ -1380,6 +1849,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1387,12 +1862,12 @@
                       "requirement":  "Friends-and-family tester packet is shareable only after all public gates pass.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=107763; finalizedHeight=107763; ownerInputsStatus=blocked; packetShareable=False; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "evidence":  "status=blocked; latestHeight=107937; finalizedHeight=107937; ownerInputsStatus=blocked; packetShareable=False; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
                       "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:26.6830979+00:00",
-                      "ageSeconds":  156,
+                      "generatedAt":  "2026-05-21T00:49:36.8787270+00:00",
+                      "ageSeconds":  58,
                       "staleReasons":  [
 
                                        ],
@@ -1428,6 +1903,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1439,8 +1933,8 @@
                       "command":  "npm run flowchain:external-tester:packet:validate",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:27.5281216+00:00",
-                      "ageSeconds":  155,
+                      "generatedAt":  "2026-05-21T00:49:37.8025254+00:00",
+                      "ageSeconds":  57,
                       "staleReasons":  [
 
                                        ],
@@ -1476,6 +1970,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1487,8 +2000,8 @@
                       "command":  "npm run flowchain:external-tester:client:validate",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:29.4071887+00:00",
-                      "ageSeconds":  154,
+                      "generatedAt":  "2026-05-21T00:49:39.7069480+00:00",
+                      "ageSeconds":  55,
                       "staleReasons":  [
 
                                        ],
@@ -1498,6 +2011,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1510,7 +2029,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:11:17.3940955+00:00",
-                      "ageSeconds":  37006,
+                      "ageSeconds":  38357,
                       "staleReasons":  [
 
                                        ],
@@ -1520,6 +2039,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1532,7 +2057,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T17:42:27.9612563+00:00",
-                      "ageSeconds":  24335,
+                      "ageSeconds":  25687,
                       "staleReasons":  [
 
                                        ],
@@ -1542,6 +2067,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1554,7 +2085,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T00:17:37.0005790+00:00",
-                      "ageSeconds":  626,
+                      "ageSeconds":  1978,
                       "staleReasons":  [
 
                                        ],
@@ -1564,6 +2095,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1575,8 +2112,8 @@
                       "command":  "npm run flowchain:ops:alerts -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:16:46.2865357+00:00",
-                      "ageSeconds":  677,
+                      "generatedAt":  "2026-05-21T00:44:05.8051916+00:00",
+                      "ageSeconds":  389,
                       "staleReasons":  [
 
                                        ],
@@ -1586,6 +2123,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1593,12 +2136,12 @@
                       "requirement":  "Ops metrics export converts no-secret service, supervisor autorecovery, alert, public-readiness, bridge, tester, owner handoff, truth-table, and no-secret evidence into JSON plus Prometheus textfile metrics without network delivery or owner-value leakage.",
                       "classification":  "passed",
                       "rawStatus":  "passed",
-                      "evidence":  "status=passed; metricCount=280; envValuesPrinted=False; noSecrets=True; broadcasts=False; opsSnapshotLoaded=True; opsAlertRulesLoaded=True; failedChecksCount=0; missingMetricNamesCount=0",
+                      "evidence":  "status=passed; metricCount=284; envValuesPrinted=False; noSecrets=True; broadcasts=False; opsSnapshotLoaded=True; opsAlertRulesLoaded=True; failedChecksCount=0; missingMetricNamesCount=0",
                       "command":  "npm run flowchain:ops:metrics:export",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:17:45.8464344+00:00",
-                      "ageSeconds":  617,
+                      "generatedAt":  "2026-05-21T00:44:07.4117018+00:00",
+                      "ageSeconds":  387,
                       "staleReasons":  [
 
                                        ],
@@ -1608,6 +2151,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1620,7 +2169,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:12:58.8606448+00:00",
-                      "ageSeconds":  36904,
+                      "ageSeconds":  38256,
                       "staleReasons":  [
 
                                        ],
@@ -1630,6 +2179,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1642,7 +2197,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:12:40.7523973+00:00",
-                      "ageSeconds":  36922,
+                      "ageSeconds":  38274,
                       "staleReasons":  [
 
                                        ],
@@ -1652,6 +2207,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1664,7 +2225,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:13:00.5090067+00:00",
-                      "ageSeconds":  36903,
+                      "ageSeconds":  38254,
                       "staleReasons":  [
 
                                        ],
@@ -1674,6 +2235,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1686,7 +2253,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:12:20.0147217+00:00",
-                      "ageSeconds":  36943,
+                      "ageSeconds":  38295,
                       "staleReasons":  [
 
                                        ],
@@ -1696,6 +2263,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1707,8 +2280,8 @@
                       "command":  "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:19:34.1723271+00:00",
-                      "ageSeconds":  509,
+                      "generatedAt":  "2026-05-21T00:46:17.3878691+00:00",
+                      "ageSeconds":  258,
                       "staleReasons":  [
 
                                        ],
@@ -1744,6 +2317,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1755,8 +2347,8 @@
                       "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:26:17.6326680+00:00",
-                      "ageSeconds":  106,
+                      "generatedAt":  "2026-05-21T00:50:26.3853820+00:00",
+                      "ageSeconds":  9,
                       "staleReasons":  [
 
                                        ],
@@ -1792,6 +2384,25 @@
                                                  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
                                                  "FLOWCHAIN_PILOT_CONFIRMATIONS"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1803,8 +2414,8 @@
                       "command":  "npm run flowchain:architecture:audit -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:17:55.4433329+00:00",
-                      "ageSeconds":  608,
+                      "generatedAt":  "2026-05-21T00:44:20.2562966+00:00",
+                      "ageSeconds":  375,
                       "staleReasons":  [
 
                                        ],
@@ -1840,6 +2451,25 @@
                                                  "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1847,12 +2477,12 @@
                       "requirement":  "Completion audit is fresh and is the release gate for claiming production readiness.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=107763; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "evidence":  "status=blocked; latestHeight=107937; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
                       "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:25:37.0465554+00:00",
-                      "ageSeconds":  146,
+                      "generatedAt":  "2026-05-21T00:49:46.7033119+00:00",
+                      "ageSeconds":  48,
                       "staleReasons":  [
 
                                        ],
@@ -1888,6 +2518,25 @@
                                                  "FLOWCHAIN_RPC_TLS_TERMINATED",
                                                  "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
                                              ],
+                      "requiredOwnerInputBlockers":  [
+                                                         "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                                         "FLOWCHAIN_BASE8453_RPC_URL",
+                                                         "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                                         "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                                         "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                                         "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                                         "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                                         "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                                         "FLOWCHAIN_PILOT_CONFIRMATIONS",
+                                                         "FLOWCHAIN_RPC_PUBLIC_URL",
+                                                         "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                                         "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
+                                                         "FLOWCHAIN_RPC_TLS_TERMINATED",
+                                                         "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   },
                   {
@@ -1899,8 +2548,8 @@
                       "command":  "npm run flowchain:no-secret:scan",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T00:27:51.1321518+00:00",
-                      "ageSeconds":  12,
+                      "generatedAt":  "2026-05-21T00:50:25.7765901+00:00",
+                      "ageSeconds":  9,
                       "staleReasons":  [
 
                                        ],
@@ -1910,6 +2559,12 @@
                       "ownerInputBlockers":  [
 
                                              ],
+                      "requiredOwnerInputBlockers":  [
+
+                                                     ],
+                      "optionalOwnerInputBlockers":  [
+
+                                                     ],
                       "productionGate":  true
                   }
               ]

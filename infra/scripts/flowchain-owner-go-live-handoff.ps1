@@ -185,6 +185,8 @@ foreach ($report in @($activationPlan, $ownerInputs, $publicDeploymentContract, 
     Add-HandoffUniqueMany -Target $missingEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "missingEnvNames" -Default @()))
     Add-HandoffUniqueMany -Target $invalidEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "invalidEnvNames" -Default @()))
     Add-HandoffUniqueMany -Target $missingEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "missingOwnerInputs" -Default @()))
+    Add-HandoffUniqueMany -Target $missingEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "missingRequiredOwnerInputs" -Default @()))
+    Add-HandoffUniqueMany -Target $missingEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "missingOptionalOwnerInputs" -Default @()))
     Add-HandoffUniqueMany -Target $missingEnvNames -Values (Get-HandoffEnvNames -Values (Get-HandoffProp -Object $report -Name "exactExternalOwnerInputsRemaining" -Default @()))
 }
 
@@ -195,6 +197,11 @@ foreach ($stage in @($stages)) {
 if (@($nextOwnerInputNames).Count -eq 0) {
     Add-HandoffUniqueMany -Target $nextOwnerInputNames -Values @($missingEnvNames | Where-Object { $_ -in $requiredOwnerEnvNames })
 }
+$missingRequiredEnvNames = @($missingEnvNames | Where-Object { $_ -in $requiredOwnerEnvNames })
+$missingOptionalEnvNames = @($missingEnvNames | Where-Object { $_ -in $optionalOwnerEnvNames })
+$invalidRequiredEnvNames = @($invalidEnvNames | Where-Object { $_ -in $requiredOwnerEnvNames })
+$invalidOptionalEnvNames = @($invalidEnvNames | Where-Object { $_ -in $optionalOwnerEnvNames })
+$nextOwnerOptionalInputNames = @($nextOwnerInputNames | Where-Object { $_ -in $optionalOwnerEnvNames })
 
 $externalResources = New-Object System.Collections.ArrayList
 $mustNotSend = New-Object System.Collections.ArrayList
@@ -422,6 +429,8 @@ foreach ($stage in @($stages)) {
 $missingRequiredCoverage = @($requiredOwnerEnvNames | Where-Object { $_ -notin @($coveredRequiredEnvNames) })
 $unknownMissingEnvNames = @($missingEnvNames | Where-Object { $_ -notin $knownOwnerEnvNames })
 $unknownInvalidEnvNames = @($invalidEnvNames | Where-Object { $_ -notin $knownOwnerEnvNames })
+$missingInputClassifiedCount = @($missingRequiredEnvNames + $missingOptionalEnvNames + $unknownMissingEnvNames).Count
+$invalidInputClassifiedCount = @($invalidRequiredEnvNames + $invalidOptionalEnvNames + $unknownInvalidEnvNames).Count
 $nonReadyStages = @($stages | Where-Object { $_.ready -ne $true })
 
 $activationReady = (Get-HandoffProp -Object $activationPlan -Name "activationReady" -Default $false) -eq $true
@@ -456,6 +465,8 @@ $checks = [ordered]@{
     everyStageHasOwnerMustNotSend = @($stages | Where-Object { @($_.ownerMustNotSend).Count -eq 0 }).Count -eq 0
     nonReadyStagesExplainBlockers = @($nonReadyStages | Where-Object { @($_.blockingEnvNames).Count -eq 0 -and @($_.blockedByReportNames).Count -eq 0 }).Count -eq 0
     requiredEnvCoverageComplete = $missingRequiredCoverage.Count -eq 0
+    requiredAndOptionalOwnerInputsSeparated = $missingInputClassifiedCount -eq @($missingEnvNames).Count -and $invalidInputClassifiedCount -eq @($invalidEnvNames).Count
+    neededNowExcludesOptionalOwnerInputs = @($nextOwnerOptionalInputNames).Count -eq 0
     knownOwnerInputBlockersOnly = $knownOwnerInputOnly
     nextOwnerInputsPresentWhenBlocked = if ($releaseReady) { $true } else { @($nextOwnerInputNames).Count -gt 0 }
     nextCommandsPresent = @($nextCommands).Count -ge 6
@@ -508,10 +519,15 @@ $report = [ordered]@{
     requiredOwnerEnvNames = @($requiredOwnerEnvNames)
     optionalOwnerEnvNames = @($optionalOwnerEnvNames)
     missingEnvNames = @($missingEnvNames)
+    missingRequiredEnvNames = @($missingRequiredEnvNames)
+    missingOptionalEnvNames = @($missingOptionalEnvNames)
     invalidEnvNames = @($invalidEnvNames)
+    invalidRequiredEnvNames = @($invalidRequiredEnvNames)
+    invalidOptionalEnvNames = @($invalidOptionalEnvNames)
     unknownMissingEnvNames = @($unknownMissingEnvNames)
     unknownInvalidEnvNames = @($unknownInvalidEnvNames)
     nextOwnerInputNames = @($nextOwnerInputNames)
+    nextOwnerOptionalInputNames = @($nextOwnerOptionalInputNames)
     stageCount = @($stages).Count
     readyStageCount = @($stages | Where-Object { $_.ready -eq $true }).Count
     blockedStageCount = @($nonReadyStages).Count
@@ -565,6 +581,18 @@ if (@($nextOwnerInputNames).Count -eq 0) {
 }
 else {
     foreach ($name in @($nextOwnerInputNames)) {
+        $markdownLines.Add("- ``$name``")
+    }
+}
+$markdownLines.Add("")
+$markdownLines.Add("## Optional Owner Inputs")
+$markdownLines.Add("")
+$markdownLines.Add("These names can tune bridge scanning, but they are not required go-live blockers.")
+if (@($missingOptionalEnvNames).Count -eq 0) {
+    $markdownLines.Add("- None")
+}
+else {
+    foreach ($name in @($missingOptionalEnvNames)) {
         $markdownLines.Add("- ``$name``")
     }
 }

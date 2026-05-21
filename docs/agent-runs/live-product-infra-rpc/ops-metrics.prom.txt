@@ -772,6 +772,18 @@ flowchain_owner_go_live_stages_total 8
 # HELP flowchain_owner_go_live_next_inputs_total Owner input names still listed as needed by the go-live handoff.
 # TYPE flowchain_owner_go_live_next_inputs_total gauge
 flowchain_owner_go_live_next_inputs_total 14
+# HELP flowchain_owner_go_live_missing_required_inputs Required owner input names still missing in the go-live handoff.
+# TYPE flowchain_owner_go_live_missing_required_inputs gauge
+flowchain_owner_go_live_missing_required_inputs 14
+# HELP flowchain_owner_go_live_missing_optional_inputs Optional owner input names mentioned by the go-live handoff.
+# TYPE flowchain_owner_go_live_missing_optional_inputs gauge
+flowchain_owner_go_live_missing_optional_inputs 1
+# HELP flowchain_owner_go_live_next_optional_inputs Optional owner input names that incorrectly leaked into Needed Now.
+# TYPE flowchain_owner_go_live_next_optional_inputs gauge
+flowchain_owner_go_live_next_optional_inputs 0
+# HELP flowchain_owner_go_live_input_separation_ready One when required and optional owner inputs are separated and Needed Now excludes optional inputs.
+# TYPE flowchain_owner_go_live_input_separation_ready gauge
+flowchain_owner_go_live_input_separation_ready 1
 # HELP flowchain_owner_go_live_failed_checks Failed checks in the owner go-live handoff report.
 # TYPE flowchain_owner_go_live_failed_checks gauge
 flowchain_owner_go_live_failed_checks 0
