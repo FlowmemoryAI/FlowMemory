@@ -16,3 +16,5 @@ apps/dashboard/test-results/
 apps/dashboard/playwright-report/
 crypto/node_modules/
 *.tgz
+# Prevent accidental nested clean-clone copies from local public quickstart testing.
+/FlowMemory/
