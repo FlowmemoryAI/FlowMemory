@@ -8,6 +8,8 @@ These are not hidden defects. They are the remaining work required before FlowMe
 
 ### 1. Base Sepolia public-agent deployment and readback
 
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/164
+
 Current state: scripts and contract stack exist, but no full public-agent network Base Sepolia broadcast/readback is committed for this release.
 
 Missing work:
@@ -20,6 +22,8 @@ Missing work:
 
 ### 2. Keeper / runtime automation
 
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/165
+
 Current state: contracts expose launch, fuel, bond, receipt, lineage, and swarm primitives. The long-running automation layer is not implemented.
 
 Missing work:
@@ -30,6 +34,8 @@ Missing work:
 - operator runbook and failure drill for automation.
 
 ### 3. Direct contract-backed SDK submission
+
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/166
 
 Current state: FlowChain SDK exposes control-plane wrappers, and FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes. Direct transaction submission is not yet a complete SDK surface.
 
@@ -43,6 +49,8 @@ Missing work:
 
 ### 4. Public-network dashboard live data
 
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/167
+
 Current state: the dashboard renders a public-agent-network view backed by deterministic local data and control-plane projections.
 
 Missing work:
@@ -54,6 +62,8 @@ Missing work:
 - correction/challenge timelines.
 
 ### 5. Swarm-born agents and memory inheritance
+
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/168
 
 Current state: lineage supports parent agents and swarms, and swarms support membership and lifecycle transitions.
 
