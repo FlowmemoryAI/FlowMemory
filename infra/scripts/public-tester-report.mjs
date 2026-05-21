@@ -21,6 +21,10 @@ const LANES = {
     label: "Dashboard workbench",
     command: ["npm", ["run", "public:test:dashboard"]],
   },
+  cli: {
+    label: "CLI / control-plane trial",
+    command: ["npm", ["run", "public:test:cli"]],
+  },
 };
 
 const SECRET_PATTERNS = [
@@ -38,7 +42,7 @@ function usage() {
   return `FlowMemory public tester report
 
 Usage:
-  node infra/scripts/public-tester-report.mjs [--quick] [--contracts] [--e2e] [--dashboard] [--all] [--strict] [--out <path>]
+  node infra/scripts/public-tester-report.mjs [--quick] [--contracts] [--e2e] [--dashboard] [--cli] [--all] [--strict] [--out <path>]
 
 Defaults to --quick. Writes a public-safe JSON report and markdown issue body under devnet/local/public-test-reports/.
 `;
@@ -126,6 +130,8 @@ function parseArgs(argv) {
       lanes.add("e2e");
     } else if (arg === "--dashboard") {
       lanes.add("dashboard");
+    } else if (arg === "--cli") {
+      lanes.add("cli");
     } else if (arg === "--strict") {
       strict = true;
     } else if (arg === "--out") {
