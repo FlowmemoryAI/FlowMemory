@@ -1,18 +1,32 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-21T10:55:37.7392322Z",
+    "generatedAt":  "2026-05-21T17:05:46.2137658Z",
     "status":  "blocked",
     "refresh":  {
-                    "performed":  false,
+                    "performed":  true,
                     "steps":  [
-
+                                  {
+                                      "name":  "service-status",
+                                      "exitCode":  0,
+                                      "outputLineCount":  10
+                                  },
+                                  {
+                                      "name":  "service-monitor",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  },
+                                  {
+                                      "name":  "public-rpc-synthetic-canary",
+                                      "exitCode":  0,
+                                      "outputLineCount":  4
+                                  }
                               ],
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "112092",
-                  "finalizedHeight":  "112092",
-                  "stateFileLastWriteAgeSeconds":  4,
+                  "latestHeight":  "114051",
+                  "finalizedHeight":  "114051",
+                  "stateFileLastWriteAgeSeconds":  11,
                   "monitorStatus":  "passed",
                   "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
@@ -24,10 +38,10 @@
                               "txIntakeRows":  187,
                               "txIntakeAcceptedRows":  187,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  49626.21,
+                              "txIntakeLastWriteAgeSeconds":  71833.069,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  522823.637,
+                              "runtimeSubmitNewestFileAgeSeconds":  545030.636,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -78,7 +92,7 @@
                            "supervisorNodeRecoveryControlPlaneRunning":  true,
                            "supervisorNodeRecoveryLiveProfile":  true,
                            "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
-                           "supervisorNodeRecoveryLatestHeight":  "15536",
+                           "supervisorNodeRecoveryLatestHeight":  "15636",
                            "supervisorLatestRestartReasons":  [
 
                                                               ],
@@ -221,8 +235,8 @@
                            "bridgeRelayerCursorReason":  "not-run",
                            "bridgeRuntimeCredit":  "passed",
                            "bridgeRuntimeCreditReady":  true,
-                           "bridgeRuntimeCreditLatencySeconds":  0.845,
-                           "bridgeRuntimeTransferLatencySeconds":  0.695,
+                           "bridgeRuntimeCreditLatencySeconds":  0.693,
+                           "bridgeRuntimeTransferLatencySeconds":  0.641,
                            "bridgeRuntimeCreditFailedChecks":  0,
                            "bridgeRuntimeCreditMissingRuntimeChecks":  0,
                            "bridgeRuntimeCreditFalseRuntimeChecks":  0,

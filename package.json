@@ -136,6 +136,7 @@
     "flowchain:ops:alerts": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-alerts.ps1",
     "flowchain:ops:metrics:export": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-metrics-export.ps1",
     "flowchain:ops:monitoring:bundle": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-monitoring-bundle.ps1",
+    "flowchain:ops:launch-watch": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-ops-launch-watch.ps1",
     "flowchain:ops:metrics:install:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-metrics-install-windows.ps1",
     "flowchain:ops:metrics:install:systemd": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-metrics-install-systemd.ps1",
     "flowchain:ops:metrics:install:systemd:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-metrics-install-systemd-validation.ps1",

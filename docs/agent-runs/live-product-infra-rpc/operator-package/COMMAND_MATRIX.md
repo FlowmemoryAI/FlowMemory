@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-21T16:40:26.2843852Z
+Generated: 2026-05-21T17:13:32.2095625Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -45,6 +45,7 @@ Generated: 2026-05-21T16:40:26.2843852Z
 | ops | `npm run flowchain:ops:alerts -- -AllowBlocked` | Refresh local alert rules and finding coverage. |
 | ops | `npm run flowchain:ops:metrics:export` | Export no-secret JSON and Prometheus textfile metrics for owner collectors. |
 | ops | `npm run flowchain:ops:monitoring:bundle` | Render no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain ops metrics. |
+| ops | `npm run flowchain:ops:launch-watch` | Verify every launch-critical operations lane has evidence, metrics, alert rules, and operator commands. |
 | ops | `npm run flowchain:ops:metrics:install:windows -- -Action Plan` | Render recurring metrics export Scheduled Task plan. |
 | ops | `npm run flowchain:ops:metrics:install:systemd -- -Action Plan` | Render recurring metrics export Linux systemd timer plan. |
 | ops | `npm run flowchain:ops:metrics:install:systemd:validate` | Validate Linux systemd timer metrics export plan without mutating the owner host. |

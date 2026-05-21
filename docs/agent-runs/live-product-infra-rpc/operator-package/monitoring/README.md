@@ -4,8 +4,8 @@ This bundle turns existing no-secret FlowChain ops evidence into owner-operated 
 
 - Grafana dashboard: `flowchain-grafana-dashboard.json`
 - Prometheus alert rules: `flowchain-prometheus-alerts.yml`
-- Source metrics: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
-- Source alert rules: `docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json`
+- Source metrics: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\ops-metrics.json`
+- Source alert rules: `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\ops-alert-rules-report.json`
 
 Import the dashboard into the owner Grafana workspace with a Prometheus datasource named `DS_PROMETHEUS`. Load the alert rules into the owner Prometheus-compatible rules path. These files contain metric names, thresholds, and commands only.
 

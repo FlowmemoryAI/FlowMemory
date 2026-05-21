@@ -59,6 +59,7 @@ $paths = [ordered]@{
     externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
     liveCapabilityMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
+    opsLaunchWatch = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -325,6 +326,12 @@ try {
         -ExpectedReportPath $paths.liveCapabilityMatrix))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Ops launch watch" `
+        -Command "npm run flowchain:ops:launch-watch -- -NoRefresh" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-launch-watch.ps1"), "-NoRefresh") `
+        -ExpectedReportPath $paths.opsLaunchWatch))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "Production truth table" `
         -Command "npm run flowchain:truth-table -- -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-production-truth-table.ps1"), "-AllowBlocked") `
@@ -408,6 +415,12 @@ $ready = [ordered]@{
     testerClientValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterClientValidation) -eq "passed"
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
     liveCapabilityMatrixPassed = (Get-CutoverReportStatus -Report $reports.liveCapabilityMatrix) -eq "passed" -and @((Get-CutoverProp -Object $reports.liveCapabilityMatrix -Name "repoBlockedCapabilities" -Default @())).Count -eq 0
+    opsLaunchWatchPassed = (Get-CutoverReportStatus -Report $reports.opsLaunchWatch) -eq "passed" `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "failedChecks" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingReports" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingMetrics" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "missingAlertRules" -Default @())).Count -eq 0 `
+        -and @((Get-CutoverProp -Object $reports.opsLaunchWatch -Name "blockedLaneUnknownBlockers" -Default @())).Count -eq 0
     truthTableCompleted = $truthTableReportStatus -in @("passed", "blocked-owner-input")
     truthTableAccepted = $truthTableAccepted
     truthTableSelfReferenceStaleAccepted = $truthTableReportStatus -ne "stale" -or $truthTableSelfReferenceStale
@@ -436,7 +449,7 @@ $checks = [ordered]@{
     ownerEnvFileExists = $ownerEnvExists
     ownerEnvFileIsFile = $ownerEnvIsFile
     ownerEnvFileGitIgnored = $ownerEnvGitIgnore.ignored -eq $true
-    stepsRan = @($steps).Count -eq 11
+    stepsRan = @($steps).Count -eq 12
     stepCommandsSucceeded = @($steps | Where-Object { [int] $_.exitCode -ne 0 -and "$($_.status)" -ne "blocked" }).Count -eq 0
     noFailedSteps = $failedSteps.Count -eq 0
     missingEnvNamesEmpty = @($missingEnvNames).Count -eq 0
@@ -452,6 +465,7 @@ $checks = [ordered]@{
     testerClientValidationPassed = $ready.testerClientValidationPassed
     completionReady = $ready.completionReady
     liveCapabilityMatrixPassed = $ready.liveCapabilityMatrixPassed
+    opsLaunchWatchPassed = $ready.opsLaunchWatchPassed
     truthTableCompleted = $ready.truthTableCompleted
     truthTableAccepted = $ready.truthTableAccepted
     truthTableSelfReferenceStaleAccepted = $ready.truthTableSelfReferenceStaleAccepted
@@ -507,6 +521,7 @@ $report = [ordered]@{
         "npm run flowchain:external-tester:packet:validate",
         "npm run flowchain:external-tester:client:validate",
         "npm run flowchain:live:capabilities",
+        "npm run flowchain:ops:launch-watch",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
     )
@@ -525,7 +540,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
+$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, ops launch watch, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
 $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")

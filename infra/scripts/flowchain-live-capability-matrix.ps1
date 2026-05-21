@@ -85,6 +85,7 @@ $paths = [ordered]@{
     opsAlertRules = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json"
     opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
     monitoringBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
+    opsLaunchWatch = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     externalTesterReadiness = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -322,6 +323,7 @@ $opsSnapshotPassedOrBlocked = (Get-CapabilityStatus -Report $reports.opsSnapshot
 $opsAlertRulesPassed = Test-CapabilityReportPassed -Report $reports.opsAlertRules
 $opsMetricsExportPassed = Test-CapabilityReportPassed -Report $reports.opsMetricsExport
 $monitoringBundlePassed = Test-CapabilityReportPassed -Report $reports.monitoringBundle
+$opsLaunchWatchPassed = Test-CapabilityReportPassed -Report $reports.opsLaunchWatch
 $alertInstallPassed = Test-CapabilityReportPassed -Report $reports.alertInstallValidation
 $metricsInstallPassed = Test-CapabilityReportPassed -Report $reports.metricsInstallValidation
 $externalTesterReadinessPassed = Test-CapabilityReportPassed -Report $reports.externalTesterReadiness
@@ -402,10 +404,10 @@ $capabilities = New-Object System.Collections.ArrayList
         -ReportNames @("backupReadiness", "backupRestoreValidation", "backupOwnerPathDryRun", "backupInstallValidation") `
         -Blockers $backupBlockers))
 [void] $capabilities.Add((New-LiveCapability -Id "observability-alerting" -Title "Observability and alerting" -UserRequirement "Operators can monitor chain health, public RPC, bridge, backup, testers, and incident gates without leaking secrets." `
-        -Classification $(if ($opsSnapshotPassedOrBlocked -and $opsAlertRulesPassed -and $opsMetricsExportPassed -and $monitoringBundlePassed -and $alertInstallPassed -and $metricsInstallPassed) { "passed" } else { "failed" }) `
-        -Evidence "opsSnapshot=$(Get-CapabilityStatus -Report $reports.opsSnapshot); alerts=$(Get-CapabilityStatus -Report $reports.opsAlertRules); metrics=$(Get-CapabilityStatus -Report $reports.opsMetricsExport); monitoringBundle=$(Get-CapabilityStatus -Report $reports.monitoringBundle)" `
-        -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:monitoring:bundle") `
-        -ReportNames @("opsSnapshot", "opsAlertRules", "opsMetricsExport", "monitoringBundle", "alertInstallValidation", "metricsInstallValidation")))
+        -Classification $(if ($opsSnapshotPassedOrBlocked -and $opsAlertRulesPassed -and $opsMetricsExportPassed -and $monitoringBundlePassed -and $opsLaunchWatchPassed -and $alertInstallPassed -and $metricsInstallPassed) { "passed" } else { "failed" }) `
+        -Evidence "opsSnapshot=$(Get-CapabilityStatus -Report $reports.opsSnapshot); alerts=$(Get-CapabilityStatus -Report $reports.opsAlertRules); metrics=$(Get-CapabilityStatus -Report $reports.opsMetricsExport); monitoringBundle=$(Get-CapabilityStatus -Report $reports.monitoringBundle); launchWatch=$(Get-CapabilityStatus -Report $reports.opsLaunchWatch)" `
+        -Commands @("npm run flowchain:ops:snapshot -- -AllowBlocked", "npm run flowchain:ops:alerts -- -AllowBlocked", "npm run flowchain:ops:metrics:export -- -AllowBlocked", "npm run flowchain:ops:monitoring:bundle", "npm run flowchain:ops:launch-watch") `
+        -ReportNames @("opsSnapshot", "opsAlertRules", "opsMetricsExport", "monitoringBundle", "opsLaunchWatch", "alertInstallValidation", "metricsInstallValidation")))
 [void] $capabilities.Add((New-LiveCapability -Id "external-tester-launch" -Title "External tester launch" -UserRequirement "Friends-and-family testers receive a shareable connection pack only after public RPC, backup, bridge, and tester gates pass." `
         -Classification $(if ($externalTesterReadinessPassed -and $externalTesterPacketStatus -eq "passed" -and $externalTesterClientValidationPassed) { "passed" } elseif ($externalTesterBlockers.Count -gt 0 -and $externalTesterPacketSmokeReady -and $externalTesterClientValidationPassed) { "blocked-owner-input" } else { "failed" }) `
         -Evidence "testerReadiness=$(Get-CapabilityStatus -Report $reports.externalTesterReadiness); packet=$externalTesterPacketStatus; packetSmoke=$externalTesterPacketSmokeReady; clientValidation=$(Get-CapabilityStatus -Report $reports.externalTesterClientValidation); blockers=$($externalTesterBlockers -join ',')" `
@@ -473,6 +475,7 @@ $loadedRequiredReportNames = @(
     "realValuePilotAggregate",
     "backupRestoreValidation",
     "monitoringBundle",
+    "opsLaunchWatch",
     "externalTesterPacket",
     "ownerNeedsNow",
     "devPack"

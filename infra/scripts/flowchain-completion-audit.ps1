@@ -65,6 +65,7 @@ $paths = [ordered]@{
     alertInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json"
     opsMetricsExport = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json"
     monitoringBundle = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
+    opsLaunchWatch = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
     metricsInstallValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
@@ -534,6 +535,9 @@ $architectureAuditExitCode = $architectureAuditResult.exitCode
 $liveCapabilityMatrixResult = Invoke-AuditChild -Path $paths.liveCapabilityMatrix -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-capability-matrix.ps1"))
 $liveCapabilityMatrixOutput = @($liveCapabilityMatrixResult.output)
 $liveCapabilityMatrixExitCode = $liveCapabilityMatrixResult.exitCode
+$opsLaunchWatchResult = Invoke-AuditChild -Path $paths.opsLaunchWatch -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-launch-watch.ps1"), "-NoRefresh")
+$opsLaunchWatchOutput = @($opsLaunchWatchResult.output)
+$opsLaunchWatchExitCode = $opsLaunchWatchResult.exitCode
 
 $reports = [ordered]@{}
 foreach ($entry in $paths.GetEnumerator()) {
@@ -3191,6 +3195,75 @@ $monitoringBundlePassed = $monitoringBundleExitCode -eq 0 `
     -and ((Get-AuditProp -Object $monitoringBundle -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $monitoringBundle -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $monitoringBundle -Name "broadcasts" -Default $true) -eq $false)
+$opsLaunchWatch = $reports.opsLaunchWatch
+$opsLaunchWatchStatus = Get-ReportStatus -Report $opsLaunchWatch
+$opsLaunchWatchLaunchStatus = [string](Get-AuditProp -Object $opsLaunchWatch -Name "launchWatchStatus" -Default "missing")
+$opsLaunchWatchChecks = Get-AuditProp -Object $opsLaunchWatch -Name "checks"
+$opsLaunchWatchFailedChecks = @((Get-AuditProp -Object $opsLaunchWatch -Name "failedChecks" -Default @()))
+$opsLaunchWatchSecretFindings = @((Get-AuditProp -Object $opsLaunchWatch -Name "secretMarkerFindings" -Default @()))
+$opsLaunchWatchMissingReports = @((Get-AuditProp -Object $opsLaunchWatch -Name "missingReports" -Default @()))
+$opsLaunchWatchMissingMetrics = @((Get-AuditProp -Object $opsLaunchWatch -Name "missingMetrics" -Default @()))
+$opsLaunchWatchMissingAlertRules = @((Get-AuditProp -Object $opsLaunchWatch -Name "missingAlertRules" -Default @()))
+$opsLaunchWatchMissingPackageScripts = @((Get-AuditProp -Object $opsLaunchWatch -Name "missingPackageScripts" -Default @()))
+$opsLaunchWatchBlockedLaneUnknownBlockers = @((Get-AuditProp -Object $opsLaunchWatch -Name "blockedLaneUnknownBlockers" -Default @()))
+$opsLaunchWatchCommandUrls = @((Get-AuditProp -Object $opsLaunchWatch -Name "commandsWithUrls" -Default @()))
+$opsLaunchWatchInlineEnvAssignments = @((Get-AuditProp -Object $opsLaunchWatch -Name "commandsWithInlineEnvAssignment" -Default @()))
+$opsLaunchWatchLaneCount = [int](Get-AuditProp -Object $opsLaunchWatch -Name "laneCount" -Default 0)
+$opsLaunchWatchBlockedLaneCount = [int](Get-AuditProp -Object $opsLaunchWatch -Name "blockedLaneCount" -Default 0)
+$opsLaunchWatchRequiredChecks = @(
+    "packageScriptPresent",
+    "metricsJsonLoaded",
+    "laneCountSufficient",
+    "everyLaneHasEvidence",
+    "everyLaneHasMetrics",
+    "everyLaneHasAlertRules",
+    "everyLaneHasCommands",
+    "everyLaneCommandHasPackageScript",
+    "commandsAvoidInlineEnvAssignment",
+    "commandsAvoidUrls",
+    "opsSnapshotLoaded",
+    "opsSnapshotHasNoCriticalFindings",
+    "opsSnapshotBlockedFindingsAreExpected",
+    "opsAlertRulesPassed",
+    "opsAlertsMapCurrentFindings",
+    "activeAlertRulesPresent",
+    "opsMetricsExportPassed",
+    "monitoringBundlePassed",
+    "noSecretScanPassed",
+    "truthTableNoRepoBlocked",
+    "truthTableNoFailed",
+    "truthTableNoStale",
+    "capabilityMatrixNoRepoBlocked",
+    "blockedLanesHaveKnownOwnerInputs",
+    "noProductionReadyClaimWhileBlocked",
+    "opsCriticalMetricZero",
+    "truthFailedMetricZero",
+    "truthStaleMetricZero",
+    "truthRepoBlockedMetricZero",
+    "envValuesPrintedFalse",
+    "secretMarkerFindingsEmpty",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$opsLaunchWatchMissingChecks = @(Get-MissingAuditChecks -Checks $opsLaunchWatchChecks -Names $opsLaunchWatchRequiredChecks)
+$opsLaunchWatchPassed = $opsLaunchWatchExitCode -eq 0 `
+    -and $opsLaunchWatchStatus -eq "passed" `
+    -and $opsLaunchWatchLaunchStatus -in @("passed", "blocked-owner-input") `
+    -and $opsLaunchWatchLaneCount -ge 6 `
+    -and $opsLaunchWatchFailedChecks.Count -eq 0 `
+    -and $opsLaunchWatchSecretFindings.Count -eq 0 `
+    -and $opsLaunchWatchMissingReports.Count -eq 0 `
+    -and $opsLaunchWatchMissingMetrics.Count -eq 0 `
+    -and $opsLaunchWatchMissingAlertRules.Count -eq 0 `
+    -and $opsLaunchWatchMissingPackageScripts.Count -eq 0 `
+    -and $opsLaunchWatchBlockedLaneUnknownBlockers.Count -eq 0 `
+    -and $opsLaunchWatchCommandUrls.Count -eq 0 `
+    -and $opsLaunchWatchInlineEnvAssignments.Count -eq 0 `
+    -and $opsLaunchWatchMissingChecks.Count -eq 0 `
+    -and ((Get-AuditProp -Object $opsLaunchWatch -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $opsLaunchWatch -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsLaunchWatch -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $opsLaunchWatch -Name "noLiveBroadcast" -Default $false) -eq $true)
 $metricsInstallValidation = $reports.metricsInstallValidation
 $metricsInstallValidationStatus = Get-ReportStatus -Report $metricsInstallValidation
 $metricsInstallValidationChecks = Get-AuditProp -Object $metricsInstallValidation -Name "checks"
@@ -3742,6 +3815,12 @@ Add-AuditItem -Items $items -Id "ops-monitoring-bundle" `
     -Evidence "monitoringBundle=$monitoringBundleStatus, panels=$monitoringBundleDashboardPanelCount, prometheusRules=$monitoringBundlePrometheusRuleCount, failedChecks=$($monitoringBundleFailedChecks.Count), secretFindings=$($monitoringBundleSecretFindings.Count), missingDashboardMetrics=$($monitoringBundleMissingDashboardMetricNames.Count), missingPrometheusMetrics=$($monitoringBundleMissingPrometheusMetricNames.Count), missingSourceRules=$($monitoringBundleMissingSourceRuleIds.Count), commandUrls=$($monitoringBundleCommandsWithUrls.Count), inlineEnvAssignments=$($monitoringBundleCommandsWithInlineEnvAssignment.Count), report=$($paths.monitoringBundle)" `
     -Commands @("npm run flowchain:ops:monitoring:bundle")
 
+Add-AuditItem -Items $items -Id "ops-launch-watch" `
+    -Requirement "Ops launch watch ties service install/autorecovery, public RPC deployment, backup/restore, bridge pilot relayer, Explorer/faucet/wallet UI, observability, and release-governance lanes to concrete reports, metrics, alert rules, and local operator commands without treating owner-input blockers as repo failures." `
+    -Status $(if ($opsLaunchWatchPassed) { "passed" } else { "failed" }) `
+    -Evidence "launchWatch=$opsLaunchWatchLaunchStatus, lanes=$opsLaunchWatchLaneCount, blockedLanes=$opsLaunchWatchBlockedLaneCount, failedChecks=$($opsLaunchWatchFailedChecks.Count), missingChecks=$($opsLaunchWatchMissingChecks.Count), missingReports=$($opsLaunchWatchMissingReports.Count), missingMetrics=$($opsLaunchWatchMissingMetrics.Count), missingAlertRules=$($opsLaunchWatchMissingAlertRules.Count), missingScripts=$($opsLaunchWatchMissingPackageScripts.Count), unknownBlockers=$($opsLaunchWatchBlockedLaneUnknownBlockers.Count), commandUrls=$($opsLaunchWatchCommandUrls.Count), inlineEnvAssignments=$($opsLaunchWatchInlineEnvAssignments.Count), secretFindings=$($opsLaunchWatchSecretFindings.Count), report=$($paths.opsLaunchWatch)" `
+    -Commands @("npm run flowchain:ops:launch-watch")
+
 Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `
     -Requirement "Ops metrics scheduled export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics." `
     -Status $(if ($metricsInstallValidationPassed) { "passed" } else { "failed" }) `
@@ -4040,6 +4119,8 @@ $report = [ordered]@{
     architectureAuditOutputRedacted = @($architectureAuditOutput | ForEach-Object { "$_" })
     liveCapabilityMatrixExitCode = $liveCapabilityMatrixExitCode
     liveCapabilityMatrixOutputRedacted = @($liveCapabilityMatrixOutput | ForEach-Object { "$_" })
+    opsLaunchWatchExitCode = $opsLaunchWatchExitCode
+    opsLaunchWatchOutputRedacted = @($opsLaunchWatchOutput | ForEach-Object { "$_" })
     packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
     externalTesterLaunchEvidence = [ordered]@{
         externalTesterStatus = $externalTesterStatus
@@ -4161,6 +4242,7 @@ $report = [ordered]@{
         "npm run flowchain:ops:alerts:install:systemd:validate",
         "npm run flowchain:ops:alerts:install:validate",
         "npm run flowchain:ops:metrics:export",
+        "npm run flowchain:ops:launch-watch",
         "npm run flowchain:ops:metrics:install:systemd:validate",
         "npm run flowchain:ops:metrics:install:validate",
         "npm run flowchain:ops:escalation:dry-run",

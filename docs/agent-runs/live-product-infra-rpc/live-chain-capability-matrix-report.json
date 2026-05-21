@@ -1,11 +1,11 @@
 {
     "schema":  "flowchain.live_chain_capability_matrix_report.v0",
-    "generatedAt":  "2026-05-21T16:46:36.6273134Z",
+    "generatedAt":  "2026-05-21T17:21:55.7569045Z",
     "status":  "passed",
     "launchReadinessStatus":  "blocked-owner-input",
     "productionReady":  false,
-    "latestHeight":  "113926",
-    "finalizedHeight":  "113926",
+    "latestHeight":  "114146",
+    "finalizedHeight":  "114146",
     "capabilityCount":  14,
     "publicLaunchCriticalCapabilityCount":  13,
     "blockedCapabilityCount":  4,
@@ -122,7 +122,7 @@
                              "userRequirement":  "RPC servers are online and readable.",
                              "classification":  "passed",
                              "publicLaunchCritical":  true,
-                             "evidence":  "serviceStatus=passed; latestHeight=113926; finalizedHeight=113926",
+                             "evidence":  "serviceStatus=passed; latestHeight=114146; finalizedHeight=114146",
                              "commands":  [
                                               "npm run flowchain:service:status"
                                           ],
@@ -141,7 +141,7 @@
                              "userRequirement":  "The chain is alive and producing/finalizing blocks.",
                              "classification":  "passed",
                              "publicLaunchCritical":  true,
-                             "evidence":  "serviceMonitor=passed; heightAdvanced=True; latestHeight=113926",
+                             "evidence":  "serviceMonitor=passed; heightAdvanced=True; latestHeight=114146",
                              "commands":  [
                                               "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30"
                                           ],
@@ -203,7 +203,7 @@
                              "userRequirement":  "People can send funds from wallet to wallet and see settlement in produced blocks.",
                              "classification":  "passed",
                              "publicLaunchCritical":  true,
-                             "evidence":  "liveWallet=passed; testerTransfers=4; latestHeight=113926",
+                             "evidence":  "liveWallet=passed; testerTransfers=4; latestHeight=114146",
                              "commands":  [
                                               "npm run flowchain:wallet:live-service:e2e",
                                               "npm run flowchain:wallet:live-tester:e2e"
@@ -350,18 +350,20 @@
                              "userRequirement":  "Operators can monitor chain health, public RPC, bridge, backup, testers, and incident gates without leaking secrets.",
                              "classification":  "passed",
                              "publicLaunchCritical":  true,
-                             "evidence":  "opsSnapshot=blocked; alerts=passed; metrics=passed; monitoringBundle=passed",
+                             "evidence":  "opsSnapshot=blocked; alerts=passed; metrics=passed; monitoringBundle=passed; launchWatch=passed",
                              "commands":  [
                                               "npm run flowchain:ops:snapshot -- -AllowBlocked",
                                               "npm run flowchain:ops:alerts -- -AllowBlocked",
                                               "npm run flowchain:ops:metrics:export -- -AllowBlocked",
-                                              "npm run flowchain:ops:monitoring:bundle"
+                                              "npm run flowchain:ops:monitoring:bundle",
+                                              "npm run flowchain:ops:launch-watch"
                                           ],
                              "reportNames":  [
                                                  "opsSnapshot",
                                                  "opsAlertRules",
                                                  "opsMetricsExport",
                                                  "monitoringBundle",
+                                                 "opsLaunchWatch",
                                                  "alertInstallValidation",
                                                  "metricsInstallValidation"
                                              ],
@@ -512,6 +514,7 @@
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
                         "monitoringBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\monitoring-bundle-report.json",
+                        "opsLaunchWatch":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-launch-watch-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
                         "metricsInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-validation-report.json",
                         "externalTesterReadiness":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T16:40:26.2843852Z",
+    "generatedAt":  "2026-05-21T17:13:32.2095625Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -206,6 +206,11 @@
                          "phase":  "ops",
                          "command":  "npm run flowchain:ops:monitoring:bundle",
                          "purpose":  "Render no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain ops metrics."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:launch-watch",
+                         "purpose":  "Verify every launch-critical operations lane has evidence, metrics, alert rules, and operator commands."
                      },
                      {
                          "phase":  "ops",

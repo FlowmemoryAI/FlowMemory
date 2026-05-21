@@ -2694,6 +2694,70 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "ops-launch-watch"
+        requirement = "Ops launch watch ties service install/autorecovery, public RPC deployment, backup/restore, bridge pilot relayer, Explorer/faucet/wallet UI, observability, and release-governance lanes to concrete reports, metrics, alert rules, and local operator commands without treating owner-input blockers as repo failures."
+        path = "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
+        command = "npm run flowchain:ops:launch-watch"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "metricsJsonLoaded",
+            "laneCountSufficient",
+            "everyLaneHasEvidence",
+            "everyLaneHasMetrics",
+            "everyLaneHasAlertRules",
+            "everyLaneHasCommands",
+            "everyLaneCommandHasPackageScript",
+            "commandsAvoidInlineEnvAssignment",
+            "commandsAvoidUrls",
+            "opsSnapshotLoaded",
+            "opsSnapshotHasNoCriticalFindings",
+            "opsSnapshotBlockedFindingsAreExpected",
+            "opsAlertRulesPassed",
+            "opsAlertsMapCurrentFindings",
+            "activeAlertRulesPresent",
+            "opsMetricsExportPassed",
+            "monitoringBundlePassed",
+            "noSecretScanPassed",
+            "truthTableNoRepoBlocked",
+            "truthTableNoFailed",
+            "truthTableNoStale",
+            "capabilityMatrixNoRepoBlocked",
+            "blockedLanesHaveKnownOwnerInputs",
+            "noProductionReadyClaimWhileBlocked",
+            "opsCriticalMetricZero",
+            "truthFailedMetricZero",
+            "truthStaleMetricZero",
+            "truthRepoBlockedMetricZero",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "missingReports",
+            "missingMetrics",
+            "missingAlertRules",
+            "missingPackageScripts",
+            "blockedLaneUnknownBlockers",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            laneCount = 6
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+        staleIfOlderThan = @("ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-monitoring-bundle", "service-status", "service-monitor", "service-install-validation", "systemd-service-install-validation", "public-rpc-readiness", "public-rpc-synthetic-canary", "public-rpc-deployment-automation", "public-rpc-command-matrix", "backup-readiness", "backup-restore-validation", "backup-owner-path-dry-run", "backup-install-validation", "bridge-live-readiness", "bridge-infra-readiness", "bridge-relayer-once", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "bridge-reconciliation", "bridge-release-evidence-validation", "real-value-pilot-aggregate", "external-tester-readiness", "external-tester-packet", "external-tester-client-validation", "external-tester-evidence-validation", "public-tester-gateway-e2e", "dashboard-ui-readiness", "owner-go-live-handoff", "owner-needs-now", "public-deployment-contract", "live-chain-capability-matrix", "no-secret-scan")
+    },
+    [ordered]@{
         id = "ops-metrics-install-validation"
         requirement = "Scheduled metrics export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics."
         path = "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"

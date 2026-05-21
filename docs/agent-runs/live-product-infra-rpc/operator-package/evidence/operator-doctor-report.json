@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-21T16:40:20.7293604Z",
+    "generatedAt":  "2026-05-21T17:13:27.3852344Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  2.83,
-    "stateFileLastWriteAgeSeconds":  5,
-    "latestHeight":  "113867",
-    "finalizedHeight":  "113867",
+    "diskFreeGiB":  2.56,
+    "stateFileLastWriteAgeSeconds":  8,
+    "latestHeight":  "114051",
+    "finalizedHeight":  "114051",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -303,21 +303,21 @@
                        "name":  "disk-free:E",
                        "status":  "warning",
                        "owner":  "storage",
-                       "detail":  "2.83 GiB free on E:",
+                       "detail":  "2.56 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 5",
+                       "detail":  "devnet/local/state.json age seconds: 8",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=113867 finalizedHeight=113867 stateAge=6",
+                       "detail":  "latestHeight=114051 finalizedHeight=114051 stateAge=11",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {
@@ -457,7 +457,7 @@
                               "name":  "disk-free:E",
                               "status":  "warning",
                               "owner":  "storage",
-                              "detail":  "2.83 GiB free on E:",
+                              "detail":  "2.56 GiB free on E:",
                               "nextCommand":  "free disk space before public operation"
                           }
                       ],

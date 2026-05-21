@@ -1,6 +1,6 @@
 ﻿# FlowChain Monitoring Bundle
 
-Generated: 2026-05-21T15:34:10.7303144Z
+Generated: 2026-05-21T17:05:58.4769952Z
 Status: passed
 
 This bundle renders owner-operated Grafana and Prometheus files from existing no-secret FlowChain metrics and alert-rule evidence. It does not send network notifications or store external delivery credentials.
@@ -16,8 +16,8 @@ This bundle renders owner-operated Grafana and Prometheus files from existing no
 | --- | --- | --- |
 | `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-grafana-dashboard.json` | `34a066020715a97aeee657d6320113b531e4633209d57d94cced0f018906bee0` | 77464 |
 | `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-prometheus-alerts.yml` | `4c83bd377bbd421f87c679243dafe458e70501bd50c07aff7d357983cf7a43e9` | 5734 |
-| `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/README.md` | `da9f8a85fbb548deee55284c4ebd82c22f79b17f49acd63ddc3ac6cef186143a` | 895 |
-| `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-monitoring-bundle-manifest.json` | `97240e223ed19e0d64f578d34b47eab03adb801736f6931ebc2363725f717d15` | 1848 |
+| `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/README.md` | `8735165c40a91065a4d2c3adcb3befd32385c678750f330e938a9192e477f26b` | 975 |
+| `docs/agent-runs/live-product-infra-rpc/monitoring-bundle/flowchain-monitoring-bundle-manifest.json` | `ff06131cd6a4cda63a270f16290ecdc6922f73fedfcd9af17494352df080729c` | 1986 |
 
 ## Checks
 
