@@ -2925,6 +2925,55 @@ $definitions = @(
         staleIfOlderThan = @("owner-env-readiness", "public-deployment-contract", "tester-network-e2e", "tester-write-token-setup", "external-tester-packet", "external-tester-packet-validation", "external-tester-client-validation", "public-rpc-command-matrix", "completion-audit")
     },
     [ordered]@{
+        id = "live-chain-capability-matrix"
+        requirement = "User-facing live-chain capability matrix maps wallet creation, wallet-to-wallet transfer, public RPC connection, real-value bridge pilot, RPC services, block production, Explorer/faucet/wallet UI, backup, observability, external tester launch, developer tooling, and owner go-live controls to concrete evidence and remaining owner-input blockers."
+        path = "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
+        command = "npm run flowchain:live:capabilities"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "requiredReportsLoaded",
+            "capabilityCountMinimumMet",
+            "userRequirementCoverageComplete",
+            "publicLaunchCriticalCapabilitiesCovered",
+            "allCriticalCapabilitiesEitherPassedOrOwnerBlocked",
+            "repoBlockedCapabilitiesEmpty",
+            "blockedCapabilitiesHaveBlockers",
+            "blockedCapabilitiesUseKnownOwnerInputs",
+            "truthTableOwnerBlockersKnown",
+            "publicRpcCapabilityBlocksOnPublicRpcInputs",
+            "bridgeCapabilityBlocksOnBridgeInputs",
+            "backupCapabilityBlocksOnBackupInput",
+            "noProductionReadyClaimWhileBlocked",
+            "ownerNeedsNowLoaded",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse",
+            "secretMarkerFindingsEmpty"
+        )
+        requiredMinimums = [ordered]@{
+            capabilityCount = 12
+            publicLaunchCriticalCapabilityCount = 10
+        }
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "repoBlockedCapabilities",
+            "missingUserCapabilityCoverage",
+            "missingRequiredReports",
+            "blockedCapabilitiesMissingBlockers",
+            "blockedCapabilitiesUnknownBlockers"
+        )
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "noLiveBroadcast" = $true
+        }
+        staleIfOlderThan = @("service-status", "service-monitor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "wallet-live-service-e2e", "tester-network-e2e", "public-rpc-readiness", "public-rpc-synthetic-canary", "public-tester-gateway-e2e", "dashboard-ui-readiness", "bridge-live-readiness", "bridge-infra-readiness", "bridge-relayer-once", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation", "bridge-release-evidence-validation", "backup-readiness", "backup-restore-validation", "backup-owner-path-dry-run", "backup-install-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-monitoring-bundle", "ops-alert-install-validation", "ops-metrics-install-validation", "external-tester-readiness", "external-tester-packet", "external-tester-client-validation", "owner-needs-now", "owner-go-live-handoff", "public-deployment-contract", "developer-dev-pack")
+    },
+    [ordered]@{
         id = "architecture-audit"
         requirement = "System architecture audit covers local runtime, public RPC, backup, bridge, tester, and no-secret gates."
         path = "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -3235,6 +3284,12 @@ function ConvertTo-TruthEvidence {
         "opsSnapshotStatus",
         "opsAlertRulesStatus",
         "completionReady",
+        "launchReadinessStatus",
+        "productionReady",
+        "capabilityCount",
+        "publicLaunchCriticalCapabilityCount",
+        "blockedCapabilityCount",
+        "repoBlockedCapabilityCount",
         "blockedOnlyOnKnownExternalOwnerInputs",
         "blockedOnlyOnOwnerInputs",
         "safeReasonCode",

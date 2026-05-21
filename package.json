@@ -90,6 +90,7 @@
     "flowchain:architecture:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-architecture-audit.ps1",
     "flowchain:public-deployment:contract": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-public-deployment-contract.ps1",
     "flowchain:live:cutover:rehearsal": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-cutover-rehearsal.ps1",
+    "flowchain:live:capabilities": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-live-capability-matrix.ps1",
     "flowchain:completion:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-completion-audit.ps1",
     "flowchain:dev-pack:e2e": "npm run e2e --prefix services/flowchain-sdk",
     "flowchain:sdk:e2e": "npm run e2e --prefix services/flowchain-sdk",

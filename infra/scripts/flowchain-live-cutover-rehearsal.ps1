@@ -58,6 +58,7 @@ $paths = [ordered]@{
     externalTesterPacketValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json"
     externalTesterClientValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json"
     completionAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json"
+    liveCapabilityMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
     truthTable = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     noSecret = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
 }
@@ -318,6 +319,12 @@ try {
         -ExpectedReportPath $paths.completionAudit))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "Live chain capability matrix" `
+        -Command "npm run flowchain:live:capabilities" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-capability-matrix.ps1")) `
+        -ExpectedReportPath $paths.liveCapabilityMatrix))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "Production truth table" `
         -Command "npm run flowchain:truth-table -- -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-production-truth-table.ps1"), "-AllowBlocked") `
@@ -400,6 +407,7 @@ $ready = [ordered]@{
     testerPacketValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterPacketValidation) -eq "passed"
     testerClientValidationPassed = (Get-CutoverReportStatus -Report $reports.externalTesterClientValidation) -eq "passed"
     completionReady = (Get-CutoverProp -Object $reports.completionAudit -Name "completionReady" -Default $false) -eq $true
+    liveCapabilityMatrixPassed = (Get-CutoverReportStatus -Report $reports.liveCapabilityMatrix) -eq "passed" -and @((Get-CutoverProp -Object $reports.liveCapabilityMatrix -Name "repoBlockedCapabilities" -Default @())).Count -eq 0
     truthTableCompleted = $truthTableReportStatus -in @("passed", "blocked-owner-input")
     truthTableAccepted = $truthTableAccepted
     truthTableSelfReferenceStaleAccepted = $truthTableReportStatus -ne "stale" -or $truthTableSelfReferenceStale
@@ -428,7 +436,7 @@ $checks = [ordered]@{
     ownerEnvFileExists = $ownerEnvExists
     ownerEnvFileIsFile = $ownerEnvIsFile
     ownerEnvFileGitIgnored = $ownerEnvGitIgnore.ignored -eq $true
-    stepsRan = @($steps).Count -eq 10
+    stepsRan = @($steps).Count -eq 11
     stepCommandsSucceeded = @($steps | Where-Object { [int] $_.exitCode -ne 0 -and "$($_.status)" -ne "blocked" }).Count -eq 0
     noFailedSteps = $failedSteps.Count -eq 0
     missingEnvNamesEmpty = @($missingEnvNames).Count -eq 0
@@ -443,6 +451,7 @@ $checks = [ordered]@{
     testerPacketValidationPassed = $ready.testerPacketValidationPassed
     testerClientValidationPassed = $ready.testerClientValidationPassed
     completionReady = $ready.completionReady
+    liveCapabilityMatrixPassed = $ready.liveCapabilityMatrixPassed
     truthTableCompleted = $ready.truthTableCompleted
     truthTableAccepted = $ready.truthTableAccepted
     truthTableSelfReferenceStaleAccepted = $ready.truthTableSelfReferenceStaleAccepted
@@ -497,6 +506,7 @@ $report = [ordered]@{
         "npm run flowchain:tester:token:setup",
         "npm run flowchain:external-tester:packet:validate",
         "npm run flowchain:external-tester:client:validate",
+        "npm run flowchain:live:capabilities",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
     )

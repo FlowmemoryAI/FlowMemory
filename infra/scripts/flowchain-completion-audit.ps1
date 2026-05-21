@@ -69,6 +69,7 @@ $paths = [ordered]@{
     opsEscalationDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json"
     incidentDrill = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json"
     publicDeploymentContract = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json"
+    liveCapabilityMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/live-chain-capability-matrix-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
     backupRestoreValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json"
     backupOwnerPathDryRun = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json"
@@ -530,6 +531,9 @@ $ownerActivationPlanExitCode = $ownerActivationPlanResult.exitCode
 $architectureAuditResult = Invoke-AuditChild -Path $paths.architectureAudit -AllowBlockedStatus -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-architecture-audit.ps1"), "-AllowBlocked")
 $architectureAuditOutput = @($architectureAuditResult.output)
 $architectureAuditExitCode = $architectureAuditResult.exitCode
+$liveCapabilityMatrixResult = Invoke-AuditChild -Path $paths.liveCapabilityMatrix -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-live-capability-matrix.ps1"))
+$liveCapabilityMatrixOutput = @($liveCapabilityMatrixResult.output)
+$liveCapabilityMatrixExitCode = $liveCapabilityMatrixResult.exitCode
 
 $reports = [ordered]@{}
 foreach ($entry in $paths.GetEnumerator()) {
@@ -3391,6 +3395,34 @@ $architectureAuditReady = ($architectureAuditExitCode -eq 0) `
     -and ($architectureAuditBlockedOnlyKnown -eq $true) `
     -and ($architectureAuditNoSecrets -eq $true) `
     -and ($architectureAuditNoBroadcast -eq $true)
+$liveCapabilityMatrix = $reports.liveCapabilityMatrix
+$liveCapabilityMatrixStatus = Get-ReportStatus -Report $liveCapabilityMatrix
+$liveCapabilityMatrixChecks = Get-AuditProp -Object $liveCapabilityMatrix -Name "checks"
+$liveCapabilityMatrixFailedChecks = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "failedChecks" -Default @()))
+$liveCapabilityMatrixSecretFindings = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "secretMarkerFindings" -Default @()))
+$liveCapabilityMatrixRepoBlocked = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "repoBlockedCapabilities" -Default @()))
+$liveCapabilityMatrixBlocked = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "blockedCapabilities" -Default @()))
+$liveCapabilityMatrixMissingCoverage = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "missingUserCapabilityCoverage" -Default @()))
+$liveCapabilityMatrixMissingReports = @((Get-AuditProp -Object $liveCapabilityMatrix -Name "missingRequiredReports" -Default @()))
+$liveCapabilityMatrixCapabilityCount = [int](Get-AuditProp -Object $liveCapabilityMatrix -Name "capabilityCount" -Default 0)
+$liveCapabilityMatrixCriticalCapabilityCount = [int](Get-AuditProp -Object $liveCapabilityMatrix -Name "publicLaunchCriticalCapabilityCount" -Default 0)
+$liveCapabilityMatrixLaunchReadinessStatus = [string](Get-AuditProp -Object $liveCapabilityMatrix -Name "launchReadinessStatus" -Default "missing")
+$liveCapabilityMatrixProductionReady = Get-AuditProp -Object $liveCapabilityMatrix -Name "productionReady" -Default $false
+$liveCapabilityMatrixPassed = $liveCapabilityMatrixExitCode -eq 0 `
+    -and $liveCapabilityMatrixStatus -eq "passed" `
+    -and $liveCapabilityMatrixFailedChecks.Count -eq 0 `
+    -and $liveCapabilityMatrixSecretFindings.Count -eq 0 `
+    -and $liveCapabilityMatrixRepoBlocked.Count -eq 0 `
+    -and $liveCapabilityMatrixMissingCoverage.Count -eq 0 `
+    -and $liveCapabilityMatrixMissingReports.Count -eq 0 `
+    -and $liveCapabilityMatrixCapabilityCount -ge 12 `
+    -and $liveCapabilityMatrixCriticalCapabilityCount -ge 10 `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrixChecks -Name "allCriticalCapabilitiesEitherPassedOrOwnerBlocked" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrixChecks -Name "blockedCapabilitiesUseKnownOwnerInputs" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrixChecks -Name "noProductionReadyClaimWhileBlocked" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrix -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $liveCapabilityMatrix -Name "broadcasts" -Default $true) -eq $false)
 
 $items = New-Object System.Collections.ArrayList
 
@@ -3489,6 +3521,12 @@ Add-AuditItem -Items $items -Id "public-deployment-contract" `
     -Status $(if ($publicDeploymentContractSafe) { "passed" } else { "failed" }) `
     -Evidence "deploymentStatus=$publicDeploymentContractStatus, deploymentReady=$publicDeploymentContractDeploymentReady, packetShareable=$publicDeploymentContractPacketShareable, packetSmoke=$publicDeploymentContractPacketSmoke, blockedOnlyKnown=$publicDeploymentContractBlockedOnlyKnown, blockedItems=$publicDeploymentContractBlocked, failedItems=$publicDeploymentContractFailed, report=$($paths.publicDeploymentContract)" `
     -Commands @("npm run flowchain:public-deployment:contract -- -AllowBlocked")
+
+Add-AuditItem -Items $items -Id "live-chain-capability-matrix" `
+    -Requirement "User-facing live-chain capability matrix maps wallet creation, wallet-to-wallet transfer, public RPC connection, real-value bridge pilot, RPC services, block production, Explorer/faucet/wallet UI, backup, observability, external tester launch, developer tooling, and owner go-live controls to evidence and known owner blockers." `
+    -Status $(if ($liveCapabilityMatrixPassed) { "passed" } else { "failed" }) `
+    -Evidence "matrixStatus=$liveCapabilityMatrixStatus, launchReadiness=$liveCapabilityMatrixLaunchReadinessStatus, productionReady=$liveCapabilityMatrixProductionReady, capabilities=$liveCapabilityMatrixCapabilityCount, critical=$liveCapabilityMatrixCriticalCapabilityCount, ownerBlocked=$($liveCapabilityMatrixBlocked.Count), repoBlocked=$($liveCapabilityMatrixRepoBlocked.Count), missingCoverage=$($liveCapabilityMatrixMissingCoverage.Count), missingReports=$($liveCapabilityMatrixMissingReports.Count), failedChecks=$($liveCapabilityMatrixFailedChecks.Count), secretFindings=$($liveCapabilityMatrixSecretFindings.Count), report=$($paths.liveCapabilityMatrix)" `
+    -Commands @("npm run flowchain:live:capabilities")
 
 Add-AuditItem -Items $items -Id "owner-input-validator-self-test" `
     -Requirement "Owner input validator blocks missing env, fails invalid env, passes structurally valid dummy owner inputs from direct env and the local owner env-file loader, and writes failed reports for missing or malformed owner env files without printing values." `
@@ -4000,6 +4038,8 @@ $report = [ordered]@{
     publicDeploymentContractOutputRedacted = @($publicDeploymentContractOutput | ForEach-Object { "$_" })
     architectureAuditExitCode = $architectureAuditExitCode
     architectureAuditOutputRedacted = @($architectureAuditOutput | ForEach-Object { "$_" })
+    liveCapabilityMatrixExitCode = $liveCapabilityMatrixExitCode
+    liveCapabilityMatrixOutputRedacted = @($liveCapabilityMatrixOutput | ForEach-Object { "$_" })
     packetExecutableSmokeValidated = $externalTesterPacketExecutableSmokeValidated
     externalTesterLaunchEvidence = [ordered]@{
         externalTesterStatus = $externalTesterStatus
@@ -4132,6 +4172,7 @@ $report = [ordered]@{
         "npm run flowchain:external-tester:client:validate",
         "npm run flowchain:tester:evidence:validate",
         "npm run flowchain:public-deployment:contract",
+        "npm run flowchain:live:capabilities",
         "npm run flowchain:architecture:audit",
         "npm run flowchain:live-product:e2e"
     )

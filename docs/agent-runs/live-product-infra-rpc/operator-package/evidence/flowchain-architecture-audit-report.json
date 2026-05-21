@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-21T10:12:12.0400622Z",
+    "generatedAt":  "2026-05-21T16:02:08.9234062Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -30,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=111767, finalizedHeight=111767",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=113582, finalizedHeight=113582",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -66,9 +66,9 @@
                   {
                       "id":  "ops-observability-boundary",
                       "layer":  "Operations",
-                      "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
+                      "requirement":  "Operations has explicit status, monitor, ops snapshot, scheduled alert refresh, scheduled metrics export, no-secret Grafana/Prometheus monitoring bundle, alert rules, backup restore and owner-path telemetry, service-install validation telemetry, bridge relayer-loop validation telemetry, bridge reconciliation telemetry, bridge release-evidence validation telemetry, external tester client validation telemetry, escalation dry run, incident drills, and emergency controls that classify incidents separately from owner-input blockers.",
                       "status":  "passed",
-                      "evidence":  "monitorStatus=passed, samples=3, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=44, alertCoveredFindings=46, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, publicRpcApplyPlanAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, bridgeCommandMatrixAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=330, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, publicRpcOwnerApplyMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, bridgeCommandMatrixMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=37, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
+                      "evidence":  "monitorStatus=passed, samples=2, heightAdvanced=True, supervisorValidation=passed, supervisorRestartAttempts=1, supervisorNodeRestartAttempts=1, supervisorNodeRecovered=True, supervisorRelayerRestartAttempts=1, supervisorRelayerRecovered=True, opsSnapshot=blocked, criticalCount=0, alertRules=passed, alertRuleCount=44, alertCoveredFindings=46, relayerLoopAlertCoverage=True, bridgeReconciliationAlert=True, secondComputerAlert=True, serviceInstallAlertCoverage=True, devPackAlert=True, publicRpcRollbackAlert=True, publicRpcApplyPlanAlert=True, backupRestoreAlert=True, backupOwnerPathAlert=True, bridgeDeployControlAlert=True, bridgeCommandMatrixAlert=True, alertInstall=passed, systemdAlert=True, alertInstallFailedChecks=0, metricsExport=passed, metricCount=334, publicRpcEdgeMetrics=True, publicRpcSecurityHeaderMetrics=True, publicRpcRollbackMetrics=True, publicRpcOwnerApplyMetrics=True, backupRestoreMetrics=True, backupOwnerPathMetrics=True, bridgeDeployControlMetrics=True, bridgeCommandMatrixMetrics=True, supervisorNodeRecoveryMetrics=True, serviceInstallValidationMetrics=True, bridgeRelayerLoopValidationMetrics=True, bridgeReconciliationMetrics=True, bridgeReleaseEvidenceMetrics=True, externalTesterClientMetrics=True, secondComputerMetrics=True, devPackMetrics=True, monitoringBundle=passed, monitoringPanels=20, monitoringRules=12, monitoringFailedChecks=0, metricsInstall=passed, systemdMetrics=True, metricsInstallFailedChecks=0, escalationDryRun=passed, escalationFailedChecks=0, criticalRules=37, blockedRules=7, unmappedAlerts=0, incidentDrill=passed, incidentCases=20, incidentFailed=0",
                       "files":  [
                                     "infra/scripts/flowchain-service-monitor.ps1",
                                     "infra/scripts/flowchain-service-supervisor.ps1",
@@ -80,6 +80,7 @@
                                     "infra/scripts/flowchain-alert-install-systemd-validation.ps1",
                                     "infra/scripts/flowchain-alert-install-validation.ps1",
                                     "infra/scripts/flowchain-ops-metrics-export.ps1",
+                                    "infra/scripts/flowchain-monitoring-bundle.ps1",
                                     "infra/scripts/flowchain-metrics-install-windows.ps1",
                                     "infra/scripts/flowchain-metrics-install-systemd.ps1",
                                     "infra/scripts/flowchain-metrics-install-systemd-validation.ps1",
@@ -97,6 +98,7 @@
                                        "npm run flowchain:ops:alerts:install:validate",
                                        "npm run flowchain:ops:alerts:install:systemd:validate",
                                        "npm run flowchain:ops:metrics:export -- -AllowBlocked",
+                                       "npm run flowchain:ops:monitoring:bundle",
                                        "npm run flowchain:ops:metrics:install:validate",
                                        "npm run flowchain:ops:metrics:install:systemd:validate",
                                        "npm run flowchain:ops:escalation:dry-run -- -AllowBlocked",
@@ -159,7 +161,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator packaging collects no-secret runbooks, command matrix, owner-input names, and current evidence for install, autorecovery, public RPC, backup, ops, bridge, testers, and release gates.",
                       "status":  "passed",
-                      "evidence":  "operatorPackage=passed, commands=69, runbooks=51, evidenceReports=71, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackage=passed, commands=70, runbooks=52, evidenceReports=76, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package.ps1",
                                     "docs/developer/FLOWCHAIN_NODE_OPERATOR.md"
@@ -176,7 +178,7 @@
                       "layer":  "Operations",
                       "requirement":  "Node operator package verifier independently checks generated package files, command matrix, owner-input name-only boundary, owner go-live expected evidence reports, forbidden local files, and no-secret scan.",
                       "status":  "passed",
-                      "evidence":  "operatorPackageVerify=passed, expectedFiles=112, commands=69, goLiveEvidence=36, missingGoLiveEvidence=0, goLiveEvidenceNotInManifest=0, failedChecks=0, noSecretScan=True",
+                      "evidence":  "operatorPackageVerify=passed, expectedFiles=118, commands=70, goLiveEvidence=36, missingGoLiveEvidence=0, goLiveEvidenceNotInManifest=0, failedChecks=0, noSecretScan=True",
                       "files":  [
                                     "infra/scripts/flowchain-operator-package-verify.ps1",
                                     "docs/agent-runs/live-product-infra-rpc/OPERATOR_PACKAGE_VERIFY.md"
@@ -424,7 +426,7 @@
                       "layer":  "Bridge",
                       "requirement":  "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.845, transferSeconds=0.695",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.693, transferSeconds=0.641",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
                                     "infra/scripts/flowchain-real-value-pilot-runtime.ps1",
@@ -1071,6 +1073,7 @@
                         "opsAlertRules":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
                         "alertInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\alert-install-validation-report.json",
                         "opsMetricsExport":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-metrics-export-report.json",
+                        "monitoringBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\monitoring-bundle-report.json",
                         "metricsInstallValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\metrics-install-validation-report.json",
                         "opsEscalationDryRun":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-escalation-dry-run-report.json",
                         "incidentDrill":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\incident-drill-report.json",
@@ -1188,7 +1191,7 @@
                          },
     "opsMetricsCoverage":  {
                                "exportStatus":  "passed",
-                               "metricCount":  330,
+                               "metricCount":  334,
                                "exportFailedCheckCount":  0,
                                "installStatus":  "passed",
                                "installFailedCheckCount":  0,
@@ -1252,6 +1255,14 @@
                                "missingDevPackMetricNames":  [
 
                                                              ],
+                               "monitoringBundleStatus":  "passed",
+                               "monitoringBundleDashboardPanelCount":  20,
+                               "monitoringBundlePrometheusRuleCount":  12,
+                               "monitoringBundleFailedCheckCount":  0,
+                               "monitoringBundleSecretFindingCount":  0,
+                               "monitoringBundleMissingDashboardMetricCount":  0,
+                               "monitoringBundleMissingPrometheusMetricCount":  0,
+                               "monitoringBundleMissingSourceRuleIdCount":  0,
                                "systemdTimerUnitPlanned":  true,
                                "noExternalDelivery":  true
                            },

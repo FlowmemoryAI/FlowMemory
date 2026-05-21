@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T15:44:53.4363460Z",
+    "generatedAt":  "2026-05-21T16:40:26.2843852Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -331,6 +331,11 @@
                          "phase":  "cutover",
                          "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
                          "purpose":  "Run owner-env, public deployment, local tester wallet network, tester packet, completion, truth table, and no-secret gates as one redacted rehearsal."
+                     },
+                     {
+                         "phase":  "release",
+                         "command":  "npm run flowchain:live:capabilities",
+                         "purpose":  "Map user-facing chain capabilities to evidence and the remaining owner-input blockers."
                      },
                      {
                          "phase":  "release",

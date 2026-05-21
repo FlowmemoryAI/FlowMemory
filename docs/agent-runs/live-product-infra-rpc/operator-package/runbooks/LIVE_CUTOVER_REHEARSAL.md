@@ -1,6 +1,6 @@
 # FlowChain Live Cutover Rehearsal
 
-Generated: 2026-05-21T15:44:10.5973585Z
+Generated: 2026-05-21T16:37:36.1030375Z
 Status: blocked
 
 This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.
@@ -23,6 +23,7 @@ Truth table self-reference stale accepted: True
 | testerPacketValidationPassed | True |
 | testerClientValidationPassed | True |
 | completionReady | False |
+| liveCapabilityMatrixPassed | True |
 | truthTableCompleted | False |
 | truthTableAccepted | True |
 | truthTableSelfReferenceStaleAccepted | True |
@@ -40,6 +41,7 @@ Truth table self-reference stale accepted: True
 | External tester packet validation | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-packet-validation-report.json` |
 | External tester client validation | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-client-validation-report.json` |
 | Completion audit | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-completion-audit-report.json` |
+| Live chain capability matrix | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-chain-capability-matrix-report.json` |
 | Production truth table | stale | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\production-truth-table-report.json` |
 | No-secret scan | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json` |
 
@@ -72,6 +74,7 @@ Truth table self-reference stale accepted: True
 - npm run flowchain:tester:token:setup
 - npm run flowchain:external-tester:packet:validate
 - npm run flowchain:external-tester:client:validate
+- npm run flowchain:live:capabilities
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
 - npm run flowchain:truth-table -- -AllowBlocked
 
