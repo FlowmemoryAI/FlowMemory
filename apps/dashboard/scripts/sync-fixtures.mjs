@@ -50,6 +50,7 @@ const liveReadinessReportCopies = [
   "public-rpc-deployment-bundle-report.json",
   "public-rpc-deployment-automation-report.json",
   "public-rpc-readiness-report.json",
+  "public-rpc-command-matrix-report.json",
   "backup-readiness-report.json",
   "backup-owner-path-dry-run-report.json",
   "bridge-relayer-once-report.json",
@@ -217,6 +218,7 @@ function writeLiveReadinessSummary() {
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
+  const publicRpcCommandMatrix = reports["public-rpc-command-matrix-report.json"];
   const externalTesterPacket = reports["external-tester-packet-report.json"];
   const externalTesterConnectPack = reports["external-tester-connect-pack.json"];
   const externalTesterReadiness = reports["external-tester-readiness-report.json"];
@@ -368,6 +370,16 @@ function writeLiveReadinessSummary() {
       publicRpcSecurityHeaderPreflight: publicRpcDeploymentBundle?.checks?.preflightsCheckSecurityHeaders === true,
       publicRpcRenderedSecurityHeaders: publicRpcDeploymentAutomation?.checks?.renderedNginxHasSecurityHeaders === true,
       publicRpcRenderedSecurityHeaderPreflight: publicRpcDeploymentAutomation?.checks?.renderedPreflightChecksSecurityHeaders === true,
+      publicRpcCommandMatrixStatus: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrix ?? publicRpcCommandMatrix?.status, "not recorded"),
+      publicRpcCommandMatrixReady: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixReady === true || publicRpcCommandMatrix?.status === "passed",
+      publicRpcCommandMatrixCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixCommands ?? publicRpcCommandMatrix?.commandCount, "0"),
+      publicRpcCommandMatrixOwnerHostCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixOwnerHostCommands ?? publicRpcCommandMatrix?.ownerHostCommandCount, "0"),
+      publicRpcCommandMatrixMutatingOwnerHostCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixMutatingOwnerHostCommands ?? publicRpcCommandMatrix?.mutatingOwnerHostCommandCount, "0"),
+      publicRpcCommandMatrixCommittedEvidencePaths: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixCommittedEvidencePaths ?? publicRpcCommandMatrix?.committedEvidencePathCount, "0"),
+      publicRpcCommandMatrixFailedChecks: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixFailedChecks ?? asArray(publicRpcCommandMatrix?.failedChecks).length, "0"),
+      publicRpcCommandMatrixMissingScripts: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixMissingScripts ?? asArray(publicRpcCommandMatrix?.missingPackageScripts).length, "0"),
+      publicRpcCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixNoSecrets === true || publicRpcCommandMatrix?.noSecrets === true,
+      publicRpcCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixNoBroadcasts === true || publicRpcCommandMatrix?.broadcasts === false,
       externalTesterPacketStatus: asText(externalTesterPacket?.status, "not recorded"),
       externalTesterConnectPackStatus: asText(externalTesterConnectPack?.status, "not recorded"),
       publicTesterGatewayStatus: asText(publicTesterGateway?.status, "not recorded"),
@@ -440,6 +452,15 @@ function writeLiveReadinessSummary() {
       publicRpcDeploymentAutomationAction: asText(publicRpcDeploymentAutomation?.action, "not recorded"),
       publicRpcSecurityHeaders: publicRpcDeploymentBundle?.checks?.includesSecurityHeaders === true,
       publicRpcRenderedSecurityHeaders: publicRpcDeploymentAutomation?.checks?.renderedNginxHasSecurityHeaders === true,
+      publicRpcCommandMatrixStatus: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrix ?? publicRpcCommandMatrix?.status, "not recorded"),
+      publicRpcCommandMatrixReady: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixReady === true || publicRpcCommandMatrix?.status === "passed",
+      publicRpcCommandMatrixCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixCommands ?? publicRpcCommandMatrix?.commandCount, "0"),
+      publicRpcCommandMatrixOwnerHostCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixOwnerHostCommands ?? publicRpcCommandMatrix?.ownerHostCommandCount, "0"),
+      publicRpcCommandMatrixMutatingOwnerHostCommands: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixMutatingOwnerHostCommands ?? publicRpcCommandMatrix?.mutatingOwnerHostCommandCount, "0"),
+      publicRpcCommandMatrixCommittedEvidencePaths: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixCommittedEvidencePaths ?? publicRpcCommandMatrix?.committedEvidencePathCount, "0"),
+      publicRpcCommandMatrixFailedChecks: asText(opsSnapshot?.reportStatuses?.publicRpcCommandMatrixFailedChecks ?? asArray(publicRpcCommandMatrix?.failedChecks).length, "0"),
+      publicRpcCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixNoSecrets === true || publicRpcCommandMatrix?.noSecrets === true,
+      publicRpcCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.publicRpcCommandMatrixNoBroadcasts === true || publicRpcCommandMatrix?.broadcasts === false,
       opsMetricCount: asText(opsMetricsExport?.metricCount, "0"),
       opsRequiredMetricsPresent: opsMetricsExport?.checks?.requiredMetricsPresent === true,
       publicTesterGatewayStatus: asText(publicTesterGateway?.status, "not recorded"),
@@ -603,6 +624,7 @@ function writeLiveReadinessSummary() {
         gateway: ["npm run flowchain:tester:gateway:e2e"],
         wallet: ["npm run flowchain:wallet:live-tester:e2e"],
         explorer: ["npm run flowchain:public-deployment:contract -- -AllowBlocked"],
+        publicRpc: ["npm run flowchain:public-rpc:command-matrix"],
       },
       envValuesPrinted: false,
       noSecrets: publicTesterGateway?.noSecrets === true,

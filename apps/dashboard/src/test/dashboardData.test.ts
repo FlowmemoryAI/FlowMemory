@@ -168,6 +168,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix commands")?.value).toBe("21");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "source chain ID" && fact.value === "8453"))).toBe(true);
     expect(workbench.sections.explorerRecords.length).toBeGreaterThan(0);
@@ -487,6 +489,10 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Missing inputs");
     expect(html).toContain("Packet smoke");
     expect(html).toContain("Gateway proof");
+    expect(html).toContain("RPC command matrix");
+    expect(html).toContain("RPC launch matrix");
+    expect(html).toContain("RPC matrix");
+    expect(html).toContain("21 commands; 6 owner-host");
     expect(html).toContain("Relayer timeout");
     expect(html).toContain("Alert rules");
     expect(html).toContain("Tester workflow");
@@ -507,6 +513,7 @@ describe("dashboard fixture", () => {
     expect(html).toContain("/tester/faucet");
     expect(html).toContain("/tester/wallets/send");
     expect(html).toContain("/explorer/summary");
+    expect(html).toContain("npm run flowchain:public-rpc:command-matrix");
     expect(html).toContain("npm run flowchain:external-tester:packet");
     expect(html).not.toContain("local-tester-write-token");
   });

@@ -123,6 +123,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
     publicRpcHeadersReady &&
     publicRpcHeaderPreflightReady &&
     publicRpcHeaderMetricsReady;
+  const publicRpcCommandMatrixReady = metrics.publicRpcCommandMatrixReady === true;
+  const publicRpcCommandMatrixStatus = text(metrics.publicRpcCommandMatrixStatus, publicRpcCommandMatrixReady ? "passed" : "not recorded");
+  const publicRpcCommandMatrixCommands = text(metrics.publicRpcCommandMatrixCommands, "0");
+  const publicRpcCommandMatrixOwnerHostCommands = text(metrics.publicRpcCommandMatrixOwnerHostCommands, "0");
+  const publicRpcCommandMatrixMutatingOwnerHostCommands = text(metrics.publicRpcCommandMatrixMutatingOwnerHostCommands, "0");
+  const publicRpcCommandMatrixFailedChecks = text(metrics.publicRpcCommandMatrixFailedChecks, "0");
+  const publicRpcCommandMatrixUiStatus: DashboardStatus = publicRpcCommandMatrixReady
+    ? "verified"
+    : statusFromText(publicRpcCommandMatrixStatus);
+  const publicRpcCommandMatrixCommand = commandGroup(testerCommands.publicRpc, ["npm run flowchain:public-rpc:command-matrix"])[0];
 
   const readinessCards: Array<{
     id: string;
@@ -167,6 +177,16 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
       command: "npm run flowchain:public-rpc:deployment:automation",
       to: "/ops",
       Icon: ShieldAlert,
+    },
+    {
+      id: "rpc-command-matrix",
+      label: "RPC matrix",
+      status: publicRpcCommandMatrixUiStatus,
+      value: publicRpcCommandMatrixStatus,
+      detail: `${publicRpcCommandMatrixCommands} commands; ${publicRpcCommandMatrixOwnerHostCommands} owner-host`,
+      command: publicRpcCommandMatrixCommand,
+      to: "/ops",
+      Icon: Terminal,
     },
     {
       id: "tester-gateway",
@@ -287,6 +307,10 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
 
   const commandGroups = [
     {
+      label: "RPC launch matrix",
+      commands: commandGroup(testerCommands.publicRpc, ["npm run flowchain:public-rpc:command-matrix"]),
+    },
+    {
       label: "Pre-exposure",
       commands: commandGroup(reportCommands.preExposure, ["npm run flowchain:public-deployment:contract -- -AllowBlocked"]),
     },
@@ -374,6 +398,14 @@ export function ExternalTesterLaunchView({ workbench }: { workbench: WorkbenchSn
           <span>RPC headers</span>
           <strong>{boolText(publicRpcLiveHeaderProofReady)}</strong>
           <small>live {boolText(publicRpcLiveHeadersReady)}; probe {boolText(publicRpcLiveHeaderProbeReady)}; metrics {boolText(publicRpcHeaderMetricsReady)}</small>
+        </div>
+        <div>
+          <span>RPC command matrix</span>
+          <strong>{boolText(publicRpcCommandMatrixReady)}</strong>
+          <small>
+            {publicRpcCommandMatrixCommands} commands; owner-host {publicRpcCommandMatrixOwnerHostCommands}; mutating{" "}
+            {publicRpcCommandMatrixMutatingOwnerHostCommands}; failed {publicRpcCommandMatrixFailedChecks}
+          </small>
         </div>
         <div>
           <span>Relayer timeout</span>
