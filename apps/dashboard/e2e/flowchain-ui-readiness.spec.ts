@@ -367,6 +367,8 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.goto("/bridge");
     await expect(page.getByRole("heading", { name: "Bridge funds into Flowchain" })).toBeVisible();
     const bridgeRuntimeProof = page.getByLabel("Bridge runtime proof");
+    await expect(bridgeRuntimeProof).toContainText("Bridge command matrix");
+    await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:command-matrix");
     await expect(bridgeRuntimeProof).toContainText("Pilot aggregate");
     await expect(bridgeRuntimeProof).toContainText("Runtime credit");
     await expect(bridgeRuntimeProof).toContainText("Transfer settlement");

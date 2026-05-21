@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T06:56:18.0442309+00:00",
+    "generatedAt":  "2026-05-21T07:16:11.5083041+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -19,6 +19,7 @@
                    "bridgeRouteCovered":  true,
                    "bridgePilotRuntimeProofCovered":  true,
                    "bridgeRuntimeCreditProofCovered":  true,
+                   "bridgeCommandMatrixProofCovered":  true,
                    "realValuePilotAggregateProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
                    "publicRpcCommandMatrixProofCovered":  true,
@@ -50,7 +51,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  6,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -60,7 +61,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  49,
+                         "durationSeconds":  38,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  28
                      },
@@ -70,7 +71,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  4,
+                         "durationSeconds":  5,
                          "stdoutLineCount":  19,
                          "stderrLineCount":  0
                      },
@@ -80,7 +81,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  255,
+                         "durationSeconds":  382,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -100,6 +101,7 @@
                           "/bridge"
                       ],
     "coveredProofs":  [
+                          "base8453-bridge-command-matrix-proof",
                           "base8453-bridge-runtime-credit-proof",
                           "real-value-pilot-aggregate-proof",
                           "public-rpc-command-matrix-proof",

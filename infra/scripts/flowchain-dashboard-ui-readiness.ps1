@@ -161,6 +161,7 @@ $checks = [ordered]@{
     bridgeRouteCovered = $specText.Contains("/bridge")
     bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail") -and $specText.Contains("Pilot aggregate")
     bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
+    bridgeCommandMatrixProofCovered = $specText.Contains("Bridge command matrix") -and $specText.Contains("flowchain:bridge:command-matrix") -and $workbenchText.Contains("bridgeCommandMatrix")
     realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
     publicRpcCommandMatrixProofCovered = $specText.Contains("RPC command matrix") -and $specText.Contains("flowchain:public-rpc:command-matrix") -and $workbenchText.Contains("publicRpcCommandMatrix")
@@ -190,7 +191,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge")
-    coveredProofs = @("base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback")
+    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -221,7 +222,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner host apply plan/apply/rollback proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> tester launch RPC command-matrix proof -> activation cockpit owner-input proof -> owner host apply plan/apply/rollback proof -> bridge pilot command-matrix proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

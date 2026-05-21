@@ -168,6 +168,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness.some((record) => record.id === "base8453-bridge-runtime-credit-proof")).toBe(true);
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge runtime credit")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix commands")?.value).toBe("20");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix commands")?.value).toBe("21");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
@@ -591,6 +593,10 @@ describe("dashboard fixture", () => {
 
     expect(html).toContain("Bridge runtime proof");
     expect(html).toContain("Relayer and credit checks");
+    expect(html).toContain("Bridge command matrix");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixCommands} commands`);
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixLiveBroadcastCommands} live-broadcast gated`);
+    expect(html).toContain("npm run flowchain:bridge:command-matrix");
     expect(html).toContain("Pilot aggregate");
     expect(html).toContain("Runtime credit");
     expect(html).toContain("Transfer settlement");

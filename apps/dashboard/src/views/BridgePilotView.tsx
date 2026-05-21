@@ -386,11 +386,25 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const pilotAggregateStatus = liveMetrics.realValuePilotAggregateStatus;
   const pilotAggregateReady = liveMetrics.realValuePilotAggregateReady === true;
   const pilotAggregateCommandCount = text(liveMetrics.realValuePilotAggregateCommandsRun, "0");
+  const bridgeCommandMatrixStatus = text(liveMetrics.bridgeCommandMatrixStatus);
+  const bridgeCommandMatrixReady = liveMetrics.bridgeCommandMatrixReady === true;
+  const bridgeCommandMatrixCommands = text(liveMetrics.bridgeCommandMatrixCommands, "0");
+  const bridgeCommandMatrixLiveBroadcastCommands = text(liveMetrics.bridgeCommandMatrixLiveBroadcastCommands, "0");
+  const bridgeCommandMatrixAckGaps = text(liveMetrics.bridgeCommandMatrixBroadcastAckGaps, "0");
   const bridgeProofCards = [
+    {
+      label: "Bridge command matrix",
+      value: bridgeCommandMatrixStatus,
+      detail: `${bridgeCommandMatrixCommands} commands; ${bridgeCommandMatrixLiveBroadcastCommands} live-broadcast gated; ack gaps ${bridgeCommandMatrixAckGaps}`,
+      command: "npm run flowchain:bridge:command-matrix",
+      status: bridgeCommandMatrixReady ? "verified" : statusFromMetric(bridgeCommandMatrixStatus),
+      Icon: ListChecks,
+    },
     {
       label: "Pilot aggregate",
       value: text(pilotAggregateStatus),
       detail: `${pilotAggregateCommandCount} proof commands`,
+      command: "npm run flowchain:real-value-pilot:e2e",
       status: pilotAggregateReady ? "verified" : statusFromMetric(pilotAggregateStatus),
       Icon: ListChecks,
     },
@@ -398,6 +412,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       label: "Runtime credit",
       value: text(runtimeCreditStatus),
       detail: `${secondsLabel(liveMetrics.bridgeRuntimeCreditLatencySeconds)} to spendable credit`,
+      command: "npm run flowchain:bridge:runtime-credit:validate",
       status: statusFromMetric(runtimeCreditStatus),
       Icon: Activity,
     },
@@ -405,6 +420,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       label: "Transfer settlement",
       value: secondsLabel(liveMetrics.bridgeRuntimeCreditTransferSeconds),
       detail: "wallet credit transfer proof",
+      command: "npm run flowchain:bridge:runtime-credit:validate",
       status: liveMetrics.bridgeRuntimeCreditReady === true ? "verified" : statusFromMetric(runtimeCreditStatus),
       Icon: ArrowRightLeft,
     },
@@ -412,6 +428,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       label: "Relayer guardrail",
       value: text(liveMetrics.bridgeRelayerGuardrailStatus),
       detail: "fail-closed cursor and broadcast checks",
+      command: "npm run flowchain:bridge:relayer:guardrail:validate",
       status: statusFromMetric(liveMetrics.bridgeRelayerGuardrailStatus),
       Icon: ShieldCheck,
     },
@@ -419,6 +436,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       label: "Relayer loop",
       value: text(liveMetrics.bridgeRelayerLoopValidationStatus),
       detail: "start, health, stop, and cleanup proof",
+      command: "npm run flowchain:bridge:relayer:loop:validate",
       status: statusFromMetric(liveMetrics.bridgeRelayerLoopValidationStatus),
       Icon: ListChecks,
     },
@@ -426,6 +444,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
     label: string;
     value: string;
     detail: string;
+    command: string;
     status: DashboardStatus;
     Icon: typeof Activity;
   }>;
@@ -621,6 +640,7 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
                   <strong>{card.label}</strong>
                   <p>{card.value}</p>
                   <small>{card.detail}</small>
+                  <code>{card.command}</code>
                 </article>
               );
             })}

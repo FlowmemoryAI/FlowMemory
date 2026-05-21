@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T06:58:09.9947145Z",
+  "generatedAt": "2026-05-21T07:19:06.8596061Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "110359",
-    "finalizedHeight": "110359",
+    "latestHeight": "110506",
+    "finalizedHeight": "110506",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -32,6 +32,16 @@
     "bridgeRelayerCheckContractReady": true,
     "bridgeRelayerFailedChecks": "0",
     "bridgeRelayerMissingChecks": "0",
+    "bridgeCommandMatrixStatus": "passed",
+    "bridgeCommandMatrixReady": true,
+    "bridgeCommandMatrixCommands": "20",
+    "bridgeCommandMatrixPhases": "9",
+    "bridgeCommandMatrixLiveBroadcastCommands": "4",
+    "bridgeCommandMatrixCommittedEvidencePaths": "12",
+    "bridgeCommandMatrixFailedChecks": "0",
+    "bridgeCommandMatrixBroadcastAckGaps": "0",
+    "bridgeCommandMatrixNoSecrets": true,
+    "bridgeCommandMatrixNoBroadcasts": true,
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerLoopValidationStatus": "passed",
     "bridgeRuntimeCreditValidationStatus": "passed",
@@ -161,6 +171,14 @@
     "bridgeRelayerCheckContractReady": true,
     "bridgeRelayerFailedChecks": "0",
     "bridgeRelayerMissingChecks": "0",
+    "bridgeCommandMatrixStatus": "passed",
+    "bridgeCommandMatrixReady": true,
+    "bridgeCommandMatrixCommands": "20",
+    "bridgeCommandMatrixLiveBroadcastCommands": "4",
+    "bridgeCommandMatrixFailedChecks": "0",
+    "bridgeCommandMatrixBroadcastAckGaps": "0",
+    "bridgeCommandMatrixNoSecrets": true,
+    "bridgeCommandMatrixNoBroadcasts": true,
     "bridgeRelayerGuardrailStatus": "passed",
     "bridgeRelayerGuardrailReady": true,
     "bridgeRuntimeCreditStatus": "passed",
@@ -2213,7 +2231,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110333, finalizedHeight=110333",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110465, finalizedHeight=110465",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2441,19 +2459,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T06:58:09.9947145Z"
+      "generatedAt": "2026-05-21T07:19:06.8596061Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:44.3439901Z"
+      "generatedAt": "2026-05-21T07:25:20.4506487Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:01:28.6270556Z"
+      "generatedAt": "2026-05-21T07:25:06.1720106Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -2495,7 +2513,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:20.4188030Z"
+      "generatedAt": "2026-05-21T07:24:58.6777963Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -2507,7 +2525,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:34.8516476Z"
+      "generatedAt": "2026-05-21T07:25:11.4059040Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2516,10 +2534,16 @@
       "generatedAt": "2026-05-21T02:13:55.2599973Z"
     },
     {
+      "fileName": "bridge-command-matrix-report.json",
+      "schema": "flowchain.bridge_command_matrix_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-21T05:10:16.7291033Z"
+    },
+    {
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:41.2291064Z"
+      "generatedAt": "2026-05-21T07:25:17.3775606Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2549,25 +2573,25 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:47.5032815Z"
+      "generatedAt": "2026-05-21T07:25:23.4921985Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:47.5032815Z"
+      "generatedAt": "2026-05-21T07:25:23.4921985Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:45.1547482Z"
+      "generatedAt": "2026-05-21T07:25:21.3017866Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T06:47:29.1525898Z"
+      "generatedAt": "2026-05-21T07:24:41.0983837Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
@@ -2609,7 +2633,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T07:01:46.6223454Z"
+      "generatedAt": "2026-05-21T07:25:22.6471800Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2627,7 +2651,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T07:02:40.4331950Z"
+      "generatedAt": "2026-05-21T07:26:09.9772572Z"
     }
   ],
   "envValuesPrinted": false,

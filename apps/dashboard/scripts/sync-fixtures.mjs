@@ -53,6 +53,7 @@ const liveReadinessReportCopies = [
   "public-rpc-command-matrix-report.json",
   "backup-readiness-report.json",
   "backup-owner-path-dry-run-report.json",
+  "bridge-command-matrix-report.json",
   "bridge-relayer-once-report.json",
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
@@ -215,6 +216,7 @@ function writeLiveReadinessSummary() {
   const bridgeRelayerLoopValidation = reports["bridge-relayer-loop-validation-report.json"];
   const bridgeRuntimeCreditValidation = reports["bridge-runtime-credit-validation-report.json"];
   const realValuePilotAggregate = reports["real-value-pilot-aggregate-report.json"];
+  const bridgeCommandMatrix = reports["bridge-command-matrix-report.json"];
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
@@ -347,6 +349,16 @@ function writeLiveReadinessSummary() {
       bridgeRelayerCheckContractReady: opsSnapshot?.reportStatuses?.bridgeRelayerCheckContractReady === true,
       bridgeRelayerFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerFailedChecks, "0"),
       bridgeRelayerMissingChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerMissingChecks, "0"),
+      bridgeCommandMatrixStatus: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrix ?? bridgeCommandMatrix?.status, "not recorded"),
+      bridgeCommandMatrixReady: opsSnapshot?.reportStatuses?.bridgeCommandMatrixReady === true || bridgeCommandMatrix?.status === "passed",
+      bridgeCommandMatrixCommands: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixCommands ?? bridgeCommandMatrix?.commandCount, "0"),
+      bridgeCommandMatrixPhases: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixPhases ?? bridgeCommandMatrix?.phaseCount, "0"),
+      bridgeCommandMatrixLiveBroadcastCommands: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixLiveBroadcastCommands ?? bridgeCommandMatrix?.liveBroadcastCapableCommandCount, "0"),
+      bridgeCommandMatrixCommittedEvidencePaths: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixCommittedEvidencePaths ?? bridgeCommandMatrix?.committedEvidencePathCount, "0"),
+      bridgeCommandMatrixFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixFailedChecks ?? asArray(bridgeCommandMatrix?.failedChecks).length, "0"),
+      bridgeCommandMatrixBroadcastAckGaps: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixBroadcastAckGaps ?? asArray(bridgeCommandMatrix?.liveBroadcastRowsWithoutAck).length, "0"),
+      bridgeCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoSecrets === true || bridgeCommandMatrix?.noSecrets === true,
+      bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
       bridgeRuntimeCreditValidationStatus: asText(bridgeRuntimeCreditValidation?.status, "not recorded"),
@@ -473,6 +485,14 @@ function writeLiveReadinessSummary() {
       bridgeRelayerCheckContractReady: opsSnapshot?.reportStatuses?.bridgeRelayerCheckContractReady === true,
       bridgeRelayerFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerFailedChecks, "0"),
       bridgeRelayerMissingChecks: asText(opsSnapshot?.reportStatuses?.bridgeRelayerMissingChecks, "0"),
+      bridgeCommandMatrixStatus: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrix ?? bridgeCommandMatrix?.status, "not recorded"),
+      bridgeCommandMatrixReady: opsSnapshot?.reportStatuses?.bridgeCommandMatrixReady === true || bridgeCommandMatrix?.status === "passed",
+      bridgeCommandMatrixCommands: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixCommands ?? bridgeCommandMatrix?.commandCount, "0"),
+      bridgeCommandMatrixLiveBroadcastCommands: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixLiveBroadcastCommands ?? bridgeCommandMatrix?.liveBroadcastCapableCommandCount, "0"),
+      bridgeCommandMatrixFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixFailedChecks ?? asArray(bridgeCommandMatrix?.failedChecks).length, "0"),
+      bridgeCommandMatrixBroadcastAckGaps: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixBroadcastAckGaps ?? asArray(bridgeCommandMatrix?.liveBroadcastRowsWithoutAck).length, "0"),
+      bridgeCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoSecrets === true || bridgeCommandMatrix?.noSecrets === true,
+      bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
       bridgeRuntimeCreditStatus: asText(opsSnapshot?.reportStatuses?.bridgeRuntimeCredit ?? bridgeRuntimeCreditValidation?.status, "not recorded"),
