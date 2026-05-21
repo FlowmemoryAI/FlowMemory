@@ -2,9 +2,9 @@
 
 FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentralized hardware, and future appchain/L1 research project.
 
-This repository contains the FlowMemory V0 foundation: project operating docs, local/test contracts, fixture-first services, Rootflow and Flow Memory launch-core generation, a fixture-backed dashboard, crypto helpers, a local no-value devnet prototype, and FlowRouter hardware POC materials. Do not treat the current repo as containing production product features yet.
+This repository contains the FlowMemory V0 foundation: project operating docs, local/test contracts, fixture-first services, Rootflow and Flow Memory launch-core generation, a fixture-backed dashboard, crypto helpers, a local no-value devnet prototype, public-agent network contracts, Agent Bonds surfaces, and FlowRouter hardware POC materials. Treat it as public local/test infrastructure, not as a production deployment or audited network.
 
-Public release status and open gaps are tracked in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` and `docs/PUBLIC_RELEASE_GAPS.md`.
+Start with the public documentation map in `docs/PUBLIC_REPO_GUIDE.md`. Public-agent release status and open gaps are tracked in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` and `docs/PUBLIC_RELEASE_GAPS.md`.
 
 ## What FlowMemory Is Exploring
 
@@ -20,13 +20,24 @@ Public release status and open gaps are tracked in `docs/PUBLIC_AGENT_NETWORK_RE
 - Cryptographic receipts, attestations, roots, and proofs
 - Future FlowMemory appchain/L1 research
 
+## Documentation For Public Readers
+
+| Reader goal | Start here |
+| --- | --- |
+| Understand what this repository contains | `docs/PUBLIC_REPO_GUIDE.md` |
+| Understand the public-agent network end-to-end | `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` |
+| See release status and verification commands | `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` |
+| See missing work and tracking issues | `docs/PUBLIC_RELEASE_GAPS.md` |
+| Understand Base on-chain agent memory | `docs/base-onchain-agent-memory/README.md` |
+| Understand contribution and security rules | `CONTRIBUTING.md`, `SECURITY.md` |
+
 ## Base On-Chain Agent Memory Workstream
 
-The professional product and architecture package for the Base-native agent memory workstream lives at `docs/base-onchain-agent-memory/README.md`.
+The product and architecture package for the Base-native agent memory workstream lives at `docs/base-onchain-agent-memory/README.md`.
 
-This workstream defines the proposed On-Chain Task Scout: a bounded autonomous agent that reads task state and public memory, previews a deterministic next step, commits only allowed actions, writes compact memory deltas, emits FlowPulse, and exposes replayable Rootflow transitions and `AgentMemoryView` output.
+This workstream defines the On-Chain Task Scout: a bounded autonomous agent that reads task state and public memory, previews a deterministic next step, commits only allowed actions, writes compact memory deltas, emits FlowPulse, and exposes replayable Rootflow transitions and `AgentMemoryView` output.
 
-This does not change the current repository boundary: heavy AI/model/memory artifacts stay off-chain by default, and the current repo should not be described as containing finished public product features.
+This does not change the repository boundary: heavy AI/model/memory artifacts stay off-chain by default, and the current repo should not be described as production-ready.
 
 
 ## Public Agent Network Workstream
@@ -198,16 +209,18 @@ npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpul
 
 ## Repository Map
 
-- `apps/`: future dashboard, explorer, and hardware console applications
-- `contracts/`: FlowPulse schema/interface, RootfieldRegistry foundation, and future on-chain protocol and hook contracts
-- `crypto/`: future cryptographic receipt, proof, and attestation work
-- `docs/`: project context, architecture, roadmap, security model, and decisions
-- `hardware/`: future FlowRouter, LoRa, Meshtastic, and enclosure work
-- `infra/scripts/`: worktree setup and future automation or repository maintenance scripts
-- `inbox/`: staging area for imported prompts, notes, and unsorted context
-- `research/`: future AI memory, neural geometry, and appchain/L1 research
-- `services/`: future indexer, verifier, worker, and API services
-- `schemas/flowmemory/`: canonical Flow Memory and Rootflow JSON schemas
+| Path | Purpose |
+| --- | --- |
+| `apps/` | Fixture-backed dashboard, workbench, and public-network projection views. |
+| `contracts/` | FlowPulse, Rootfield, bridge, Agent Bonds, Base agent-memory, public-agent, and swarm contracts. |
+| `crypto/` | Cryptographic receipt, proof, attestation, wallet, and vector helper work. |
+| `docs/` | Public guides, architecture, roadmap, security model, runbooks, decisions, reviews, and gap register. |
+| `hardware/` | FlowRouter, LoRa, Meshtastic, simulator, enclosure, and field-test research materials. |
+| `infra/scripts/` | Validation, launch, deployment-planning, no-secret, claim-guardrail, and local automation scripts. |
+| `inbox/` | Staging area for imported prompts, notes, and unsorted context. |
+| `research/` | AI memory, neural geometry, appchain/L1, and agent-network research. |
+| `services/` | Shared helpers, indexer, verifier, Flow Memory, control-plane, bridge-relayer, SDK, and agent-memory SDK packages. |
+| `schemas/` | Canonical JSON schemas for Flow Memory, Rootflow, Base agent memory, Agent Bonds, and related objects. |
 
 ## Implemented Foundation
 

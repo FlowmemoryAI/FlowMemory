@@ -4,6 +4,8 @@ Status: public repository release boundary, local/test implementation.
 
 This document names what exists for the public agent network, what is intentionally not claimed, and how reviewers can verify the current stack.
 
+For the end-to-end reader guide, see `docs/PUBLIC_REPO_GUIDE.md`. For component-level details, see `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md`.
+
 ## What Exists
 
 The current public-agent network stack includes:

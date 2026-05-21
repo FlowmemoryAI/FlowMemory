@@ -7,10 +7,12 @@ This is the first document to read after `AGENTS.md`.
 1. `AGENTS.md`
 2. `docs/FLOWMEMORY_HQ_CONTEXT.md`
 3. `docs/CURRENT_STATE.md`
-4. `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, and `docs/V0_LAUNCH_ACCEPTANCE.md` for launch-core work
-5. `docs/developer/README.md` for FlowChain L1, wallets, RPC, bridge, SDK, external tester, explorer/indexer, or faucet work
-6. The task-specific document or issue
-7. Any relevant decision records in `docs/DECISIONS/`
+4. `docs/PUBLIC_REPO_GUIDE.md` for public-reader orientation, repository map, verification commands, and gap links
+5. `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` for public-agent network implementation details
+6. `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, and `docs/V0_LAUNCH_ACCEPTANCE.md` for launch-core work
+7. `docs/developer/README.md` for FlowChain L1, wallets, RPC, bridge, SDK, external tester, explorer/indexer, or faucet work
+8. The task-specific document or issue
+9. Any relevant decision records in `docs/DECISIONS/`
 
 ## Before You Edit
 
