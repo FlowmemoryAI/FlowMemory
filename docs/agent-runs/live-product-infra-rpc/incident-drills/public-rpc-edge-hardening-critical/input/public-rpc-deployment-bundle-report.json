@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_bundle_report.v3",
-    "generatedAt":  "2026-05-20T14:09:35.2015679Z",
+    "generatedAt":  "2026-05-21T12:55:17.9614147Z",
     "status":  "failed",
     "bundleDir":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle",
     "flowChainRpcIsRepoOwned":  true,
@@ -51,6 +51,7 @@
                              "npm run flowchain:ops:snapshot -- -AllowBlocked",
                              "npm run flowchain:public-rpc:validate",
                              "npm run flowchain:public-rpc:check",
+                             "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                              "npm run flowchain:tester:gateway:e2e",
                              "npm run flowchain:wallet:live-tester:e2e",
                              "npm run flowchain:backup:restore:validate",
@@ -121,7 +122,8 @@
                                             "publicUrlPathRenderOutputNoSecrets":  true,
                                             "cleanupAttempted":  true,
                                             "broadcastsFalse":  true,
-                                            "renderedNginxHasSecurityHeaders":  true
+                                            "renderedNginxHasSecurityHeaders":  true,
+                                            "renderedNginxHasTimeoutGuardrails":  true
                                         },
                              "failedChecks":  [
 
@@ -185,6 +187,7 @@
                    "ownerRenderDoesNotPrintTokenHash":  true,
                    "ownerRenderFilesDoNotContainTokenHash":  true,
                    "ownerRenderIncludesSecurityHeaders":  true,
+                   "ownerRenderIncludesTimeoutGuardrails":  true,
                    "ownerRenderPreflightsRejectWrongMethods":  true,
                    "ownerRenderRejectsPublicUrlPath":  true,
                    "ownerRenderPublicUrlPathRejectOutputNoSecrets":  true,
@@ -192,7 +195,9 @@
                    "includesRateLimitPlaceholder":  true,
                    "includesTlsPlaceholders":  true,
                    "includesSecurityHeaders":  false,
+                   "includesTimeoutGuardrails":  true,
                    "preflightsCheckSecurityHeaders":  false,
+                   "preflightsCheckTimeoutGuardrails":  true,
                    "includesMethodRejectionPreflight":  true,
                    "includesCorsOriginForwarding":  true,
                    "publicStateMirrorExcluded":  true,

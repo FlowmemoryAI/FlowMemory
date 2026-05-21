@@ -1,10 +1,10 @@
 ﻿# FlowChain Ops Snapshot
 
-Generated: 2026-05-20T14:11:59.7865174Z
+Generated: 2026-05-21T14:27:59.1954146Z
 Status: failed
-Latest height: 102799
-Finalized height: 102799
-Transaction intake rows: 175
+Latest height: 113229
+Finalized height: 113229
+Transaction intake rows: 187
 Runtime inbox files: 0
 
 ## Findings
@@ -36,6 +36,7 @@ Runtime inbox files: 0
 
 ### publicExposure
 - npm run flowchain:public-rpc:check
+- npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked
 - npm run flowchain:public-rpc:abuse-test
 - npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:deployment:automation
@@ -60,8 +61,19 @@ Runtime inbox files: 0
 - npm run flowchain:bridge:emergency-stop
 - npm run flowchain:emergency:export-evidence
 
+### bridgePilot
+- npm run flowchain:bridge:command-matrix
+- npm run flowchain:bridge:deploy:control:validate
+- npm run flowchain:bridge:relayer:guardrail:validate
+- npm run flowchain:bridge:reconciliation
+
 ### bridgeRelayerLoop
 - npm run flowchain:service:status
 - npm run flowchain:service:supervisor -- -Once -StartBridgeRelayerLoop
 - npm run flowchain:bridge:relayer:loop:validate
 - npm run flowchain:service:restart -- -LiveProfile -StartBridgeRelayerLoop
+
+### serviceInstall
+- npm run flowchain:service:install:validate
+- npm run flowchain:service:install:systemd:validate
+- npm run flowchain:service:status

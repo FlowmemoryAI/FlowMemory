@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-20T14:09:29.2690932Z",
+    "generatedAt":  "2026-05-21T13:56:36.8835297Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  25,
-                       "blocked":  6,
+                       "passed":  28,
+                       "blocked":  7,
                        "failed":  0,
-                       "total":  31
+                       "total":  35
                    },
     "items":  [
                   {
@@ -40,6 +40,8 @@
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:tester:token:setup",
                                        "npm run flowchain:tester:gateway:e2e",
@@ -52,6 +54,7 @@
                                        "npm run flowchain:bridge:infra:check -- -AllowBlocked",
                                        "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
                                        "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:bridge:release:evidence:validate",
                                        "npm run flowchain:external-tester:packet -- -AllowBlocked",
                                        "npm run flowchain:no-secret:scan"
                                    ],
@@ -85,9 +88,9 @@
                   },
                   {
                       "id":  "owner-env-template",
-                      "requirement":  "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added.",
+                      "requirement":  "Owner env-file setup has a command-generated local scaffold and no-secret field guide whose target path is git-ignored before owner values are added.",
                       "status":  "passed",
-                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, includesAllRequired=True",
+                      "evidence":  "templateStatus=passed, pathIsGitIgnored=True, requiredEnvNameCount=17, optionalEnvNameCount=2, fieldGuideCount=19, includesAllRequired=True",
                       "commands":  [
                                        "npm run flowchain:owner-env:template"
                                    ],
@@ -99,7 +102,7 @@
                       "id":  "public-rpc-edge-template",
                       "requirement":  "Public RPC exposure has a no-values owner edge template and render-validated deployment bundle for HTTPS reverse proxying, rate limiting, tester write preflight, wallet/tester cutover proof, disallowed-origin and blocked-private-path probes, verification, rollback, and no broad local state mirror.",
                       "status":  "passed",
-                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
+                      "evidence":  "edgeTemplateStatus=passed, bundleStatus=passed, renderValidation=True, testerWritePreflight=True, methodRejectionPreflight=True, timeoutGuardrails=True, walletCutoverCommands=True, disallowedOriginPreflight=True, blockedStatePreflight=True, privateWalletCreateBlocked=True, authForwardingScoped=True, repoOwned=True, requiresTls=True, requiresRateLimit=True, forwardsOrigin=True, publicStateMirrorExcluded=True, devnetStatePublicRpcExcluded=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:edge-template",
                                        "npm run flowchain:public-rpc:deployment-bundle"
@@ -110,9 +113,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, timeoutGuardrails=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -124,7 +127,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=102783, finalizedHeight=102783",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=113073, finalizedHeight=113073",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -206,7 +209,7 @@
                       "id":  "ops-alert-rules",
                       "requirement":  "Owner deployment has a no-secret alert rule manifest that maps every current ops finding to operator commands without committing delivery credentials.",
                       "status":  "passed",
-                      "evidence":  "alertRules=passed, criticalRules=23, blockedRules=7, unmappedCurrentFindingCodes=0",
+                      "evidence":  "alertRules=passed, criticalRules=37, blockedRules=7, unmappedCurrentFindingCodes=0",
                       "commands":  [
                                        "npm run flowchain:ops:alerts -- -AllowBlocked"
                                    ],
@@ -304,12 +307,39 @@
                                    ]
                   },
                   {
+                      "id":  "public-rpc-synthetic-canary",
+                      "requirement":  "The public RPC synthetic canary must run read-only live endpoint probes, avoid write methods, and stay owner-blocked until the public endpoint exists.",
+                      "status":  "blocked",
+                      "evidence":  "canaryStatus=blocked, ready=False, ownerBlocked=True",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+                                       "FLOWCHAIN_RPC_PUBLIC_URL"
+                                   ]
+                  },
+                  {
+                      "id":  "public-rpc-canary-schedule-automation",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks without host mutation or external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "canaryScheduleValidation=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "public-rpc-edge",
                       "requirement":  "The owner TLS edge must pass endpoint, CORS, live security-header, rate-limit, readiness, and response-hygiene checks before sharing.",
                       "status":  "blocked",
-                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
+                      "evidence":  "publicRpcStatus=blocked, publicRpcReady=False, canaryStatus=blocked, canaryReady=False, canaryScheduleReady=True, validationStatus=passed, validationPassed=True, abuseStatus=passed, abusePassed=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:validate",
+                                       "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
+                                       "npm run flowchain:public-rpc:canary:schedule:validate",
                                        "npm run flowchain:public-rpc:abuse-test",
                                        "npm run flowchain:public-rpc:check"
                                    ],
@@ -424,12 +454,37 @@
                                    ]
                   },
                   {
+                      "id":  "base8453-bridge-reconciliation-schedule-automation",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "reconciliationSchedule=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:bridge:reconciliation:schedule:validate",
+                                       "npm run flowchain:bridge:reconciliation"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.686, transferSeconds=0.548",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.693, transferSeconds=0.641",
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "base8453-bridge-release-evidence-validation",
+                      "requirement":  "Bridge withdrawal/release evidence must prove the Base 8453 release method, amount, token, recipient, source chain, destination asset, production-ready flag, local-only boundary, and no-broadcast/no-secret constraints before bridge-funded tester launch.",
+                      "status":  "passed",
+                      "evidence":  "releaseEvidence=passed, cases=12, failedChecks=0, missingChecks=0, failedCases=0, missingCases=0, secretFindings=0, broadcasts=False, noSecrets=True",
+                      "commands":  [
+                                       "npm run flowchain:bridge:release:evidence:validate"
                                    ],
                       "blockers":  [
 
@@ -439,7 +494,7 @@
                       "id":  "external-tester-sharing",
                       "requirement":  "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, bridgeReleaseEvidenceReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"
@@ -601,6 +656,8 @@
                         "publicRpcDeploymentBundle":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-bundle-report.json",
                         "publicRpcDeploymentAutomation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-deployment-automation-report.json",
                         "publicRpc":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-readiness-report.json",
+                        "publicRpcSyntheticCanary":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-synthetic-canary-report.json",
+                        "publicRpcCanaryScheduleValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-canary-schedule-validation-report.json",
                         "publicRpcValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-validation-report.json",
                         "publicRpcAbuseTest":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\public-rpc-abuse-test-report.json",
                         "testerWriteTokenSetup":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\tester-write-token-setup-report.json",
@@ -615,6 +672,8 @@
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
                         "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                        "bridgeReleaseEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-release-evidence-validation-report.json",
+                        "bridgeReconciliationScheduleValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-reconciliation-schedule-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "architectureAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",
@@ -645,6 +704,7 @@
                                                  "npm run flowchain:public-rpc:edge-template",
                                                  "npm run flowchain:public-rpc:deployment-bundle",
                                                  "npm run flowchain:public-rpc:validate",
+                                                 "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked",
                                                  "npm run flowchain:public-rpc:abuse-test",
                                                  "npm run flowchain:tester:gateway:e2e",
                                                  "npm run flowchain:wallet:live-tester:e2e",
@@ -662,6 +722,7 @@
                                                  "npm run flowchain:bridge:infra:check",
                                                  "npm run flowchain:bridge:relayer:once",
                                                  "npm run flowchain:bridge:runtime-credit:validate",
+                                                 "npm run flowchain:bridge:release:evidence:validate",
                                                  "npm run flowchain:tester:readiness",
                                                  "npm run flowchain:external-tester:packet",
                                                  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",

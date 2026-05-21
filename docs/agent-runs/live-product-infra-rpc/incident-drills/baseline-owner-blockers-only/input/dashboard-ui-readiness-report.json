@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-20T14:00:57.9158526+00:00",
+    "generatedAt":  "2026-05-21T12:21:22.7274902+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -17,9 +17,28 @@
                    "testerLaunchRouteCovered":  true,
                    "activationRouteCovered":  true,
                    "bridgeRouteCovered":  true,
+                   "opsRouteCovered":  true,
+                   "alertsRouteCovered":  true,
                    "bridgePilotRuntimeProofCovered":  true,
                    "bridgeRuntimeCreditProofCovered":  true,
+                   "bridgeReleaseEvidenceProofCovered":  true,
+                   "bridgeCommandMatrixProofCovered":  true,
+                   "bridgeReconciliationScheduleProofCovered":  true,
+                   "realValuePilotAggregateProofCovered":  true,
+                   "opsObservabilityProofCovered":  true,
+                   "alertsListProofCovered":  true,
                    "publicRpcHeaderProofCovered":  true,
+                   "publicRpcCommandMatrixProofCovered":  true,
+                   "ownerHostApplyPlanProofCovered":  true,
+                   "ownerHostApplyExecutionProofCovered":  true,
+                   "ownerHostApplyRollbackProofCovered":  true,
+                   "ownerNeedsNowReportCopied":  true,
+                   "ownerNeedsNowGroupsCovered":  true,
+                   "ownerNeedsNowActionsCovered":  true,
+                   "ownerNeedsNowReadyGroupCovered":  true,
+                   "ownerEnvTemplateReportCopied":  true,
+                   "ownerEnvFieldGuideCovered":  true,
+                   "ownerEnvFieldGuideBoundaryCovered":  true,
                    "noSecretLeakageAsserted":  true,
                    "noHorizontalOverflowAsserted":  true,
                    "dashboardUnitTestsPassed":  true,
@@ -45,7 +64,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  4,
+                         "durationSeconds":  6,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -55,9 +74,9 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  28,
+                         "durationSeconds":  43,
                          "stdoutLineCount":  6,
-                         "stderrLineCount":  28
+                         "stderrLineCount":  32
                      },
                      {
                          "label":  "dashboard production build",
@@ -73,9 +92,9 @@
                          "label":  "control-plane tester gateway tests",
                          "command":  "npm test --prefix services/control-plane",
                          "exitCode":  0,
-                         "timeoutSeconds":  300,
+                         "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  183,
+                         "durationSeconds":  329,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -92,10 +111,24 @@
                           "/explorer",
                           "/tester",
                           "/activation",
-                          "/bridge"
+                          "/bridge",
+                          "/ops",
+                          "/alerts"
                       ],
     "coveredProofs":  [
-                          "base8453-bridge-runtime-credit-proof"
+                          "base8453-bridge-command-matrix-proof",
+                          "base8453-bridge-runtime-credit-proof",
+                          "base8453-bridge-release-evidence-validation",
+                          "base8453-bridge-reconciliation-schedule-proof",
+                          "real-value-pilot-aggregate-proof",
+                          "public-rpc-command-matrix-proof",
+                          "owner-needs-now-groups",
+                          "owner-env-field-guide",
+                          "owner-host-apply-plan",
+                          "owner-host-apply-execution",
+                          "owner-host-apply-rollback",
+                          "ops-observability-proof",
+                          "alerts-list-proof"
                       ],
     "envValuesPrinted":  false,
     "noSecrets":  true,
