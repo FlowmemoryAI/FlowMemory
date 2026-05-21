@@ -78,6 +78,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    bridgeReconciliationScheduleValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
     architectureAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json"
@@ -400,6 +401,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-guardrail-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"), "-ReportPath", $paths.bridgeRelayerGuardrailValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-loop-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"), "-ReportPath", $paths.bridgeRelayerLoopValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-runtime-credit-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"), "-ReportPath", $paths.bridgeRuntimeCreditValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-reconciliation-schedule-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-reconciliation-schedule-validation.ps1"), "-ReportPath", $paths.bridgeReconciliationScheduleValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
         "-NoProfile",
@@ -1279,6 +1281,42 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-relayer-queue" `
     -Evidence "relayer=$bridgeRelayerStatus, onceChecksReady=$bridgeRelayerCheckContractReady, onceFailedChecks=$($bridgeRelayerFailedChecks.Count), guardrail=$bridgeRelayerGuardrailStatus, directObserveStagedDefault=$(Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name 'directObserveUsesStagedCursorByDefault' -Default $false), directObserveCursorNotFinal=$(Get-DeploymentProp -Object $bridgeRelayerGuardrailChecks -Name 'directObserveCursorNotFinal' -Default $false), loopValidation=$bridgeRelayerLoopStatus, loopFailedChecks=$($bridgeRelayerLoopFailedChecks.Count), loopReportHealthy=$(Get-DeploymentProp -Object $bridgeRelayerLoopChecks -Name 'statusRelayerReportHealthy' -Default $false), observed=$(Get-DeploymentProp -Object $bridgeRelayerCounts -Name 'observedCredits' -Default 0), new=$bridgeRelayerNewCount, queued=$bridgeRelayerQueuedCount, applied=$bridgeRelayerAppliedCount, latencyGate=$bridgeRelayerLatencyGate, cursorCommitRequired=$bridgeRelayerCursorCommitRequired, cursorCommitted=$bridgeRelayerCursorCommitted, cursorReason=$bridgeRelayerCursorReason, handoffToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRelayerTiming -Name 'handoffToSpendableSeconds')" `
     -Commands @("npm run flowchain:bridge:relayer:once", "npm run flowchain:bridge:relayer:guardrail:validate", "npm run flowchain:bridge:relayer:loop:validate") `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
+
+$bridgeReconciliationScheduleValidation = $reports.bridgeReconciliationScheduleValidation
+$bridgeReconciliationScheduleStatus = Get-DeploymentStatus -Report $bridgeReconciliationScheduleValidation
+$bridgeReconciliationScheduleChecks = Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "checks"
+$bridgeReconciliationScheduleFailedChecks = @((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "failedChecks" -Default @()))
+$bridgeReconciliationScheduleReady = ($bridgeReconciliationScheduleStatus -eq "passed") `
+    -and ($bridgeReconciliationScheduleFailedChecks.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "packageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationPackageScriptPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationScriptReadsRelayerEvidence" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "reconciliationScriptReadsRuntimeEvidence" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesReconciliationScript" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanHasReportPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanHasMarkdownPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanDoesNotMutateHost" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceUsesOwnerEnvFile" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHasReportPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHasMarkdownPath" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceHardeningPresent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerRendered" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerPersistent" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerIntervalConfigured" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "noExternalDelivery" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "hostMutationPerformedFalse" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "hostMutationPerformed" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $bridgeReconciliationScheduleValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:reconciliation:schedule:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-reconciliation-schedule-automation" `
+    -Requirement "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery credentials." `
+    -Status $(if ($bridgeReconciliationScheduleReady) { "passed" } else { "failed" }) `
+    -Evidence "reconciliationSchedule=$bridgeReconciliationScheduleStatus, windowsPlan=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "windowsPlanUsesReconciliationScript"), systemdTimer=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdTimerRendered"), ownerEnv=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "systemdServiceUsesOwnerEnvFile"), noMutation=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "hostMutationPerformedFalse"), noExternalDelivery=$(Get-DeploymentProp -Object $bridgeReconciliationScheduleChecks -Name "noExternalDelivery")" `
+    -Commands @("npm run flowchain:bridge:reconciliation:schedule:validate", "npm run flowchain:bridge:reconciliation")
 
 $bridgeRuntimeCreditValidation = $reports.bridgeRuntimeCreditValidation
 $bridgeRuntimeCreditStatus = Get-DeploymentStatus -Report $bridgeRuntimeCreditValidation

@@ -2064,6 +2064,55 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "bridge-reconciliation-schedule-validation"
+        requirement = "Bridge reconciliation schedule validation renders no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"
+        command = "npm run flowchain:bridge:reconciliation:schedule:validate"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "reconciliationPackageScriptPresent",
+            "reconciliationScriptExists",
+            "reconciliationScriptReadsRelayerEvidence",
+            "reconciliationScriptReadsRuntimeEvidence",
+            "scheduledReportPathInsideRepo",
+            "scheduledMarkdownPathInsideRepo",
+            "windowsPlanUsesReconciliationScript",
+            "windowsPlanUsesOwnerEnvFile",
+            "windowsPlanHasReportPath",
+            "windowsPlanHasMarkdownPath",
+            "windowsPlanUsesRepoWorkingDirectory",
+            "windowsPlanDoesNotMutateHost",
+            "systemdServiceRendered",
+            "systemdServiceUsesOneshot",
+            "systemdServiceUsesOwnerEnvFile",
+            "systemdServiceHasReportPath",
+            "systemdServiceHasMarkdownPath",
+            "systemdServiceHardeningPresent",
+            "systemdServiceWritePathsScoped",
+            "systemdTimerRendered",
+            "systemdTimerPersistent",
+            "systemdTimerIntervalConfigured",
+            "noExternalDelivery",
+            "hostMutationPerformedFalse",
+            "envValuesPrintedFalse",
+            "secretMarkerFindingsEmpty",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings"
+        )
+        requiredReportProperties = [ordered]@{
+            "hostMutationPerformed" = $false
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "external-tester-readiness"
         requirement = "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass."
         path = "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
@@ -2723,7 +2772,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation-schedule-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

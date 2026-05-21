@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T08:01:32.5240539Z",
+    "generatedAt":  "2026-05-21T08:17:18.2320741Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -276,6 +276,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:reconciliation",
                          "purpose":  "Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:reconciliation:schedule:validate",
+                         "purpose":  "Render no-secret Windows and systemd recurring bridge reconciliation schedule plans without mutating the owner host."
                      },
                      {
                          "phase":  "bridge",

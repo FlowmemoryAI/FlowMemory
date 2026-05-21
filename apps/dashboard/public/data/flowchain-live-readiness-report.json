@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T08:02:40.3990474Z",
+  "generatedAt": "2026-05-21T08:18:49.9708202Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "110824",
-    "finalizedHeight": "110824",
+    "latestHeight": "110950",
+    "finalizedHeight": "110950",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -121,7 +121,7 @@
     "opsEscalationDryRunStatus": "passed",
     "opsEscalationDryRunEvents": "6",
     "statusCounts": {
-      "passed": 9,
+      "passed": 10,
       "blocked": 5
     }
   },
@@ -2231,7 +2231,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110798, finalizedHeight=110798",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=110921, finalizedHeight=110921",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2329,6 +2329,18 @@
       "evidence": "dryRun=passed, failedChecks=0, readiness=passed, snapshotProof=True, retention=True, restoreProof=True",
       "commands": [
         "npm run flowchain:backup:owner-path:dry-run"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "base8453-bridge-reconciliation-schedule-automation",
+      "label": "Bridge reconciliation schedule",
+      "status": "passed",
+      "summary": "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery credentials.",
+      "evidence": "reconciliationSchedule=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+      "commands": [
+        "npm run flowchain:bridge:reconciliation:schedule:validate",
+        "npm run flowchain:bridge:reconciliation"
       ],
       "blockers": []
     },
@@ -2471,19 +2483,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:02:40.3990474Z"
+      "generatedAt": "2026-05-21T08:18:49.9708202Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:05:59.6739946Z"
+      "generatedAt": "2026-05-21T08:22:25.4626147Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T08:05:45.7143777Z"
+      "generatedAt": "2026-05-21T08:22:10.3296166Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -2525,7 +2537,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:05:38.0349345Z"
+      "generatedAt": "2026-05-21T08:22:01.3590681Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -2543,7 +2555,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:05:51.2152341Z"
+      "generatedAt": "2026-05-21T08:22:16.2425752Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -2561,7 +2573,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:05:56.9422140Z"
+      "generatedAt": "2026-05-21T08:22:22.5676973Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -2582,6 +2594,12 @@
       "generatedAt": "2026-05-21T02:17:09.4296718Z"
     },
     {
+      "fileName": "bridge-reconciliation-schedule-validation-report.json",
+      "schema": "flowchain.bridge_reconciliation_schedule_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-21T08:16:33.3147010Z"
+    },
+    {
       "fileName": "real-value-pilot-aggregate-report.json",
       "schema": "flowchain.real_value_pilot.e2e_report.v0",
       "status": "passed",
@@ -2591,19 +2609,19 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:06:03.0494825Z"
+      "generatedAt": "2026-05-21T08:22:29.6382589Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:06:03.0494825Z"
+      "generatedAt": "2026-05-21T08:22:29.6382589Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:06:00.5196874Z"
+      "generatedAt": "2026-05-21T08:22:26.6046418Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
@@ -2651,7 +2669,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T08:06:02.0867859Z"
+      "generatedAt": "2026-05-21T08:22:28.8463032Z"
     },
     {
       "fileName": "owner-activation-plan-report.json",
@@ -2669,7 +2687,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T08:08:07.0755500Z"
+      "generatedAt": "2026-05-21T08:24:11.9550082Z"
     }
   ],
   "envValuesPrinted": false,

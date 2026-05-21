@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Command Matrix
 
-Generated: 2026-05-21T08:01:32.5240539Z
+Generated: 2026-05-21T08:17:18.2320741Z
 
 | Phase | Command | Purpose |
 | --- | --- | --- |
@@ -59,6 +59,7 @@ Generated: 2026-05-21T08:01:32.5240539Z
 | bridge | `npm run flowchain:bridge:runtime-credit:validate` | Validate a production-shaped Base 8453 handoff becomes spendable, transferable, replay-safe, and restart/export/import-safe in isolated L1 state. |
 | bridge | `npm run flowchain:real-value-pilot:e2e -- -SkipBaseline -ChildTimeoutSeconds 1800` | Run the bounded aggregate pilot proof across contracts, bridge, runtime, wallet, control-dashboard, and ops before owner-funded pilot approval. |
 | bridge | `npm run flowchain:bridge:reconciliation` | Reconcile live relayer counts, cursor safety, runtime credit proof, replay rejection, and release evidence into one bridge operator report. |
+| bridge | `npm run flowchain:bridge:reconciliation:schedule:validate` | Render no-secret Windows and systemd recurring bridge reconciliation schedule plans without mutating the owner host. |
 | bridge | `npm run flowchain:bridge:release:evidence:validate` | Validate withdrawal/release evidence matching, mismatch rejection, and no-broadcast boundaries. |
 | testers | `npm run flowchain:external-tester:packet -- -AllowBlocked` | Regenerate the friends-and-family packet and fail closed until public gates pass. |
 | testers | `npm run flowchain:external-tester:packet:validate` | Validate the packet and connect pack are no-secret, locally executable, and not externally shareable before owner inputs. |

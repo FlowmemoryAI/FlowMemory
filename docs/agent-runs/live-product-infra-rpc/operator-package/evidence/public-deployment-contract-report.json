@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T07:54:53.6359972Z",
+    "generatedAt":  "2026-05-21T08:16:43.1193252Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  26,
+                       "passed":  27,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  33
+                       "total":  34
                    },
     "items":  [
                   {
@@ -126,7 +126,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=110738, finalizedHeight=110738",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=110824, finalizedHeight=110824",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -453,6 +453,19 @@
                                    ]
                   },
                   {
+                      "id":  "base8453-bridge-reconciliation-schedule-automation",
+                      "requirement":  "The owner host has no-secret Windows Scheduled Task and Linux systemd timer plans for recurring bridge reconciliation checks without host mutation or external delivery credentials.",
+                      "status":  "passed",
+                      "evidence":  "reconciliationSchedule=passed, windowsPlan=True, systemdTimer=True, ownerEnv=True, noMutation=True, noExternalDelivery=True",
+                      "commands":  [
+                                       "npm run flowchain:bridge:reconciliation:schedule:validate",
+                                       "npm run flowchain:bridge:reconciliation"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
@@ -646,6 +659,7 @@
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
                         "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                        "bridgeReconciliationScheduleValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-reconciliation-schedule-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
                         "architectureAudit":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\flowchain-architecture-audit-report.json",

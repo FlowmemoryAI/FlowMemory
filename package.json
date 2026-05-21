@@ -171,6 +171,7 @@
     "flowchain:bridge:relayer:loop:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-relayer-loop-validation.ps1",
     "flowchain:bridge:runtime-credit:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
     "flowchain:bridge:reconciliation": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-reconciliation.ps1",
+    "flowchain:bridge:reconciliation:schedule:validate": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-bridge-reconciliation-schedule-validation.ps1",
     "flowchain:bridge:pause": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Pause",
     "flowchain:bridge:resume": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base8453-control.ps1 -Action Resume",
     "flowchain:bridge:withdraw:intent": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -ApplyCredit -WithdrawalIntent -ReportPath devnet/local/bridge-live-readiness/bridge-withdraw-intent-report.json",
