@@ -414,6 +414,8 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.goto("/");
     await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge runtime credit");
     await expect(page.getByLabel("Public L1 launch readiness")).toContainText("flowchain:bridge:runtime-credit:validate");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("Bridge release evidence");
+    await expect(page.getByLabel("Public L1 launch readiness")).toContainText("flowchain:bridge:release:evidence:validate");
 
     await expectNoUiLeakage(page);
     await expectNoHorizontalOverflow(page);

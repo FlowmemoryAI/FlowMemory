@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.dashboard_ui_readiness_report.v0",
-    "generatedAt":  "2026-05-21T11:47:11.1004558+00:00",
+    "generatedAt":  "2026-05-21T12:21:22.7274902+00:00",
     "status":  "passed",
     "checks":  {
                    "dashboardPackageScriptPresent":  true,
@@ -21,6 +21,7 @@
                    "alertsRouteCovered":  true,
                    "bridgePilotRuntimeProofCovered":  true,
                    "bridgeRuntimeCreditProofCovered":  true,
+                   "bridgeReleaseEvidenceProofCovered":  true,
                    "bridgeCommandMatrixProofCovered":  true,
                    "bridgeReconciliationScheduleProofCovered":  true,
                    "realValuePilotAggregateProofCovered":  true,
@@ -63,7 +64,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  180,
                          "timedOut":  false,
-                         "durationSeconds":  5,
+                         "durationSeconds":  6,
                          "stdoutLineCount":  7,
                          "stderrLineCount":  0
                      },
@@ -73,7 +74,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  300,
                          "timedOut":  false,
-                         "durationSeconds":  38,
+                         "durationSeconds":  43,
                          "stdoutLineCount":  6,
                          "stderrLineCount":  32
                      },
@@ -93,7 +94,7 @@
                          "exitCode":  0,
                          "timeoutSeconds":  600,
                          "timedOut":  false,
-                         "durationSeconds":  337,
+                         "durationSeconds":  329,
                          "stdoutLineCount":  83,
                          "stderrLineCount":  0
                      }
@@ -117,6 +118,7 @@
     "coveredProofs":  [
                           "base8453-bridge-command-matrix-proof",
                           "base8453-bridge-runtime-credit-proof",
+                          "base8453-bridge-release-evidence-validation",
                           "base8453-bridge-reconciliation-schedule-proof",
                           "real-value-pilot-aggregate-proof",
                           "public-rpc-command-matrix-proof",

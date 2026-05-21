@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T12:02:52.6306427Z",
+    "generatedAt":  "2026-05-21T12:23:25.6741326Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -9,10 +9,10 @@
     "connectPackReady":  true,
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "itemCounts":  {
-                       "passed":  27,
+                       "passed":  28,
                        "blocked":  7,
                        "failed":  0,
-                       "total":  34
+                       "total":  35
                    },
     "items":  [
                   {
@@ -54,6 +54,7 @@
                                        "npm run flowchain:bridge:infra:check -- -AllowBlocked",
                                        "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
                                        "npm run flowchain:bridge:relayer:loop:validate",
+                                       "npm run flowchain:bridge:release:evidence:validate",
                                        "npm run flowchain:external-tester:packet -- -AllowBlocked",
                                        "npm run flowchain:no-secret:scan"
                                    ],
@@ -126,7 +127,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=112593, finalizedHeight=112593",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=112720, finalizedHeight=112720",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -478,10 +479,22 @@
                                    ]
                   },
                   {
+                      "id":  "base8453-bridge-release-evidence-validation",
+                      "requirement":  "Bridge withdrawal/release evidence must prove the Base 8453 release method, amount, token, recipient, source chain, destination asset, production-ready flag, local-only boundary, and no-broadcast/no-secret constraints before bridge-funded tester launch.",
+                      "status":  "passed",
+                      "evidence":  "releaseEvidence=passed, cases=12, failedChecks=0, missingChecks=0, failedCases=0, missingCases=0, secretFindings=0, broadcasts=False, noSecrets=True",
+                      "commands":  [
+                                       "npm run flowchain:bridge:release:evidence:validate"
+                                   ],
+                      "blockers":  [
+
+                                   ]
+                  },
+                  {
                       "id":  "external-tester-sharing",
                       "requirement":  "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
                       "status":  "blocked",
-                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+                      "evidence":  "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, bridgeReleaseEvidenceReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
                       "commands":  [
                                        "npm run flowchain:tester:readiness",
                                        "npm run flowchain:external-tester:packet"
@@ -659,6 +672,7 @@
                         "bridgeRelayerGuardrailValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-guardrail-validation-report.json",
                         "bridgeRelayerLoopValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-relayer-loop-validation-report.json",
                         "bridgeRuntimeCreditValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-runtime-credit-validation-report.json",
+                        "bridgeReleaseEvidenceValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-release-evidence-validation-report.json",
                         "bridgeReconciliationScheduleValidation":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\bridge-reconciliation-schedule-validation-report.json",
                         "externalTester":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-readiness-report.json",
                         "externalTesterPacket":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\external-tester-packet-report.json",
@@ -708,6 +722,7 @@
                                                  "npm run flowchain:bridge:infra:check",
                                                  "npm run flowchain:bridge:relayer:once",
                                                  "npm run flowchain:bridge:runtime-credit:validate",
+                                                 "npm run flowchain:bridge:release:evidence:validate",
                                                  "npm run flowchain:tester:readiness",
                                                  "npm run flowchain:external-tester:packet",
                                                  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",

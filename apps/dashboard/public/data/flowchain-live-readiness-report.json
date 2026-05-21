@@ -1,6 +1,6 @@
 {
   "schema": "flowchain.live_readiness_dashboard_report.v0",
-  "generatedAt": "2026-05-21T11:24:18.3984836Z",
+  "generatedAt": "2026-05-21T12:13:21.6695727Z",
   "status": "blocked",
   "deploymentReady": false,
   "packetShareable": false,
@@ -8,8 +8,8 @@
   "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
   "privateRpcUrl": "http://127.0.0.1:8787",
   "metrics": {
-    "latestHeight": "112360",
-    "finalizedHeight": "112360",
+    "latestHeight": "112619",
+    "finalizedHeight": "112619",
     "monitorHeightAdvanced": true,
     "serviceSupervisorValidationStatus": "passed",
     "serviceSupervisorRestartAttempts": "1",
@@ -62,6 +62,10 @@
     "bridgeRuntimeCreditLatencySeconds": "0.693",
     "bridgeRuntimeCreditTransferSeconds": "0.641",
     "bridgeRuntimeCreditFailedChecks": "0",
+    "bridgeReleaseEvidenceStatus": "passed",
+    "bridgeReleaseEvidenceReady": true,
+    "bridgeReleaseEvidenceCaseCount": "12",
+    "bridgeReleaseEvidenceFailedChecks": "0",
     "realValuePilotAggregateStatus": "passed",
     "realValuePilotAggregateReady": true,
     "realValuePilotAggregateCommandsRun": "6",
@@ -143,7 +147,7 @@
     "opsEscalationDryRunStatus": "passed",
     "opsEscalationDryRunEvents": "6",
     "statusCounts": {
-      "passed": 10,
+      "passed": 11,
       "blocked": 5
     }
   },
@@ -220,6 +224,10 @@
     "bridgeRuntimeCreditReady": true,
     "bridgeRuntimeCreditLatencySeconds": "0.845",
     "bridgeRuntimeTransferLatencySeconds": "0.695",
+    "bridgeReleaseEvidenceStatus": "passed",
+    "bridgeReleaseEvidenceReady": true,
+    "bridgeReleaseEvidenceCaseCount": "12",
+    "bridgeReleaseEvidenceFailedChecks": "0",
     "realValuePilotAggregateStatus": "passed",
     "realValuePilotAggregateReady": true,
     "realValuePilotAggregateCommandsRun": "6",
@@ -2807,7 +2815,7 @@
       "label": "Private L1 origin",
       "status": "passed",
       "summary": "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
-      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=112334, finalizedHeight=112334",
+      "evidence": "serviceStatus=passed, privateBind=True, latestHeight=112619, finalizedHeight=112619",
       "commands": [
         "npm run flowchain:service:status"
       ],
@@ -2977,11 +2985,22 @@
       "blockers": []
     },
     {
+      "id": "base8453-bridge-release-evidence-validation",
+      "label": "Bridge release evidence",
+      "status": "passed",
+      "summary": "Bridge withdrawal/release evidence must prove the Base 8453 release method, amount, token, recipient, source chain, destination asset, production-ready flag, local-only boundary, and no-broadcast/no-secret constraints before bridge-funded tester launch.",
+      "evidence": "releaseEvidence=passed, cases=12, failedChecks=0, missingChecks=0, failedCases=0, missingCases=0, secretFindings=0, broadcasts=False, noSecrets=True",
+      "commands": [
+        "npm run flowchain:bridge:release:evidence:validate"
+      ],
+      "blockers": []
+    },
+    {
       "id": "external-tester-sharing",
       "label": "External tester packet",
       "status": "blocked",
       "summary": "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke.",
-      "evidence": "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
+      "evidence": "externalTester=blocked, localTesterRehearsalReady=True, testerNetworkFresh=True, publicTesterGatewayReady=True, faucetRoute=True, packetSmoke=True, testerFaucet=True, capRejected=True, connectPackReady=True, bridgeReleaseEvidenceReady=True, externalSharingReady=False, packet=blocked, packetShareable=False",
       "commands": [
         "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet"
@@ -3059,19 +3078,19 @@
       "fileName": "public-deployment-contract-report.json",
       "schema": "flowchain.public_deployment_contract_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:24:18.3984836Z"
+      "generatedAt": "2026-05-21T12:13:21.6695727Z"
     },
     {
       "fileName": "flowchain-live-infra-check-report.json",
       "schema": "flowchain.live_infra_check_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:46.8979011Z"
+      "generatedAt": "2026-05-21T12:07:05.6508686Z"
     },
     {
       "fileName": "service-status-report.json",
       "schema": "flowchain.service_status_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T11:27:31.3347614Z"
+      "generatedAt": "2026-05-21T12:06:48.2681070Z"
     },
     {
       "fileName": "service-monitor-report.json",
@@ -3113,7 +3132,7 @@
       "fileName": "public-rpc-readiness-report.json",
       "schema": "flowchain.public_rpc_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:23.4512510Z"
+      "generatedAt": "2026-05-21T12:06:39.4911371Z"
     },
     {
       "fileName": "public-rpc-command-matrix-report.json",
@@ -3131,7 +3150,7 @@
       "fileName": "backup-readiness-report.json",
       "schema": "flowchain.backup_readiness_report.v1",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:37.6010834Z"
+      "generatedAt": "2026-05-21T12:06:55.0290279Z"
     },
     {
       "fileName": "backup-owner-path-dry-run-report.json",
@@ -3155,7 +3174,7 @@
       "fileName": "bridge-relayer-once-report.json",
       "schema": "flowchain.bridge_relayer_once_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:43.6209618Z"
+      "generatedAt": "2026-05-21T12:07:01.7627952Z"
     },
     {
       "fileName": "bridge-relayer-guardrail-validation-report.json",
@@ -3176,6 +3195,12 @@
       "generatedAt": "2026-05-21T11:07:57.3233364Z"
     },
     {
+      "fileName": "bridge-release-evidence-validation-report.json",
+      "schema": "flowchain.bridge_release_evidence_validation_report.v0",
+      "status": "passed",
+      "generatedAt": "2026-05-21T12:13:13.1139764Z"
+    },
+    {
       "fileName": "bridge-reconciliation-schedule-validation-report.json",
       "schema": "flowchain.bridge_reconciliation_schedule_validation_report.v0",
       "status": "passed",
@@ -3191,25 +3216,25 @@
       "fileName": "external-tester-packet-report.json",
       "schema": "flowchain.external_tester_packet_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:50.1376938Z"
+      "generatedAt": "2026-05-21T12:07:09.0914270Z"
     },
     {
       "fileName": "external-tester-connect-pack.json",
       "schema": "flowchain.external_tester_connect_pack.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:50.1376938Z"
+      "generatedAt": "2026-05-21T12:07:09.0914270Z"
     },
     {
       "fileName": "external-tester-readiness-report.json",
       "schema": "flowchain.external_tester_readiness_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:47.7498059Z"
+      "generatedAt": "2026-05-21T12:07:06.6728909Z"
     },
     {
       "fileName": "public-tester-gateway-e2e-report.json",
       "schema": "flowchain.public_tester_gateway_e2e_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T11:01:38.9383878Z"
+      "generatedAt": "2026-05-21T11:54:14.0435616Z"
     },
     {
       "fileName": "ops-snapshot-report.json",
@@ -3251,7 +3276,7 @@
       "fileName": "owner-inputs-report.json",
       "schema": "flowchain.owner_inputs_report.v0",
       "status": "blocked",
-      "generatedAt": "2026-05-21T11:27:49.2143982Z"
+      "generatedAt": "2026-05-21T12:07:08.1786419Z"
     },
     {
       "fileName": "owner-env-template-report.json",
@@ -3281,7 +3306,7 @@
       "fileName": "no-secret-scan-report.json",
       "schema": "flowchain.no_secret_scan_report.v0",
       "status": "passed",
-      "generatedAt": "2026-05-21T11:29:30.3244538Z"
+      "generatedAt": "2026-05-21T12:08:54.6475966Z"
     }
   ],
   "envValuesPrinted": false,

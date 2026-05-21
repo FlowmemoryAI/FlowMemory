@@ -98,6 +98,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
   const backupDryRunGate = liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
   const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
   const bridgeRuntimeCreditGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-runtime-credit-proof");
+  const bridgeReleaseEvidenceGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-release-evidence-validation");
   const testerPacketGate = liveReadinessGates.find((record) => record.id === "external-tester-sharing");
   const pilotRecords = workbench.sections.realValuePilot;
   const pilotOverview = pilotRecords.find((record) => record.kind === "Pilot status") ?? pilotRecords[0];
@@ -268,6 +269,7 @@ export function WorkbenchView({ data, workbench, onRefresh }: WorkbenchViewProps
     { label: "Backup dry run", record: backupDryRunGate, Icon: ListChecks },
     { label: "Bridge relayer", record: bridgeRelayerGate, Icon: ShieldAlert },
     { label: "Bridge runtime credit", record: bridgeRuntimeCreditGate, Icon: Activity },
+    { label: "Bridge release evidence", record: bridgeReleaseEvidenceGate, Icon: ListChecks },
     { label: "Tester packet", record: testerPacketGate, Icon: KeyRound },
   ];
 

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.production_truth_table_report.v1",
-    "generatedAt":  "2026-05-21T12:08:11.4767671+00:00",
+    "generatedAt":  "2026-05-21T12:34:46.7751455+00:00",
     "status":  "blocked-owner-input",
     "maxReportAgeHours":  24,
     "classificationCounts":  {
@@ -85,12 +85,12 @@
                       "requirement":  "Private FlowChain node and control-plane services are running and readable.",
                       "classification":  "passed",
                       "rawStatus":  "passed",
-                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; latestHeight=112619; finalizedHeight=112619; failedChecksCount=0",
+                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; latestHeight=112761; finalizedHeight=112761; failedChecksCount=0",
                       "command":  "npm run flowchain:service:status",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-status-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:06:48.2681070+00:00",
-                      "ageSeconds":  83,
+                      "generatedAt":  "2026-05-21T12:31:05.2258789+00:00",
+                      "ageSeconds":  221,
                       "staleReasons":  [
 
                                        ],
@@ -118,7 +118,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-monitor-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:47:26.8728380+00:00",
-                      "ageSeconds":  4844,
+                      "ageSeconds":  6440,
                       "staleReasons":  [
 
                                        ],
@@ -141,12 +141,12 @@
                       "requirement":  "Operator doctor reports host tools, package scripts, state path, disk, service evidence, ports, owner-input groups, and owner env-file status without printing owner values.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=112545; finalizedHeight=112545; blockedOnlyOnOwnerInputs=True; failedChecksCount=0",
+                      "evidence":  "status=blocked; latestHeight=112619; finalizedHeight=112619; blockedOnlyOnOwnerInputs=True; failedChecksCount=0",
                       "command":  "npm run flowchain:doctor -- -ReportPath docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-doctor-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:01:26.0044905+00:00",
-                      "ageSeconds":  405,
+                      "generatedAt":  "2026-05-21T12:21:54.7202981+00:00",
+                      "ageSeconds":  772,
                       "staleReasons":  [
 
                                        ],
@@ -174,7 +174,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-supervisor-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:54:55.7361289+00:00",
-                      "ageSeconds":  4396,
+                      "ageSeconds":  5991,
                       "staleReasons":  [
 
                                        ],
@@ -202,7 +202,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/service-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:55:25.7399046+00:00",
-                      "ageSeconds":  4366,
+                      "ageSeconds":  5962,
                       "staleReasons":  [
 
                                        ],
@@ -230,7 +230,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:55:32.9110556+00:00",
-                      "ageSeconds":  4359,
+                      "ageSeconds":  5954,
                       "staleReasons":  [
 
                                        ],
@@ -258,7 +258,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/upgrade-rehearsal-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:15.6956902+00:00",
-                      "ageSeconds":  80336,
+                      "ageSeconds":  81932,
                       "staleReasons":  [
 
                                        ],
@@ -286,7 +286,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/install-check-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:49:41.3809158+00:00",
-                      "ageSeconds":  80310,
+                      "ageSeconds":  81906,
                       "staleReasons":  [
 
                                        ],
@@ -314,7 +314,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-product-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:42:00.5046787+00:00",
-                      "ageSeconds":  80771,
+                      "ageSeconds":  82367,
                       "staleReasons":  [
 
                                        ],
@@ -380,8 +380,8 @@
                       "command":  "npm run flowchain:live-infra:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-live-infra-check-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:05.6508686+00:00",
-                      "ageSeconds":  66,
+                      "generatedAt":  "2026-05-21T12:32:23.9506601+00:00",
+                      "ageSeconds":  144,
                       "staleReasons":  [
 
                                        ],
@@ -448,7 +448,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:50:50.3086926+00:00",
-                      "ageSeconds":  80241,
+                      "ageSeconds":  81837,
                       "staleReasons":  [
 
                                        ],
@@ -475,8 +475,8 @@
                       "command":  "npm run flowchain:wallet:live-tester:e2e",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:05:33.6601309+00:00",
-                      "ageSeconds":  158,
+                      "generatedAt":  "2026-05-21T12:26:32.8716778+00:00",
+                      "ageSeconds":  495,
                       "staleReasons":  [
 
                                        ],
@@ -503,8 +503,8 @@
                       "command":  "npm run flowchain:owner-inputs -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-inputs-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:08.1786419+00:00",
-                      "ageSeconds":  64,
+                      "generatedAt":  "2026-05-21T12:32:26.7596751+00:00",
+                      "ageSeconds":  141,
                       "staleReasons":  [
 
                                        ],
@@ -571,7 +571,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-onboarding-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:30.0404964+00:00",
-                      "ageSeconds":  4302,
+                      "ageSeconds":  5898,
                       "staleReasons":  [
 
                                        ],
@@ -638,7 +638,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-signup-checklist-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:31.7804144+00:00",
-                      "ageSeconds":  4300,
+                      "ageSeconds":  5896,
                       "staleReasons":  [
 
                                        ],
@@ -705,7 +705,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-activation-plan-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T23:05:40.5458704+00:00",
-                      "ageSeconds":  46951,
+                      "ageSeconds":  48548,
                       "staleReasons":  [
 
                                        ],
@@ -772,7 +772,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-go-live-handoff-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T06:00:32.9112705+00:00",
-                      "ageSeconds":  22059,
+                      "ageSeconds":  23655,
                       "staleReasons":  [
 
                                        ],
@@ -841,7 +841,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-needs-now-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T09:17:35.9757558+00:00",
-                      "ageSeconds":  10236,
+                      "ageSeconds":  11832,
                       "staleReasons":  [
 
                                        ],
@@ -869,7 +869,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:14:19.9280392+00:00",
-                      "ageSeconds":  3232,
+                      "ageSeconds":  4829,
                       "staleReasons":  [
 
                                        ],
@@ -897,7 +897,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:09:01.3702452+00:00",
-                      "ageSeconds":  79151,
+                      "ageSeconds":  80747,
                       "staleReasons":  [
 
                                        ],
@@ -924,8 +924,8 @@
                       "command":  "npm run flowchain:owner-env:readiness -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/owner-env-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:02:46.9230052+00:00",
-                      "ageSeconds":  325,
+                      "generatedAt":  "2026-05-21T12:23:19.4853538+00:00",
+                      "ageSeconds":  689,
                       "staleReasons":  [
 
                                        ],
@@ -991,8 +991,8 @@
                       "command":  "npm run flowchain:tester:token:setup",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:05:36.6385335+00:00",
-                      "ageSeconds":  155,
+                      "generatedAt":  "2026-05-21T12:26:35.8614051+00:00",
+                      "ageSeconds":  493,
                       "staleReasons":  [
 
                                        ],
@@ -1019,8 +1019,8 @@
                       "command":  "npm run flowchain:tester:gateway:e2e",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T11:54:14.0435616+00:00",
-                      "ageSeconds":  838,
+                      "generatedAt":  "2026-05-21T12:30:19.6238128+00:00",
+                      "ageSeconds":  269,
                       "staleReasons":  [
 
                                        ],
@@ -1047,8 +1047,8 @@
                       "command":  "npm run flowchain:public-rpc:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:06:39.4911371+00:00",
-                      "ageSeconds":  93,
+                      "generatedAt":  "2026-05-21T12:30:49.7859534+00:00",
+                      "ageSeconds":  239,
                       "staleReasons":  [
 
                                        ],
@@ -1088,7 +1088,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-synthetic-canary-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:01:42.5584848+00:00",
-                      "ageSeconds":  3990,
+                      "ageSeconds":  5586,
                       "staleReasons":  [
 
                                        ],
@@ -1116,7 +1116,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-canary-schedule-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:01:44.4164111+00:00",
-                      "ageSeconds":  3988,
+                      "ageSeconds":  5584,
                       "staleReasons":  [
 
                                        ],
@@ -1144,7 +1144,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:58:57.7860413+00:00",
-                      "ageSeconds":  4154,
+                      "ageSeconds":  5751,
                       "staleReasons":  [
 
                                        ],
@@ -1172,7 +1172,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-abuse-test-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:59:18.9548728+00:00",
-                      "ageSeconds":  4133,
+                      "ageSeconds":  5730,
                       "staleReasons":  [
 
                                        ],
@@ -1200,7 +1200,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-bundle-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:43.4930881+00:00",
-                      "ageSeconds":  4289,
+                      "ageSeconds":  5885,
                       "staleReasons":  [
 
                                        ],
@@ -1228,7 +1228,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:48.0741764+00:00",
-                      "ageSeconds":  4284,
+                      "ageSeconds":  5881,
                       "staleReasons":  [
 
                                        ],
@@ -1256,7 +1256,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-rpc-command-matrix-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T06:00:23.2217487+00:00",
-                      "ageSeconds":  22069,
+                      "ageSeconds":  23666,
                       "staleReasons":  [
 
                                        ],
@@ -1283,8 +1283,8 @@
                       "command":  "npm run flowchain:operator:package",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-package-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:01:31.6888557+00:00",
-                      "ageSeconds":  401,
+                      "generatedAt":  "2026-05-21T12:22:02.0793914+00:00",
+                      "ageSeconds":  767,
                       "staleReasons":  [
 
                                        ],
@@ -1311,8 +1311,8 @@
                       "command":  "npm run flowchain:operator:package:verify",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/operator-package-verify-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:01:43.3831240+00:00",
-                      "ageSeconds":  389,
+                      "generatedAt":  "2026-05-21T12:22:11.0081104+00:00",
+                      "ageSeconds":  758,
                       "staleReasons":  [
 
                                        ],
@@ -1340,7 +1340,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/second-computer-readiness-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T22:18:50.2128640+00:00",
-                      "ageSeconds":  49762,
+                      "ageSeconds":  51359,
                       "staleReasons":  [
 
                                        ],
@@ -1368,7 +1368,7 @@
                       "reportPath":  "docs/agent-runs/live-product-dev-pack/dev-pack-e2e-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T21:08:30.9030000+00:00",
-                      "ageSeconds":  53982,
+                      "ageSeconds":  55578,
                       "staleReasons":  [
 
                                        ],
@@ -1430,8 +1430,8 @@
                       "command":  "npm run flowchain:backup:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:06:55.0290279+00:00",
-                      "ageSeconds":  78,
+                      "generatedAt":  "2026-05-21T12:31:17.7318542+00:00",
+                      "ageSeconds":  211,
                       "staleReasons":  [
 
                                        ],
@@ -1459,7 +1459,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:03:45.7198474+00:00",
-                      "ageSeconds":  3867,
+                      "ageSeconds":  5464,
                       "staleReasons":  [
 
                                        ],
@@ -1487,7 +1487,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:04:31.7512485+00:00",
-                      "ageSeconds":  3821,
+                      "ageSeconds":  5418,
                       "staleReasons":  [
 
                                        ],
@@ -1515,7 +1515,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/backup-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:04:45.2237046+00:00",
-                      "ageSeconds":  3808,
+                      "ageSeconds":  5404,
                       "staleReasons":  [
 
                                        ],
@@ -1542,8 +1542,8 @@
                       "command":  "npm run flowchain:bridge:live:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:06:56.4493064+00:00",
-                      "ageSeconds":  76,
+                      "generatedAt":  "2026-05-21T12:31:19.8228181+00:00",
+                      "ageSeconds":  210,
                       "staleReasons":  [
 
                                        ],
@@ -1594,8 +1594,8 @@
                       "command":  "npm run flowchain:bridge:infra:check -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:06:58.1204336+00:00",
-                      "ageSeconds":  75,
+                      "generatedAt":  "2026-05-21T12:31:23.3290185+00:00",
+                      "ageSeconds":  206,
                       "staleReasons":  [
 
                                        ],
@@ -1647,7 +1647,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T09:38:03.0901118+00:00",
-                      "ageSeconds":  9010,
+                      "ageSeconds":  10606,
                       "staleReasons":  [
 
                                        ],
@@ -1675,7 +1675,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T09:38:02.2054096+00:00",
-                      "ageSeconds":  9011,
+                      "ageSeconds":  10607,
                       "staleReasons":  [
 
                                        ],
@@ -1703,7 +1703,7 @@
                       "reportPath":  "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T13:53:37.4320000+00:00",
-                      "ageSeconds":  80076,
+                      "ageSeconds":  81672,
                       "staleReasons":  [
 
                                        ],
@@ -1744,7 +1744,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T20:37:09.7537192+00:00",
-                      "ageSeconds":  55863,
+                      "ageSeconds":  57460,
                       "staleReasons":  [
 
                                        ],
@@ -1772,7 +1772,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:05:15.0146500+00:00",
-                      "ageSeconds":  3778,
+                      "ageSeconds":  5375,
                       "staleReasons":  [
 
                                        ],
@@ -1800,7 +1800,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:06:58.4213415+00:00",
-                      "ageSeconds":  3675,
+                      "ageSeconds":  5272,
                       "staleReasons":  [
 
                                        ],
@@ -1828,7 +1828,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:07:57.3233364+00:00",
-                      "ageSeconds":  3616,
+                      "ageSeconds":  5213,
                       "staleReasons":  [
 
                                        ],
@@ -1856,7 +1856,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/real-value-pilot-aggregate-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T01:10:10.7303969+00:00",
-                      "ageSeconds":  39482,
+                      "ageSeconds":  41079,
                       "staleReasons":  [
 
                                        ],
@@ -1884,7 +1884,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:08:37.4224405+00:00",
-                      "ageSeconds":  79176,
+                      "ageSeconds":  80773,
                       "staleReasons":  [
 
                                        ],
@@ -1912,7 +1912,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T11:07:58.8465436+00:00",
-                      "ageSeconds":  3614,
+                      "ageSeconds":  5212,
                       "staleReasons":  [
 
                                        ],
@@ -1935,12 +1935,12 @@
                       "requirement":  "External tester flow remains blocked until public RPC, backup, bridge, and local tester evidence pass.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=112619; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "evidence":  "status=blocked; latestHeight=112761; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
                       "command":  "npm run flowchain:tester:readiness -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:06.6728909+00:00",
-                      "ageSeconds":  66,
+                      "generatedAt":  "2026-05-21T12:32:25.0066853+00:00",
+                      "ageSeconds":  145,
                       "staleReasons":  [
 
                                        ],
@@ -2006,8 +2006,8 @@
                       "command":  "npm run flowchain:bridge:release:evidence:validate",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:01:07.2469293+00:00",
-                      "ageSeconds":  426,
+                      "generatedAt":  "2026-05-21T12:13:13.1139764+00:00",
+                      "ageSeconds":  1297,
                       "staleReasons":  [
 
                                        ],
@@ -2030,12 +2030,12 @@
                       "requirement":  "Friends-and-family tester packet is shareable only after all public gates pass.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=112619; finalizedHeight=112619; ownerInputsStatus=blocked; packetShareable=False; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
+                      "evidence":  "status=blocked; latestHeight=112761; finalizedHeight=112761; ownerInputsStatus=blocked; packetShareable=False; externalSharingReady=False; localTesterRehearsalReady=True; envValuesPrinted=False; noSecrets=True; broadcasts=False; blockers=FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH,FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS",
                       "command":  "npm run flowchain:external-tester:packet -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:09.0914270+00:00",
-                      "ageSeconds":  64,
+                      "generatedAt":  "2026-05-21T12:32:27.8980918+00:00",
+                      "ageSeconds":  143,
                       "staleReasons":  [
 
                                        ],
@@ -2101,8 +2101,8 @@
                       "command":  "npm run flowchain:external-tester:packet:validate",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:10.1088447+00:00",
-                      "ageSeconds":  63,
+                      "generatedAt":  "2026-05-21T12:32:29.0679450+00:00",
+                      "ageSeconds":  142,
                       "staleReasons":  [
 
                                        ],
@@ -2168,8 +2168,8 @@
                       "command":  "npm run flowchain:external-tester:client:validate",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:12.0371060+00:00",
-                      "ageSeconds":  61,
+                      "generatedAt":  "2026-05-21T12:32:31.5231704+00:00",
+                      "ageSeconds":  139,
                       "staleReasons":  [
 
                                        ],
@@ -2197,7 +2197,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:11:17.3940955+00:00",
-                      "ageSeconds":  79016,
+                      "ageSeconds":  80613,
                       "staleReasons":  [
 
                                        ],
@@ -2220,12 +2220,12 @@
                       "requirement":  "Dashboard browser readiness proves desktop and mobile users can create a tester wallet, request faucet funds, send tester units, inspect the result in Explorer, review tester launch readiness, review the L1 activation cockpit, review bridge/runtime proof surfaces, and avoid token/secret leakage or horizontal overflow.",
                       "classification":  "passed",
                       "rawStatus":  "passed",
-                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; desktopProjectConfigured=True; mobileProjectConfigured=True; bridgeRouteCovered=True; bridgePilotRuntimeProofCovered=True; bridgeRuntimeCreditProofCovered=True; realValuePilotAggregateProofCovered=True; publicRpcHeaderProofCovered=True; dashboardBrowserE2ePassed=True; commandsCompletedWithoutTimeout=True; noSecretLeakageAsserted=True; noHorizontalOverflowAsserted=True; failedChecksCount=0; browserProjectsCount=2; coveredRoutesCount=10; coveredProofsCount=12",
+                      "evidence":  "status=passed; envValuesPrinted=False; noSecrets=True; broadcasts=False; desktopProjectConfigured=True; mobileProjectConfigured=True; bridgeRouteCovered=True; bridgePilotRuntimeProofCovered=True; bridgeRuntimeCreditProofCovered=True; realValuePilotAggregateProofCovered=True; publicRpcHeaderProofCovered=True; dashboardBrowserE2ePassed=True; commandsCompletedWithoutTimeout=True; noSecretLeakageAsserted=True; noHorizontalOverflowAsserted=True; failedChecksCount=0; browserProjectsCount=2; coveredRoutesCount=10; coveredProofsCount=13",
                       "command":  "npm run flowchain:dashboard:ui:readiness",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/dashboard-ui-readiness-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T11:47:11.1004558+00:00",
-                      "ageSeconds":  1262,
+                      "generatedAt":  "2026-05-21T12:21:22.7274902+00:00",
+                      "ageSeconds":  808,
                       "staleReasons":  [
 
                                        ],
@@ -2253,7 +2253,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-snapshot-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:55:37.7392322+00:00",
-                      "ageSeconds":  4356,
+                      "ageSeconds":  5953,
                       "staleReasons":  [
 
                                        ],
@@ -2281,7 +2281,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-alert-rules-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:55:40.6154055+00:00",
-                      "ageSeconds":  4353,
+                      "ageSeconds":  5950,
                       "staleReasons":  [
 
                                        ],
@@ -2309,7 +2309,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics-export-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:55:44.5534349+00:00",
-                      "ageSeconds":  4349,
+                      "ageSeconds":  5946,
                       "staleReasons":  [
 
                                        ],
@@ -2337,7 +2337,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:26.0332700+00:00",
-                      "ageSeconds":  4307,
+                      "ageSeconds":  5905,
                       "staleReasons":  [
 
                                        ],
@@ -2365,7 +2365,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/alert-install-validation-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:05.1308999+00:00",
-                      "ageSeconds":  4328,
+                      "ageSeconds":  5926,
                       "staleReasons":  [
 
                                        ],
@@ -2393,7 +2393,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/ops-escalation-dry-run-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:56:28.2106051+00:00",
-                      "ageSeconds":  4305,
+                      "ageSeconds":  5903,
                       "staleReasons":  [
 
                                        ],
@@ -2421,7 +2421,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/incident-drill-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-20T14:12:20.0147217+00:00",
-                      "ageSeconds":  78954,
+                      "ageSeconds":  80551,
                       "staleReasons":  [
 
                                        ],
@@ -2448,8 +2448,8 @@
                       "command":  "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:02:52.6306427+00:00",
-                      "ageSeconds":  321,
+                      "generatedAt":  "2026-05-21T12:23:25.6741326+00:00",
+                      "ageSeconds":  686,
                       "staleReasons":  [
 
                                        ],
@@ -2515,8 +2515,8 @@
                       "command":  "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:08:04.5570546+00:00",
-                      "ageSeconds":  9,
+                      "generatedAt":  "2026-05-21T12:34:25.5499987+00:00",
+                      "ageSeconds":  26,
                       "staleReasons":  [
 
                                        ],
@@ -2583,7 +2583,7 @@
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-architecture-audit-report.json",
                       "reportExists":  true,
                       "generatedAt":  "2026-05-21T10:12:12.0400622+00:00",
-                      "ageSeconds":  6962,
+                      "ageSeconds":  8559,
                       "staleReasons":  [
 
                                        ],
@@ -2645,12 +2645,12 @@
                       "requirement":  "Completion audit is fresh and is the release gate for claiming production readiness.",
                       "classification":  "blocked-owner-input",
                       "rawStatus":  "blocked",
-                      "evidence":  "status=blocked; latestHeight=112619; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+                      "evidence":  "status=blocked; latestHeight=112761; completionReady=False; envValuesPrinted=False; noSecrets=True; noLiveBroadcast=True; blockers=FLOWCHAIN_PILOT_OPERATOR_ACK,FLOWCHAIN_BASE8453_RPC_URL,FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS,FLOWCHAIN_BASE8453_SUPPORTED_TOKEN,FLOWCHAIN_BASE8453_ASSET_DECIMALS,FLOWCHAIN_BASE8453_FROM_BLOCK,FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI,FLOWCHAIN_PILOT_TOTAL_CAP_WEI,FLOWCHAIN_PILOT_CONFIRMATIONS,FLOWCHAIN_RPC_PUBLIC_URL,FLOWCHAIN_RPC_ALLOWED_ORIGINS,FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE,FLOWCHAIN_RPC_TLS_TERMINATED,FLOWCHAIN_RPC_STATE_BACKUP_PATH",
                       "command":  "npm run flowchain:completion:audit -- -AllowBlocked",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:07:20.4572631+00:00",
-                      "ageSeconds":  53,
+                      "generatedAt":  "2026-05-21T12:32:43.9394518+00:00",
+                      "ageSeconds":  128,
                       "staleReasons":  [
 
                                        ],
@@ -2716,8 +2716,8 @@
                       "command":  "npm run flowchain:no-secret:scan",
                       "reportPath":  "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
                       "reportExists":  true,
-                      "generatedAt":  "2026-05-21T12:08:03.8503715+00:00",
-                      "ageSeconds":  10,
+                      "generatedAt":  "2026-05-21T12:34:24.3989726+00:00",
+                      "ageSeconds":  27,
                       "staleReasons":  [
 
                                        ],

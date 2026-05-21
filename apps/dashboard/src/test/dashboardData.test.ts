@@ -441,6 +441,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Backup dry run");
     expect(html).toContain("Bridge relayer queue");
     expect(html).toContain("Bridge runtime credit");
+    expect(html).toContain("Bridge release evidence");
+    expect(html).toContain("flowchain:bridge:release:evidence:validate");
     expect(html).toContain("External tester packet");
     expect(html).toContain("FLOWCHAIN_RPC_PUBLIC_URL");
     expect(html).toContain("flowchain:public-deployment:contract");

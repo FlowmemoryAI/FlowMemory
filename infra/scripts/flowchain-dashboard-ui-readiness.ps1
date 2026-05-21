@@ -167,6 +167,7 @@ $checks = [ordered]@{
     alertsRouteCovered = $specText.Contains("/alerts")
     bridgePilotRuntimeProofCovered = $specText.Contains("Bridge runtime proof") -and $specText.Contains("Runtime credit") -and $specText.Contains("Relayer guardrail") -and $specText.Contains("Pilot aggregate")
     bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
+    bridgeReleaseEvidenceProofCovered = $specText.Contains("Bridge release evidence") -and $specText.Contains("flowchain:bridge:release:evidence:validate") -and $workbenchText.Contains("base8453-bridge-release-evidence-validation")
     bridgeCommandMatrixProofCovered = $specText.Contains("Bridge command matrix") -and $specText.Contains("flowchain:bridge:command-matrix") -and $workbenchText.Contains("bridgeCommandMatrix")
     bridgeReconciliationScheduleProofCovered = $specText.Contains("Reconciliation schedule") -and $specText.Contains("flowchain:bridge:reconciliation:schedule:validate") -and $workbenchText.Contains("bridgeReconciliationSchedule")
     realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
@@ -207,7 +208,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge", "/ops", "/alerts")
-    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "base8453-bridge-reconciliation-schedule-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-needs-now-groups", "owner-env-field-guide", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
+    coveredProofs = @("base8453-bridge-command-matrix-proof", "base8453-bridge-runtime-credit-proof", "base8453-bridge-release-evidence-validation", "base8453-bridge-reconciliation-schedule-proof", "real-value-pilot-aggregate-proof", "public-rpc-command-matrix-proof", "owner-needs-now-groups", "owner-env-field-guide", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback", "ops-observability-proof", "alerts-list-proof")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false

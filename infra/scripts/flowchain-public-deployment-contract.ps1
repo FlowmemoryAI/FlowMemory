@@ -78,6 +78,7 @@ $paths = [ordered]@{
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
     bridgeRuntimeCreditValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-runtime-credit-validation-report.json"
+    bridgeReleaseEvidenceValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
     bridgeReconciliationScheduleValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-schedule-validation-report.json"
     externalTester = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-readiness-report.json"
     externalTesterPacket = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json"
@@ -361,6 +362,7 @@ $dependencyRefreshCommands = @(
     "npm run flowchain:bridge:infra:check -- -AllowBlocked",
     "npm run flowchain:bridge:relayer:once -- -AllowBlocked",
     "npm run flowchain:bridge:relayer:loop:validate",
+    "npm run flowchain:bridge:release:evidence:validate",
     "npm run flowchain:external-tester:packet -- -AllowBlocked",
     "npm run flowchain:no-secret:scan"
 )
@@ -401,6 +403,7 @@ if (-not $NoRefresh.IsPresent) {
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-guardrail-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-guardrail-validation.ps1"), "-ReportPath", $paths.bridgeRelayerGuardrailValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-relayer-loop-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-relayer-loop-validation.ps1"), "-ReportPath", $paths.bridgeRelayerLoopValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-runtime-credit-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-runtime-credit-validation.ps1"), "-ReportPath", $paths.bridgeRuntimeCreditValidation)
+    Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-release-evidence-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-release-evidence-validation.ps1"), "-ReportPath", $paths.bridgeReleaseEvidenceValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "bridge-reconciliation-schedule-validation" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-reconciliation-schedule-validation.ps1"), "-ReportPath", $paths.bridgeReconciliationScheduleValidation)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "external-tester-packet" -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-external-tester-packet.ps1"), "-AllowBlocked", "-ReportPath", $paths.externalTesterPacket)
     Add-DeploymentRefreshStep -Steps $dependencyRefreshSteps -Name "no-secret-scan" -ArgumentList @(
@@ -1361,6 +1364,56 @@ Add-DeploymentItem -Items $items -Id "base8453-bridge-runtime-credit-proof" `
     -Evidence "runtimeCredit=$bridgeRuntimeCreditStatus, failedChecks=$($bridgeRuntimeCreditFailedChecks.Count), missingRuntimeChecks=$($bridgeRuntimeCreditMissingRuntimeChecks.Count), falseRuntimeChecks=$($bridgeRuntimeCreditFalseRuntimeChecks.Count), latencyGate=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'latencyGate' -Default 'missing'), queueToSpendableSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'queueToSpendableSeconds' -Default ''), transferSeconds=$(Get-DeploymentProp -Object $bridgeRuntimeCreditTiming -Name 'transferSettlementSeconds' -Default '')" `
     -Commands @("npm run flowchain:bridge:runtime-credit:validate")
 
+$bridgeReleaseEvidenceValidation = $reports.bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceStatus = Get-DeploymentStatus -Report $bridgeReleaseEvidenceValidation
+$bridgeReleaseEvidenceChecks = Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "checks"
+$bridgeReleaseEvidenceFailedChecks = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "failedChecks" -Default @()))
+$bridgeReleaseEvidenceFailedCases = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "failedCases" -Default @()))
+$bridgeReleaseEvidenceMissingCases = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "missingRequiredCases" -Default @()))
+$bridgeReleaseEvidenceSecretFindings = @((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "secretMarkerFindings" -Default @()))
+$bridgeReleaseEvidenceCaseCount = [int](Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0)
+$bridgeReleaseEvidenceRequiredChecks = @(
+    "releaseEvidenceScriptExists",
+    "matchingEvidencePasses",
+    "missingInputsBlock",
+    "amountMismatchFails",
+    "methodMismatchFails",
+    "tokenMismatchFails",
+    "recipientMismatchFails",
+    "chainMismatchFails",
+    "assetMismatchFails",
+    "releaseBroadcastRejected",
+    "withdrawalBroadcastRejected",
+    "releaseProductionReadyFalseRejected",
+    "releaseLocalOnlyTrueRejected",
+    "allRequiredCasesCovered",
+    "failedCasesAbsent",
+    "noSecretScanPassed",
+    "broadcastsFalse",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "secretMarkerFindingsEmpty"
+)
+$bridgeReleaseEvidenceMissingChecks = @($bridgeReleaseEvidenceRequiredChecks | Where-Object {
+        (Get-DeploymentProp -Object $bridgeReleaseEvidenceChecks -Name $_ -Default $false) -ne $true
+    })
+$bridgeReleaseEvidenceReady = ($bridgeReleaseEvidenceStatus -eq "passed") `
+    -and ($bridgeReleaseEvidenceCaseCount -ge 12) `
+    -and ($bridgeReleaseEvidenceFailedChecks.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceFailedCases.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceMissingCases.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceMissingChecks.Count -eq 0) `
+    -and ($bridgeReleaseEvidenceSecretFindings.Count -eq 0) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "broadcasts" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name "noSecrets" -Default $false) -eq $true) `
+    -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:bridge:release:evidence:validate")
+Add-DeploymentItem -Items $items -Id "base8453-bridge-release-evidence-validation" `
+    -Requirement "Bridge withdrawal/release evidence must prove the Base 8453 release method, amount, token, recipient, source chain, destination asset, production-ready flag, local-only boundary, and no-broadcast/no-secret constraints before bridge-funded tester launch." `
+    -Status $(if ($bridgeReleaseEvidenceReady) { "passed" } else { "failed" }) `
+    -Evidence "releaseEvidence=$bridgeReleaseEvidenceStatus, cases=$bridgeReleaseEvidenceCaseCount, failedChecks=$($bridgeReleaseEvidenceFailedChecks.Count), missingChecks=$($bridgeReleaseEvidenceMissingChecks.Count), failedCases=$($bridgeReleaseEvidenceFailedCases.Count), missingCases=$($bridgeReleaseEvidenceMissingCases.Count), secretFindings=$($bridgeReleaseEvidenceSecretFindings.Count), broadcasts=$(Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name 'broadcasts' -Default 'missing'), noSecrets=$(Get-DeploymentProp -Object $bridgeReleaseEvidenceValidation -Name 'noSecrets' -Default 'missing')" `
+    -Commands @("npm run flowchain:bridge:release:evidence:validate")
+
 $externalTester = $reports.externalTester
 $externalPacket = $reports.externalTesterPacket
 $externalTesterStatus = Get-DeploymentStatus -Report $externalTester
@@ -1392,8 +1445,8 @@ $connectPackReady = ((Get-DeploymentProp -Object $connectPackChecks -Name "conne
     -and ($connectPackShareable -eq $packetShareable)
 Add-DeploymentItem -Items $items -Id "external-tester-sharing" `
     -Requirement "External tester packet and machine-readable connection pack must remain not-shareable until owner public RPC, backup, and bridge gates pass, and they must rely on fresh tester-wallet evidence plus authenticated tester faucet/send gateway smoke." `
-    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true)) { "blocked" } else { "failed" }) `
-    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
+    -Status $(if (($externalTesterStatus -eq "passed") -and ($externalPacketStatus -eq "passed") -and ($externalSharingReady -eq $true) -and ($packetShareable -eq $true) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true) -and ($bridgeReleaseEvidenceReady -eq $true)) { "passed" } elseif (($externalTesterStatus -eq "blocked") -and ($externalPacketStatus -eq "blocked") -and ($externalSharingReady -eq $false) -and ($packetShareable -eq $false) -and ($externalTesterNetworkFresh -eq $true) -and ($externalTesterPublicGatewayReady -eq $true) -and ($externalTesterFaucetRouteValidated -eq $true) -and ($packetExecutableSmokeValidated -eq $true) -and ($packetTesterFaucet -eq $true) -and ($packetTesterCapRejected -eq $true) -and ($connectPackReady -eq $true) -and ($bridgeReleaseEvidenceReady -eq $true)) { "blocked" } else { "failed" }) `
+    -Evidence "externalTester=$externalTesterStatus, localTesterRehearsalReady=$localTesterRehearsalReady, testerNetworkFresh=$externalTesterNetworkFresh, publicTesterGatewayReady=$externalTesterPublicGatewayReady, faucetRoute=$externalTesterFaucetRouteValidated, packetSmoke=$packetExecutableSmokeValidated, testerFaucet=$packetTesterFaucet, capRejected=$packetTesterCapRejected, connectPackReady=$connectPackReady, bridgeReleaseEvidenceReady=$bridgeReleaseEvidenceReady, externalSharingReady=$externalSharingReady, packet=$externalPacketStatus, packetShareable=$packetShareable" `
     -Commands @("npm run flowchain:tester:readiness", "npm run flowchain:external-tester:packet") `
     -Blockers @($ownerMissingInputs)
 
@@ -1525,6 +1578,7 @@ $operatorCommands = [ordered]@{
                                                  "npm run flowchain:bridge:infra:check",
                                                  "npm run flowchain:bridge:relayer:once",
                                                  "npm run flowchain:bridge:runtime-credit:validate",
+                                                 "npm run flowchain:bridge:release:evidence:validate",
                                                  "npm run flowchain:tester:readiness",
         "npm run flowchain:external-tester:packet",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
