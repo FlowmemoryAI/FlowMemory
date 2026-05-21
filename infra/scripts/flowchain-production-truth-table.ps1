@@ -2208,7 +2208,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "bridge-release-evidence-validation"
-        requirement = "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, amount/token/recipient/chain/asset mismatches fail, broadcast flags are rejected, and validation remains no-secret/no-broadcast."
+        requirement = "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, method/amount/token/recipient/chain/asset mismatches fail, broadcast and production boundary flags are rejected, and validation remains no-secret/no-broadcast."
         path = "docs/agent-runs/live-product-infra-rpc/bridge-release-evidence-validation-report.json"
         command = "npm run flowchain:bridge:release:evidence:validate"
         productionGate = $true
@@ -2218,12 +2218,15 @@ $definitions = @(
             "matchingEvidencePasses",
             "missingInputsBlock",
             "amountMismatchFails",
+            "methodMismatchFails",
             "tokenMismatchFails",
             "recipientMismatchFails",
             "chainMismatchFails",
             "assetMismatchFails",
             "releaseBroadcastRejected",
             "withdrawalBroadcastRejected",
+            "releaseProductionReadyFalseRejected",
+            "releaseLocalOnlyTrueRejected",
             "allRequiredCasesCovered",
             "failedCasesAbsent",
             "noSecretScanPassed",
@@ -2239,7 +2242,7 @@ $definitions = @(
             "secretMarkerFindings"
         )
         requiredMinimums = [ordered]@{
-            caseCount = 9
+            caseCount = 12
         }
         requiredReportProperties = [ordered]@{
             "envValuesPrinted" = $false

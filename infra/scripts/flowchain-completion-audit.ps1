@@ -2761,12 +2761,15 @@ $bridgeReleaseEvidenceValidationRequiredChecks = @(
     "matchingEvidencePasses",
     "missingInputsBlock",
     "amountMismatchFails",
+    "methodMismatchFails",
     "tokenMismatchFails",
     "recipientMismatchFails",
     "chainMismatchFails",
     "assetMismatchFails",
     "releaseBroadcastRejected",
     "withdrawalBroadcastRejected",
+    "releaseProductionReadyFalseRejected",
+    "releaseLocalOnlyTrueRejected",
     "allRequiredCasesCovered",
     "failedCasesAbsent",
     "noSecretScanPassed",
@@ -3761,7 +3764,7 @@ Add-AuditItem -Items $items -Id "bridge-reconciliation" `
     -Commands @("npm run flowchain:bridge:reconciliation")
 
 Add-AuditItem -Items $items -Id "bridge-release-evidence-validation" `
-    -Requirement "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, amount/token/recipient/chain/asset mismatches fail, broadcast flags are rejected, and validation remains no-secret/no-broadcast." `
+    -Requirement "Bridge withdrawal/release evidence validation proves matching release evidence passes, missing inputs block, method/amount/token/recipient/chain/asset mismatches fail, broadcast and production boundary flags are rejected, and validation remains no-secret/no-broadcast." `
     -Status $(if ($bridgeReleaseEvidenceValidationPassed) { "passed" } else { "failed" }) `
     -Evidence "releaseEvidenceValidation=$bridgeReleaseEvidenceValidationStatus, cases=$(Get-AuditProp -Object $bridgeReleaseEvidenceValidation -Name "caseCount" -Default 0), failedChecks=$($bridgeReleaseEvidenceValidationFailedChecks.Count), failedCases=$($bridgeReleaseEvidenceValidationFailedCases.Count), missingCases=$($bridgeReleaseEvidenceValidationMissingCases.Count), secretFindings=$($bridgeReleaseEvidenceValidationSecretFindings.Count), report=$($paths.bridgeReleaseEvidenceValidation)" `
     -Commands @("npm run flowchain:bridge:release:evidence:validate")

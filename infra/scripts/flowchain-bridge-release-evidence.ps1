@@ -134,6 +134,7 @@ Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "depositIdMatch
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "sourceChainIdMatches" -Passed ([string](Get-BridgeReleaseProp -Object $withdrawal -Name "sourceChainId" -Default "") -eq [string](Get-BridgeReleaseProp -Object $release -Name "sourceChainId" -Default "__missing_release_source_chain__")) -Problem "sourceChainId mismatch"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "destinationChainIdMatches" -Passed ([string](Get-BridgeReleaseProp -Object $withdrawal -Name "destinationChainId" -Default "") -eq [string](Get-BridgeReleaseProp -Object $release -Name "destinationChainId" -Default "__missing_release_destination_chain__")) -Problem "destinationChainId mismatch"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "amountMatches" -Passed ((Get-BridgeReleaseProp -Object $withdrawal -Name "amount" -Default "") -eq (Get-BridgeReleaseProp -Object $releaseCall -Name "amount" -Default "__missing_release_amount__")) -Problem "amount mismatch"
+Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseCallMethodKnown" -Passed ((Get-BridgeReleaseProp -Object $releaseCall -Name "method" -Default "") -eq "releaseERC20") -Problem "release method mismatch"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "tokenMatches" -Passed ((Get-BridgeReleaseProp -Object $withdrawal -Name "token" -Default "") -eq (Get-BridgeReleaseProp -Object $releaseCall -Name "token" -Default "__missing_release_token__")) -Problem "token mismatch"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "recipientMatches" -Passed ((Get-BridgeReleaseProp -Object $withdrawal -Name "baseRecipient" -Default "") -eq (Get-BridgeReleaseProp -Object $releaseCall -Name "recipient" -Default "__missing_release_recipient__")) -Problem "recipient mismatch"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "assetSourceChainMatches" -Passed ([string](Get-BridgeReleaseProp -Object $withdrawalAsset -Name "sourceChainId" -Default "") -eq [string](Get-BridgeReleaseProp -Object $releaseAsset -Name "sourceChainId" -Default "__missing_release_asset_source_chain__")) -Problem "asset sourceChainId mismatch"
@@ -144,6 +145,8 @@ Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "withdrawalBroa
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseCallBroadcastFalse" -Passed ((Get-BridgeReleaseProp -Object $releaseCall -Name "broadcast" -Default $true) -eq $false) -Problem "release evidence must not be broadcast"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "withdrawalTestModeTrue" -Passed ((Get-BridgeReleaseProp -Object $withdrawal -Name "testMode" -Default $false) -eq $true) -Problem "withdrawal intent must remain testMode"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "withdrawalProductionReadyFalse" -Passed ((Get-BridgeReleaseProp -Object $withdrawal -Name "productionReady" -Default $true) -eq $false) -Problem "withdrawal intent must not claim production readiness"
+Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseProductionReadyTrue" -Passed ((Get-BridgeReleaseProp -Object $release -Name "productionReady" -Default $false) -eq $true) -Problem "release evidence must claim production readiness for Base 8453"
+Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseLocalOnlyFalse" -Passed ((Get-BridgeReleaseProp -Object $release -Name "localOnly" -Default $true) -eq $false) -Problem "release evidence must not be localOnly for Base 8453"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseEvidenceIdPresent" -Passed (-not [string]::IsNullOrWhiteSpace([string](Get-BridgeReleaseProp -Object $release -Name "releaseEvidenceId" -Default ""))) -Problem "releaseEvidenceId missing"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "releaseEvidenceHashPresent" -Passed (-not [string]::IsNullOrWhiteSpace([string](Get-BridgeReleaseProp -Object $releaseCall -Name "evidenceHash" -Default ""))) -Problem "release evidenceHash missing"
 Add-BridgeReleaseCheck -Checks $checks -Problems $problems -Name "secretMarkerFindingsEmpty" -Passed ($secretMarkerFindings.Count -eq 0) -Problem "release evidence contains secret markers"
@@ -157,7 +160,7 @@ $report = [ordered]@{
     schema = "flowchain.bridge_release_evidence_report.v0"
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     status = $status
-    checkedFields = @("schema", "withdrawalIntentId", "creditId", "depositId", "sourceChainId", "destinationChainId", "amount", "token", "recipient", "asset", "broadcast", "evidenceHash")
+    checkedFields = @("schema", "withdrawalIntentId", "creditId", "depositId", "sourceChainId", "destinationChainId", "amount", "method", "token", "recipient", "asset", "broadcast", "productionReady", "localOnly", "evidenceHash")
     checks = $checks
     failedChecks = @($failedChecks)
     problems = @($problems)

@@ -1,8 +1,8 @@
 {
     "schema":  "flowchain.bridge_release_evidence_validation_report.v0",
-    "generatedAt":  "2026-05-20T14:08:50.6010160Z",
+    "generatedAt":  "2026-05-21T12:01:07.2469293Z",
     "status":  "passed",
-    "caseCount":  9,
+    "caseCount":  12,
     "cases":  [
                   {
                       "name":  "matching-release-evidence",
@@ -85,7 +85,39 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\amount-mismatch-failed\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
+                                                       "+     throw \"Bridge release evidence validation failed.\"",
+                                                       "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                                                       "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
+                                                       "    + FullyQualifiedErrorId : Bridge release evidence validation failed.",
+                                                       " "
+                                                   ]
+                                }
+                  },
+                  {
+                      "name":  "method-mismatch-failed",
+                      "status":  "passed",
+                      "expectedStatus":  "failed",
+                      "actualStatus":  "failed",
+                      "exitCode":  1,
+                      "expectedProblem":  "release method mismatch",
+                      "problems":  [
+                                       "release method mismatch"
+                                   ],
+                      "missingInputs":  [
+
+                                        ],
+                      "failedChecks":  [
+                                           "releaseCallMethodKnown"
+                                       ],
+                      "child":  {
+                                    "name":  "method-mismatch-failed",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "Bridge release evidence status: failed",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\method-mismatch-failed\\report.json",
+                                                       "Bridge release evidence validation failed.",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -117,7 +149,7 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\token-mismatch-failed\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -149,7 +181,7 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\recipient-mismatch-failed\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -181,7 +213,7 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\chain-mismatch-failed\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -213,7 +245,7 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\asset-mismatch-failed\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -247,7 +279,7 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\release-broadcast-rejected\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -281,7 +313,71 @@
                                                        "Bridge release evidence status: failed",
                                                        "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\withdrawal-broadcast-rejected\\report.json",
                                                        "Bridge release evidence validation failed.",
-                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:174 char:5",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
+                                                       "+     throw \"Bridge release evidence validation failed.\"",
+                                                       "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                                                       "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
+                                                       "    + FullyQualifiedErrorId : Bridge release evidence validation failed.",
+                                                       " "
+                                                   ]
+                                }
+                  },
+                  {
+                      "name":  "release-production-ready-false-rejected",
+                      "status":  "passed",
+                      "expectedStatus":  "failed",
+                      "actualStatus":  "failed",
+                      "exitCode":  1,
+                      "expectedProblem":  "release evidence must claim production readiness for Base 8453",
+                      "problems":  [
+                                       "release evidence must claim production readiness for Base 8453"
+                                   ],
+                      "missingInputs":  [
+
+                                        ],
+                      "failedChecks":  [
+                                           "releaseProductionReadyTrue"
+                                       ],
+                      "child":  {
+                                    "name":  "release-production-ready-false-rejected",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "Bridge release evidence status: failed",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\release-production-ready-false-rejected\\report.json",
+                                                       "Bridge release evidence validation failed.",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
+                                                       "+     throw \"Bridge release evidence validation failed.\"",
+                                                       "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                                                       "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
+                                                       "    + FullyQualifiedErrorId : Bridge release evidence validation failed.",
+                                                       " "
+                                                   ]
+                                }
+                  },
+                  {
+                      "name":  "release-local-only-true-rejected",
+                      "status":  "passed",
+                      "expectedStatus":  "failed",
+                      "actualStatus":  "failed",
+                      "exitCode":  1,
+                      "expectedProblem":  "release evidence must not be localOnly for Base 8453",
+                      "problems":  [
+                                       "release evidence must not be localOnly for Base 8453"
+                                   ],
+                      "missingInputs":  [
+
+                                        ],
+                      "failedChecks":  [
+                                           "releaseLocalOnlyFalse"
+                                       ],
+                      "child":  {
+                                    "name":  "release-local-only-true-rejected",
+                                    "exitCode":  1,
+                                    "outputTail":  [
+                                                       "Bridge release evidence status: failed",
+                                                       "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\bridge-release-evidence-validation\\release-local-only-true-rejected\\report.json",
+                                                       "Bridge release evidence validation failed.",
+                                                       "At E:\\FlowMemory\\flowmemory-live-infra-rpc\\infra\\scripts\\flowchain-bridge-release-evidence.ps1:177 char:5",
                                                        "+     throw \"Bridge release evidence validation failed.\"",
                                                        "+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                                                        "    + CategoryInfo          : OperationStopped: (Bridge release ...idation failed.:String) [], RuntimeException",
@@ -303,12 +399,15 @@
                    "matchingEvidencePasses":  true,
                    "missingInputsBlock":  true,
                    "amountMismatchFails":  true,
+                   "methodMismatchFails":  true,
                    "tokenMismatchFails":  true,
                    "recipientMismatchFails":  true,
                    "chainMismatchFails":  true,
                    "assetMismatchFails":  true,
                    "releaseBroadcastRejected":  true,
                    "withdrawalBroadcastRejected":  true,
+                   "releaseProductionReadyFalseRejected":  true,
+                   "releaseLocalOnlyTrueRejected":  true,
                    "allRequiredCasesCovered":  true,
                    "failedCasesAbsent":  true,
                    "noSecretScanPassed":  true,

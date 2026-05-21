@@ -210,6 +210,10 @@ Add-ReleaseValidationCase -Name "amount-mismatch-failed" -ExpectedStatus "failed
     param($release)
     $release.releaseCall.amount = "20000001"
 }
+Add-ReleaseValidationCase -Name "method-mismatch-failed" -ExpectedStatus "failed" -ExpectedExitZero $false -ExpectedProblem "release method mismatch" -MutateRelease {
+    param($release)
+    $release.releaseCall.method = "releaseETH"
+}
 Add-ReleaseValidationCase -Name "token-mismatch-failed" -ExpectedStatus "failed" -ExpectedExitZero $false -ExpectedProblem "token mismatch" -MutateRelease {
     param($release)
     $release.releaseCall.token = "0x5555555555555555555555555555555555555555"
@@ -233,6 +237,14 @@ Add-ReleaseValidationCase -Name "release-broadcast-rejected" -ExpectedStatus "fa
 Add-ReleaseValidationCase -Name "withdrawal-broadcast-rejected" -ExpectedStatus "failed" -ExpectedExitZero $false -ExpectedProblem "withdrawal intent must not be broadcast" -MutateWithdrawal {
     param($withdrawal)
     $withdrawal.broadcast = $true
+}
+Add-ReleaseValidationCase -Name "release-production-ready-false-rejected" -ExpectedStatus "failed" -ExpectedExitZero $false -ExpectedProblem "release evidence must claim production readiness for Base 8453" -MutateRelease {
+    param($release)
+    $release.productionReady = $false
+}
+Add-ReleaseValidationCase -Name "release-local-only-true-rejected" -ExpectedStatus "failed" -ExpectedExitZero $false -ExpectedProblem "release evidence must not be localOnly for Base 8453" -MutateRelease {
+    param($release)
+    $release.localOnly = $true
 }
 
 $preScanReport = [ordered]@{
@@ -260,12 +272,15 @@ $requiredCaseNames = @(
     "matching-release-evidence",
     "missing-inputs-blocked",
     "amount-mismatch-failed",
+    "method-mismatch-failed",
     "token-mismatch-failed",
     "recipient-mismatch-failed",
     "chain-mismatch-failed",
     "asset-mismatch-failed",
     "release-broadcast-rejected",
-    "withdrawal-broadcast-rejected"
+    "withdrawal-broadcast-rejected",
+    "release-production-ready-false-rejected",
+    "release-local-only-true-rejected"
 )
 $caseNames = @($cases | ForEach-Object { $_.name })
 $missingRequiredCases = @($requiredCaseNames | Where-Object { $_ -notin $caseNames })
@@ -275,12 +290,15 @@ $checks = [ordered]@{
     matchingEvidencePasses = @($cases | Where-Object { $_.name -eq "matching-release-evidence" -and $_.status -eq "passed" }).Count -eq 1
     missingInputsBlock = @($cases | Where-Object { $_.name -eq "missing-inputs-blocked" -and $_.status -eq "passed" }).Count -eq 1
     amountMismatchFails = @($cases | Where-Object { $_.name -eq "amount-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
+    methodMismatchFails = @($cases | Where-Object { $_.name -eq "method-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
     tokenMismatchFails = @($cases | Where-Object { $_.name -eq "token-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
     recipientMismatchFails = @($cases | Where-Object { $_.name -eq "recipient-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
     chainMismatchFails = @($cases | Where-Object { $_.name -eq "chain-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
     assetMismatchFails = @($cases | Where-Object { $_.name -eq "asset-mismatch-failed" -and $_.status -eq "passed" }).Count -eq 1
     releaseBroadcastRejected = @($cases | Where-Object { $_.name -eq "release-broadcast-rejected" -and $_.status -eq "passed" }).Count -eq 1
     withdrawalBroadcastRejected = @($cases | Where-Object { $_.name -eq "withdrawal-broadcast-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    releaseProductionReadyFalseRejected = @($cases | Where-Object { $_.name -eq "release-production-ready-false-rejected" -and $_.status -eq "passed" }).Count -eq 1
+    releaseLocalOnlyTrueRejected = @($cases | Where-Object { $_.name -eq "release-local-only-true-rejected" -and $_.status -eq "passed" }).Count -eq 1
     allRequiredCasesCovered = $missingRequiredCases.Count -eq 0
     failedCasesAbsent = $failedCases.Count -eq 0
     noSecretScanPassed = $scanExitCode -eq 0 -and $scanStatus -eq "passed" -and $scanFindings.Count -eq 0 -and $scanSecretFindings.Count -eq 0
