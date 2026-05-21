@@ -1155,7 +1155,7 @@ $definitions = @(
     },
     [ordered]@{
         id = "public-rpc-deployment-automation"
-        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, hashed artifact manifest, install/edge apply phases, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
+        requirement = "Public RPC deployment automation validates owner-host rendering of concrete Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, synthetic public RPC canary, hashed artifact manifest, concrete owner-host plan/apply/rollback script, install/edge apply phases, post-deploy verification, and rollback phases without host mutation or owner-value leakage."
         path = "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json"
         command = "npm run flowchain:public-rpc:deployment:automation"
         productionGate = $true
@@ -1193,6 +1193,10 @@ $definitions = @(
             "renderedReportKeepsOwnerPathsOutsideRepo",
             "renderedReportNoSecrets",
             "renderedReportBroadcastsFalse",
+            "renderedOwnerHostApplyScriptWritten",
+            "renderedOwnerHostApplyScriptHasPlanApplyRollback",
+            "renderedOwnerHostApplyScriptVerifiesHashes",
+            "renderedOwnerHostApplyScriptRunsPostDeployProof",
             "ownerHostApplyPlanPresent",
             "ownerHostApplyPlanSchema",
             "ownerHostApplyPlanRepoOwned",
@@ -1211,6 +1215,7 @@ $definitions = @(
             "ownerHostApplyPlanIncludesSystemdStatusCommand",
             "ownerHostApplyPlanIncludesSystemdUninstallRollback",
             "ownerHostApplyPlanIncludesNginxReload",
+            "ownerHostApplyPlanIncludesOwnerApplyScript",
             "ownerHostApplyPlanIncludesPostDeployEvidence",
             "ownerHostApplyPlanValuesPrintedFalse",
             "ownerHostApplyPlanEnvValuesPrintedFalse",

@@ -350,7 +350,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
         signal = "Public RPC edge deployment hardening evidence is missing or failed."
-        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, install/edge apply phases, post-deploy evidence, or rollback drill proof"
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, concrete owner-host apply script, plan/apply/rollback modes, artifact hash verification, install/edge apply phases, post-deploy evidence, or rollback drill proof"
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
@@ -447,6 +447,9 @@ $publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRule.Cou
     -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")
 $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("owner-host apply plan", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("concrete owner-host apply script", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("plan/apply/rollback", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("artifact hash verification", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("install/edge apply phases", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("post-deploy evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($publicRpcEdgeHardeningRule[0].commands) -contains "npm run flowchain:public-rpc:deployment:automation")

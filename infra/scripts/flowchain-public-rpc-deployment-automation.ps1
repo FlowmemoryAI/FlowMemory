@@ -208,6 +208,15 @@ function New-RenderedArtifactManifest {
             installCommand = "retain <FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json as owner-host evidence"
             verifyCommand = "npm run flowchain:public-rpc:deployment:automation"
             rollbackCommand = ""
+        },
+        [ordered]@{
+            fileName = "owner-host-apply.sh"
+            role = "owner-host-apply-script"
+            installRequired = $false
+            installTarget = "<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh"
+            installCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+            verifyCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+            rollbackCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback"
         }
     )
 
@@ -231,6 +240,126 @@ function New-RenderedArtifactManifest {
         [void]$manifest.Add($item)
     }
     return @($manifest)
+}
+
+function New-OwnerHostApplyScript {
+    param([Parameter(Mandatory = $true)][string] $TargetRenderDir)
+
+    $artifactNamesToVerifyBeforeApply = @(
+        "nginx-flowchain-rpc.conf",
+        "flowchain-live.service",
+        "flowchain-supervisor.service",
+        "nginx-preflight.sh",
+        "nginx-preflight.ps1",
+        "public-rpc-render-report.json"
+    )
+    $hashCommands = New-Object System.Collections.ArrayList
+    foreach ($name in $artifactNamesToVerifyBeforeApply) {
+        $path = Join-Path $TargetRenderDir $name
+        $hash = Get-DeploymentFileSha256 -Path $path
+        [void]$hashCommands.Add("verify_file '$name' '$hash'")
+    }
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    foreach ($line in @(
+            '#!/usr/bin/env bash',
+            'set -euo pipefail',
+            'ACTION="${1:-plan}"',
+            'RENDER_DIR="${FLOWCHAIN_DEPLOY_RENDER_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"',
+            'NGINX_TARGET="${FLOWCHAIN_NGINX_TARGET:-/etc/nginx/conf.d/flowchain-rpc.conf}"',
+            'PREVIOUS_NGINX="${FLOWCHAIN_PREVIOUS_NGINX_CONF:-${RENDER_DIR}/previous-nginx-flowchain-rpc.conf}"',
+            '',
+            'need_root() {',
+            '  if [ "$(id -u)" -ne 0 ]; then',
+            '    echo "owner-host apply requires root for systemd and nginx install actions" >&2',
+            '    exit 1',
+            '  fi',
+            '}',
+            '',
+            'verify_file() {',
+            '  local name="$1"',
+            '  local expected="$2"',
+            '  if [ -z "${expected}" ]; then',
+            '    echo "missing hash for ${name}" >&2',
+            '    exit 1',
+            '  fi',
+            '  printf "%s  %s/%s\n" "${expected}" "${RENDER_DIR}" "${name}" | sha256sum -c -',
+            '}',
+            '',
+            'verify_artifacts() {'
+        )) {
+        $lines.Add($line)
+    }
+    foreach ($command in @($hashCommands)) {
+        $lines.Add("  $command")
+    }
+    foreach ($line in @(
+            '}',
+            '',
+            'plan() {',
+            '  echo "FlowChain owner-host apply plan"',
+            '  echo "1. verify rendered artifact hashes"',
+            '  echo "2. verify systemd unit files"',
+            '  echo "3. install FlowChain systemd services"',
+            '  echo "4. back up and publish nginx RPC edge config"',
+            '  echo "5. run public RPC, tester gateway, cutover, truth-table, and no-secret proof commands"',
+            '  echo "6. use rollback mode if nginx/systemd install needs to be reverted"',
+            '}',
+            '',
+            'apply() {',
+            '  need_root',
+            '  verify_artifacts',
+            '  systemd-analyze verify "${RENDER_DIR}/flowchain-live.service"',
+            '  systemd-analyze verify "${RENDER_DIR}/flowchain-supervisor.service"',
+            '  npm run flowchain:service:install:systemd -- -Action Install -RenderDir "${RENDER_DIR}"',
+            '  npm run flowchain:service:install:systemd -- -Action Status',
+            '  npm run flowchain:service:status',
+            '  if [ -f "${NGINX_TARGET}" ]; then',
+            '    cp "${NGINX_TARGET}" "${PREVIOUS_NGINX}"',
+            '  fi',
+            '  install -m 0644 "${RENDER_DIR}/nginx-flowchain-rpc.conf" "${NGINX_TARGET}"',
+            '  nginx -t',
+            '  systemctl reload nginx',
+            '  bash "${RENDER_DIR}/nginx-preflight.sh"',
+            '  npm run flowchain:public-rpc:validate',
+            '  npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked',
+            '  npm run flowchain:public-rpc:abuse-test',
+            '  npm run flowchain:tester:gateway:e2e',
+            '  npm run flowchain:wallet:live-tester:e2e',
+            '  npm run flowchain:live:cutover:rehearsal -- -AllowBlocked',
+            '  npm run flowchain:truth-table -- -AllowBlocked',
+            '  npm run flowchain:no-secret:scan',
+            '}',
+            '',
+            'rollback() {',
+            '  need_root',
+            '  systemctl stop flowchain-supervisor.service || true',
+            '  systemctl stop flowchain-live.service || true',
+            '  npm run flowchain:service:install:systemd -- -Action Uninstall || true',
+            '  if [ -f "${PREVIOUS_NGINX}" ]; then',
+            '    cp "${PREVIOUS_NGINX}" "${NGINX_TARGET}"',
+            '    nginx -t',
+            '    systemctl reload nginx',
+            '  fi',
+            '  npm run flowchain:ops:snapshot -- -AllowBlocked || true',
+            '}',
+            '',
+            'case "${ACTION}" in',
+            '  plan) plan ;;',
+            '  apply) apply ;;',
+            '  rollback) rollback ;;',
+            '  *) echo "usage: owner-host-apply.sh [plan|apply|rollback]" >&2; exit 2 ;;',
+            'esac'
+        )) {
+        $lines.Add($line)
+    }
+
+    $scriptPath = Join-Path $TargetRenderDir "owner-host-apply.sh"
+    $scriptText = ($lines -join [Environment]::NewLine) + [Environment]::NewLine
+    Assert-FlowChainNoSecretText -Text $scriptText -Label "public RPC owner-host apply script"
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($scriptPath, $scriptText, $utf8NoBom)
+    return $scriptPath
 }
 
 function New-OwnerHostApplyPlan {
@@ -257,6 +386,8 @@ function New-OwnerHostApplyPlan {
     $systemdStatusCommand = "npm run flowchain:service:install:systemd -- -Action Status"
     $systemdRollbackCommand = "npm run flowchain:service:install:systemd -- -Action Uninstall"
     $nginxReloadCommand = "systemctl reload nginx"
+    $ownerHostApplyScriptPlanCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+    $ownerHostApplyScriptRollbackCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback"
     $rollbackCommands = @(
         "npm run flowchain:ops:snapshot -- -AllowBlocked",
         "npm run flowchain:service:status",
@@ -268,6 +399,7 @@ function New-OwnerHostApplyPlan {
         $nginxReloadCommand,
         "systemctl restart flowchain-live.service",
         "systemctl restart flowchain-supervisor.service",
+        $ownerHostApplyScriptRollbackCommand,
         "npm run flowchain:emergency:stop-local"
     )
 
@@ -304,7 +436,8 @@ function New-OwnerHostApplyPlan {
                     "systemd-analyze verify <FLOWCHAIN_DEPLOY_RENDER_DIR>/flowchain-supervisor.service",
                     "nginx -t",
                     "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh",
-                    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1"
+                    "powershell -NoProfile -ExecutionPolicy Bypass -File <FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1",
+                    $ownerHostApplyScriptPlanCommand
                 )
                 expectedReportPaths = @("docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json")
             },
@@ -388,6 +521,8 @@ function Test-OwnerHostApplyPlan {
     $systemdStatusCommand = "npm run flowchain:service:install:systemd -- -Action Status"
     $systemdRollbackCommand = "npm run flowchain:service:install:systemd -- -Action Uninstall"
     $nginxReloadCommand = "systemctl reload nginx"
+    $ownerHostApplyScriptPlanCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh plan"
+    $ownerHostApplyScriptRollbackCommand = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback"
     $expectedReports = @((Get-DeployProp -Object $Plan -Name "expectedReportPaths" -Default @()) | ForEach-Object { "$_" })
     $artifactNames = @($artifacts | ForEach-Object { "$($_.fileName)" })
     $artifactHashes = @($artifacts | ForEach-Object { "$($_.sha256)" })
@@ -398,7 +533,8 @@ function Test-OwnerHostApplyPlan {
         "flowchain-supervisor.service",
         "nginx-preflight.sh",
         "nginx-preflight.ps1",
-        "public-rpc-render-report.json"
+        "public-rpc-render-report.json",
+        "owner-host-apply.sh"
     )
     $requiredPhaseIds = @(
         "render-owner-files",
@@ -426,7 +562,7 @@ function Test-OwnerHostApplyPlan {
         ownerHostApplyPlanSchema = [string](Get-DeployProp -Object $Plan -Name "schema" -Default "") -eq "flowchain.public_rpc_owner_host_apply_plan.v1"
         ownerHostApplyPlanRepoOwned = (Get-DeployProp -Object $Plan -Name "flowChainRpcIsRepoOwned" -Default $false) -eq $true
         ownerHostApplyPlanPrivateOrigin = [string](Get-DeployProp -Object $Plan -Name "privateOrigin" -Default "") -eq "127.0.0.1:8787"
-        ownerHostApplyPlanArtifactManifestCount = $artifacts.Count -eq 6
+        ownerHostApplyPlanArtifactManifestCount = $artifacts.Count -eq 7
         ownerHostApplyPlanAllArtifactsListed = @($requiredArtifactNames | Where-Object { $_ -notin $artifactNames }).Count -eq 0
         ownerHostApplyPlanArtifactsExist = @($artifacts | Where-Object { $_.exists -ne $true }).Count -eq 0
         ownerHostApplyPlanArtifactsHaveSha256 = @($artifactHashes | Where-Object { $_ -notmatch '^[a-f0-9]{64}$' }).Count -eq 0
@@ -440,6 +576,7 @@ function Test-OwnerHostApplyPlan {
         ownerHostApplyPlanIncludesSystemdStatusCommand = $systemdStatusCommand -in $commands
         ownerHostApplyPlanIncludesSystemdUninstallRollback = $systemdRollbackCommand -in $rollbackCommands
         ownerHostApplyPlanIncludesNginxReload = $nginxReloadCommand -in $commands -and $nginxReloadCommand -in $rollbackCommands
+        ownerHostApplyPlanIncludesOwnerApplyScript = "owner-host-apply.sh" -in $artifactNames -and $ownerHostApplyScriptPlanCommand -in $commands -and $ownerHostApplyScriptRollbackCommand -in $rollbackCommands
         ownerHostApplyPlanIncludesPostDeployEvidence = @($requiredEvidence | Where-Object { $_ -notin $expectedReports }).Count -eq 0
         ownerHostApplyPlanValuesPrintedFalse = (Get-DeployProp -Object $Plan -Name "valuesPrinted" -Default $true) -eq $false
         ownerHostApplyPlanEnvValuesPrintedFalse = (Get-DeployProp -Object $Plan -Name "envValuesPrinted" -Default $true) -eq $false
@@ -543,12 +680,14 @@ function Test-RenderedDeployment {
     $renderedShellPreflightPath = Join-Path $TargetRenderDir "nginx-preflight.sh"
     $renderedWindowsPreflightPath = Join-Path $TargetRenderDir "nginx-preflight.ps1"
     $renderedReportPath = Join-Path $TargetRenderDir "public-rpc-render-report.json"
+    $renderedOwnerHostApplyScriptPath = New-OwnerHostApplyScript -TargetRenderDir $TargetRenderDir
     $renderedPaths = @(
         $renderedNginxPath,
         $renderedLiveUnitPath,
         $renderedSupervisorUnitPath,
         $renderedShellPreflightPath,
-        $renderedWindowsPreflightPath
+        $renderedWindowsPreflightPath,
+        $renderedOwnerHostApplyScriptPath
     )
 
     $renderedTexts = @()
@@ -574,6 +713,10 @@ function Test-RenderedDeployment {
         renderedSystemdSupervisorWritten = Test-Path -LiteralPath $renderedSupervisorUnitPath
         renderedShellPreflightWritten = Test-Path -LiteralPath $renderedShellPreflightPath
         renderedWindowsPreflightWritten = Test-Path -LiteralPath $renderedWindowsPreflightPath
+        renderedOwnerHostApplyScriptWritten = Test-Path -LiteralPath $renderedOwnerHostApplyScriptPath
+        renderedOwnerHostApplyScriptHasPlanApplyRollback = $renderedAllText.Contains('owner-host-apply.sh [plan|apply|rollback]') -and $renderedAllText.Contains('apply() {') -and $renderedAllText.Contains('rollback() {')
+        renderedOwnerHostApplyScriptVerifiesHashes = $renderedAllText.Contains('sha256sum -c -') -and $renderedAllText.Contains("verify_file 'nginx-flowchain-rpc.conf'") -and $renderedAllText.Contains("verify_file 'flowchain-live.service'") -and $renderedAllText.Contains("verify_file 'public-rpc-render-report.json'")
+        renderedOwnerHostApplyScriptRunsPostDeployProof = $renderedAllText.Contains('flowchain:public-rpc:synthetic-canary') -and $renderedAllText.Contains('flowchain:live:cutover:rehearsal') -and $renderedAllText.Contains('flowchain:truth-table') -and $renderedAllText.Contains('flowchain:no-secret:scan')
         renderedReportWritten = Test-Path -LiteralPath $renderedReportPath
         renderedReportPassed = $null -ne $renderReport -and [string](Get-DeployProp -Object $renderReport -Name "status" -Default "missing") -eq "passed"
         renderedReportAllowedOriginCountPresent = $null -ne $renderReport -and [int](Get-DeployProp -Object $renderReport -Name "allowedOriginCount" -Default 0) -ge 1
@@ -848,7 +991,8 @@ if ($Action -eq "Validate" -or $Action -eq "Render") {
     }
     $checks.renderedReportSummaryPresent = $null -ne $rendered.renderedReportSummary
     $checks.renderedReportSummaryPassed = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.status -eq "passed"
-    $checks.renderedReportSummaryListsFiles = $null -ne $rendered.renderedReportSummary -and [int]$rendered.renderedReportSummary.renderedFileCount -eq @($rendered.renderedFileNames).Count
+    $renderReportBackedFileCount = @($rendered.renderedFileNames | Where-Object { "$_" -ne "owner-host-apply.sh" }).Count
+    $checks.renderedReportSummaryListsFiles = $null -ne $rendered.renderedReportSummary -and [int]$rendered.renderedReportSummary.renderedFileCount -eq $renderReportBackedFileCount
     $checks.renderedReportSummaryHasRequiredEnvNames = $null -ne $rendered.renderedReportSummary -and [int]$rendered.renderedReportSummary.requiredEnvNameCount -eq 8
     $checks.renderedReportSummaryNoSecrets = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.noSecrets -eq $true -and $rendered.renderedReportSummary.envValuesPrinted -eq $false
     $checks.renderedReportSummaryBroadcastsFalse = $null -ne $rendered.renderedReportSummary -and $rendered.renderedReportSummary.broadcasts -eq $false

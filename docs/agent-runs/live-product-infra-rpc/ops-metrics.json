@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T00:44:06.7682119Z",
+    "generatedAt":  "2026-05-21T01:47:22.5206570Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -455,6 +455,36 @@
                         "name":  "flowchain_public_rpc_owner_host_apply_plan_ready",
                         "type":  "gauge",
                         "help":  "One when public RPC deployment automation includes a complete owner-host apply plan.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_script_rendered",
+                        "type":  "gauge",
+                        "help":  "One when public RPC deployment automation renders a concrete owner-host apply script.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_script_modes",
+                        "type":  "gauge",
+                        "help":  "One when the owner-host apply script includes plan, apply, and rollback modes.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_script_hashes",
+                        "type":  "gauge",
+                        "help":  "One when the owner-host apply script verifies rendered artifact hashes before host mutation.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_script_post_deploy",
+                        "type":  "gauge",
+                        "help":  "One when the owner-host apply script runs post-deploy public RPC and truth proof commands.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_owner_host_apply_script_in_plan",
+                        "type":  "gauge",
+                        "help":  "One when the owner-host apply plan lists the generated apply script and rollback command.",
                         "value":  1
                     },
                     {
@@ -1736,7 +1766,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  284,
+    "metricCount":  289,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

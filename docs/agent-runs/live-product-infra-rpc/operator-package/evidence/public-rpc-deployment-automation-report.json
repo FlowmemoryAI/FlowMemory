@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-21T00:08:52.4694960Z",
+    "generatedAt":  "2026-05-21T01:47:06.8564712Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -37,6 +37,10 @@
                    "renderedSystemdSupervisorWritten":  true,
                    "renderedShellPreflightWritten":  true,
                    "renderedWindowsPreflightWritten":  true,
+                   "renderedOwnerHostApplyScriptWritten":  true,
+                   "renderedOwnerHostApplyScriptHasPlanApplyRollback":  true,
+                   "renderedOwnerHostApplyScriptVerifiesHashes":  true,
+                   "renderedOwnerHostApplyScriptRunsPostDeployProof":  true,
                    "renderedReportWritten":  true,
                    "renderedReportPassed":  true,
                    "renderedReportAllowedOriginCountPresent":  true,
@@ -85,6 +89,7 @@
                    "ownerHostApplyPlanIncludesSystemdStatusCommand":  true,
                    "ownerHostApplyPlanIncludesSystemdUninstallRollback":  true,
                    "ownerHostApplyPlanIncludesNginxReload":  true,
+                   "ownerHostApplyPlanIncludesOwnerApplyScript":  true,
                    "ownerHostApplyPlanIncludesPostDeployEvidence":  true,
                    "ownerHostApplyPlanValuesPrintedFalse":  true,
                    "ownerHostApplyPlanEnvValuesPrintedFalse":  true,
@@ -113,7 +118,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68004-de004ea0d4564694b3aee83dad75ff6d\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-80456-b94726e6e6254ab5b65c173f48b05450\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -131,8 +136,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68004-de004ea0d4564694b3aee83dad75ff6d\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-68004-de004ea0d4564694b3aee83dad75ff6d\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-80456-b94726e6e6254ab5b65c173f48b05450\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-80456-b94726e6e6254ab5b65c173f48b05450\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [
@@ -140,7 +145,8 @@
                               "flowchain-live.service",
                               "flowchain-supervisor.service",
                               "nginx-preflight.sh",
-                              "nginx-preflight.ps1"
+                              "nginx-preflight.ps1",
+                              "owner-host-apply.sh"
                           ],
     "renderedArtifactManifest":  [
                                      {
@@ -154,7 +160,7 @@
                                          "rollbackCommand":  "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e /etc/nginx/conf.d/flowchain-rpc.conf",
                                          "exists":  true,
                                          "sizeBytes":  3959,
-                                         "sha256":  "279fb60b8ceadfc6dc9888debb4492773ae2692bca6dba104cde98f7654ffcc4"
+                                         "sha256":  "59a07f3c423810bd68d3bbc082ccf38d15615b620edb793b9b84e53323556e06"
                                      },
                                      {
                                          "fileName":  "flowchain-live.service",
@@ -167,7 +173,7 @@
                                          "rollbackCommand":  "systemctl stop flowchain-live.service",
                                          "exists":  true,
                                          "sizeBytes":  1492,
-                                         "sha256":  "3e02caf2c1ff3325d6b351eff8a94a6c695d6bad884c8b78cebf4f23931b7895"
+                                         "sha256":  "1e926d409e65fecdafff6a5b019ac12dea548fe90bba8f5f888ecd3414d579d1"
                                      },
                                      {
                                          "fileName":  "flowchain-supervisor.service",
@@ -180,7 +186,7 @@
                                          "rollbackCommand":  "systemctl stop flowchain-supervisor.service",
                                          "exists":  true,
                                          "sizeBytes":  1354,
-                                         "sha256":  "81ba0770c62323e5e8f8ba595d94a8151bbb61c41b13ad6f93f96bf5a64a5ea5"
+                                         "sha256":  "256e40b39d17c1f9b42ac1b344c2f28c90207edd0be5bb3f71466d3002c326b3"
                                      },
                                      {
                                          "fileName":  "nginx-preflight.sh",
@@ -193,7 +199,7 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  4079,
-                                         "sha256":  "39fcd66f89cd0fd4ba95123b3fab830e152da1f3c53fb2b855b4253d6ed4b60e"
+                                         "sha256":  "6cbf808f13109353c7aa7ec7b48465a639d965a1ef209ab8b2fa8ffb4381bae0"
                                      },
                                      {
                                          "fileName":  "nginx-preflight.ps1",
@@ -206,7 +212,7 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  6809,
-                                         "sha256":  "9ab77bbcf540fb492e425f500577de983a5ef04ffb9a3cb73fd314acca0d2713"
+                                         "sha256":  "1126e778be3ca6256bc3f1c985b3e750e8a07baff60f2f908258688a303f191b"
                                      },
                                      {
                                          "fileName":  "public-rpc-render-report.json",
@@ -219,7 +225,20 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  1228,
-                                         "sha256":  "7861664c3aa249126f43056eeb47a58c2f9eda40f7e2404a4def73d1af44c30a"
+                                         "sha256":  "c8f3dee71c5609c1f378143a7e6c35fd6add305cdfcc13c6815ca0788d4e78ce"
+                                     },
+                                     {
+                                         "fileName":  "owner-host-apply.sh",
+                                         "relativePath":  "owner-host-apply.sh",
+                                         "role":  "owner-host-apply-script",
+                                         "installRequired":  false,
+                                         "installTarget":  "\u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh",
+                                         "installCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                         "verifyCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                         "rollbackCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
+                                         "exists":  true,
+                                         "sizeBytes":  3393,
+                                         "sha256":  "a3f3211f4c72495f779980ab3e14fe6658adba72c19c560151218effb69572cc"
                                      }
                                  ],
     "renderedReportPath":  "",
@@ -279,7 +298,7 @@
                                                             "rollbackCommand":  "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e /etc/nginx/conf.d/flowchain-rpc.conf",
                                                             "exists":  true,
                                                             "sizeBytes":  3959,
-                                                            "sha256":  "279fb60b8ceadfc6dc9888debb4492773ae2692bca6dba104cde98f7654ffcc4"
+                                                            "sha256":  "59a07f3c423810bd68d3bbc082ccf38d15615b620edb793b9b84e53323556e06"
                                                         },
                                                         {
                                                             "fileName":  "flowchain-live.service",
@@ -292,7 +311,7 @@
                                                             "rollbackCommand":  "systemctl stop flowchain-live.service",
                                                             "exists":  true,
                                                             "sizeBytes":  1492,
-                                                            "sha256":  "3e02caf2c1ff3325d6b351eff8a94a6c695d6bad884c8b78cebf4f23931b7895"
+                                                            "sha256":  "1e926d409e65fecdafff6a5b019ac12dea548fe90bba8f5f888ecd3414d579d1"
                                                         },
                                                         {
                                                             "fileName":  "flowchain-supervisor.service",
@@ -305,7 +324,7 @@
                                                             "rollbackCommand":  "systemctl stop flowchain-supervisor.service",
                                                             "exists":  true,
                                                             "sizeBytes":  1354,
-                                                            "sha256":  "81ba0770c62323e5e8f8ba595d94a8151bbb61c41b13ad6f93f96bf5a64a5ea5"
+                                                            "sha256":  "256e40b39d17c1f9b42ac1b344c2f28c90207edd0be5bb3f71466d3002c326b3"
                                                         },
                                                         {
                                                             "fileName":  "nginx-preflight.sh",
@@ -318,7 +337,7 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  4079,
-                                                            "sha256":  "39fcd66f89cd0fd4ba95123b3fab830e152da1f3c53fb2b855b4253d6ed4b60e"
+                                                            "sha256":  "6cbf808f13109353c7aa7ec7b48465a639d965a1ef209ab8b2fa8ffb4381bae0"
                                                         },
                                                         {
                                                             "fileName":  "nginx-preflight.ps1",
@@ -331,7 +350,7 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  6809,
-                                                            "sha256":  "9ab77bbcf540fb492e425f500577de983a5ef04ffb9a3cb73fd314acca0d2713"
+                                                            "sha256":  "1126e778be3ca6256bc3f1c985b3e750e8a07baff60f2f908258688a303f191b"
                                                         },
                                                         {
                                                             "fileName":  "public-rpc-render-report.json",
@@ -344,7 +363,20 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  1228,
-                                                            "sha256":  "7861664c3aa249126f43056eeb47a58c2f9eda40f7e2404a4def73d1af44c30a"
+                                                            "sha256":  "c8f3dee71c5609c1f378143a7e6c35fd6add305cdfcc13c6815ca0788d4e78ce"
+                                                        },
+                                                        {
+                                                            "fileName":  "owner-host-apply.sh",
+                                                            "relativePath":  "owner-host-apply.sh",
+                                                            "role":  "owner-host-apply-script",
+                                                            "installRequired":  false,
+                                                            "installTarget":  "\u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh",
+                                                            "installCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                                            "verifyCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
+                                                            "rollbackCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
+                                                            "exists":  true,
+                                                            "sizeBytes":  3393,
+                                                            "sha256":  "a3f3211f4c72495f779980ab3e14fe6658adba72c19c560151218effb69572cc"
                                                         }
                                                     ],
                                "installPhases":  [
@@ -360,7 +392,8 @@
                                                                                    "flowchain-supervisor.service",
                                                                                    "nginx-preflight.sh",
                                                                                    "nginx-preflight.ps1",
-                                                                                   "public-rpc-render-report.json"
+                                                                                   "public-rpc-render-report.json",
+                                                                                   "owner-host-apply.sh"
                                                                                ]
                                                      },
                                                      {
@@ -374,7 +407,8 @@
                                                                           "systemd-analyze verify \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/flowchain-supervisor.service",
                                                                           "nginx -t",
                                                                           "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/nginx-preflight.sh",
-                                                                          "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/nginx-preflight.ps1"
+                                                                          "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/nginx-preflight.ps1",
+                                                                          "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan"
                                                                       ],
                                                          "expectedReportPaths":  [
                                                                                      "docs/agent-runs/live-product-infra-rpc/systemd-service-install-validation-report.json"
@@ -459,6 +493,7 @@
                                                                                   "systemctl reload nginx",
                                                                                   "systemctl restart flowchain-live.service",
                                                                                   "systemctl restart flowchain-supervisor.service",
+                                                                                  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
                                                                                   "npm run flowchain:emergency:stop-local"
                                                                               ]
                                                      }
@@ -488,6 +523,7 @@
                                                         "systemctl reload nginx",
                                                         "systemctl restart flowchain-live.service",
                                                         "systemctl restart flowchain-supervisor.service",
+                                                        "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
                                                         "npm run flowchain:emergency:stop-local"
                                                     ],
                                "valuesPrinted":  false,

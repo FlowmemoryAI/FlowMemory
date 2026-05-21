@@ -211,6 +211,21 @@ flowchain_public_rpc_command_plan_no_secret_scan 1
 # HELP flowchain_public_rpc_owner_host_apply_plan_ready One when public RPC deployment automation includes a complete owner-host apply plan.
 # TYPE flowchain_public_rpc_owner_host_apply_plan_ready gauge
 flowchain_public_rpc_owner_host_apply_plan_ready 1
+# HELP flowchain_public_rpc_owner_host_apply_script_rendered One when public RPC deployment automation renders a concrete owner-host apply script.
+# TYPE flowchain_public_rpc_owner_host_apply_script_rendered gauge
+flowchain_public_rpc_owner_host_apply_script_rendered 1
+# HELP flowchain_public_rpc_owner_host_apply_script_modes One when the owner-host apply script includes plan, apply, and rollback modes.
+# TYPE flowchain_public_rpc_owner_host_apply_script_modes gauge
+flowchain_public_rpc_owner_host_apply_script_modes 1
+# HELP flowchain_public_rpc_owner_host_apply_script_hashes One when the owner-host apply script verifies rendered artifact hashes before host mutation.
+# TYPE flowchain_public_rpc_owner_host_apply_script_hashes gauge
+flowchain_public_rpc_owner_host_apply_script_hashes 1
+# HELP flowchain_public_rpc_owner_host_apply_script_post_deploy One when the owner-host apply script runs post-deploy public RPC and truth proof commands.
+# TYPE flowchain_public_rpc_owner_host_apply_script_post_deploy gauge
+flowchain_public_rpc_owner_host_apply_script_post_deploy 1
+# HELP flowchain_public_rpc_owner_host_apply_script_in_plan One when the owner-host apply plan lists the generated apply script and rollback command.
+# TYPE flowchain_public_rpc_owner_host_apply_script_in_plan gauge
+flowchain_public_rpc_owner_host_apply_script_in_plan 1
 # HELP flowchain_public_rpc_owner_host_artifacts_hashed One when public RPC owner-host rendered artifacts have SHA256 hashes.
 # TYPE flowchain_public_rpc_owner_host_artifacts_hashed gauge
 flowchain_public_rpc_owner_host_artifacts_hashed 1

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_render_report_snapshot.v1",
-    "generatedAt":  "2026-05-21T00:08:52.3981302Z",
+    "generatedAt":  "2026-05-21T01:47:06.7864714Z",
     "source":  "flowchain-public-rpc-deployment-automation Validate",
     "renderReportSummary":  {
                                 "schema":  "flowchain.public_rpc_owner_render_report.v0",
@@ -36,7 +36,8 @@
                               "flowchain-live.service",
                               "flowchain-supervisor.service",
                               "nginx-preflight.sh",
-                              "nginx-preflight.ps1"
+                              "nginx-preflight.ps1",
+                              "owner-host-apply.sh"
                           ],
     "valuesPrinted":  false,
     "envValuesPrinted":  false,

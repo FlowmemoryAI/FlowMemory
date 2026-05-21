@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T00:44:05.8051916Z",
+    "generatedAt":  "2026-05-21T01:47:15.5402787Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -592,7 +592,7 @@
                                            "public-rpc-edge-hardening-failed"
                                        ],
                       "signal":  "Public RPC edge deployment hardening evidence is missing or failed.",
-                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, install/edge apply phases, post-deploy evidence, or rollback drill proof",
+                      "threshold":  "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, concrete owner-host apply script, plan/apply/rollback modes, artifact hash verification, install/edge apply phases, post-deploy evidence, or rollback drill proof",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment-bundle",
                                        "npm run flowchain:public-rpc:deployment:automation",
