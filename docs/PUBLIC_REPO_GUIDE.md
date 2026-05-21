@@ -2,20 +2,21 @@
 
 Status: public-reader guide for the current local/test repository release.
 
-FlowMemory is a Base-native AI memory, Rootflow, public-agent-network, FlowChain local/test, and FlowRouter research repository. It is public so builders, reviewers, and operators can inspect the work, reproduce the local flows, and see the exact gaps that remain. It is not a production deployment, not an audited network, and not a mainnet-readiness claim.
+FlowMemory is a Base-native agent memory and accountability protocol workbench. It is public so builders, reviewers, and operators can inspect the agent-memory, Agent Bonds, public-agent, service, SDK, and dashboard surfaces; reproduce the local flows; and see the exact gaps that remain. Separate chain-devnet research also exists in this repository, but it is not the public-reader starting point.
 
 ## The Short Version
 
-FlowMemory makes agent memory explicit and replayable without pretending heavy AI state belongs on-chain.
+FlowMemory makes agent work explicit, replayable, and economically accountable without pretending heavy AI state belongs on-chain.
 
 The repository currently contains:
 
 - local/test Solidity contracts for FlowPulse, Rootfield, Base on-chain agent memory, Agent Bonds, and the public-agent network;
 - fixture-first indexer, verifier, Flow Memory, control-plane, SDK, and dashboard packages;
 - deterministic Rootflow and Flow Memory V0 fixtures;
-- a local no-value FlowChain devnet prototype;
+- signed Agent Bonds quote attestations, recourse-policy fixtures, and requester quote/create SDK helpers;
 - a public-agent launch and swarm stack with Foundry tests and a local e2e script;
-- public docs that describe what exists, what does not, and what must be verified before broader claims are allowed.
+- FlowRouter hardware/resilience research materials;
+- public docs that describe what exists, what works locally, and what must be verified before broader value-bearing claims are allowed.
 
 ## How The Pieces Fit Together
 
@@ -47,24 +48,46 @@ registered class + approved tool set
 | --- | --- |
 | Understand the repo boundary | `README.md`, `docs/CURRENT_STATE.md`, `docs/MARKETING_CLAIMS_GUARDRAILS.md` |
 | Understand the public-agent release | `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`, `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` |
+| Test what works locally | `docs/PUBLIC_TESTER_GUIDE.md` |
 | See exactly what is still missing | `docs/PUBLIC_RELEASE_GAPS.md` and GitHub issues #164-#168 |
 | Understand Base on-chain agent memory | `docs/base-onchain-agent-memory/README.md` |
 | Understand Rootflow and Flow Memory V0 | `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, `docs/V0_LAUNCH_ACCEPTANCE.md` |
 | Operate or contribute safely | `AGENTS.md`, `docs/START_HERE.md`, `CONTRIBUTING.md`, `SECURITY.md` |
 | Check deployment and claim boundaries | `docs/PRODUCTION_READINESS_CHECKLIST.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, `contracts/ACCESS_CONTROL_REVIEW.md` |
 
+## Public Tester Commands
+
+Start with the low-friction lane:
+
+```powershell
+npm run public:test:quick
+```
+
+Then add the lanes that match your local tools:
+
+```powershell
+npm run public:test:contracts
+npm run public:test:e2e
+npm run public:test:dashboard
+```
+
+The full public local pass is:
+
+```powershell
+npm run public:test:all
+```
+
+See `docs/PUBLIC_TESTER_GUIDE.md` for expected results, CLI/control-plane commands, dashboard review prompts, and the tester-report template.
+
 ## Verification Commands
 
-Run the checks for the area you are inspecting. The broad local/test confidence path is:
+Run the checks for the area you are inspecting. The broad public confidence path is:
 
 ```powershell
 npm test
-npm run contracts:hardening
-npm run launch:candidate
-npm run public-agent-network:contracts
-npm run public-agent-network:local-e2e
-npm test --prefix apps/dashboard
-npm run build --prefix apps/dashboard
+npm run build:production
+npm run flowmemory:agent-bonds:phase2
+npm run flowmemory:agent-bonds:readiness
 node infra/scripts/check-unsafe-claims.mjs
 git diff --check
 ```
@@ -82,7 +105,7 @@ Some checks require local tools such as Foundry, Rust, dashboard dependencies, o
 | `services/verifier/` | Local/test verifier reports and status projection. |
 | `services/flowmemory/` | Launch-core generation, public-agent helpers, Agent Bonds helpers, and deterministic fixture builders. |
 | `services/control-plane/` | Local JSON-RPC style control-plane methods and smoke client. |
-| `services/flowchain-sdk/` | FlowChain client and CLI wrappers. |
+| `services/flowchain-sdk/` | Client and CLI wrappers for the separate chain-devnet research track; not required for the main public quickstart. |
 | `services/agent-memory-sdk/` | Agent-memory client for fixture-backed and local control-plane flows. |
 | `apps/dashboard/` | Vite/React fixture-backed dashboard and public-network projection views. |
 | `fixtures/` | Deterministic local/test outputs used by services and dashboard. |

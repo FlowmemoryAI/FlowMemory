@@ -100,6 +100,7 @@ FlowMemory should be better at the narrower kernel:
 - [SDK Reference](./SDK_REFERENCE.md) — fixture-backed client API for the first task-scout proof.
 - [Acceptance Matrix](./ACCEPTANCE_MATRIX.md) — what must be true before claiming the workstream is complete.
 - [Public Repository Guide](../PUBLIC_REPO_GUIDE.md) — top-level public reader map, repo layout, trust boundary, verification commands, and gap links.
+- [Public Tester Guide](../PUBLIC_TESTER_GUIDE.md) — external tester lanes, expected results, CLI/control-plane trial, and report template.
 - [Public Agent Network Technical Guide](../PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md) — current implementation guide across contracts, helpers, control-plane, SDK, dashboard, tests, and issues.
 - [Public Agent Network Architecture](./PUBLIC_AGENT_NETWORK_ARCHITECTURE.md) — exact public-launch contract, factory, token, and swarm architecture.
 - [GPT Public Agent Network Draft](./GPT_PUBLIC_AGENT_NETWORK_DRAFT.md) — creative external architecture draft captured after prompting GPT with FlowMemory's public-launch context.

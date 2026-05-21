@@ -1,0 +1,84 @@
+name: Public Tester Report
+description: Report results from public FlowMemory tester lanes.
+title: "[Public Tester]: "
+labels:
+  - public-tester
+  - tester-report
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing FlowMemory. Do not include private keys, seed phrases, RPC credentials, API keys, webhook URLs, wallet secrets, or private user data.
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Tester Lane
+      description: Which public tester lane did you run?
+      options:
+        - Quick JS smoke
+        - Public-agent contracts
+        - Local public-agent e2e
+        - Dashboard workbench
+        - CLI / control-plane trial
+        - Documentation review
+        - Other public local/test path
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, shell, Node/npm versions, Foundry version if relevant, browser if relevant.
+      placeholder: |
+        OS: Windows 11
+        Shell: PowerShell 7
+        Node: v22.x
+        npm: 10.x
+        Forge: 1.x
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands Run
+      description: Exact commands, in order.
+      placeholder: |
+        npm install
+        npm run public:test:quick
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Passed
+        - Failed
+        - Partially passed
+        - Documentation unclear
+        - Could not run because prerequisite was missing
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence Or First Useful Error
+      description: Include the first useful error, short logs, screenshot notes, or returned JSON shape. Do not paste huge logs.
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Or Suggested Improvement
+      description: What should have happened, or what would make this easier to test/use?
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety Check
+      options:
+        - label: I did not include private keys, seed phrases, RPC credentials, API keys, webhook URLs, wallet secrets, or private user data.
+          required: true
+        - label: I understand this is local/test public infrastructure, not a production/mainnet readiness claim.
+          required: true

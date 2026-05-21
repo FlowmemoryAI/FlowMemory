@@ -124,6 +124,8 @@ It shows public network primitives and deterministic local projections. Live eve
 
 ## 7. Local Verification
 
+For external tester lanes and expected results, see `docs/PUBLIC_TESTER_GUIDE.md`.
+
 Public-agent contract suites:
 
 ```powershell

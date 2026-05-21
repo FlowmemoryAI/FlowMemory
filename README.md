@@ -1,264 +1,194 @@
 # FlowMemory
 
-FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentralized hardware, and future appchain/L1 research project.
+**FlowMemory is the accountability layer for autonomous agents.**
 
-This repository contains the FlowMemory V0 foundation: project operating docs, local/test contracts, fixture-first services, Rootflow and Flow Memory launch-core generation, a fixture-backed dashboard, crypto helpers, a local no-value devnet prototype, public-agent network contracts, Agent Bonds surfaces, and FlowRouter hardware POC materials. Treat it as public local/test infrastructure, not as a production deployment or audited network.
+Agents are becoming economic actors: they take tasks, call tools, spend budgets, produce artifacts, and need a memory trail other systems can inspect. FlowMemory turns that work into replayable receipts, compact on-chain commitments, verifier reports, reputation state, and task-scoped recourse records.
 
-Start with the public documentation map in `docs/PUBLIC_REPO_GUIDE.md`. Public-agent release status and open gaps are tracked in `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` and `docs/PUBLIC_RELEASE_GAPS.md`.
+The public repo is built around one core idea:
 
-## What FlowMemory Is Exploring
+> **Agent work should leave a memory trail that can be priced, challenged, replayed, and reused.**
 
-- Base and future Uniswap v4 hook integrations
-- FlowPulse event schema v0 and future event expansion
-- Rootflow and Rootfield state commitments
-- AI memory and neural geometry research
-- FlowRouter decentralized internet hardware
-- Meshtastic and LoRa sidecar signaling
-- 3D-printed hardware enclosures
-- Dashboard, explorer, and hardware console applications
-- Indexer, verifier, and worker services
-- Cryptographic receipts, attestations, roots, and proofs
-- Future FlowMemory appchain/L1 research
+FlowMemory is not “AI memory” as vague storage. It is a protocol workbench for **Proof-of-Useful-Memory**: agent actions, task outcomes, evidence roots, execution receipts, and reputation signals that can move across applications.
 
-## Documentation For Public Readers
+## What Is In The Public Repo
 
-| Reader goal | Start here |
+FlowMemory currently ships a local/test implementation of the main protocol surfaces:
+
+| Surface | What it does |
 | --- | --- |
-| Understand what this repository contains | `docs/PUBLIC_REPO_GUIDE.md` |
-| Understand the public-agent network end-to-end | `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` |
-| See release status and verification commands | `docs/PUBLIC_AGENT_NETWORK_RELEASE.md` |
-| See missing work and tracking issues | `docs/PUBLIC_RELEASE_GAPS.md` |
-| Understand Base on-chain agent memory | `docs/base-onchain-agent-memory/README.md` |
-| Understand contribution and security rules | `CONTRIBUTING.md`, `SECURITY.md` |
+| **FlowPulse** | Event spine for protocol activity, task lifecycle events, memory updates, and reliability checkpoints. |
+| **Rootflow / Rootfield** | State-transition and commitment layers for replayable agent memory. |
+| **Flow Memory V0** | Generates MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView objects from receipts and verifier reports. |
+| **Base On-Chain Agent Memory** | Bounded agent runtime that previews deterministic next steps, commits compact memory deltas, and emits FlowPulse. |
+| **Agent Bonds** | Bonded task acceptance, escrow, verifier confirmation, challenge/slash flows, signed recourse quotes, credit attestations, and reputation updates. |
+| **Public Agent Network** | Local/test contracts for agent classes, tool sets, profiles, launch intents, memory fuel, lineage, receipts, and swarms. |
+| **Indexer / Verifier / Control Plane** | Fixture-first services that reconstruct facts from logs, generate reports, expose local JSON-RPC methods, and power the dashboard/SDKs. |
+| **Dashboard** | Vite/React public workbench for Flow Memory, Agent Bonds, canary reads, local devnet state, public agents, and swarm projections. |
+| **FlowRouter research** | Hardware/resilience track for local connectivity, LoRa/Meshtastic sidecar signaling, and operator-facing hardware experiments. |
 
-## Base On-Chain Agent Memory Workstream
+## Why It Matters
 
-The product and architecture package for the Base-native agent memory workstream lives at `docs/base-onchain-agent-memory/README.md`.
+Today, most agent output is ephemeral: a transcript, a tool call, maybe a database row. FlowMemory makes agent work composable:
 
-This workstream defines the On-Chain Task Scout: a bounded autonomous agent that reads task state and public memory, previews a deterministic next step, commits only allowed actions, writes compact memory deltas, emits FlowPulse, and exposes replayable Rootflow transitions and `AgentMemoryView` output.
+- **Memory becomes verifiable** through receipts, roots, and replayable state transitions.
+- **Agent work becomes accountable** through bonded tasks, verifier reports, challenge windows, and slashing paths.
+- **Reputation becomes machine-readable** through passports, execution receipts, score attestations, and public task history.
+- **Compute and inference become traceable** through memory-attested work, not vague claims that a model “did something.”
+- **Markets become possible** because tasks, recourse, evidence, and reliability have explicit objects and lifecycle states.
 
-This does not change the repository boundary: heavy AI/model/memory artifacts stay off-chain by default, and the current repo should not be described as production-ready.
+## Agent Bonds: The First Economic Wedge
 
+Agent Bonds is the most concrete product surface in this repo.
 
-## Public Agent Network Workstream
+It gives objective agent work a real lifecycle:
 
-The public agent network stack now has local/test contracts, deterministic helpers, control-plane methods, SDK/CLI wrappers, dashboard projection, swarm support, and a local Foundry e2e script.
+```text
+requester opens task
+  -> agent accepts with stake / capacity
+  -> verifier checks objective result
+  -> receipt updates reputation
+  -> valid work settles
+  -> invalid work can be challenged, slashed, and routed through capped recourse
+```
 
-Key commands:
+Current Agent Bonds surfaces include:
+
+- task-scoped escrow and settlement
+- stake-gated agents and verifiers
+- evidence-availability commitments
+- independent verifier confirmation paths
+- challenge bonds and slash accounting
+- Passport / Envelope / Receipt primitives
+- signed recourse-policy quote attestations
+- credit-attestation registry
+- USDC-style recourse pools with concentration caps, epoch loss caps, and withdrawal cooldowns
+- requester quote/create SDK helpers for the API/data pilot lane
+- public dashboard view at `/agent-bonds`
+
+The public-safe claim is:
+
+**FlowMemory provides bounded agent-work accountability with task-scoped, capital-backed recourse records.**
+
+This is not described as insurance, a guarantee, or a finished public financial product.
+
+## Public Agent Network
+
+The public-agent network workstream shows how FlowMemory can launch agents with memory, fuel, tools, and lineage:
+
+```text
+registered class + approved tool set
+  -> owner-signed launch intent
+  -> shared BaseOnchainAgentMemory runtime registration
+  -> launch bond + memory fuel account
+  -> profile + lineage + receipt anchor
+  -> optional swarm membership and budget lifecycle
+```
+
+Run the local/test contract and e2e checks:
 
 ```powershell
 npm run public-agent-network:contracts
 npm run public-agent-network:local-e2e
 ```
 
-This workstream is public for review and local experimentation. It is not a production agent network, not an audited deployment, and not a mainnet-readiness claim.
+## Quickstart
 
-## Important Boundaries
+Prerequisites:
 
-- AI does not run on-chain.
-- Storage is not free.
-- Transaction hashes do not store arbitrary data.
-- Uniswap v4 hooks cannot know `txHash` or `logIndex`.
-- Indexers and verifiers derive `txHash` and `logIndex` after reading receipts and logs.
-- Heavy AI, model, memory, and artifact data stays off-chain.
-- On-chain state stores roots, receipts, commitments, attestations, proofs, and work state.
-- `metadataURI` and `evidenceURI` values are emitted as on-chain log bytes and are not contract-enforced as short pointers.
-- Meshtastic and LoRa are low-bandwidth control signaling paths, not normal internet bandwidth.
+- Node.js compatible with this repo’s TypeScript test runner
+- npm
+- Foundry (`forge`) for Solidity tests and local scripts
+- Rust/Cargo if you run the full launch candidate path
 
-## Agent Bonds Experimental Surface
-
-The repo now includes an experimental Agent Bonds v1 surface for bounded off-chain agent work:
-
-- task-scoped escrow and settlement
-- stake-gated agents and verifiers
-- challenge bonds and slash paths
-- evidence-availability commitments
-- optional independent verifier confirmation before settlement
-- capped-pilot controls, emergency stop, and timelocked multisig administration paths
-- optional USDC recourse pools with signed quote attestations, concentration caps, epoch loss caps, and withdrawal cooldown controls
-
-Do not describe this as an uncapped public launch or a trustless verifier network. The public boundary is documented in `docs/AGENT_BONDS_PUBLIC_LAUNCH_BOUNDARY.md`, the capped operator path is documented in `docs/OPERATIONS/AGENT_BONDS_CAPPED_PILOT_RUNBOOK.md`, and the internal review is in `docs/reviews/AGENT_BONDS_V1_SECURITY_REVIEW.md`.
-
-Public GitHub publication is allowed as a capped-pilot / integration-beta repository surface when these guardrails stay in place. The safe public claim is **bounded agent-work accountability with task-scoped, capital-backed recourse records**. Do not describe this as insurance, an uncapped public launch, a trustless verifier network, or a guarantee of reimbursement.
-
-
-## Start Here
-
-For a second computer or local test, install Git and clone the public repository:
+Clone and install:
 
 ```powershell
-winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
-$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
-git clone https://github.com/FlowmemoryAI/FlowMemory.git "$env:USERPROFILE\FlowMemory\FlowMemory"
-cd "$env:USERPROFILE\FlowMemory\FlowMemory"
-powershell -ExecutionPolicy Bypass -File .\INSTALL_FLOWCHAIN_WINDOWS.ps1
-```
-
-Detailed guide: `docs/EASY_SECOND_COMPUTER_SETUP.md`.
-FlowChain developer, wallet, bridge, node-operator, explorer/indexer, faucet,
-and troubleshooting guides start at `docs/developer/README.md`.
-
-Every contributor and agent should read:
-
-1. `AGENTS.md`
-2. `docs/START_HERE.md`
-3. `docs/FLOWMEMORY_HQ_CONTEXT.md`
-4. `docs/CURRENT_STATE.md`
-5. `docs/ROOTFLOW_V0.md`
-6. `docs/FLOW_MEMORY_V0.md`
-7. `docs/V0_LAUNCH_ACCEPTANCE.md`
-8. `docs/PRODUCTION_READINESS_CHECKLIST.md`
-9. `docs/MARKETING_CLAIMS_GUARDRAILS.md`
-10. `docs/developer/README.md` if working on FlowChain L1, wallets, RPC,
-    bridge, SDK, or external tester flows
-11. `docs/DAILY_HQ_RUNBOOK.md` if operating HQ or coordinating agents
-
-Then work only inside the assigned scope.
-
-## HQ Operating System
-
-FlowMemory is managed as a multi-agent program. The management layer is part of the repo and should be kept current before large subsystem work begins.
-
-- `docs/ISSUE_BACKLOG.md`: maps issues into milestones, dependencies, and agent worktrees
-- `docs/AGENT_PROMPTS.md`: copy-ready prompts for each worktree
-- `docs/LAUNCH_CORE_AGENT_GOALS.md`: copy-ready Rootflow V0 and Flow Memory V0 launch-core goals
-- `docs/reviews/OPEN_PR_MERGE_READINESS.md`: historical merge-readiness evidence for the merged V0 foundation PRs
-- `docs/PR_PROCESS.md`: branch, draft PR, review, merge, conflict, and issue-closing rules
-- `docs/DAILY_HQ_RUNBOOK.md`: morning review, triage, agent launch, PR monitoring, merge order, and handoff
-- `docs/PRODUCTION_READINESS_CHECKLIST.md`: blocking checklist before any production language is allowed
-- `docs/MARKETING_CLAIMS_GUARDRAILS.md`: allowed and blocked launch claims for docs and marketing
-- `infra/scripts/status-report.ps1`: read-only local worktree, PR, and issue status report
-
-Immediate major milestone: keep the Rootflow V0 and Flow Memory V0 launch core green while packaging the FlowChain private/local L1 testnet path for second-computer validation. This means local contracts/tests, FlowPulse fixtures, Uniswap swap-derived memory-signal fixtures, Rootflow transitions, Flow Memory schemas, verifier reports, crypto fixtures, dashboard-readable state, Base Sepolia testnet read/deploy commands, Windows-first wrapper scripts, and local smoke-test gates. It does not mean production deployment.
-
-Run the local launch-core path:
-
-```powershell
-npm run launch:v0
-```
-
-This regenerates local/test Rootflow and Flow Memory V0 fixtures, including `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, and the dashboard fixture at `fixtures/dashboard/flowmemory-dashboard-v0.json`.
-
-Run the stricter local launch-candidate gate:
-
-```powershell
-npm run launch:candidate
-```
-
-That command runs contract hardening, the launch flow, runtime schema validation, fixture drift checks, and claim guardrails.
-
-Run the current FlowChain private/local wrapper path:
-
-```powershell
-npm run flowchain:prereq
-npm run flowchain:init
-npm run flowchain:start
-npm run flowchain:demo
-npm run flowchain:export
-```
-
-Run the private/local product testnet acceptance path when Foundry, Python,
-Visual Studio Build Tools C++ workload, dashboard dependencies, and crypto
-dependencies are installed:
-
-```powershell
+git clone https://github.com/FlowmemoryAI/FlowMemory.git
+cd FlowMemory
+npm install
 npm install --prefix apps/dashboard
-npm install --prefix crypto
-npm run flowchain:smoke
-npm run flowchain:full-smoke
-npm run flowchain:product-e2e
 ```
 
-Run the capped owner pilot dry-run before any Base `8453` pilot action:
+Run the quickest public tester lane:
 
 ```powershell
-npm run flowchain:real-value-pilot:ops
+npm run public:test:quick
 ```
 
-Owner pilot coordination and go/no-go criteria live in
-`docs/FLOWCHAIN_REAL_VALUE_PILOT.md`.
-
-Run the existing dashboard as the local workbench:
+Run the core public checks if you also have Foundry and dashboard dependencies:
 
 ```powershell
-npm run workbench:dev
+npm run public:test:contracts
+npm run public:test:e2e
+npm run public:test:dashboard
 ```
 
-Build the dashboard after regenerating launch data:
+Run the full local launch/readiness gate:
 
 ```powershell
 npm run build:production
+npm run flowmemory:agent-bonds:phase2
+npm run flowmemory:agent-bonds:readiness
 ```
 
-Base Sepolia testnet commands require local environment values from `.env.example`:
+Run safety checks before publishing changes:
 
 ```powershell
-npm run deploy:base-sepolia
-npm run deploy:base-sepolia:broadcast
-npm run read:base-sepolia -- --rpc-url <base-sepolia-rpc-url> --address <flowpulse-contract> --from-block <n> --to-block <n>
+node infra/scripts/check-unsafe-claims.mjs
+git diff --check
 ```
 
-## What Not To Claim
+The old Windows installer path has been removed from the public quickstart; it was for a separate chain-devnet track and is not needed to understand or test FlowMemory.
 
-- Do not claim FlowMemory has production contracts or a mainnet deployment.
-- Do not claim FlowMemory is production-ready or mainnet-ready.
-- Do not claim the current hook adapter is a production Uniswap v4 hook.
-- Do not claim production explorer, production hardware console, production FlowRouter hardware, or Meshtastic integration exists yet.
-- Do not claim production cryptographic proof systems, tokenomics, public mainnet, or audited value-bearing L1 deployment exists yet.
-- Do not claim URI fields enforce off-chain storage. Current URI values are caller-supplied log data.
+If you want to help test, start with `docs/PUBLIC_TESTER_GUIDE.md` and open a **Public Tester Report** issue with your exact commands and environment.
+
+## Documentation Map
+
+| Reader goal | Start here |
+| --- | --- |
+| Understand the repo boundary | `docs/PUBLIC_REPO_GUIDE.md`, `docs/CURRENT_STATE.md` |
+| Understand Agent Bonds | `docs/AGENT_BONDS_PHASE2_ARCHITECTURE.md`, `docs/AGENT_BONDS_PUBLIC_LAUNCH_BOUNDARY.md`, `docs/AGENT_BONDS_UNDERWRITER_POOLS.md` |
+| Understand public agents | `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`, `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` |
+| Test what works locally | `docs/PUBLIC_TESTER_GUIDE.md` |
+| Understand Base agent memory | `docs/base-onchain-agent-memory/README.md` |
+| See open public gaps | `docs/PUBLIC_RELEASE_GAPS.md` |
+| Review claim rules | `docs/MARKETING_CLAIMS_GUARDRAILS.md` |
+| Contribute safely | `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md` |
 
 ## Repository Map
 
 | Path | Purpose |
 | --- | --- |
-| `apps/` | Fixture-backed dashboard, workbench, and public-network projection views. |
-| `contracts/` | FlowPulse, Rootfield, bridge, Agent Bonds, Base agent-memory, public-agent, and swarm contracts. |
-| `crypto/` | Cryptographic receipt, proof, attestation, wallet, and vector helper work. |
-| `docs/` | Public guides, architecture, roadmap, security model, runbooks, decisions, reviews, and gap register. |
-| `hardware/` | FlowRouter, LoRa, Meshtastic, simulator, enclosure, and field-test research materials. |
-| `infra/scripts/` | Validation, launch, deployment-planning, no-secret, claim-guardrail, and local automation scripts. |
-| `inbox/` | Staging area for imported prompts, notes, and unsorted context. |
-| `research/` | AI memory, neural geometry, appchain/L1, and agent-network research. |
-| `services/` | Shared helpers, indexer, verifier, Flow Memory, control-plane, bridge-relayer, SDK, and agent-memory SDK packages. |
+| `contracts/` | FlowPulse, Rootfield, Agent Bonds, Base agent-memory, public-agent, bridge, and swarm contracts. |
+| `tests/` | Foundry tests for protocol, memory, Agent Bonds, public-agent, swarm, and bridge surfaces. |
+| `services/flowmemory/` | Launch-core generation, Flow Memory objects, Agent Bonds helpers, public-agent helpers, and deterministic fixture builders. |
+| `services/control-plane/` | Local JSON-RPC style API over generated state and deterministic fixtures. |
+| `services/agent-memory-sdk/` | Agent-memory and Agent Bonds client helpers for fixture-backed and local control-plane flows. |
+| `services/indexer/`, `services/verifier/` | Fixture-first log reconstruction and verifier-report generation. |
+| `apps/dashboard/` | Public workbench and dashboard projection views. |
+| `fixtures/` | Deterministic generated state used by services, tests, and dashboard. |
 | `schemas/` | Canonical JSON schemas for Flow Memory, Rootflow, Base agent memory, Agent Bonds, and related objects. |
+| `docs/` | Public guides, architecture, runbooks, reviews, decisions, and gap register. |
+| `hardware/` | FlowRouter and LoRa/Meshtastic research materials. |
 
-## Implemented Foundation
+## What Not To Claim
 
-- Repo operating system: `AGENTS.md`, start-here docs, current state, roadmap, architecture, security model, agent roles, and decision-record home
-- GitHub issue and pull request templates
-- Repository hygiene CI scaffold
-- Worktree setup script
-- `contracts/FlowPulse.sol`
-- `contracts/RootfieldRegistry.sol`
-- contract skeletons for artifacts, cursors, workers, verifiers, receipts, verifier reports, hook adapter, and work scheduling
-- contracts hardening docs and static-analysis runner
-- `contracts/FLOWPULSE_SCHEMA.md`
-- `tests/RootfieldRegistry.t.sol`
-- Foundry tests for the Rootfield registry foundation and live V0 contract package
-- fixture-first indexer/verifier packages and local launch-core generation
-- Base Sepolia reader path with explicit RPC URL and durable checkpoint output
-- Base Sepolia deployment runner for the current V0 testnet contract set
-- FlowMemoryHookAdapter emits a `SWAP_MEMORY_SIGNAL` FlowPulse for the swap-memory fixture path
-- Flow Memory V0 schemas and generated Rootflow transition fixtures
-- runtime schema validation and generated fixture drift checks for launch-core outputs
-- fixture-backed dashboard V0
-- crypto helper package and test vectors
-- local no-value devnet prototype
-- FlowRouter hardware POC docs, schemas, and simulator fixture
-- Documented URI/log-data limitations for the current contract skeleton
+FlowMemory is public and substantial, but public claims still need to match what is actually implemented.
 
-## Still Conceptual
+Do not claim:
 
-- Production Uniswap v4 hook integration
-- Production indexer and verifier services
-- Production Rootflow runtime implementation
-- Production Flow Memory runtime implementation
-- FlowRouter hardware implementation
-- Meshtastic integration
-- Explorer and hardware console applications
-- Cryptographic proof systems
-- Appchain/L1 design and implementation
+- broad real-value launch approval
+- trustless arbitrary AI correctness
+- guaranteed reimbursement
+- insurance
+- permanent artifact availability
+- finished tokenomics
+- deployed public verifier network
+- deployed public appchain
+- completed hardware product
 
 ## Current Status
 
-See `docs/CURRENT_STATE.md` for the latest repo state.
+FlowMemory is a public local/test protocol workbench with working contracts, services, dashboard fixtures, SDK helpers, public-agent flows, Agent Bonds recourse primitives, and reproducible verification gates.
+
+The next external blockers for real value-bearing launch are owner inputs, live deployment addresses, operator evidence, and independent review/signoff. Repo-side public review and local experimentation are open now.
