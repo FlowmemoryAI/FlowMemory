@@ -826,13 +826,14 @@ $definitions = @(
     },
     [ordered]@{
         id = "owner-env-template"
-        requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold for every required owner input without recording real values."
+        requirement = "Owner env template creates or preserves an ignored local-only NAME=value scaffold and no-secret field guide for every owner input without recording real values."
         path = "docs/agent-runs/live-product-infra-rpc/owner-env-template-report.json"
         command = "npm run flowchain:owner-env:template"
         productionGate = $true
         ownerInputGate = $false
         requiredMinimums = [ordered]@{
             requiredEnvNameCount = 17
+            fieldGuideCount = 19
         }
         requiredChecks = @(
             "pathIsGitIgnored",
@@ -840,6 +841,10 @@ $definitions = @(
             "templateIncludesAllRequiredEnvNames",
             "requiredEnvNameCountExpected",
             "optionalEnvNameCountExpected",
+            "fieldGuideCoversAllRequiredEnvNames",
+            "fieldGuideCoversAllOptionalEnvNames",
+            "fieldGuideHasValidationForEveryName",
+            "fieldGuideHasDoNotSendForEveryName",
             "valuesPrintedFalse",
             "envValuesPrintedFalse",
             "noSecrets",
@@ -3126,6 +3131,7 @@ function ConvertTo-TruthEvidence {
         "externalSignupCount",
         "itemCount",
         "requiredEnvNameCount",
+        "fieldGuideCount",
         "templateIncludesAllRequiredEnvNames",
         "pathIsGitIgnored",
         "deploymentReady",
@@ -3249,6 +3255,10 @@ function ConvertTo-TruthEvidence {
             "bridgeRuntimeCreditProofCovered",
             "realValuePilotAggregateProofCovered",
             "publicRpcHeaderProofCovered",
+            "fieldGuideCoversAllRequiredEnvNames",
+            "fieldGuideCoversAllOptionalEnvNames",
+            "fieldGuideHasValidationForEveryName",
+            "fieldGuideHasDoNotSendForEveryName",
             "dashboardBrowserE2ePassed",
             "commandsCompletedWithoutTimeout",
             "noSecretLeakageAsserted",

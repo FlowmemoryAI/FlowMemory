@@ -1,6 +1,6 @@
 ﻿# FlowChain Alert Install Validation
 
-Generated: 2026-05-21T02:04:49.2305652Z
+Generated: 2026-05-21T10:56:05.1308999Z
 Status: passed
 
 This validation proves the scheduled alert refresh path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local alert evidence without external delivery. It covers both Windows Scheduled Task and Linux systemd timer paths.

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.bridge_runtime_credit_validation_report.v1",
-    "generatedAt":  "2026-05-21T02:17:09.4296718Z",
+    "generatedAt":  "2026-05-21T11:07:57.3233364Z",
     "status":  "passed",
     "targetSettlementSeconds":  60,
     "validationRunDir":  "devnet/local/bridge-runtime-credit-validation",
@@ -9,8 +9,8 @@
     "childProcess":  {
                          "exitCode":  0,
                          "timedOut":  false,
-                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260520211609577-51956-312e99a9.stdout.log",
-                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260520211609577-51956-312e99a9.stderr.log"
+                         "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260521060700143-80892-451dfa35.stdout.log",
+                         "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\bridge-runtime-credit-validation\\20260521060700143-80892-451dfa35.stderr.log"
                      },
     "source":  {
                    "chainId":  8453,
@@ -32,16 +32,16 @@
                                 "error":  "bridge replay key is already consumed: 0xea93b7d168d2f1f6c4be4f95ba4d85aa2d07fc4298a720d180000a19d98481f0"
                             },
     "timing":  {
-                   "runStartedAt":  "2026-05-21T02:16:12.3680109Z",
-                   "handoffQueuedAt":  "2026-05-21T02:17:03.6876218Z",
-                   "creditAppliedAt":  "2026-05-21T02:17:04.5328695Z",
-                   "firstSpendableAt":  "2026-05-21T02:17:04.5328695Z",
-                   "transferQueuedAt":  "2026-05-21T02:17:05.6876635Z",
-                   "transferSpendableAt":  "2026-05-21T02:17:06.3827029Z",
-                   "completedAt":  "2026-05-21T02:17:08.7634020Z",
-                   "queueToSpendableSeconds":  0.845,
-                   "transferSettlementSeconds":  0.695,
-                   "totalSeconds":  56.395,
+                   "runStartedAt":  "2026-05-21T11:07:02.0198424Z",
+                   "handoffQueuedAt":  "2026-05-21T11:07:52.4176708Z",
+                   "creditAppliedAt":  "2026-05-21T11:07:53.1110299Z",
+                   "firstSpendableAt":  "2026-05-21T11:07:53.1110299Z",
+                   "transferQueuedAt":  "2026-05-21T11:07:54.1328659Z",
+                   "transferSpendableAt":  "2026-05-21T11:07:54.7737832Z",
+                   "completedAt":  "2026-05-21T11:07:56.7366065Z",
+                   "queueToSpendableSeconds":  0.693,
+                   "transferSettlementSeconds":  0.641,
+                   "totalSeconds":  54.717,
                    "targetSettlementSeconds":  60,
                    "latencyGate":  "passed"
                },

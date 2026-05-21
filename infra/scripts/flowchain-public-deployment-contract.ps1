@@ -531,17 +531,24 @@ $ownerEnvTemplateGitIgnored = Get-DeploymentProp -Object $ownerEnvTemplate -Name
 $ownerEnvTemplateIncludesRequired = Get-DeploymentProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-DeploymentProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
 $ownerEnvTemplateOptionalCount = @((Get-DeploymentProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
+$ownerEnvTemplateFieldGuideCount = [int](Get-DeploymentProp -Object $ownerEnvTemplate -Name "fieldGuideCount" -Default 0)
+$ownerEnvTemplateChecks = Get-DeploymentProp -Object $ownerEnvTemplate -Name "checks"
 $ownerEnvTemplateReady = ($ownerEnvTemplateStatus -eq "passed") `
     -and (Test-DeploymentPackageScript -PackageJson $packageJson -Name "flowchain:owner-env:template") `
     -and ($ownerEnvTemplateGitIgnored -eq $true) `
     -and ($ownerEnvTemplateIncludesRequired -eq $true) `
     -and (($ownerEnvTemplateRequiredCount + $ownerEnvTemplateOptionalCount) -eq $knownOwnerInputs.Count) `
+    -and ($ownerEnvTemplateFieldGuideCount -eq $knownOwnerInputs.Count) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideCoversAllRequiredEnvNames" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideCoversAllOptionalEnvNames" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideHasValidationForEveryName" -Default $false) -eq $true) `
+    -and ((Get-DeploymentProp -Object $ownerEnvTemplateChecks -Name "fieldGuideHasDoNotSendForEveryName" -Default $false) -eq $true) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-DeploymentProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true)
 Add-DeploymentItem -Items $items -Id "owner-env-template" `
-    -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
+    -Requirement "Owner env-file setup has a command-generated local scaffold and no-secret field guide whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplateReady) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, fieldGuideCount=$ownerEnvTemplateFieldGuideCount, includesAllRequired=$ownerEnvTemplateIncludesRequired" `
     -Commands @("npm run flowchain:owner-env:template")
 
 $publicRpcEdgeTemplate = $reports.publicRpcEdgeTemplate

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-21T03:35:07.2182530Z
+Generated: 2026-05-21T10:56:48.0741764Z
 Status: passed
 Action: Validate
 
@@ -151,14 +151,14 @@ This validator proves the owner-host public RPC deployment path can render concr
 
 ## Rendered Artifact Manifest
 
-- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=90932da09b8653cd20f22fb8c847e9ec85d54d51e51999e3f127302971be38b1
-- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=18b7dc444a21bc0d9f557a7352de8ac9348ea7909459105f66676a4a704216ef
-- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=1de42388fddac453761597bb067ff779f60f71b7bdf629cfccc7cc8ced1d7434
-- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=cdec272c2662eec38a70c72f0738c1847f6e89b797e4e4e3f226a8dc2c715cfc
-- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=03773e4dd5322ce5485c2648eb5e5ace176f05da1046d6c05a9bb6fe193ef525
-- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=313304f4964dc1d0769d975447d999d3d8415fd11560a0efd2b4ae153652820c
-- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=4720c0dc0920c540786dca14ccac80fe956bcb7ebe9f00a46344156c32d145a2
-- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=1a5982f38ec161fdb3ce81fc9d7741eeed0f68926c4fad3962f342f85d7bd2a0
+- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=ab79fdb1133525e70a1c20884e6b6b8e3b0eb6c7ca937e7837253063516c326d
+- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=5283636fcf4293475fb13b3d72bcc0c4a02ba82709e80bc4d1c1da400656e252
+- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=62505c2aa33b60fdcb9d07b173e73b0c8962b7d503ac62d726b7254ce4688c00
+- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=c3048160bcf6767592e1510a5353080637f7cb6f34f84f173c5da0678375d41d
+- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=fb2d44d4c77e48211976264f2ccff8c3e4cf5c211c3c9257ad1fbde1de42d5fe
+- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=c3546861d097613abc8a1d3cefed387d13b9c3070e774b0ec87ad504e92f4aff
+- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=ceca83af90e9e2fb03768aebc9f390da45d0ee7d9d8b14c5416b1a1006a3a163
+- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=f02842d6654b65edf009113a6dfbbc04e2d28b5afaac4e504b9b18c06971ae38
 
 ## Owner Host Apply Phases
 

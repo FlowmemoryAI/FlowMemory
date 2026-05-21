@@ -1,6 +1,6 @@
 ﻿# FlowChain Metrics Install Validation
 
-Generated: 2026-05-21T02:05:18.7525381Z
+Generated: 2026-05-21T10:56:26.0332700Z
 Status: passed
 
 This validation proves the scheduled metrics export path is planned, status-checkable, absent-uninstall safe, no-secret, non-mutating in read-only/no-op modes, and refreshes local JSON plus Prometheus textfile metrics without external delivery. It covers both Windows Scheduled Task and Linux systemd timer paths.

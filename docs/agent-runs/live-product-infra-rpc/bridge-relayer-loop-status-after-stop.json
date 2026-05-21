@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-21T02:16:03.1538164Z",
+    "generatedAt":  "2026-05-21T11:06:55.5651026Z",
     "status":  "failed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,7 +9,7 @@
              },
     "node":  {
                  "status":  "stopped",
-                 "pid":  47580,
+                 "pid":  57176,
                  "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\node\\flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  false
@@ -29,7 +29,7 @@
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  17.582,
+                                             "ageSeconds":  17.884,
                                              "maxAgeSeconds":  180,
                                              "fresh":  true,
                                              "acceptableStatus":  true,
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "335",
-                  "latestHash":  "0x72766e5de7464f694144dc6a62f6dc7a46d904bd40302c799aa3cfdf06bcb0e0",
+                  "latestHeight":  "361",
+                  "latestHash":  "0x475ecee4bb8ac4e8af011f2452662d76ae27fc502e147f911404821829c9c142",
                   "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
                   "stateFileLastWriteAgeSeconds":  8,
-                  "finalizedHeight":  "335",
-                  "finalizedHash":  "0x72766e5de7464f694144dc6a62f6dc7a46d904bd40302c799aa3cfdf06bcb0e0",
+                  "finalizedHeight":  "361",
+                  "finalizedHash":  "0x475ecee4bb8ac4e8af011f2452662d76ae27fc502e147f911404821829c9c142",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },

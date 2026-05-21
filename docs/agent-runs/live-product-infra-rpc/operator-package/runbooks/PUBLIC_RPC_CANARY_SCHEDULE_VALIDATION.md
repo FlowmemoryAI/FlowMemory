@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Canary Schedule Validation
 
-Generated: 2026-05-21T07:53:25.6732598Z
+Generated: 2026-05-21T11:01:44.4164111Z
 Status: passed
 
 This validation renders no-secret Windows Scheduled Task and Linux systemd timer plans for recurring read-only public RPC synthetic canary checks. It does not register tasks, mutate host services, send external notifications, or store owner endpoint values.

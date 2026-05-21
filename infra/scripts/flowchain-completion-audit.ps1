@@ -1404,6 +1404,7 @@ $ownerEnvTemplateGitIgnored = Get-AuditProp -Object $ownerEnvTemplate -Name "pat
 $ownerEnvTemplateIncludesRequired = Get-AuditProp -Object $ownerEnvTemplate -Name "templateIncludesAllRequiredEnvNames" -Default $false
 $ownerEnvTemplateRequiredCount = [int](Get-AuditProp -Object $ownerEnvTemplate -Name "requiredEnvNameCount" -Default 0)
 $ownerEnvTemplateOptionalCount = @((Get-AuditProp -Object $ownerEnvTemplate -Name "optionalEnvNames" -Default @())).Count
+$ownerEnvTemplateFieldGuideCount = [int](Get-AuditProp -Object $ownerEnvTemplate -Name "fieldGuideCount" -Default 0)
 $ownerEnvTemplateChecks = Get-AuditProp -Object $ownerEnvTemplate -Name "checks"
 $ownerEnvTemplateFailedChecks = @((Get-AuditProp -Object $ownerEnvTemplate -Name "failedChecks" -Default @()))
 $ownerEnvTemplateSecretFindings = @((Get-AuditProp -Object $ownerEnvTemplate -Name "secretMarkerFindings" -Default @()))
@@ -1413,6 +1414,10 @@ $ownerEnvTemplateRequiredChecks = @(
     "templateIncludesAllRequiredEnvNames",
     "requiredEnvNameCountExpected",
     "optionalEnvNameCountExpected",
+    "fieldGuideCoversAllRequiredEnvNames",
+    "fieldGuideCoversAllOptionalEnvNames",
+    "fieldGuideHasValidationForEveryName",
+    "fieldGuideHasDoNotSendForEveryName",
     "valuesPrintedFalse",
     "envValuesPrintedFalse",
     "noSecrets",
@@ -1432,6 +1437,7 @@ $ownerEnvTemplatePassed = $ownerEnvTemplateExitCode -eq 0 `
     -and $ownerEnvTemplateIncludesRequired -eq $true `
     -and $ownerEnvTemplateRequiredCount -eq 17 `
     -and $ownerEnvTemplateOptionalCount -eq 2 `
+    -and $ownerEnvTemplateFieldGuideCount -eq 19 `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $ownerEnvTemplate -Name "broadcasts" -Default $true) -eq $false)
@@ -3473,9 +3479,9 @@ Add-AuditItem -Items $items -Id "owner-go-live-handoff" `
     -Commands @("npm run flowchain:owner:go-live-handoff")
 
 Add-AuditItem -Items $items -Id "owner-env-template" `
-    -Requirement "Owner env-file setup has a command-generated local scaffold whose target path is git-ignored before owner values are added." `
+    -Requirement "Owner env-file setup has a command-generated local scaffold and no-secret field guide whose target path is git-ignored before owner values are added." `
     -Status $(if ($ownerEnvTemplatePassed) { "passed" } else { "failed" }) `
-    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, failedChecks=$ownerEnvTemplateFailedCheckCount, secretFindings=$ownerEnvTemplateSecretFindingCount, missingChecks=$ownerEnvTemplateMissingCheckCount, report=$($paths.ownerEnvTemplate)" `
+    -Evidence "templateStatus=$ownerEnvTemplateStatus, pathIsGitIgnored=$ownerEnvTemplateGitIgnored, requiredEnvNameCount=$ownerEnvTemplateRequiredCount, optionalEnvNameCount=$ownerEnvTemplateOptionalCount, fieldGuideCount=$ownerEnvTemplateFieldGuideCount, includesAllRequired=$ownerEnvTemplateIncludesRequired, failedChecks=$ownerEnvTemplateFailedCheckCount, secretFindings=$ownerEnvTemplateSecretFindingCount, missingChecks=$ownerEnvTemplateMissingCheckCount, report=$($paths.ownerEnvTemplate)" `
     -Commands @("npm run flowchain:owner-env:template")
 
 Add-AuditItem -Items $items -Id "owner-env-readiness-validator-self-test" `

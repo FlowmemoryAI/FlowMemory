@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_snapshot_report.v1",
-    "generatedAt":  "2026-05-21T09:38:25.0057109Z",
+    "generatedAt":  "2026-05-21T10:55:37.7392322Z",
     "status":  "blocked",
     "refresh":  {
                     "performed":  false,
@@ -10,11 +10,11 @@
                     "inputReportDir":  ""
                 },
     "chain":  {
-                  "latestHeight":  "111430",
-                  "finalizedHeight":  "111430",
-                  "stateFileLastWriteAgeSeconds":  5,
+                  "latestHeight":  "112092",
+                  "finalizedHeight":  "112092",
+                  "stateFileLastWriteAgeSeconds":  4,
                   "monitorStatus":  "passed",
-                  "monitorSamples":  3,
+                  "monitorSamples":  2,
                   "monitorHeightAdvanced":  true,
                   "mempoolDepth":  0
               },
@@ -24,10 +24,10 @@
                               "txIntakeRows":  187,
                               "txIntakeAcceptedRows":  187,
                               "txIntakeInvalidRows":  0,
-                              "txIntakeLastWriteAgeSeconds":  44993.999,
+                              "txIntakeLastWriteAgeSeconds":  49626.21,
                               "runtimeSubmitDir":  "devnet/local/intake/runtime-submit",
                               "runtimeSubmitFileCount":  4,
-                              "runtimeSubmitNewestFileAgeSeconds":  518191.348,
+                              "runtimeSubmitNewestFileAgeSeconds":  522823.637,
                               "runtimeInboxDir":  "devnet/local/node/inbox",
                               "runtimeInboxFileCount":  0,
                               "runtimeInboxNewestFileAgeSeconds":  null,
@@ -78,7 +78,7 @@
                            "supervisorNodeRecoveryControlPlaneRunning":  true,
                            "supervisorNodeRecoveryLiveProfile":  true,
                            "supervisorNodeRecoveryMaxBlocksUnbounded":  true,
-                           "supervisorNodeRecoveryLatestHeight":  "15452",
+                           "supervisorNodeRecoveryLatestHeight":  "15536",
                            "supervisorLatestRestartReasons":  [
 
                                                               ],
