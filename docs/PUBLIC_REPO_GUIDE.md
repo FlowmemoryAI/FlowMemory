@@ -77,6 +77,12 @@ The full public local pass is:
 npm run public:test:all
 ```
 
+Generate a paste-ready public tester report:
+
+```powershell
+npm run public:test:report
+```
+
 See `docs/PUBLIC_TESTER_GUIDE.md` for expected results, CLI/control-plane commands, dashboard review prompts, and the tester-report template.
 
 ## Verification Commands

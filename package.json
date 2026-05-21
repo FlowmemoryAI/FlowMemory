@@ -33,6 +33,7 @@
     "public:test:e2e": "npm run public-agent-network:local-e2e",
     "public:test:dashboard": "npm test --prefix apps/dashboard && npm run build --prefix apps/dashboard",
     "public:test:all": "npm run public:test:quick && npm run public:test:contracts && npm run public:test:e2e && npm run public:test:dashboard && node infra/scripts/check-unsafe-claims.mjs",
+    "public:test:report": "node infra/scripts/public-tester-report.mjs",
     "public:devkit": "npm run flowchain:devkit --",
     "verify:base-canary:sources": "node infra/scripts/verify-base-canary-sources.mjs --dry-run",
     "verify:base-canary:sources:submit": "node infra/scripts/verify-base-canary-sources.mjs --submit --watch",

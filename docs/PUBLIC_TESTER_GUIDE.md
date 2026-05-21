@@ -33,6 +33,22 @@ forge --version
 
 Do not create or commit `.env` files for these tests. The public tester lanes use deterministic local/test data and do not require live private keys or RPC credentials.
 
+To generate a paste-ready local report for GitHub:
+
+```powershell
+npm run public:test:report
+```
+
+By default this runs the quick JS smoke lane and writes public-safe JSON and Markdown files under `devnet/local/public-test-reports/`. That folder is intentionally ignored by Git.
+
+You can include more lanes:
+
+```powershell
+npm run public:test:report -- --contracts --e2e
+npm run public:test:report -- --all
+```
+
+
 ## Lane 1: Quick JS Smoke
 
 Run:
@@ -145,6 +161,14 @@ Useful feedback:
 - What should the CLI summarize for non-protocol users?
 
 ## What To Report
+If you want the repo to generate most of the report body, run:
+
+```powershell
+npm run public:test:report
+```
+
+Then copy the generated `.md` file from `devnet/local/public-test-reports/` into the issue.
+
 
 Open a GitHub issue using the **Public Tester Report** template and include:
 

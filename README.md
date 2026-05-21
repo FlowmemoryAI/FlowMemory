@@ -115,6 +115,12 @@ Run the quickest public tester lane:
 npm run public:test:quick
 ```
 
+Generate a paste-ready GitHub tester report:
+
+```powershell
+npm run public:test:report
+```
+
 Run the core public checks if you also have Foundry and dashboard dependencies:
 
 ```powershell
