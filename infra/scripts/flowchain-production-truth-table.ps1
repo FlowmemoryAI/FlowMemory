@@ -2632,6 +2632,68 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "ops-monitoring-bundle"
+        requirement = "Ops monitoring bundle renders no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain metrics and alert-rule evidence, covering block production, service health, public RPC, backup, bridge relayer, external testers, truth table, and no-secret boundaries without external delivery credentials."
+        path = "docs/agent-runs/live-product-infra-rpc/monitoring-bundle-report.json"
+        command = "npm run flowchain:ops:monitoring:bundle"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "packageScriptPresent",
+            "metricsJsonLoaded",
+            "metricsExportReportLoaded",
+            "alertRulesLoaded",
+            "sourceMetricsSufficient",
+            "sourceAlertRulesSufficient",
+            "dashboardWritten",
+            "dashboardJsonValid",
+            "dashboardPanelCountSufficient",
+            "dashboardTargetsHaveKnownMetrics",
+            "dashboardIncludesCorePanels",
+            "prometheusRulesWritten",
+            "prometheusYamlHasRules",
+            "prometheusRuleCountSufficient",
+            "prometheusRulesReferenceKnownMetrics",
+            "prometheusRulesReferenceKnownAlertRuleIds",
+            "prometheusRulesHaveRunbookCommands",
+            "prometheusCommandsAvoidInlineEnvAssignment",
+            "prometheusCommandsAvoidUrls",
+            "readmeWritten",
+            "manifestWritten",
+            "artifactHashesPresent",
+            "filesNoSecretMarkers",
+            "noNetworkDelivery",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "missingDashboardMetricNames",
+            "missingPrometheusMetricNames",
+            "missingSourceRuleIds",
+            "missingPanelTitles",
+            "rulesWithoutCommands",
+            "commandsWithInlineEnvAssignment",
+            "commandsWithUrls",
+            "artifactHashGaps",
+            "secretMarkerFindings"
+        )
+        requiredMinimums = [ordered]@{
+            sourceMetricCount = 50
+            sourceAlertRuleCount = 10
+            dashboardPanelCount = 12
+            prometheusRuleCount = 8
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+            "notificationPlan.storesSecrets" = $false
+            "notificationPlan.sendsNetworkNotifications" = $false
+        }
+    },
+    [ordered]@{
         id = "ops-metrics-install-validation"
         requirement = "Scheduled metrics export install validation proves Windows Scheduled Task and Linux systemd timer plan/status/uninstall boundaries and no external delivery for recurring JSON and Prometheus textfile metrics."
         path = "docs/agent-runs/live-product-infra-rpc/metrics-install-validation-report.json"

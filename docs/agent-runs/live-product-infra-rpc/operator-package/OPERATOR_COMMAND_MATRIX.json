@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T12:21:59.5635980Z",
+    "generatedAt":  "2026-05-21T15:44:53.4363460Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -201,6 +201,11 @@
                          "phase":  "ops",
                          "command":  "npm run flowchain:ops:metrics:export",
                          "purpose":  "Export no-secret JSON and Prometheus textfile metrics for owner collectors."
+                     },
+                     {
+                         "phase":  "ops",
+                         "command":  "npm run flowchain:ops:monitoring:bundle",
+                         "purpose":  "Render no-secret Grafana dashboard and Prometheus alert-rule artifacts from current FlowChain ops metrics."
                      },
                      {
                          "phase":  "ops",

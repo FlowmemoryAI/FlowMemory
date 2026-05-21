@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics_export_report.v0",
-    "generatedAt":  "2026-05-21T10:55:44.5534349Z",
+    "generatedAt":  "2026-05-21T13:24:18.7364249Z",
     "status":  "passed",
     "refresh":  {
                     "performed":  false,
@@ -51,7 +51,7 @@
                     },
     "metricsJsonPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.json",
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
-    "metricCount":  330,
+    "metricCount":  334,
     "requiredMetricNames":  [
                                 "flowchain_latest_height",
                                 "flowchain_finalized_height",
@@ -111,9 +111,13 @@
                                 "flowchain_public_rpc_auth_forwarding_scoped",
                                 "flowchain_public_rpc_security_headers",
                                 "flowchain_public_rpc_security_header_preflight",
+                                "flowchain_public_rpc_timeout_guardrails",
+                                "flowchain_public_rpc_timeout_guardrail_preflight",
                                 "flowchain_public_rpc_wallet_cutover_commands",
                                 "flowchain_public_rpc_rendered_security_headers",
                                 "flowchain_public_rpc_rendered_security_header_preflight",
+                                "flowchain_public_rpc_rendered_timeout_guardrails",
+                                "flowchain_public_rpc_rendered_timeout_guardrail_preflight",
                                 "flowchain_public_rpc_command_plan_wallet_cutover_proof",
                                 "flowchain_public_rpc_command_plan_tester_gateway_e2e",
                                 "flowchain_public_rpc_command_plan_wallet_tester_e2e",

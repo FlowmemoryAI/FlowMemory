@@ -1,12 +1,12 @@
 {
     "schema":  "flowchain.doctor_report.v0",
-    "generatedAt":  "2026-05-21T12:21:54.7202981Z",
+    "generatedAt":  "2026-05-21T15:44:50.0949387Z",
     "status":  "blocked",
     "repoRoot":  "E:/FlowMemory/flowmemory-live-infra-rpc",
-    "diskFreeGiB":  11.83,
-    "stateFileLastWriteAgeSeconds":  6,
-    "latestHeight":  "112619",
-    "finalizedHeight":  "112619",
+    "diskFreeGiB":  4.13,
+    "stateFileLastWriteAgeSeconds":  0,
+    "latestHeight":  "113519",
+    "finalizedHeight":  "113519",
     "localUrls":  {
                       "controlPlaneHealth":  "http://127.0.0.1:8787/health",
                       "dashboard":  "http://127.0.0.1:5173/"
@@ -301,23 +301,23 @@
                    },
                    {
                        "name":  "disk-free:E",
-                       "status":  "running",
+                       "status":  "warning",
                        "owner":  "storage",
-                       "detail":  "11.83 GiB free on E:",
+                       "detail":  "4.13 GiB free on E:",
                        "nextCommand":  "free disk space before public operation"
                    },
                    {
                        "name":  "state-file",
                        "status":  "running",
                        "owner":  "storage",
-                       "detail":  "devnet/local/state.json age seconds: 6",
+                       "detail":  "devnet/local/state.json age seconds: 0",
                        "nextCommand":  "npm run flowchain:service:start -- -LiveProfile"
                    },
                    {
                        "name":  "service-status-report",
                        "status":  "running",
                        "owner":  "service",
-                       "detail":  "latestHeight=112619 finalizedHeight=112619 stateAge=5",
+                       "detail":  "latestHeight=113519 finalizedHeight=113519 stateAge=5",
                        "nextCommand":  "npm run flowchain:service:status -- -AllowBlocked"
                    },
                    {
@@ -359,7 +359,7 @@
                        "name":  "port:8787",
                        "status":  "running",
                        "owner":  "control-plane",
-                       "detail":  "owned by PID(s): 46952",
+                       "detail":  "owned by PID(s): 4072",
                        "nextCommand":  "npm run control-plane:serve"
                    },
                    {
@@ -453,7 +453,13 @@
                           }
                       ],
     "warningChecks":  [
-
+                          {
+                              "name":  "disk-free:E",
+                              "status":  "warning",
+                              "owner":  "storage",
+                              "detail":  "4.13 GiB free on E:",
+                              "nextCommand":  "free disk space before public operation"
+                          }
                       ],
     "missingLiveEnvNames":  [
                                 "FLOWCHAIN_RPC_PUBLIC_URL",

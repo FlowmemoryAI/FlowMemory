@@ -1,0 +1,112 @@
+﻿groups:
+  - name: flowchain_l1_ops
+    rules:
+      - alert: FlowChainServiceDown
+        expr: 'flowchain_service_status_ready == 0'
+        for: 2m
+        labels:
+          severity: critical
+          source_rule_ids: 'node-process-down,control-plane-down'
+        annotations:
+          summary: 'FlowChain service status is not ready.'
+          commands: 'npm run flowchain:service:status; npm run flowchain:service:restart -- -LiveProfile'
+      - alert: FlowChainBlockProductionStalled
+        expr: '(flowchain_height_advanced == 0) or (flowchain_latest_height <= 0)'
+        for: 5m
+        labels:
+          severity: critical
+          source_rule_ids: 'block-production-stalled'
+        annotations:
+          summary: 'FlowChain block height is not advancing.'
+          commands: 'npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30; npm run flowchain:service:restart -- -LiveProfile'
+      - alert: FlowChainStateFileStale
+        expr: 'flowchain_state_file_age_seconds > 300'
+        for: 5m
+        labels:
+          severity: critical
+          source_rule_ids: 'state-file-stale'
+        annotations:
+          summary: 'FlowChain state evidence is stale.'
+          commands: 'npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30; npm run flowchain:service:restart -- -LiveProfile'
+      - alert: FlowChainPublicRpcNotReady
+        expr: '(flowchain_public_rpc_ready == 0) or (flowchain_public_rpc_synthetic_canary_ready == 0)'
+        for: 5m
+        labels:
+          severity: blocked
+          source_rule_ids: 'public-rpc-edge-hardening-failed'
+        annotations:
+          summary: 'Public RPC is not ready for sharing.'
+          commands: 'npm run flowchain:public-rpc:check -- -AllowBlocked; npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked'
+      - alert: FlowChainPublicRpcHardeningMissing
+        expr: 'min(flowchain_public_rpc_security_headers, flowchain_public_rpc_timeout_guardrails, flowchain_public_rpc_auth_forwarding_scoped) == 0'
+        for: 5m
+        labels:
+          severity: critical
+          source_rule_ids: 'public-rpc-edge-hardening-failed'
+        annotations:
+          summary: 'Public RPC hardening evidence is incomplete.'
+          commands: 'npm run flowchain:public-rpc:deployment-bundle; npm run flowchain:public-rpc:deployment:automation'
+      - alert: FlowChainBackupRestoreProofMissing
+        expr: '(flowchain_backup_restore_validation_ready == 0) or (flowchain_backup_owner_path_dry_run_ready == 0)'
+        for: 10m
+        labels:
+          severity: critical
+          source_rule_ids: 'backup-restore-validation-failed,backup-owner-path-dry-run-failed'
+        annotations:
+          summary: 'Backup restore or owner-path proof is not ready.'
+          commands: 'npm run flowchain:backup:restore:validate; npm run flowchain:backup:owner-path:dry-run'
+      - alert: FlowChainBridgeRelayerUnsafe
+        expr: '(flowchain_bridge_relayer_loop_validation_ready == 0) or (flowchain_bridge_relayer_guardrail_ready == 0)'
+        for: 5m
+        labels:
+          severity: critical
+          source_rule_ids: 'bridge-relayer-loop-unhealthy,bridge-relayer-guardrail-failed'
+        annotations:
+          summary: 'Bridge relayer loop or guardrail evidence is unsafe.'
+          commands: 'npm run flowchain:bridge:relayer:loop:validate; npm run flowchain:bridge:relayer:guardrail:validate'
+      - alert: FlowChainBridgeReconciliationFailed
+        expr: 'flowchain_bridge_reconciliation_ready == 0'
+        for: 10m
+        labels:
+          severity: critical
+          source_rule_ids: 'bridge-reconciliation-failed'
+        annotations:
+          summary: 'Bridge reconciliation evidence is missing or failing.'
+          commands: 'npm run flowchain:bridge:reconciliation; npm run flowchain:bridge:emergency-stop'
+      - alert: FlowChainExternalTesterNotShareable
+        expr: '(flowchain_external_tester_external_sharing_ready == 0) or (flowchain_external_tester_missing_owner_inputs > 0)'
+        for: 10m
+        labels:
+          severity: blocked
+          source_rule_ids: 'external-tester-not-shareable'
+        annotations:
+          summary: 'External tester sharing remains blocked.'
+          commands: 'npm run flowchain:external-tester:packet -- -AllowBlocked; npm run flowchain:external-tester:packet:validate'
+      - alert: FlowChainNoSecretScanFailed
+        expr: 'flowchain_no_secret_ready == 0'
+        for: 1m
+        labels:
+          severity: critical
+          source_rule_ids: 'secret-boundary-breach'
+        annotations:
+          summary: 'No-secret scan is not passing.'
+          commands: 'npm run flowchain:no-secret:scan; npm run flowchain:emergency:export-evidence'
+      - alert: FlowChainTruthTableFailed
+        expr: '(flowchain_truth_gates_failed > 0) or (flowchain_truth_gates_repo_blocked > 0) or (flowchain_truth_gates_stale > 0)'
+        for: 1m
+        labels:
+          severity: critical
+          source_rule_ids: 'truth-table-stale-or-failed'
+        annotations:
+          summary: 'Production truth table has failed, repo-blocked, or stale gates.'
+          commands: 'npm run flowchain:truth-table -- -AllowBlocked; npm run flowchain:completion:audit -- -AllowBlocked -NoRefresh'
+      - alert: FlowChainOwnerInputsStillBlockingLaunch
+        expr: 'flowchain_owner_needs_now_next_inputs_total > 0'
+        for: 30m
+        labels:
+          severity: blocked
+          source_rule_ids: 'owner-inputs-validation-failed,owner-go-live-handoff-failed'
+        annotations:
+          summary: 'Launch remains blocked on owner-provided inputs.'
+          commands: 'npm run flowchain:owner:needs-now; npm run flowchain:owner:activation-plan'
+

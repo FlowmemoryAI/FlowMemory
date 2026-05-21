@@ -1,0 +1,1229 @@
+{
+    "uid":  "flowchain-l1-ops",
+    "title":  "FlowChain L1 Operations",
+    "tags":  [
+                 "flowchain",
+                 "l1",
+                 "owner-operated",
+                 "no-secret"
+             ],
+    "timezone":  "browser",
+    "schemaVersion":  39,
+    "version":  1,
+    "refresh":  "30s",
+    "templating":  {
+                       "list":  [
+                                    {
+                                        "name":  "DS_PROMETHEUS",
+                                        "type":  "datasource",
+                                        "query":  "prometheus",
+                                        "current":  {
+                                                        "text":  "Prometheus",
+                                                        "value":  "${DS_PROMETHEUS}"
+                                                    }
+                                    }
+                                ]
+                   },
+    "panels":  [
+                   {
+                       "id":  1,
+                       "title":  "Latest block height",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  0,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_latest_height",
+                                           "legendFormat":  "Latest block height"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  2,
+                       "title":  "Finalized block height",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  6,
+                                       "y":  0,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_finalized_height",
+                                           "legendFormat":  "Finalized block height"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  3,
+                       "title":  "Height advancing",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  12,
+                                       "y":  0,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_height_advanced",
+                                           "legendFormat":  "Height advancing"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  4,
+                       "title":  "State file age seconds",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  18,
+                                       "y":  0,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_state_file_age_seconds",
+                                           "legendFormat":  "State file age seconds"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "s",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  5,
+                       "title":  "Service ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  5,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_service_status_ready",
+                                           "legendFormat":  "Service ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  6,
+                       "title":  "Supervisor node recovery",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  6,
+                                       "y":  5,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_supervisor_node_recovery_validated",
+                                           "legendFormat":  "Supervisor node recovery"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  7,
+                       "title":  "Public RPC ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  12,
+                                       "y":  5,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_public_rpc_ready",
+                                           "legendFormat":  "Public RPC ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  8,
+                       "title":  "Public RPC canary ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  18,
+                                       "y":  5,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_public_rpc_synthetic_canary_ready",
+                                           "legendFormat":  "Public RPC canary ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  9,
+                       "title":  "Public RPC hardening",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  10,
+                                       "w":  8,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "min(flowchain_public_rpc_security_headers, flowchain_public_rpc_timeout_guardrails, flowchain_public_rpc_auth_forwarding_scoped)",
+                                           "legendFormat":  "Public RPC hardening"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  10,
+                       "title":  "Backup restore proof",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  8,
+                                       "y":  10,
+                                       "w":  8,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_backup_restore_validation_ready",
+                                           "legendFormat":  "Backup restore proof"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  11,
+                       "title":  "Backup owner path proof",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  16,
+                                       "y":  10,
+                                       "w":  8,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_backup_owner_path_dry_run_ready",
+                                           "legendFormat":  "Backup owner path proof"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  12,
+                       "title":  "Bridge relayer loop",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  15,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_bridge_relayer_loop_validation_ready",
+                                           "legendFormat":  "Bridge relayer loop"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  13,
+                       "title":  "Bridge reconciliation",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  6,
+                                       "y":  15,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_bridge_reconciliation_ready",
+                                           "legendFormat":  "Bridge reconciliation"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  14,
+                       "title":  "Bridge guardrail ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  12,
+                                       "y":  15,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_bridge_relayer_guardrail_ready",
+                                           "legendFormat":  "Bridge guardrail ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  15,
+                       "title":  "External tester local rehearsal",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  18,
+                                       "y":  15,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_external_tester_local_rehearsal_ready",
+                                           "legendFormat":  "External tester local rehearsal"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  16,
+                       "title":  "Dashboard UI ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  20,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_dashboard_ui_ready",
+                                           "legendFormat":  "Dashboard UI ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  17,
+                       "title":  "Owner inputs still needed",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  6,
+                                       "y":  20,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_owner_needs_now_next_inputs_total",
+                                           "legendFormat":  "Owner inputs still needed"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  18,
+                       "title":  "Critical ops findings",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  12,
+                                       "y":  20,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_ops_critical_findings",
+                                           "legendFormat":  "Critical ops findings"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  19,
+                       "title":  "Truth table failures",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  18,
+                                       "y":  20,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_truth_gates_failed + flowchain_truth_gates_repo_blocked + flowchain_truth_gates_stale",
+                                           "legendFormat":  "Truth table failures"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   },
+                   {
+                       "id":  20,
+                       "title":  "No-secret scan ready",
+                       "type":  "stat",
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "${DS_PROMETHEUS}"
+                                      },
+                       "gridPos":  {
+                                       "x":  0,
+                                       "y":  25,
+                                       "w":  6,
+                                       "h":  5
+                                   },
+                       "targets":  [
+                                       {
+                                           "refId":  "A",
+                                           "expr":  "flowchain_no_secret_ready",
+                                           "legendFormat":  "No-secret scan ready"
+                                       }
+                                   ],
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short",
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  1
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "options":  {
+                                       "reduceOptions":  {
+                                                             "values":  false,
+                                                             "calcs":  [
+                                                                           "lastNotNull"
+                                                                       ],
+                                                             "fields":  ""
+                                                         },
+                                       "orientation":  "auto",
+                                       "textMode":  "auto",
+                                       "colorMode":  "value",
+                                       "graphMode":  "area",
+                                       "justifyMode":  "auto"
+                                   }
+                   }
+               ]
+}
