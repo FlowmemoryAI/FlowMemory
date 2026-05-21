@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T12:59:10.2457775Z",
+    "generatedAt":  "2026-05-21T13:26:39.6427615Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -127,7 +127,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=112900, finalizedHeight=112900",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=113037, finalizedHeight=113037",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],

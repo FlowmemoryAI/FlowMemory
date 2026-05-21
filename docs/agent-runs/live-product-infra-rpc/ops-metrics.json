@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T10:55:44.0411663Z",
+    "generatedAt":  "2026-05-21T13:24:18.0449112Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -408,6 +408,18 @@
                         "value":  1
                     },
                     {
+                        "name":  "flowchain_public_rpc_timeout_guardrails",
+                        "type":  "gauge",
+                        "help":  "One when the public RPC bundle includes bounded Nginx timeout guardrails.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_timeout_guardrail_preflight",
+                        "type":  "gauge",
+                        "help":  "One when public RPC preflights check bounded Nginx timeout guardrails.",
+                        "value":  1
+                    },
+                    {
                         "name":  "flowchain_public_rpc_method_rejection_preflight",
                         "type":  "gauge",
                         "help":  "One when public RPC preflights include wrong-method rejection probes.",
@@ -453,6 +465,18 @@
                         "name":  "flowchain_public_rpc_rendered_security_header_preflight",
                         "type":  "gauge",
                         "help":  "One when rendered public RPC preflights check defensive response headers.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_timeout_guardrails",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC Nginx config includes bounded timeout guardrails.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_public_rpc_rendered_timeout_guardrail_preflight",
+                        "type":  "gauge",
+                        "help":  "One when rendered public RPC preflights check bounded timeout guardrails.",
                         "value":  1
                     },
                     {
@@ -1089,7 +1113,7 @@
                         "name":  "flowchain_bridge_release_evidence_cases_total",
                         "type":  "gauge",
                         "help":  "Bridge release evidence validation case count.",
-                        "value":  9
+                        "value":  12
                     },
                     {
                         "name":  "flowchain_bridge_release_evidence_failed_cases",
@@ -2016,7 +2040,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  330,
+    "metricCount":  334,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

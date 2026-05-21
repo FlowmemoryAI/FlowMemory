@@ -374,7 +374,7 @@ $rules = @(
         severity = "critical"
         findingCodes = @("public-rpc-edge-hardening-failed")
         signal = "Public RPC edge deployment hardening evidence is missing or failed."
-        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, wallet/tester cutover command proof, hashed owner-host apply plan, concrete owner-host apply script, plan/apply/rollback modes, artifact hash verification, install/edge apply phases, post-deploy evidence, or rollback drill proof"
+        threshold = "deployment bundle or rendered automation lacks disallowed-origin, blocked-private-path, scoped authorization forwarding, defensive response-header proof, bounded timeout guardrail proof, wallet/tester cutover command proof, hashed owner-host apply plan, concrete owner-host apply script, plan/apply/rollback modes, artifact hash verification, install/edge apply phases, post-deploy evidence, or rollback drill proof"
         commands = @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked -NoRefresh")
     },
     [ordered]@{
@@ -470,6 +470,8 @@ $activeRuleIdsWithoutCommands = @($rules | Where-Object { $activeRules.Contains(
 $publicRpcEdgeHardeningRule = @($rules | Where-Object { $_.id -eq "public-rpc-edge-hardening-failed" } | Select-Object -First 1)
 $publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("response-header", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$publicRpcEdgeHardeningRuleCoversTimeoutGuardrails = $publicRpcEdgeHardeningRule.Count -eq 1 `
+    -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("timeout guardrail", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
 $publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRule.Count -eq 1 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("wallet/tester", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$publicRpcEdgeHardeningRule[0].threshold).IndexOf("cutover", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
@@ -631,6 +633,7 @@ $checks = [ordered]@{
     commandsAvoidUrls = $commandsWithUrls.Count -eq 0
     findingsWithoutCommandsEmpty = $findingsWithoutCommands.Count -eq 0
     publicRpcEdgeHardeningRuleCoversSecurityHeaders = $publicRpcEdgeHardeningRuleCoversSecurityHeaders
+    publicRpcEdgeHardeningRuleCoversTimeoutGuardrails = $publicRpcEdgeHardeningRuleCoversTimeoutGuardrails
     publicRpcEdgeHardeningRuleCoversWalletCutover = $publicRpcEdgeHardeningRuleCoversWalletCutover
     publicRpcEdgeHardeningRuleCoversRollbackDrill = $publicRpcEdgeHardeningRuleCoversRollbackDrill
     publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan = $publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan

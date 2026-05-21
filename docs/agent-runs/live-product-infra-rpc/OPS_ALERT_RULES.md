@@ -1,6 +1,6 @@
 ﻿# FlowChain Ops Alert Rules
 
-Generated: 2026-05-21T10:55:40.6154055Z
+Generated: 2026-05-21T13:24:05.8900607Z
 Status: passed
 Current alert state: blocked
 

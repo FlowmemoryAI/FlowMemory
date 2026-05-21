@@ -184,6 +184,12 @@ flowchain_public_rpc_security_headers 1
 # HELP flowchain_public_rpc_security_header_preflight One when public RPC preflights check defensive response headers.
 # TYPE flowchain_public_rpc_security_header_preflight gauge
 flowchain_public_rpc_security_header_preflight 1
+# HELP flowchain_public_rpc_timeout_guardrails One when the public RPC bundle includes bounded Nginx timeout guardrails.
+# TYPE flowchain_public_rpc_timeout_guardrails gauge
+flowchain_public_rpc_timeout_guardrails 1
+# HELP flowchain_public_rpc_timeout_guardrail_preflight One when public RPC preflights check bounded Nginx timeout guardrails.
+# TYPE flowchain_public_rpc_timeout_guardrail_preflight gauge
+flowchain_public_rpc_timeout_guardrail_preflight 1
 # HELP flowchain_public_rpc_method_rejection_preflight One when public RPC preflights include wrong-method rejection probes.
 # TYPE flowchain_public_rpc_method_rejection_preflight gauge
 flowchain_public_rpc_method_rejection_preflight 1
@@ -208,6 +214,12 @@ flowchain_public_rpc_rendered_security_headers 1
 # HELP flowchain_public_rpc_rendered_security_header_preflight One when rendered public RPC preflights check defensive response headers.
 # TYPE flowchain_public_rpc_rendered_security_header_preflight gauge
 flowchain_public_rpc_rendered_security_header_preflight 1
+# HELP flowchain_public_rpc_rendered_timeout_guardrails One when rendered public RPC Nginx config includes bounded timeout guardrails.
+# TYPE flowchain_public_rpc_rendered_timeout_guardrails gauge
+flowchain_public_rpc_rendered_timeout_guardrails 1
+# HELP flowchain_public_rpc_rendered_timeout_guardrail_preflight One when rendered public RPC preflights check bounded timeout guardrails.
+# TYPE flowchain_public_rpc_rendered_timeout_guardrail_preflight gauge
+flowchain_public_rpc_rendered_timeout_guardrail_preflight 1
 # HELP flowchain_public_rpc_rendered_method_rejection_preflight One when rendered public RPC preflights prove wrong HTTP methods are rejected.
 # TYPE flowchain_public_rpc_rendered_method_rejection_preflight gauge
 flowchain_public_rpc_rendered_method_rejection_preflight 1
@@ -525,7 +537,7 @@ flowchain_bridge_reconciliation_no_broadcasts 1
 flowchain_bridge_release_evidence_validation_ready 1
 # HELP flowchain_bridge_release_evidence_cases_total Bridge release evidence validation case count.
 # TYPE flowchain_bridge_release_evidence_cases_total gauge
-flowchain_bridge_release_evidence_cases_total 9
+flowchain_bridge_release_evidence_cases_total 12
 # HELP flowchain_bridge_release_evidence_failed_cases Failed bridge release evidence validation cases.
 # TYPE flowchain_bridge_release_evidence_failed_cases gauge
 flowchain_bridge_release_evidence_failed_cases 0
