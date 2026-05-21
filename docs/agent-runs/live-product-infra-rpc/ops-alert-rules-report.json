@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_alert_rules_report.v0",
-    "generatedAt":  "2026-05-21T09:17:24.2710168Z",
+    "generatedAt":  "2026-05-21T09:38:22.9946199Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -10,8 +10,8 @@
                        "exitCode":  0,
                        "outputLineCount":  0
                    },
-    "ruleCount":  43,
-    "criticalRuleCount":  36,
+    "ruleCount":  44,
+    "criticalRuleCount":  37,
     "blockedRuleCount":  7,
     "activeRuleIds":  [
                           "public-rpc-not-shareable",
@@ -43,6 +43,7 @@
                                 "backup-owner-path-dry-run-failed",
                                 "bridge-deploy-control-validation-failed",
                                 "bridge-command-matrix-failed",
+                                "bridge-no-secret-audit-failed",
                                 "bridge-relayer-check-contract-failed",
                                 "bridge-relayer-latency-failed",
                                 "bridge-relayer-cursor-unsafe",
@@ -116,6 +117,7 @@
                    "backupOwnerPathDryRunRuleCoversOwnerPath":  true,
                    "bridgeDeployControlRuleCoversDeploymentControls":  true,
                    "bridgeCommandMatrixRuleCoversLaunchRunbook":  true,
+                   "bridgeNoSecretAuditRuleCoversNoSecretProof":  true,
                    "bridgeRelayerCheckContractRuleCoversFailedChecks":  true,
                    "bridgeRelayerLoopRuleCoversValidationTelemetry":  true,
                    "bridgeReconciliationRuleCoversCursorAndReplay":  true,
@@ -305,6 +307,20 @@
                                        "npm run flowchain:bridge:command-matrix",
                                        "npm run flowchain:bridge:deploy:control:validate",
                                        "npm run flowchain:bridge:reconciliation"
+                                   ]
+                  },
+                  {
+                      "id":  "bridge-no-secret-audit-failed",
+                      "severity":  "critical",
+                      "findingCodes":  [
+                                           "bridge-no-secret-audit-failed"
+                                       ],
+                      "signal":  "Bridge generated pilot evidence no-secret audit is missing or unsafe.",
+                      "threshold":  "committed bridge no-secret audit JSON and Markdown must scan generated bridge pilot evidence with positive scanned file count, zero findings, zero secret findings, zero failed checks, no env value printing, no secrets, and no broadcasts",
+                      "commands":  [
+                                       "npm run flowchain:bridge:no-secret-audit",
+                                       "npm run flowchain:bridge:command-matrix",
+                                       "npm run flowchain:no-secret:scan"
                                    ]
                   },
                   {

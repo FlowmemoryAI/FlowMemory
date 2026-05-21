@@ -1,6 +1,6 @@
 ﻿# FlowChain External Tester Packet Validation
 
-Generated: 2026-05-21T09:09:22.3194996Z
+Generated: 2026-05-21T09:23:51.3937977Z
 Status: passed
 
 This validation proves the friends-and-family tester packet and machine-readable connect pack are generated, no-secret, executable against the local tester gateway, and fail closed until owner public RPC and tester-write inputs exist.

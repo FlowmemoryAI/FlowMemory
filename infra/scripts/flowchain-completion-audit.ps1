@@ -80,6 +80,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+    bridgeNoSecretAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
     bridgeDeployControlValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerOnce = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrailValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
@@ -414,6 +415,9 @@ $backupInstallValidationExitCode = $backupInstallValidationResult.exitCode
 $bridgeCommandMatrixResult = Invoke-AuditChild -Path $paths.bridgeCommandMatrix -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-command-matrix.ps1"))
 $bridgeCommandMatrixOutput = @($bridgeCommandMatrixResult.output)
 $bridgeCommandMatrixExitCode = $bridgeCommandMatrixResult.exitCode
+$bridgeNoSecretAuditResult = Invoke-AuditChild -Path $paths.bridgeNoSecretAudit -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-no-secret-audit.ps1"))
+$bridgeNoSecretAuditOutput = @($bridgeNoSecretAuditResult.output)
+$bridgeNoSecretAuditExitCode = $bridgeNoSecretAuditResult.exitCode
 $bridgeDeployControlValidationResult = Invoke-AuditChild -Path $paths.bridgeDeployControlValidation -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-bridge-deploy-control-validation.ps1"))
 $bridgeDeployControlValidationOutput = @($bridgeDeployControlValidationResult.output)
 $bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationResult.exitCode
@@ -2354,6 +2358,32 @@ $bridgeCommandMatrixPassed = $bridgeCommandMatrixExitCode -eq 0 `
     -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+$bridgeNoSecretAudit = $reports.bridgeNoSecretAudit
+$bridgeNoSecretAuditStatus = Get-ReportStatus -Report $bridgeNoSecretAudit
+$bridgeNoSecretAuditChecks = Get-AuditProp -Object $bridgeNoSecretAudit -Name "checks"
+$bridgeNoSecretAuditFindings = @((Get-AuditProp -Object $bridgeNoSecretAudit -Name "findings" -Default @()))
+$bridgeNoSecretAuditSecretFindings = @((Get-AuditProp -Object $bridgeNoSecretAudit -Name "secretMarkerFindings" -Default @()))
+$bridgeNoSecretAuditFailedChecks = @((Get-AuditProp -Object $bridgeNoSecretAudit -Name "failedChecks" -Default @()))
+$bridgeNoSecretAuditRequiredChecks = @(
+    "scannedPathsPresent",
+    "scannedFileCountPositive",
+    "findingsEmpty",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeNoSecretAuditMissingChecks = @(Get-MissingAuditChecks -Checks $bridgeNoSecretAuditChecks -Names $bridgeNoSecretAuditRequiredChecks)
+$bridgeNoSecretAuditPassed = $bridgeNoSecretAuditExitCode -eq 0 `
+    -and $bridgeNoSecretAuditStatus -eq "passed" `
+    -and $bridgeNoSecretAuditFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditSecretFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditFailedChecks.Count -eq 0 `
+    -and $bridgeNoSecretAuditMissingChecks.Count -eq 0 `
+    -and ([int](Get-AuditProp -Object $bridgeNoSecretAudit -Name "scannedFileCount" -Default 0) -gt 0) `
+    -and ((Get-AuditProp -Object $bridgeNoSecretAudit -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-AuditProp -Object $bridgeNoSecretAudit -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $bridgeNoSecretAudit -Name "broadcasts" -Default $true) -eq $false)
 $bridgeDeployControlValidation = $reports.bridgeDeployControlValidation
 $bridgeDeployControlValidationStatus = Get-ReportStatus -Report $bridgeDeployControlValidation
 $bridgeDeployControlChecks = Get-AuditProp -Object $bridgeDeployControlValidation -Name "checks"
@@ -2994,6 +3024,7 @@ $opsAlertRequiredChecks = @(
     "backupOwnerPathDryRunRuleCoversOwnerPath",
     "bridgeDeployControlRuleCoversDeploymentControls",
     "bridgeCommandMatrixRuleCoversLaunchRunbook",
+    "bridgeNoSecretAuditRuleCoversNoSecretProof",
     "supervisorNodeRecoveryRuleCoversLiveProfile",
     "bridgeRelayerLoopRuleCoversValidationTelemetry",
     "bridgeReconciliationRuleCoversCursorAndReplay",
@@ -3079,6 +3110,8 @@ $opsMetricsExportPassed = $opsMetricsExportExitCode -eq 0 `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixLoaded" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeCommandMatrixMetricsPresent" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditLoaded" -Default $false) -eq $true) `
+    -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false) -eq $true) `
     -and ((Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false) -eq $true) `
@@ -3595,7 +3628,7 @@ Add-AuditItem -Items $items -Id "ops-snapshot" `
 Add-AuditItem -Items $items -Id "ops-alert-rules" `
     -Requirement "Ops alert rules map every current ops finding, public RPC apply-plan regression, backup restore/owner-path regression, bridge reconciliation regression, service-install validation regression, and autorecovery telemetry regression to local operator commands with critical and blocked rule coverage, no unmapped current findings, and no external delivery credentials." `
     -Status $(if ($opsAlertRulesPassed) { "passed" } else { "failed" }) `
-    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, publicRpcRollbackAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), publicRpcApplyPlanAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false), backupRestoreAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false), backupOwnerPathAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false), bridgeDeployControlAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), bridgeReconciliationAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false), serviceInstallAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), devPackAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false), secondComputerAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
+    -Evidence "alertRules=$opsAlertRulesStatus, rules=$opsAlertRuleCount, criticalRules=$opsAlertCriticalRuleCount, blockedRules=$opsAlertBlockedRuleCount, failedChecks=$opsAlertFailedCheckCount, missingChecks=$opsAlertMissingCheckCount, secretFindings=$opsAlertSecretFindingCount, publicRpcRollbackAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversRollbackDrill" -Default $false), publicRpcApplyPlanAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "publicRpcEdgeHardeningRuleCoversOwnerHostApplyPlan" -Default $false), backupRestoreAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "backupRestoreValidationRuleCoversSafety" -Default $false), backupOwnerPathAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "backupOwnerPathDryRunRuleCoversOwnerPath" -Default $false), bridgeDeployControlAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "bridgeDeployControlRuleCoversDeploymentControls" -Default $false), bridgeNoSecretAuditAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "bridgeNoSecretAuditRuleCoversNoSecretProof" -Default $false), bridgeReconciliationAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "bridgeReconciliationRuleCoversCursorAndReplay" -Default $false), serviceInstallAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "serviceInstallValidationRuleCoversAutorecoveryTelemetry" -Default $false), devPackAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "devPackRuleCoversBrowserStarter" -Default $false), secondComputerAlert=$(Get-AuditProp -Object $opsAlertChecks -Name "secondComputerRuleCoversBundleVerifyNoSecret" -Default $false), unmapped=$($opsAlertUnmappedCodes.Count), rulesWithoutCommands=$($opsAlertRulesWithoutCommands.Count), commandUrls=$($opsAlertCommandsWithUrls.Count), inlineEnvAssignments=$($opsAlertCommandsWithInlineEnvAssignment.Count), report=$($paths.opsAlertRules)" `
     -Commands @("npm run flowchain:ops:alerts -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
@@ -3607,7 +3640,7 @@ Add-AuditItem -Items $items -Id "ops-alert-install-validation" `
 Add-AuditItem -Items $items -Id "ops-metrics-export" `
     -Requirement "Ops metrics export writes no-secret JSON and Prometheus textfile metrics from current L1 operations evidence, including backup restore/owner-path safety, public RPC edge deployment hardening, bridge relayer-loop validation, bridge reconciliation, bridge release-evidence validation, and external tester client validation coverage, without hiding owner-input blockers." `
     -Status $(if ($opsMetricsExportPassed) { "passed" } else { "failed" }) `
-    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), backupRestoreValidationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationLoaded" -Default $false), backupRestoreValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationMetricsPresent" -Default $false), backupOwnerPathDryRunLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunLoaded" -Default $false), backupOwnerPathDryRunMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcRollbackDrillMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false), publicRpcOwnerApplyMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false), bridgeDeployControlMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false), serviceInstallValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false), bridgeRelayerLoopValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false), bridgeReconciliationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationLoaded" -Default $false), bridgeReconciliationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationMetricsPresent" -Default $false), bridgeReleaseEvidenceMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), secondComputerLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerLoaded" -Default $false), secondComputerMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerMetricsPresent" -Default $false), devPackLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackLoaded" -Default $false), devPackMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
+    -Evidence "metricsExport=$opsMetricsExportStatus, metricCount=$opsMetricsExportMetricCount, failedChecks=$($opsMetricsExportFailedChecks.Count), secretFindings=$($opsMetricsExportSecretFindings.Count), metricsJsonWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "metricsJsonWritten" -Default $false), prometheusTextWritten=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "prometheusTextWritten" -Default $false), requiredMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "requiredMetricsPresent" -Default $false), backupRestoreValidationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationLoaded" -Default $false), backupRestoreValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupRestoreValidationMetricsPresent" -Default $false), backupOwnerPathDryRunLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunLoaded" -Default $false), backupOwnerPathDryRunMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "backupOwnerPathDryRunMetricsPresent" -Default $false), publicRpcEdgeMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcEdgeMetricsPresent" -Default $false), publicRpcRollbackDrillMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcRollbackDrillMetricsPresent" -Default $false), publicRpcOwnerApplyMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "publicRpcOwnerHostApplyPlanMetricsPresent" -Default $false), bridgeNoSecretAuditLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditLoaded" -Default $false), bridgeNoSecretAuditMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeNoSecretAuditMetricsPresent" -Default $false), bridgeDeployControlMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeDeployControlMetricsPresent" -Default $false), serviceInstallValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "serviceInstallValidationMetricsPresent" -Default $false), bridgeRelayerLoopValidationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeRelayerLoopValidationMetricsPresent" -Default $false), bridgeReconciliationLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationLoaded" -Default $false), bridgeReconciliationMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReconciliationMetricsPresent" -Default $false), bridgeReleaseEvidenceMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "bridgeReleaseEvidenceMetricsPresent" -Default $false), externalTesterClientMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "externalTesterClientMetricsPresent" -Default $false), secondComputerLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerLoaded" -Default $false), secondComputerMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "secondComputerMetricsPresent" -Default $false), devPackLoaded=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackLoaded" -Default $false), devPackMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "devPackMetricsPresent" -Default $false), supervisorNodeRecoveryMetricsPresent=$(Get-AuditProp -Object $opsMetricsExportChecks -Name "supervisorNodeRecoveryMetricsPresent" -Default $false), report=$($paths.opsMetricsExport)" `
     -Commands @("npm run flowchain:ops:metrics:export -- -AllowBlocked")
 
 Add-AuditItem -Items $items -Id "ops-metrics-install-validation" `
@@ -3655,10 +3688,16 @@ Add-AuditItem -Items $items -Id "bridge-funds" `
     -Blockers @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_RPC_URL", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS")
 
 Add-AuditItem -Items $items -Id "bridge-command-matrix" `
-    -Requirement "Bridge pilot command matrix maps deploy, observe, relayer, credit, withdrawal/release, emergency-control, smoke, and release commands to owner env names, broadcast acknowledgement gates, risk class, and evidence paths without owner-value leakage." `
+    -Requirement "Bridge pilot command matrix maps deploy, observe, relayer, credit, withdrawal/release, emergency-control, smoke, no-secret audit, and release commands to owner env names, broadcast acknowledgement gates, risk class, and evidence paths without owner-value leakage." `
     -Status $(if ($bridgeCommandMatrixPassed) { "passed" } else { "failed" }) `
     -Evidence "matrixStatus=$bridgeCommandMatrixStatus, commands=$($bridgeCommandMatrixRows.Count), phases=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "phaseCount" -Default 0), liveBroadcastCommands=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "liveBroadcastCapableCommandCount" -Default 0), committedEvidencePaths=$(Get-AuditProp -Object $bridgeCommandMatrix -Name "committedEvidencePathCount" -Default 0), failedChecks=$($bridgeCommandMatrixFailedChecks.Count), missingScripts=$($bridgeCommandMatrixMissingScripts.Count), missingPhases=$($bridgeCommandMatrixMissingPhases.Count), broadcastAckGaps=$($bridgeCommandMatrixBroadcastAckGaps.Count), report=$($paths.bridgeCommandMatrix)" `
     -Commands @("npm run flowchain:bridge:command-matrix")
+
+Add-AuditItem -Items $items -Id "bridge-no-secret-audit" `
+    -Requirement "Bridge generated pilot evidence is scanned for secret-shaped material before owner-funded bridge activation, with committed no-secret JSON and Markdown evidence." `
+    -Status $(if ($bridgeNoSecretAuditPassed) { "passed" } else { "failed" }) `
+    -Evidence "bridgeNoSecretStatus=$bridgeNoSecretAuditStatus, scannedFiles=$(Get-AuditProp -Object $bridgeNoSecretAudit -Name "scannedFileCount" -Default 0), findings=$($bridgeNoSecretAuditFindings.Count), secretFindings=$($bridgeNoSecretAuditSecretFindings.Count), failedChecks=$($bridgeNoSecretAuditFailedChecks.Count), missingChecks=$($bridgeNoSecretAuditMissingChecks.Count), report=$($paths.bridgeNoSecretAudit)" `
+    -Commands @("npm run flowchain:bridge:no-secret-audit")
 
 Add-AuditItem -Items $items -Id "bridge-local-pilot-proof" `
     -Requirement "Local/mock bridge pilot proof preserves exact value, rejects replay/wrong-chain/unapproved-lockbox cases, and performs no broadcast." `
@@ -3832,6 +3871,8 @@ $report = [ordered]@{
     backupInstallValidationOutputRedacted = @($backupInstallValidationOutput | ForEach-Object { "$_" })
     bridgeCommandMatrixExitCode = $bridgeCommandMatrixExitCode
     bridgeCommandMatrixOutputRedacted = @($bridgeCommandMatrixOutput | ForEach-Object { "$_" })
+    bridgeNoSecretAuditExitCode = $bridgeNoSecretAuditExitCode
+    bridgeNoSecretAuditOutputRedacted = @($bridgeNoSecretAuditOutput | ForEach-Object { "$_" })
     bridgeDeployControlValidationExitCode = $bridgeDeployControlValidationExitCode
     bridgeDeployControlValidationOutputRedacted = @($bridgeDeployControlValidationOutput | ForEach-Object { "$_" })
     bridgeRelayerOnceExitCode = $bridgeRelayerOnceExitCode
@@ -3946,6 +3987,8 @@ $report = [ordered]@{
         installCheckPassed = $installCheckPassed
         bridgeCommandMatrixStatus = $bridgeCommandMatrixStatus
         bridgeCommandMatrixPassed = $bridgeCommandMatrixPassed
+        bridgeNoSecretAuditStatus = $bridgeNoSecretAuditStatus
+        bridgeNoSecretAuditPassed = $bridgeNoSecretAuditPassed
         bridgeDeployControlValidationStatus = $bridgeDeployControlValidationStatus
         bridgeDeployControlValidationPassed = $bridgeDeployControlValidationPassed
         bridgeRelayerOnceStatus = $bridgeRelayerOnceStatus

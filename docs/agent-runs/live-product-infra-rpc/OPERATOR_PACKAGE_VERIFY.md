@@ -1,6 +1,6 @@
 ﻿# FlowChain Operator Package Verify
 
-Generated: 2026-05-21T09:18:16.1244216Z
+Generated: 2026-05-21T09:39:13.7584048Z
 Status: passed
 
 ## Checks
@@ -42,7 +42,7 @@ Status: passed
 - Missing files: 0
 - Forbidden local files: 0
 - Hash problems: 0
-- Command count: 68
+- Command count: 69
 - Go-live evidence paths: 36
 - Missing go-live evidence files: 0
 - Go-live evidence missing from manifest: 0

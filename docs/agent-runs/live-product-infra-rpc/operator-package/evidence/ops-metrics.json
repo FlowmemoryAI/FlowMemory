@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T09:17:24.7784162Z",
+    "generatedAt":  "2026-05-21T09:38:23.9659296Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -15,6 +15,7 @@
                           "backupRestoreValidationStatus":  "passed",
                           "backupOwnerPathDryRunStatus":  "passed",
                           "bridgeCommandMatrixStatus":  "passed",
+                          "bridgeNoSecretAuditStatus":  "passed",
                           "bridgeRelayerLoopValidationStatus":  "passed",
                           "bridgeReconciliationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
@@ -122,13 +123,13 @@
                         "name":  "flowchain_ops_alert_rules_total",
                         "type":  "gauge",
                         "help":  "Configured ops alert rule count.",
-                        "value":  42
+                        "value":  43
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_critical",
                         "type":  "gauge",
                         "help":  "Configured critical ops alert rule count.",
-                        "value":  35
+                        "value":  36
                     },
                     {
                         "name":  "flowchain_ops_alert_rules_blocked",
@@ -818,6 +819,42 @@
                         "name":  "flowchain_bridge_command_matrix_no_secrets",
                         "type":  "gauge",
                         "help":  "One when bridge command matrix reports no secrets and no env value printing.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_ready",
+                        "type":  "gauge",
+                        "help":  "One when generated bridge pilot evidence no-secret audit is passed.",
+                        "value":  1
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_scanned_files",
+                        "type":  "gauge",
+                        "help":  "Generated bridge pilot evidence files scanned by the no-secret audit.",
+                        "value":  32
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_findings",
+                        "type":  "gauge",
+                        "help":  "Findings in generated bridge pilot evidence no-secret audit.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_secret_findings",
+                        "type":  "gauge",
+                        "help":  "Secret marker findings in generated bridge pilot evidence no-secret audit.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_failed_checks",
+                        "type":  "gauge",
+                        "help":  "Failed checks in generated bridge pilot evidence no-secret audit.",
+                        "value":  0
+                    },
+                    {
+                        "name":  "flowchain_bridge_no_secret_audit_no_broadcasts",
+                        "type":  "gauge",
+                        "help":  "One when generated bridge pilot evidence audit reports no broadcasts.",
                         "value":  1
                     },
                     {
@@ -1979,7 +2016,7 @@
                         "value":  0
                     }
                 ],
-    "metricCount":  324,
+    "metricCount":  330,
     "prometheusTextPath":  "docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt",
     "envValuesPrinted":  false,
     "noSecrets":  true,

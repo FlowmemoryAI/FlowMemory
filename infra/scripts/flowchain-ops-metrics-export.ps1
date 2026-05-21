@@ -37,6 +37,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeCommandMatrix = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+    bridgeNoSecretAudit = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
     bridgeDeployControl = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayerGuardrail = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
     bridgeRelayerLoopValidation = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json"
@@ -246,6 +247,7 @@ $ownerActivationPlan = $reports.ownerActivationPlan
 $ownerGoLiveHandoff = $reports.ownerGoLiveHandoff
 $ownerNeedsNow = $reports.ownerNeedsNow
 $bridgeCommandMatrix = $reports.bridgeCommandMatrix
+$bridgeNoSecretAudit = $reports.bridgeNoSecretAudit
 $bridgeDeployControl = $reports.bridgeDeployControl
 $bridgeRelayerLoopValidation = $reports.bridgeRelayerLoopValidation
 $bridgeReconciliation = $reports.bridgeReconciliation
@@ -568,6 +570,29 @@ $bridgeCommandMatrixReady = (Get-MetricsStatus -Report $bridgeCommandMatrix) -eq
     -and ((Get-MetricsProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-MetricsProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-MetricsProp -Object $bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+$bridgeNoSecretAuditChecks = Get-MetricsProp -Object $bridgeNoSecretAudit -Name "checks"
+$bridgeNoSecretAuditFindings = @((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "findings" -Default @()))
+$bridgeNoSecretAuditSecretFindings = @((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "secretMarkerFindings" -Default @()))
+$bridgeNoSecretAuditFailedChecks = @((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "failedChecks" -Default @()))
+$bridgeNoSecretAuditRequiredChecks = @(
+    "scannedPathsPresent",
+    "scannedFileCountPositive",
+    "findingsEmpty",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeNoSecretAuditMissingChecks = @($bridgeNoSecretAuditRequiredChecks | Where-Object { (Get-MetricsProp -Object $bridgeNoSecretAuditChecks -Name $_ -Default $false) -ne $true })
+$bridgeNoSecretAuditReady = (Get-MetricsStatus -Report $bridgeNoSecretAudit) -eq "passed" `
+    -and $bridgeNoSecretAuditFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditSecretFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditFailedChecks.Count -eq 0 `
+    -and $bridgeNoSecretAuditMissingChecks.Count -eq 0 `
+    -and ([int](Get-MetricsProp -Object $bridgeNoSecretAudit -Name "scannedFileCount" -Default 0) -gt 0) `
+    -and ((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "broadcasts" -Default $true) -eq $false)
 $bridgeRelayerLoopValidationChecks = Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "checks"
 $bridgeRelayerLoopValidationFailedChecks = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "failedChecks" -Default @()))
 $bridgeRelayerLoopValidationSecretFindings = @((Get-MetricsProp -Object $bridgeRelayerLoopValidation -Name "secretMarkerFindings" -Default @()))
@@ -753,6 +778,12 @@ Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_command_matrix_live_br
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_command_matrix_missing_scripts" -Help "Missing package scripts in bridge command matrix." -Value (ConvertTo-MetricNumber -Value $bridgeCommandMatrixMissingScripts.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_command_matrix_broadcast_ack_gaps" -Help "Live-broadcast bridge commands missing explicit broadcast acknowledgement coverage." -Value (ConvertTo-MetricNumber -Value $bridgeCommandMatrixBroadcastAckGaps.Count)
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_command_matrix_no_secrets" -Help "One when bridge command matrix reports no secrets and no env value printing." -Value (ConvertTo-MetricBool -Value (((Get-MetricsProp -Object $bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) -and ((Get-MetricsProp -Object $bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_ready" -Help "One when generated bridge pilot evidence no-secret audit is passed." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeNoSecretAuditReady" -Default $bridgeNoSecretAuditReady))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_scanned_files" -Help "Generated bridge pilot evidence files scanned by the no-secret audit." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeNoSecretAuditScannedFiles" -Default (Get-MetricsProp -Object $bridgeNoSecretAudit -Name "scannedFileCount" -Default 0)))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_findings" -Help "Findings in generated bridge pilot evidence no-secret audit." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeNoSecretAuditFindings" -Default $bridgeNoSecretAuditFindings.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_secret_findings" -Help "Secret marker findings in generated bridge pilot evidence no-secret audit." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeNoSecretAuditSecretFindings" -Default $bridgeNoSecretAuditSecretFindings.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_failed_checks" -Help "Failed checks in generated bridge pilot evidence no-secret audit." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeNoSecretAuditFailedChecks" -Default $bridgeNoSecretAuditFailedChecks.Count))
+Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_no_secret_audit_no_broadcasts" -Help "One when generated bridge pilot evidence audit reports no broadcasts." -Value (ConvertTo-MetricBool -Value ((Get-MetricsProp -Object $bridgeNoSecretAudit -Name "broadcasts" -Default $true) -eq $false))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_validation_ready" -Help "One when bridge deploy/control validation is passed and safe." -Value (ConvertTo-MetricBool -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlReady" -Default $bridgeDeployControlReady))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_failed_checks" -Help "Failed checks in bridge deploy/control validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlFailedChecks" -Default $bridgeDeployControlFailedChecks.Count))
 Add-MetricGauge -Metrics $metrics -Name "flowchain_bridge_deploy_control_missing_checks" -Help "Missing required checks in bridge deploy/control validation." -Value (ConvertTo-MetricNumber -Value (Get-MetricsProp -Object $reportStatuses -Name "bridgeDeployControlMissingChecks" -Default $bridgeDeployControlMissingChecks.Count))
@@ -970,6 +1001,7 @@ $metricsJson = [ordered]@{
         backupRestoreValidationStatus = Get-MetricsStatus -Report $backupRestoreValidation
         backupOwnerPathDryRunStatus = Get-MetricsStatus -Report $backupOwnerPathDryRun
         bridgeCommandMatrixStatus = Get-MetricsStatus -Report $bridgeCommandMatrix
+        bridgeNoSecretAuditStatus = Get-MetricsStatus -Report $bridgeNoSecretAudit
         bridgeRelayerLoopValidationStatus = Get-MetricsStatus -Report $bridgeRelayerLoopValidation
         bridgeReconciliationStatus = Get-MetricsStatus -Report $bridgeReconciliation
         bridgeReleaseEvidenceValidationStatus = Get-MetricsStatus -Report $bridgeReleaseEvidenceValidation
@@ -1127,6 +1159,12 @@ $requiredMetricNames = @(
     "flowchain_bridge_command_matrix_missing_scripts",
     "flowchain_bridge_command_matrix_broadcast_ack_gaps",
     "flowchain_bridge_command_matrix_no_secrets",
+    "flowchain_bridge_no_secret_audit_ready",
+    "flowchain_bridge_no_secret_audit_scanned_files",
+    "flowchain_bridge_no_secret_audit_findings",
+    "flowchain_bridge_no_secret_audit_secret_findings",
+    "flowchain_bridge_no_secret_audit_failed_checks",
+    "flowchain_bridge_no_secret_audit_no_broadcasts",
     "flowchain_bridge_deploy_control_validation_ready",
     "flowchain_bridge_deploy_control_failed_checks",
     "flowchain_bridge_deploy_control_missing_checks",
@@ -1331,6 +1369,7 @@ $checks = [ordered]@{
     externalTesterClientValidationLoaded = $null -ne $externalTesterClientValidation
     externalTesterEvidenceLoaded = $null -ne $externalTesterEvidence
     bridgeCommandMatrixLoaded = $null -ne $bridgeCommandMatrix
+    bridgeNoSecretAuditLoaded = $null -ne $bridgeNoSecretAudit
     bridgeDeployControlLoaded = $null -ne $bridgeDeployControl
     bridgeRelayerLoopValidationLoaded = $null -ne $bridgeRelayerLoopValidation
     bridgeReconciliationLoaded = $null -ne $bridgeReconciliation
@@ -1426,6 +1465,14 @@ $checks = [ordered]@{
         "flowchain_bridge_command_matrix_missing_scripts",
         "flowchain_bridge_command_matrix_broadcast_ack_gaps",
         "flowchain_bridge_command_matrix_no_secrets"
+    ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
+    bridgeNoSecretAuditMetricsPresent = @(
+        "flowchain_bridge_no_secret_audit_ready",
+        "flowchain_bridge_no_secret_audit_scanned_files",
+        "flowchain_bridge_no_secret_audit_findings",
+        "flowchain_bridge_no_secret_audit_secret_findings",
+        "flowchain_bridge_no_secret_audit_failed_checks",
+        "flowchain_bridge_no_secret_audit_no_broadcasts"
     ) | Where-Object { $_ -notin $metricNames } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
     bridgeRuntimeCreditMetricsPresent = @(
         "flowchain_bridge_runtime_credit_ready",

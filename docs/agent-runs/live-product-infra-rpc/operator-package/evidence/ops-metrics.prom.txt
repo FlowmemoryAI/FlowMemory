@@ -42,10 +42,10 @@ flowchain_ops_critical_findings 0
 flowchain_ops_blocked_findings 6
 # HELP flowchain_ops_alert_rules_total Configured ops alert rule count.
 # TYPE flowchain_ops_alert_rules_total gauge
-flowchain_ops_alert_rules_total 42
+flowchain_ops_alert_rules_total 43
 # HELP flowchain_ops_alert_rules_critical Configured critical ops alert rule count.
 # TYPE flowchain_ops_alert_rules_critical gauge
-flowchain_ops_alert_rules_critical 35
+flowchain_ops_alert_rules_critical 36
 # HELP flowchain_ops_alert_rules_blocked Configured owner-blocked ops alert rule count.
 # TYPE flowchain_ops_alert_rules_blocked gauge
 flowchain_ops_alert_rules_blocked 7
@@ -391,6 +391,24 @@ flowchain_bridge_command_matrix_broadcast_ack_gaps 0
 # HELP flowchain_bridge_command_matrix_no_secrets One when bridge command matrix reports no secrets and no env value printing.
 # TYPE flowchain_bridge_command_matrix_no_secrets gauge
 flowchain_bridge_command_matrix_no_secrets 1
+# HELP flowchain_bridge_no_secret_audit_ready One when generated bridge pilot evidence no-secret audit is passed.
+# TYPE flowchain_bridge_no_secret_audit_ready gauge
+flowchain_bridge_no_secret_audit_ready 1
+# HELP flowchain_bridge_no_secret_audit_scanned_files Generated bridge pilot evidence files scanned by the no-secret audit.
+# TYPE flowchain_bridge_no_secret_audit_scanned_files gauge
+flowchain_bridge_no_secret_audit_scanned_files 32
+# HELP flowchain_bridge_no_secret_audit_findings Findings in generated bridge pilot evidence no-secret audit.
+# TYPE flowchain_bridge_no_secret_audit_findings gauge
+flowchain_bridge_no_secret_audit_findings 0
+# HELP flowchain_bridge_no_secret_audit_secret_findings Secret marker findings in generated bridge pilot evidence no-secret audit.
+# TYPE flowchain_bridge_no_secret_audit_secret_findings gauge
+flowchain_bridge_no_secret_audit_secret_findings 0
+# HELP flowchain_bridge_no_secret_audit_failed_checks Failed checks in generated bridge pilot evidence no-secret audit.
+# TYPE flowchain_bridge_no_secret_audit_failed_checks gauge
+flowchain_bridge_no_secret_audit_failed_checks 0
+# HELP flowchain_bridge_no_secret_audit_no_broadcasts One when generated bridge pilot evidence audit reports no broadcasts.
+# TYPE flowchain_bridge_no_secret_audit_no_broadcasts gauge
+flowchain_bridge_no_secret_audit_no_broadcasts 1
 # HELP flowchain_bridge_deploy_control_validation_ready One when bridge deploy/control validation is passed and safe.
 # TYPE flowchain_bridge_deploy_control_validation_ready gauge
 flowchain_bridge_deploy_control_validation_ready 1

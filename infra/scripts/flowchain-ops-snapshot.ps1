@@ -60,6 +60,7 @@ $paths = [ordered]@{
     bridgeLive = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json"
     bridgeInfra = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json"
     bridgeCommandMatrix = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json"
+    bridgeNoSecretAudit = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
     bridgeDeployControl = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-deploy-control-validation-report.json"
     bridgeRelayer = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json"
     bridgeRelayerGuardrail = Resolve-OpsInputReportPath -Path "docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json"
@@ -616,6 +617,30 @@ $bridgeCommandMatrixReady = $bridgeCommandMatrixStatus -eq "passed" `
     -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "envValuesPrinted" -Default $true) -eq $false) `
     -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true) `
     -and ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+$bridgeNoSecretAuditStatus = Get-OpsStatus -Report $reports.bridgeNoSecretAudit
+$bridgeNoSecretAuditChecks = Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "checks"
+$bridgeNoSecretAuditFindings = @((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "findings" -Default @()))
+$bridgeNoSecretAuditSecretFindings = @((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "secretMarkerFindings" -Default @()))
+$bridgeNoSecretAuditFailedChecks = @((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "failedChecks" -Default @()))
+$bridgeNoSecretAuditRequiredChecks = @(
+    "scannedPathsPresent",
+    "scannedFileCountPositive",
+    "findingsEmpty",
+    "secretMarkerFindingsEmpty",
+    "envValuesPrintedFalse",
+    "noSecrets",
+    "broadcastsFalse"
+)
+$bridgeNoSecretAuditMissingChecks = @($bridgeNoSecretAuditRequiredChecks | Where-Object { (Get-OpsProp -Object $bridgeNoSecretAuditChecks -Name $_ -Default $false) -ne $true })
+$bridgeNoSecretAuditReady = $bridgeNoSecretAuditStatus -eq "passed" `
+    -and $bridgeNoSecretAuditFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditSecretFindings.Count -eq 0 `
+    -and $bridgeNoSecretAuditFailedChecks.Count -eq 0 `
+    -and $bridgeNoSecretAuditMissingChecks.Count -eq 0 `
+    -and ([int](Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "scannedFileCount" -Default 0) -gt 0) `
+    -and ((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "envValuesPrinted" -Default $true) -eq $false) `
+    -and ((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "noSecrets" -Default $false) -eq $true) `
+    -and ((Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "broadcasts" -Default $true) -eq $false)
 $bridgeDeployControlStatus = Get-OpsStatus -Report $reports.bridgeDeployControl
 $bridgeDeployControlChecks = Get-OpsProp -Object $reports.bridgeDeployControl -Name "checks"
 $bridgeDeployControlFailedChecks = @((Get-OpsProp -Object $reports.bridgeDeployControl -Name "failedChecks" -Default @()))
@@ -1117,6 +1142,9 @@ if ($bridgeLiveStatus -ne "passed" -or $bridgeInfraStatus -ne "passed") {
 if (-not $bridgeCommandMatrixReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-command-matrix-failed" -Message "Bridge command matrix is missing or unsafe: every pilot command must be mapped to risk, owner inputs, acknowledgement gates, and committed evidence without secrets or broadcasts." -Commands @("npm run flowchain:bridge:command-matrix", "npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:reconciliation")
 }
+if (-not $bridgeNoSecretAuditReady) {
+    Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-no-secret-audit-failed" -Message "Bridge generated pilot evidence no-secret audit is missing or unsafe: committed JSON and Markdown proof must scan generated bridge artifacts without findings, env values, secrets, or broadcasts." -Commands @("npm run flowchain:bridge:no-secret-audit", "npm run flowchain:bridge:command-matrix", "npm run flowchain:no-secret:scan")
+}
 if (-not $bridgeDeployControlReady) {
     Add-OpsFinding -Findings $findings -Severity "critical" -Code "bridge-deploy-control-validation-failed" -Message "Bridge deploy/control validation is missing or failed: deploy, pause, resume, and emergency-stop paths must fail closed and require explicit owner broadcast acknowledgement." -Commands @("npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:deploy:base8453", "npm run flowchain:bridge:emergency-stop")
 }
@@ -1440,6 +1468,13 @@ $report = [ordered]@{
         bridgeCommandMatrixBroadcastAckGaps = $bridgeCommandMatrixBroadcastAckGaps.Count
         bridgeCommandMatrixNoSecrets = ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "noSecrets" -Default $false) -eq $true)
         bridgeCommandMatrixNoBroadcasts = ((Get-OpsProp -Object $reports.bridgeCommandMatrix -Name "broadcasts" -Default $true) -eq $false)
+        bridgeNoSecretAudit = $bridgeNoSecretAuditStatus
+        bridgeNoSecretAuditReady = $bridgeNoSecretAuditReady
+        bridgeNoSecretAuditScannedFiles = [int](Get-OpsProp -Object $reports.bridgeNoSecretAudit -Name "scannedFileCount" -Default 0)
+        bridgeNoSecretAuditFindings = $bridgeNoSecretAuditFindings.Count
+        bridgeNoSecretAuditSecretFindings = $bridgeNoSecretAuditSecretFindings.Count
+        bridgeNoSecretAuditFailedChecks = $bridgeNoSecretAuditFailedChecks.Count
+        bridgeNoSecretAuditMissingChecks = $bridgeNoSecretAuditMissingChecks.Count
         bridgeDeployControl = $bridgeDeployControlStatus
         bridgeDeployControlReady = $bridgeDeployControlReady
         bridgeDeployControlFailedChecks = $bridgeDeployControlFailedChecks.Count

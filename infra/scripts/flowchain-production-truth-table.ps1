@@ -1807,6 +1807,36 @@ $definitions = @(
         }
     },
     [ordered]@{
+        id = "bridge-no-secret-audit"
+        requirement = "Bridge generated pilot evidence has committed JSON and Markdown no-secret proof before owner-funded bridge activation."
+        path = "docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json"
+        command = "npm run flowchain:bridge:no-secret-audit"
+        productionGate = $true
+        ownerInputGate = $false
+        requiredChecks = @(
+            "scannedPathsPresent",
+            "scannedFileCountPositive",
+            "findingsEmpty",
+            "secretMarkerFindingsEmpty",
+            "envValuesPrintedFalse",
+            "noSecrets",
+            "broadcastsFalse"
+        )
+        requiredEmptyArrays = @(
+            "failedChecks",
+            "secretMarkerFindings",
+            "findings"
+        )
+        requiredMinimums = [ordered]@{
+            scannedFileCount = 1
+        }
+        requiredReportProperties = [ordered]@{
+            "envValuesPrinted" = $false
+            "noSecrets" = $true
+            "broadcasts" = $false
+        }
+    },
+    [ordered]@{
         id = "base-tx-diagnostic-fail-closed"
         requirement = "Base 8453 transaction diagnosis fails closed without owner env/tx inputs, prints no env values, writes no secrets, and never broadcasts."
         path = "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json"
@@ -2468,6 +2498,7 @@ $definitions = @(
             "backupRestoreValidationRuleCoversSafety",
             "backupOwnerPathDryRunRuleCoversOwnerPath",
             "bridgeDeployControlRuleCoversDeploymentControls",
+            "bridgeNoSecretAuditRuleCoversNoSecretProof",
             "supervisorNodeRecoveryRuleCoversLiveProfile",
             "bridgeRelayerLoopRuleCoversValidationTelemetry",
             "bridgeReconciliationRuleCoversCursorAndReplay",
@@ -2539,6 +2570,8 @@ $definitions = @(
             "serviceInstallValidationMetricsPresent",
             "externalTesterEvidenceMetricsPresent",
             "publicTesterGatewayMetricsPresent",
+            "bridgeNoSecretAuditLoaded",
+            "bridgeNoSecretAuditMetricsPresent",
             "bridgeRelayerLoopValidationMetricsPresent",
             "bridgeReconciliationLoaded",
             "bridgeReconciliationMetricsPresent",
@@ -2822,7 +2855,7 @@ $definitions = @(
         command = "npm run flowchain:completion:audit -- -AllowBlocked"
         productionGate = $true
         ownerInputGate = $true
-        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation-schedule-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
+        staleIfOlderThan = @("operator-doctor", "service-supervisor-validation", "service-install-validation", "systemd-service-install-validation", "backup-restore-validation", "backup-install-validation", "base-tx-diagnostic-fail-closed", "bridge-no-secret-audit", "bridge-deploy-control-validation", "bridge-relayer-guardrail-validation", "bridge-relayer-loop-validation", "bridge-runtime-credit-validation", "real-value-pilot-aggregate", "bridge-reconciliation-schedule-validation", "bridge-release-evidence-validation", "public-tester-gateway-e2e", "external-tester-packet-validation", "external-tester-client-validation", "external-tester-evidence-validation", "ops-snapshot", "ops-alert-rules", "ops-metrics-export", "ops-alert-install-validation", "ops-metrics-install-validation", "ops-escalation-dry-run", "owner-onboarding", "owner-signup-checklist", "owner-activation-plan", "owner-env-template", "owner-env-readiness-validation", "owner-env-readiness", "public-rpc-synthetic-canary", "public-rpc-canary-schedule-validation", "public-rpc-deployment-bundle", "public-rpc-deployment-automation", "public-rpc-command-matrix", "tester-write-token-setup", "dashboard-ui-readiness", "developer-dev-pack", "node-operator-package", "node-operator-package-verify", "public-deployment-contract")
     },
     [ordered]@{
         id = "no-secret-scan"

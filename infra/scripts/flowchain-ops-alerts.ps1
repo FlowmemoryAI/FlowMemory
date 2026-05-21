@@ -186,6 +186,14 @@ $rules = @(
         commands = @("npm run flowchain:bridge:command-matrix", "npm run flowchain:bridge:deploy:control:validate", "npm run flowchain:bridge:reconciliation")
     },
     [ordered]@{
+        id = "bridge-no-secret-audit-failed"
+        severity = "critical"
+        findingCodes = @("bridge-no-secret-audit-failed")
+        signal = "Bridge generated pilot evidence no-secret audit is missing or unsafe."
+        threshold = "committed bridge no-secret audit JSON and Markdown must scan generated bridge pilot evidence with positive scanned file count, zero findings, zero secret findings, zero failed checks, no env value printing, no secrets, and no broadcasts"
+        commands = @("npm run flowchain:bridge:no-secret-audit", "npm run flowchain:bridge:command-matrix", "npm run flowchain:no-secret:scan")
+    },
+    [ordered]@{
         id = "bridge-relayer-check-contract-failed"
         severity = "critical"
         findingCodes = @("bridge-relayer-check-contract-failed")
@@ -522,6 +530,14 @@ $bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRule.Count -eq
     -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("broadcast acknowledgement", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and ([string]$bridgeCommandMatrixRule[0].threshold).IndexOf("committed evidence", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
     -and (@($bridgeCommandMatrixRule[0].commands) -contains "npm run flowchain:bridge:command-matrix")
+$bridgeNoSecretAuditRule = @($rules | Where-Object { $_.id -eq "bridge-no-secret-audit-failed" } | Select-Object -First 1)
+$bridgeNoSecretAuditRuleCoversNoSecretProof = $bridgeNoSecretAuditRule.Count -eq 1 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("JSON", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("Markdown", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("zero findings", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("no env value printing", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and ([string]$bridgeNoSecretAuditRule[0].threshold).IndexOf("no broadcasts", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
+    -and (@($bridgeNoSecretAuditRule[0].commands) -contains "npm run flowchain:bridge:no-secret-audit")
 $bridgeRelayerLoopRule = @($rules | Where-Object { $_.id -eq "bridge-relayer-loop-unhealthy" } | Select-Object -First 1)
 $bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRule.Count -eq 1 `
     -and ([string]$bridgeRelayerLoopRule[0].threshold).IndexOf("validation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 `
@@ -623,6 +639,7 @@ $checks = [ordered]@{
     backupOwnerPathDryRunRuleCoversOwnerPath = $backupOwnerPathDryRunRuleCoversOwnerPath
     bridgeDeployControlRuleCoversDeploymentControls = $bridgeDeployControlRuleCoversDeploymentControls
     bridgeCommandMatrixRuleCoversLaunchRunbook = $bridgeCommandMatrixRuleCoversLaunchRunbook
+    bridgeNoSecretAuditRuleCoversNoSecretProof = $bridgeNoSecretAuditRuleCoversNoSecretProof
     bridgeRelayerCheckContractRuleCoversFailedChecks = $bridgeRelayerCheckContractRuleCoversFailedChecks
     bridgeRelayerLoopRuleCoversValidationTelemetry = $bridgeRelayerLoopRuleCoversValidationTelemetry
     bridgeReconciliationRuleCoversCursorAndReplay = $bridgeReconciliationRuleCoversCursorAndReplay

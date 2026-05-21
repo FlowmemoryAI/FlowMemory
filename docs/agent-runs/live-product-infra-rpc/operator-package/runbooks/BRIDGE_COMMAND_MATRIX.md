@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Command Matrix
 
-Generated: 2026-05-21T05:10:16.7291033Z
+Generated: 2026-05-21T09:38:03.0901118Z
 Status: passed
 
 This matrix maps bridge pilot commands to their phase, live-broadcast risk, owner input names, acknowledgement gates, and expected evidence paths. It prints names only, not owner values.
@@ -10,7 +10,7 @@ This matrix maps bridge pilot commands to their phase, live-broadcast risk, owne
 - Commands: 20
 - Phases: credit, deploy-control, emergency-control, local-smoke, observe, pilot-proof, preflight, release, withdraw-release
 - Live-broadcast-capable commands: 4
-- Committed evidence paths: 12
+- Committed evidence paths: 13
 - Failed checks: 0
 
 ## Checks
@@ -60,7 +60,7 @@ This matrix maps bridge pilot commands to their phase, live-broadcast risk, owne
 | emergency-control | `flowchain:bridge:emergency-stop` | owner-live-broadcast-gated | FLOWCHAIN_PILOT_OPERATOR_ACK, FLOWCHAIN_BASE8453_BROADCAST_ACK | devnet/local/bridge-live-readiness/base8453-control-report.json |
 | local-smoke | `flowchain:bridge:local-credit:smoke` | local-validation-no-broadcast | none | command-local |
 | release | `flowchain:bridge:command-matrix` | local-validation-no-broadcast | none | docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json |
-| release | `flowchain:bridge:no-secret-audit` | local-validation-no-broadcast | none | devnet/local/bridge-live-readiness/bridge-no-secret-audit-report.json |
+| release | `flowchain:bridge:no-secret-audit` | local-validation-no-broadcast | none | docs/agent-runs/live-product-infra-rpc/bridge-no-secret-audit-report.json |
 
 ## Owner Input Names
 

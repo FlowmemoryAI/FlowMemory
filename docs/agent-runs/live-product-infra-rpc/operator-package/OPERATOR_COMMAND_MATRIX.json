@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.operator_command_matrix.v0",
-    "generatedAt":  "2026-05-21T09:18:03.3356404Z",
+    "generatedAt":  "2026-05-21T09:39:00.9460739Z",
     "commands":  [
                      {
                          "phase":  "preflight",
@@ -251,6 +251,11 @@
                          "phase":  "bridge",
                          "command":  "npm run flowchain:bridge:command-matrix",
                          "purpose":  "Map bridge deploy, observe, relayer, credit, release, and emergency-control commands to owner inputs, acknowledgement gates, risk class, and evidence paths."
+                     },
+                     {
+                         "phase":  "bridge",
+                         "command":  "npm run flowchain:bridge:no-secret-audit",
+                         "purpose":  "Scan generated bridge pilot evidence for secret-shaped material before owner-funded bridge activation."
                      },
                      {
                          "phase":  "bridge",

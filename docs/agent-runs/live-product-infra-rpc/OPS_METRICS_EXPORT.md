@@ -1,13 +1,13 @@
 ﻿# FlowChain Ops Metrics Export
 
-Generated: 2026-05-21T09:17:25.2297514Z
+Generated: 2026-05-21T09:38:24.3799002Z
 Status: passed
 
 This export converts existing no-secret ops evidence into owner-collector friendly JSON and Prometheus textfile metrics. It does not send network notifications or store external delivery credentials.
 
 - Metrics JSON: `docs/agent-runs/live-product-infra-rpc/ops-metrics.json`
 - Prometheus textfile: `docs/agent-runs/live-product-infra-rpc/ops-metrics.prom.txt`
-- Metric count: 324
+- Metric count: 330
 
 ## Required Metrics
 
@@ -132,6 +132,12 @@ This export converts existing no-secret ops evidence into owner-collector friend
 - flowchain_bridge_command_matrix_missing_scripts: present
 - flowchain_bridge_command_matrix_broadcast_ack_gaps: present
 - flowchain_bridge_command_matrix_no_secrets: present
+- flowchain_bridge_no_secret_audit_ready: present
+- flowchain_bridge_no_secret_audit_scanned_files: present
+- flowchain_bridge_no_secret_audit_findings: present
+- flowchain_bridge_no_secret_audit_secret_findings: present
+- flowchain_bridge_no_secret_audit_failed_checks: present
+- flowchain_bridge_no_secret_audit_no_broadcasts: present
 - flowchain_bridge_deploy_control_validation_ready: present
 - flowchain_bridge_deploy_control_failed_checks: present
 - flowchain_bridge_deploy_control_missing_checks: present
@@ -335,6 +341,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterClientValidationLoaded | True |
 | externalTesterEvidenceLoaded | True |
 | bridgeCommandMatrixLoaded | True |
+| bridgeNoSecretAuditLoaded | True |
 | bridgeDeployControlLoaded | True |
 | bridgeRelayerLoopValidationLoaded | True |
 | bridgeReconciliationLoaded | True |
@@ -361,6 +368,7 @@ This export converts existing no-secret ops evidence into owner-collector friend
 | externalTesterEvidenceMetricsPresent | True |
 | bridgeDirectObserveMetricsPresent | True |
 | bridgeCommandMatrixMetricsPresent | True |
+| bridgeNoSecretAuditMetricsPresent | True |
 | bridgeRuntimeCreditMetricsPresent | True |
 | bridgeReconciliationMetricsPresent | True |
 | bridgeDeployControlMetricsPresent | True |
