@@ -127,10 +127,12 @@ $rootPackage = Read-JsonObject -Path $rootPackagePath
 $specText = if (Test-Path -LiteralPath $browserSpecPath) { Get-Content -Raw -LiteralPath $browserSpecPath } else { "" }
 $configText = if (Test-Path -LiteralPath $playwrightConfigPath) { Get-Content -Raw -LiteralPath $playwrightConfigPath } else { "" }
 $workbenchViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/WorkbenchView.tsx"
+$ownerActivationViewPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/views/OwnerActivationView.tsx"
 $workbenchDataPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/src/data/workbench.ts"
 $fixtureSyncPath = Resolve-FlowChainPath -RepoRoot $repoRoot -Path "apps/dashboard/scripts/sync-fixtures.mjs"
 $workbenchText = @(
     if (Test-Path -LiteralPath $workbenchViewPath) { Get-Content -Raw -LiteralPath $workbenchViewPath } else { "" }
+    if (Test-Path -LiteralPath $ownerActivationViewPath) { Get-Content -Raw -LiteralPath $ownerActivationViewPath } else { "" }
     if (Test-Path -LiteralPath $workbenchDataPath) { Get-Content -Raw -LiteralPath $workbenchDataPath } else { "" }
     if (Test-Path -LiteralPath $fixtureSyncPath) { Get-Content -Raw -LiteralPath $fixtureSyncPath } else { "" }
 ) -join "`n"
@@ -161,6 +163,9 @@ $checks = [ordered]@{
     bridgeRuntimeCreditProofCovered = $specText.Contains("Bridge runtime credit") -and $specText.Contains("flowchain:bridge:runtime-credit:validate") -and $workbenchText.Contains("base8453-bridge-runtime-credit-proof")
     realValuePilotAggregateProofCovered = $specText.Contains("Pilot aggregate") -and $specText.Contains("proof commands") -and $workbenchText.Contains("pilot aggregate")
     publicRpcHeaderProofCovered = $specText.Contains("RPC headers")
+    ownerHostApplyPlanProofCovered = $specText.Contains("owner-host-apply.sh plan") -and $workbenchText.Contains("launchSequence") -and $workbenchText.Contains("Owner host apply proof")
+    ownerHostApplyExecutionProofCovered = $specText.Contains("owner-host-apply.sh apply") -and $workbenchText.Contains("launchSequenceCoversOwnerHostApplyExecution")
+    ownerHostApplyRollbackProofCovered = $specText.Contains("owner-host-apply.sh rollback") -and $workbenchText.Contains("rollbackCommands")
     noSecretLeakageAsserted = $specText.Contains("expectNoUiLeakage")
     noHorizontalOverflowAsserted = $specText.Contains("expectNoHorizontalOverflow")
     dashboardUnitTestsPassed = ($commands | Where-Object { $_.label -eq "dashboard unit render tests" } | Select-Object -First 1).exitCode -eq 0
@@ -184,7 +189,7 @@ $report = [ordered]@{
     commands = @($commands)
     browserProjects = @("chromium-desktop", "chromium-mobile")
     coveredRoutes = @("/wallet?panel=tester", "/tester/wallets/create", "/tester/faucet", "/tester/wallets/send", "/explorer", "/tester", "/activation", "/bridge")
-    coveredProofs = @("base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof")
+    coveredProofs = @("base8453-bridge-runtime-credit-proof", "real-value-pilot-aggregate-proof", "owner-host-apply-plan", "owner-host-apply-execution", "owner-host-apply-rollback")
     envValuesPrinted = $false
     noSecrets = $true
     broadcasts = $false
@@ -215,7 +220,7 @@ $markdownLines = New-Object System.Collections.ArrayList
 [void] $markdownLines.Add("## Coverage")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("- Browser projects: chromium-desktop, chromium-mobile")
-[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
+[void] $markdownLines.Add("- Loop: wallet tester panel -> tester wallet create -> tester faucet -> tester send -> explorer inspection -> tester launch RPC header proof -> activation cockpit owner-input proof -> owner host apply plan/apply/rollback proof -> bridge pilot runtime proof -> bridge runtime credit proof -> real-value pilot aggregate proof")
 [void] $markdownLines.Add("- Assertions: no secret text/storage leakage, no horizontal viewport overflow, no browser console errors")
 [void] $markdownLines.Add("")
 [void] $markdownLines.Add("## Commands")

@@ -38,6 +38,16 @@ interface ActivationStage {
   validationCommands: string[];
 }
 
+interface ActivationLaunchStep {
+  id: string;
+  order: string;
+  title: string;
+  status: string;
+  commands: string[];
+  expectedReportPaths: string[];
+  stopOnFailure: boolean;
+}
+
 function isRecord(value: unknown): value is UnknownRecord {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -96,6 +106,22 @@ function parseStage(value: unknown): ActivationStage | null {
   };
 }
 
+function parseLaunchStep(value: unknown, index: number): ActivationLaunchStep | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  return {
+    id: text(value.id, `launch-step-${index + 1}`),
+    order: text(value.order, String(index + 1)),
+    title: text(value.title, "Launch step"),
+    status: text(value.status, "not-run"),
+    commands: stringList(value.commands),
+    expectedReportPaths: stringList(value.expectedReportPaths),
+    stopOnFailure: value.stopOnFailure === true,
+  };
+}
+
 function stageIcon(id: string) {
   if (id.includes("public-rpc")) return Server;
   if (id.includes("backup")) return HardDrive;
@@ -122,6 +148,23 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
   const forbiddenItems = stringList(handoff?.forbiddenItems ?? activation?.forbiddenItems);
   const activationReady = activation?.activationReady === true;
   const releaseReady = handoff?.releaseReady === true;
+  const handoffChecks = isRecord(handoff?.checks) ? handoff.checks : {};
+  const launchSequence = asArray(handoff?.launchSequence)
+    .map(parseLaunchStep)
+    .filter((step): step is ActivationLaunchStep => step !== null);
+  const rollbackCommands = stringList(handoff?.rollbackCommands);
+  const launchSequenceCommandCount = text(handoff?.launchSequenceCommandCount ?? metrics.ownerGoLiveLaunchSequenceCommandCount, "0");
+  const rollbackCommandCount = text(handoff?.rollbackCommandCount ?? metrics.ownerGoLiveRollbackCommandCount, String(rollbackCommands.length));
+  const ownerHostApplyPlanCovered =
+    handoffChecks.launchSequenceCoversOwnerHostApplyPlan === true ||
+    launchSequence.some((step) => step.commands.some((command) => command.includes("owner-host-apply.sh plan")));
+  const ownerHostApplyExecutionCovered =
+    handoffChecks.launchSequenceCoversOwnerHostApplyExecution === true ||
+    launchSequence.some((step) => step.commands.some((command) => command.includes("owner-host-apply.sh apply")));
+  const ownerHostApplyRollbackCovered =
+    handoffChecks.rollbackCoversOwnerHostApplyRollback === true ||
+    rollbackCommands.some((command) => command.includes("owner-host-apply.sh rollback"));
+  const ownerHostApplyCovered = ownerHostApplyPlanCovered && ownerHostApplyExecutionCovered && ownerHostApplyRollbackCovered;
   const handoffStatus = text(handoff?.status ?? metrics.ownerGoLiveHandoffStatus, "not recorded");
   const activationStatus = text(activation?.status ?? metrics.ownerActivationStatus, "not recorded");
   const readyStageCount = text(handoff?.readyStageCount ?? activation?.readyStageCount ?? metrics.ownerActivationReadyStageCount, "0");
@@ -257,6 +300,64 @@ export function OwnerActivationView({ workbench }: { workbench: WorkbenchSnapsho
             ) : (
               <EmptyState title="Go-live handoff missing" detail="Run npm run flowchain:owner:go-live-handoff, then refresh dashboard fixtures." />
             )}
+          </article>
+          <article className="panel activation-launch-sequence">
+            <div className="panel-heading">
+              <div>
+                <Terminal size={18} aria-hidden="true" />
+                <h2>Host apply sequence</h2>
+              </div>
+              <StatusBadge status={ownerHostApplyCovered ? "verified" : "pending"} compact />
+            </div>
+            <div className="activation-host-apply-proof" aria-label="Owner host apply proof">
+              <div>
+                <span>Plan</span>
+                <strong>{String(ownerHostApplyPlanCovered)}</strong>
+                <code>owner-host-apply.sh plan</code>
+              </div>
+              <div>
+                <span>Apply</span>
+                <strong>{String(ownerHostApplyExecutionCovered)}</strong>
+                <code>owner-host-apply.sh apply</code>
+              </div>
+              <div>
+                <span>Rollback</span>
+                <strong>{String(ownerHostApplyRollbackCovered)}</strong>
+                <code>owner-host-apply.sh rollback</code>
+              </div>
+            </div>
+            {launchSequence.length > 0 ? (
+              <div className="activation-launch-step-list" aria-label="Go-live launch sequence">
+                {launchSequence.map((step) => (
+                  <article key={step.id} className="activation-launch-step">
+                    <div>
+                      <span>{step.order}</span>
+                      <div>
+                        <strong>{step.title}</strong>
+                        <small>stop on failure {String(step.stopOnFailure)} / evidence {step.expectedReportPaths.length}</small>
+                      </div>
+                      <StatusBadge status={statusFromText(step.status, "observed")} compact />
+                    </div>
+                    <div>
+                      {step.commands.slice(0, 5).map((command) => (
+                        <code key={`${step.id}:launch-command:${command}`}>{command}</code>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Launch sequence missing" detail="Run npm run flowchain:owner:go-live-handoff, then refresh dashboard fixtures." />
+            )}
+            <div className="activation-rollback-strip" aria-label="Owner host rollback commands">
+              <strong>Rollback commands</strong>
+              <span>{rollbackCommandCount} rollback / {launchSequenceCommandCount} launch commands</span>
+              <div>
+                {rollbackCommands.map((command) => (
+                  <code key={`rollback:${command}`}>{command}</code>
+                ))}
+              </div>
+            </div>
           </article>
         </div>
 

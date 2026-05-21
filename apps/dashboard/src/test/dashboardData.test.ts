@@ -523,6 +523,11 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Release");
     expect(html).toContain("handoff passed");
     expect(html).toContain("Activation stages");
+    expect(html).toContain("Host apply sequence");
+    expect(html).toContain("owner-host-apply.sh plan");
+    expect(html).toContain("owner-host-apply.sh apply");
+    expect(html).toContain("owner-host-apply.sh rollback");
+    expect(html).toContain("Apply owner-host public RPC edge");
     expect(html).toContain("Expose repo-owned FlowChain RPC");
     expect(html).toContain("Provision durable state backup storage");
     expect(html).toContain("Configure capped Base 8453 bridge pilot observation");

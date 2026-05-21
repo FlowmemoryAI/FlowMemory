@@ -4265,6 +4265,8 @@ code {
 
 .activation-command-panel span,
 .activation-stage-facts span,
+.activation-host-apply-proof span,
+.activation-rollback-strip span,
 .activation-inputs small,
 .activation-boundary span {
   color: var(--muted);
@@ -4274,7 +4276,8 @@ code {
 }
 
 .activation-command-panel strong,
-.activation-stage-facts strong {
+.activation-stage-facts strong,
+.activation-host-apply-proof strong {
   overflow-wrap: anywhere;
   color: var(--ink);
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
@@ -4300,7 +4303,10 @@ code {
 }
 
 .activation-stage-list,
+.activation-main,
 .activation-side,
+.activation-launch-sequence,
+.activation-launch-step-list,
 .activation-commands div,
 .activation-boundary div {
   display: grid;
@@ -4429,6 +4435,105 @@ code {
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.activation-host-apply-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.activation-host-apply-proof div {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #bfd0c8;
+  border-radius: 8px;
+  background: #f5fbf7;
+}
+
+.activation-host-apply-proof code,
+.activation-launch-step code,
+.activation-rollback-strip code {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 7px;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.activation-launch-step {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcf8;
+}
+
+.activation-launch-step > div:first-child {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.activation-launch-step > div:first-child > span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--accent-strong);
+  border: 1px solid #bfd0c8;
+  border-radius: 7px;
+  background: #e8f3ed;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.activation-launch-step strong,
+.activation-launch-step small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.activation-launch-step strong {
+  color: var(--ink);
+}
+
+.activation-launch-step small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.activation-launch-step > div:last-child,
+.activation-rollback-strip div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.activation-rollback-strip {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.activation-rollback-strip > strong {
+  color: var(--ink);
 }
 
 .activation-commands code {
@@ -5356,6 +5461,7 @@ code {
   .wallet-tester-flow-steps,
   .tester-launch-card-grid,
   .tester-launch-profile-grid,
+  .activation-host-apply-proof,
   .activation-stage-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5378,6 +5484,7 @@ code {
   .tester-launch-route-pair,
   .tester-launch-route-pair > div > div,
   .activation-command-panel,
+  .activation-host-apply-proof,
   .activation-stage-facts,
   .workbench-switcher,
   .explorer-category-strip,

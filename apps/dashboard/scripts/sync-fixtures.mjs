@@ -282,8 +282,19 @@ function writeLiveReadinessSummary() {
       path: sanitizeText(sourceReport?.path),
     })),
   });
+  const toLaunchStep = (step, index) => ({
+    id: sanitizeText(step?.id, `launch-step-${index + 1}`),
+    order: Number.isFinite(Number(step?.order)) ? Number(step.order) : index + 1,
+    title: sanitizeText(step?.title),
+    status: sanitizeText(step?.status, "not-run"),
+    commands: commandList(step?.commands, 10),
+    expectedReportPaths: uniqueTexts(step?.expectedReportPaths).slice(0, 14),
+    stopOnFailure: step?.stopOnFailure === true,
+  });
   const activationStages = asArray(ownerActivationPlan?.stages).map(toActivationStage);
   const goLiveStages = asArray(ownerGoLiveHandoff?.stages).map(toActivationStage);
+  const goLiveLaunchSequence = asArray(ownerGoLiveHandoff?.launchSequence).map(toLaunchStep);
+  const goLiveRollbackCommands = commandList(ownerGoLiveHandoff?.rollbackCommands, 12);
   const activationForbiddenItems = uniqueTexts(activationStages.flatMap((stage) => stage.ownerMustNotSend));
   const goLiveForbiddenItems = uniqueTexts(ownerGoLiveHandoff?.mustNotSend ?? goLiveStages.flatMap((stage) => stage.ownerMustNotSend));
   const latestHeight = asText(serviceStatus?.chain?.latestHeight, "not recorded");
@@ -375,6 +386,13 @@ function writeLiveReadinessSummary() {
       ownerGoLiveReleaseReady: ownerGoLiveHandoff?.releaseReady === true,
       ownerGoLiveNextInputCount: asArray(ownerGoLiveHandoff?.nextOwnerInputNames).length,
       ownerGoLiveStageCount: asText(ownerGoLiveHandoff?.stageCount, String(goLiveStages.length)),
+      ownerGoLiveLaunchSequenceCount: asText(ownerGoLiveHandoff?.launchSequenceCount, String(goLiveLaunchSequence.length)),
+      ownerGoLiveLaunchSequenceCommandCount: asText(ownerGoLiveHandoff?.launchSequenceCommandCount, "0"),
+      ownerGoLiveExpectedReportPathCount: asText(ownerGoLiveHandoff?.launchSequenceExpectedReportPathCount, "0"),
+      ownerGoLiveRollbackCommandCount: asText(ownerGoLiveHandoff?.rollbackCommandCount, String(goLiveRollbackCommands.length)),
+      ownerHostApplyPlanCovered: ownerGoLiveHandoff?.checks?.launchSequenceCoversOwnerHostApplyPlan === true,
+      ownerHostApplyExecutionCovered: ownerGoLiveHandoff?.checks?.launchSequenceCoversOwnerHostApplyExecution === true,
+      ownerHostApplyRollbackCovered: ownerGoLiveHandoff?.checks?.rollbackCoversOwnerHostApplyRollback === true,
       noSecretStatus: asText(noSecretScan?.status, "not recorded"),
       opsSnapshotStatus: asText(opsSnapshot?.status, "not recorded"),
       opsAlertState: asText(opsAlertRules?.currentAlertState, "not recorded"),
@@ -511,6 +529,10 @@ function writeLiveReadinessSummary() {
       readyStageCount: asText(ownerGoLiveHandoff?.readyStageCount, "0"),
       blockedStageCount: asText(ownerGoLiveHandoff?.blockedStageCount, "0"),
       nextCommandCount: asText(ownerGoLiveHandoff?.nextCommandCount, "0"),
+      launchSequenceCount: asText(ownerGoLiveHandoff?.launchSequenceCount, String(goLiveLaunchSequence.length)),
+      launchSequenceCommandCount: asText(ownerGoLiveHandoff?.launchSequenceCommandCount, "0"),
+      launchSequenceExpectedReportPathCount: asText(ownerGoLiveHandoff?.launchSequenceExpectedReportPathCount, "0"),
+      rollbackCommandCount: asText(ownerGoLiveHandoff?.rollbackCommandCount, String(goLiveRollbackCommands.length)),
       mustNotSendCount: asText(ownerGoLiveHandoff?.mustNotSendCount, "0"),
       missingEnvNames: uniqueTexts(ownerGoLiveHandoff?.missingEnvNames),
       invalidEnvNames: uniqueTexts(ownerGoLiveHandoff?.invalidEnvNames),
@@ -521,6 +543,8 @@ function writeLiveReadinessSummary() {
       forbiddenItems: goLiveForbiddenItems,
       externalResources: uniqueTexts(ownerGoLiveHandoff?.externalResources),
       stages: goLiveStages,
+      launchSequence: goLiveLaunchSequence,
+      rollbackCommands: goLiveRollbackCommands,
       checks: ownerGoLiveHandoff?.checks ?? {},
       failedChecks: uniqueTexts(ownerGoLiveHandoff?.failedChecks),
       noSecrets: ownerGoLiveHandoff?.noSecrets === true,

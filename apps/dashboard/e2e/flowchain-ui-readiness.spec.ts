@@ -348,6 +348,11 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("L1 activation status")).toContainText("Needed now");
     await expect(page.getByLabel("L1 activation status")).toContainText("Release");
     await expect(page.getByRole("heading", { name: "Needed now" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Host apply sequence" })).toBeVisible();
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh plan");
+    await expect(page.getByLabel("Owner host apply proof")).toContainText("owner-host-apply.sh apply");
+    await expect(page.getByLabel("Owner host rollback commands")).toContainText("owner-host-apply.sh rollback");
+    await expect(page.getByLabel("Go-live launch sequence")).toContainText("Apply owner-host public RPC edge");
     await expect(page.getByLabel("Next owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
     await expect(page.getByText("Expose repo-owned FlowChain RPC", { exact: false })).toBeVisible();
     await expect(page.getByLabel("Missing owner inputs")).toContainText("FLOWCHAIN_RPC_PUBLIC_URL");
