@@ -372,6 +372,8 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     const bridgeRuntimeProof = page.getByLabel("Bridge runtime proof");
     await expect(bridgeRuntimeProof).toContainText("Bridge command matrix");
     await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:command-matrix");
+    await expect(bridgeRuntimeProof).toContainText("No-secret audit");
+    await expect(bridgeRuntimeProof).toContainText("flowchain:bridge:no-secret-audit");
     await expect(bridgeRuntimeProof).toContainText("Pilot aggregate");
     await expect(bridgeRuntimeProof).toContainText("Runtime credit");
     await expect(bridgeRuntimeProof).toContainText("Transfer settlement");
@@ -391,6 +393,7 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Autorecovery drill");
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Public RPC automation");
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Systemd service plan");
+    await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Bridge evidence audit");
     await expect(page.getByLabel("Service and deployment automation proof")).toContainText("Ops install proof");
     await expect(page.getByText("Active rules", { exact: true })).toBeVisible();
     await expect(page.getByText("Escalation dry run", { exact: true }).first()).toBeVisible();

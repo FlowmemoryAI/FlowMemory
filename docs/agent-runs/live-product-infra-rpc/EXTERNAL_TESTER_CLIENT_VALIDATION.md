@@ -1,6 +1,6 @@
 ﻿# FlowChain External Tester Client Validation
 
-Generated: 2026-05-21T09:42:52.7213293Z
+Generated: 2026-05-21T10:08:08.2473890Z
 Status: passed
 
 This proves the external tester client can consume the generated connect pack, produce a no-secret dry run, cover the expected read/write routes, and avoid network calls until a tester runs it with owner-provided endpoint/token values.

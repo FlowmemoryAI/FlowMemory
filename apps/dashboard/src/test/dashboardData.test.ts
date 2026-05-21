@@ -173,6 +173,8 @@ describe("dashboard fixture", () => {
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "pilot aggregate")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge command matrix commands")?.value).toBe("20");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret audit")?.value).toBe("passed");
+    expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "bridge no-secret findings")?.value).toBe("0");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix")?.value).toBe("passed");
     expect(workbench.sections.liveReadiness[0].facts.find((fact) => fact.label === "RPC command matrix commands")?.value).toBe("21");
     expect(workbench.sections.realValuePilot.some((record) => record.facts.some((fact) => fact.label === "scope" && fact.value === "capped owner testing"))).toBe(true);
@@ -577,6 +579,8 @@ describe("dashboard fixture", () => {
     expect(html).toContain("Private chain live");
     expect(html).toContain("Public RPC");
     expect(html).toContain("Tester sharing");
+    expect(html).toContain("Bridge audit");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeNoSecretAuditStatus}; findings ${liveReadinessReport.metrics.bridgeNoSecretAuditFindings}`);
     expect(html).toContain("Alert coverage");
     expect(html).toContain("timeout 300s");
     expect(html).toContain("Open readiness");
@@ -604,6 +608,9 @@ describe("dashboard fixture", () => {
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixCommands} commands`);
     expect(html).toContain(`${liveReadinessReport.metrics.bridgeCommandMatrixLiveBroadcastCommands} live-broadcast gated`);
     expect(html).toContain("npm run flowchain:bridge:command-matrix");
+    expect(html).toContain("No-secret audit");
+    expect(html).toContain(`${liveReadinessReport.metrics.bridgeNoSecretAuditScannedFiles} files scanned`);
+    expect(html).toContain("npm run flowchain:bridge:no-secret-audit");
     expect(html).toContain("Pilot aggregate");
     expect(html).toContain("Runtime credit");
     expect(html).toContain("Transfer settlement");
@@ -627,6 +634,8 @@ describe("dashboard fixture", () => {
     const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(OpsView, { workbench })));
 
     expect(html).toContain("Ops center");
+    expect(html).toContain("Bridge audit");
+    expect(html).toContain("Bridge evidence audit");
     expect(html).toContain("Current findings");
     expect(html).toContain("Incident commands");
     expect(html).toContain("network sends; stores secrets");

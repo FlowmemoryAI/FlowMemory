@@ -55,6 +55,7 @@ const liveReadinessReportCopies = [
   "backup-readiness-report.json",
   "backup-owner-path-dry-run-report.json",
   "bridge-command-matrix-report.json",
+  "bridge-no-secret-audit-report.json",
   "bridge-relayer-once-report.json",
   "bridge-relayer-guardrail-validation-report.json",
   "bridge-relayer-loop-validation-report.json",
@@ -222,6 +223,7 @@ function writeLiveReadinessSummary() {
   const bridgeReconciliationScheduleValidation = reports["bridge-reconciliation-schedule-validation-report.json"];
   const realValuePilotAggregate = reports["real-value-pilot-aggregate-report.json"];
   const bridgeCommandMatrix = reports["bridge-command-matrix-report.json"];
+  const bridgeNoSecretAudit = reports["bridge-no-secret-audit-report.json"];
   const backupOwnerPathDryRun = reports["backup-owner-path-dry-run-report.json"];
   const publicRpcDeploymentBundle = reports["public-rpc-deployment-bundle-report.json"];
   const publicRpcDeploymentAutomation = reports["public-rpc-deployment-automation-report.json"];
@@ -364,6 +366,14 @@ function writeLiveReadinessSummary() {
       bridgeCommandMatrixBroadcastAckGaps: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixBroadcastAckGaps ?? asArray(bridgeCommandMatrix?.liveBroadcastRowsWithoutAck).length, "0"),
       bridgeCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoSecrets === true || bridgeCommandMatrix?.noSecrets === true,
       bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
+      bridgeNoSecretAuditStatus: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAudit ?? bridgeNoSecretAudit?.status, "not recorded"),
+      bridgeNoSecretAuditReady: opsSnapshot?.reportStatuses?.bridgeNoSecretAuditReady === true || bridgeNoSecretAudit?.status === "passed",
+      bridgeNoSecretAuditScannedFiles: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditScannedFiles ?? bridgeNoSecretAudit?.scannedFileCount, "0"),
+      bridgeNoSecretAuditFindings: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditFindings ?? asArray(bridgeNoSecretAudit?.findings).length, "0"),
+      bridgeNoSecretAuditSecretFindings: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditSecretFindings ?? asArray(bridgeNoSecretAudit?.secretMarkerFindings).length, "0"),
+      bridgeNoSecretAuditFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditFailedChecks ?? asArray(bridgeNoSecretAudit?.failedChecks).length, "0"),
+      bridgeNoSecretAuditNoSecrets: opsSnapshot?.reportStatuses?.bridgeNoSecretAuditReady === true || bridgeNoSecretAudit?.noSecrets === true,
+      bridgeNoSecretAuditNoBroadcasts: bridgeNoSecretAudit?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerLoopValidationStatus: asText(bridgeRelayerLoopValidation?.status, "not recorded"),
       bridgeReconciliationScheduleStatus: asText(bridgeReconciliationScheduleValidation?.status, "not recorded"),
@@ -503,6 +513,14 @@ function writeLiveReadinessSummary() {
       bridgeCommandMatrixBroadcastAckGaps: asText(opsSnapshot?.reportStatuses?.bridgeCommandMatrixBroadcastAckGaps ?? asArray(bridgeCommandMatrix?.liveBroadcastRowsWithoutAck).length, "0"),
       bridgeCommandMatrixNoSecrets: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoSecrets === true || bridgeCommandMatrix?.noSecrets === true,
       bridgeCommandMatrixNoBroadcasts: opsSnapshot?.reportStatuses?.bridgeCommandMatrixNoBroadcasts === true || bridgeCommandMatrix?.broadcasts === false,
+      bridgeNoSecretAuditStatus: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAudit ?? bridgeNoSecretAudit?.status, "not recorded"),
+      bridgeNoSecretAuditReady: opsSnapshot?.reportStatuses?.bridgeNoSecretAuditReady === true || bridgeNoSecretAudit?.status === "passed",
+      bridgeNoSecretAuditScannedFiles: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditScannedFiles ?? bridgeNoSecretAudit?.scannedFileCount, "0"),
+      bridgeNoSecretAuditFindings: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditFindings ?? asArray(bridgeNoSecretAudit?.findings).length, "0"),
+      bridgeNoSecretAuditSecretFindings: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditSecretFindings ?? asArray(bridgeNoSecretAudit?.secretMarkerFindings).length, "0"),
+      bridgeNoSecretAuditFailedChecks: asText(opsSnapshot?.reportStatuses?.bridgeNoSecretAuditFailedChecks ?? asArray(bridgeNoSecretAudit?.failedChecks).length, "0"),
+      bridgeNoSecretAuditNoSecrets: opsSnapshot?.reportStatuses?.bridgeNoSecretAuditReady === true || bridgeNoSecretAudit?.noSecrets === true,
+      bridgeNoSecretAuditNoBroadcasts: bridgeNoSecretAudit?.broadcasts === false,
       bridgeRelayerGuardrailStatus: asText(opsSnapshot?.reportStatuses?.bridgeRelayerGuardrail ?? bridgeRelayerGuardrail?.status, "not recorded"),
       bridgeRelayerGuardrailReady: opsSnapshot?.reportStatuses?.bridgeRelayerGuardrailReady === true,
       bridgeReconciliationScheduleStatus: asText(bridgeReconciliationScheduleValidation?.status, "not recorded"),

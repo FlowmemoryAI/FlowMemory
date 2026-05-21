@@ -144,6 +144,12 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
   const bridgeGuardrailStatus = text(ops?.bridgeRelayerGuardrailStatus ?? metrics.bridgeRelayerGuardrailStatus, "not recorded");
   const bridgeGuardrailReady = text(ops?.bridgeRelayerGuardrailReady, bridgeGuardrailStatus === "passed" ? "true" : "false");
   const bridgeRelayerLoopValidationStatus = text(metrics.bridgeRelayerLoopValidationStatus, "not recorded");
+  const bridgeNoSecretAuditStatus = text(ops?.bridgeNoSecretAuditStatus ?? metrics.bridgeNoSecretAuditStatus, "not recorded");
+  const bridgeNoSecretAuditReady = isReadyFlag(ops?.bridgeNoSecretAuditReady ?? metrics.bridgeNoSecretAuditReady);
+  const bridgeNoSecretAuditScannedFiles = text(ops?.bridgeNoSecretAuditScannedFiles ?? metrics.bridgeNoSecretAuditScannedFiles, "0");
+  const bridgeNoSecretAuditFindings = text(ops?.bridgeNoSecretAuditFindings ?? metrics.bridgeNoSecretAuditFindings, "0");
+  const bridgeNoSecretAuditFailedChecks = text(ops?.bridgeNoSecretAuditFailedChecks ?? metrics.bridgeNoSecretAuditFailedChecks, "0");
+  const bridgeNoSecretAuditNoBroadcasts = isReadyFlag(ops?.bridgeNoSecretAuditNoBroadcasts ?? metrics.bridgeNoSecretAuditNoBroadcasts);
   const publicRpcDeployBundleStatus = text(ops?.publicRpcDeploymentBundleStatus ?? metrics.publicRpcDeploymentBundleStatus, "not recorded");
   const publicRpcDeployAutomationStatus = text(ops?.publicRpcDeploymentAutomationStatus ?? metrics.publicRpcDeploymentAutomationStatus, "not recorded");
   const publicRpcDeployAutomationAction = text(ops?.publicRpcDeploymentAutomationAction ?? metrics.publicRpcDeploymentAutomationAction, "not recorded");
@@ -228,6 +234,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
           <small>start, status, stop proof</small>
         </div>
         <div>
+          <span>Bridge audit</span>
+          <strong>{bridgeNoSecretAuditStatus}</strong>
+          <small>{bridgeNoSecretAuditScannedFiles} files; findings {bridgeNoSecretAuditFindings}</small>
+        </div>
+        <div>
           <span>RPC deploy automation</span>
           <strong>{publicRpcDeployAutomationStatus}</strong>
           <small>mode {publicRpcDeployAutomationAction}</small>
@@ -289,6 +300,11 @@ export function OpsView({ workbench }: { workbench: WorkbenchSnapshot }) {
               <span>Relayer opt-in</span>
               <strong>{String(serviceInstallRelayerOptInStartsLoop && systemdBridgeRelayerOptInStartsLoop)}</strong>
               <small>Windows and systemd install plans start the relayer loop only with owner opt-in</small>
+            </div>
+            <div>
+              <span>Bridge evidence audit</span>
+              <strong>{String(bridgeNoSecretAuditReady)}</strong>
+              <small>failed {bridgeNoSecretAuditFailedChecks} / no broadcasts {String(bridgeNoSecretAuditNoBroadcasts)}</small>
             </div>
             <div>
               <span>Public RPC automation</span>

@@ -391,6 +391,11 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
   const bridgeCommandMatrixCommands = text(liveMetrics.bridgeCommandMatrixCommands, "0");
   const bridgeCommandMatrixLiveBroadcastCommands = text(liveMetrics.bridgeCommandMatrixLiveBroadcastCommands, "0");
   const bridgeCommandMatrixAckGaps = text(liveMetrics.bridgeCommandMatrixBroadcastAckGaps, "0");
+  const bridgeNoSecretAuditStatus = text(liveMetrics.bridgeNoSecretAuditStatus);
+  const bridgeNoSecretAuditReady = liveMetrics.bridgeNoSecretAuditReady === true;
+  const bridgeNoSecretAuditScannedFiles = text(liveMetrics.bridgeNoSecretAuditScannedFiles, "0");
+  const bridgeNoSecretAuditFindings = text(liveMetrics.bridgeNoSecretAuditFindings, "0");
+  const bridgeNoSecretAuditFailedChecks = text(liveMetrics.bridgeNoSecretAuditFailedChecks, "0");
   const bridgeProofCards = [
     {
       label: "Bridge command matrix",
@@ -399,6 +404,14 @@ export function BridgePilotView({ workbench }: BridgePilotViewProps) {
       command: "npm run flowchain:bridge:command-matrix",
       status: bridgeCommandMatrixReady ? "verified" : statusFromMetric(bridgeCommandMatrixStatus),
       Icon: ListChecks,
+    },
+    {
+      label: "No-secret audit",
+      value: bridgeNoSecretAuditStatus,
+      detail: `${bridgeNoSecretAuditScannedFiles} files scanned; findings ${bridgeNoSecretAuditFindings}; failed ${bridgeNoSecretAuditFailedChecks}`,
+      command: "npm run flowchain:bridge:no-secret-audit",
+      status: bridgeNoSecretAuditReady ? "verified" : statusFromMetric(bridgeNoSecretAuditStatus),
+      Icon: ShieldCheck,
     },
     {
       label: "Pilot aggregate",

@@ -159,6 +159,12 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const liveReadinessRecords = workbench.sections.liveReadiness;
   const liveReadinessSummary = liveReadinessRecords.find((record) => record.kind === "Public launch readiness") ?? liveReadinessRecords[0];
   const liveReadinessGates = liveReadinessRecords.filter((record) => record.kind === "Launch gate");
+  const liveReadinessReport = workbench.raw.liveReadinessReport && typeof workbench.raw.liveReadinessReport === "object" && !Array.isArray(workbench.raw.liveReadinessReport)
+    ? (workbench.raw.liveReadinessReport as Record<string, unknown>)
+    : null;
+  const liveMetrics = liveReadinessReport?.metrics && typeof liveReadinessReport.metrics === "object" && !Array.isArray(liveReadinessReport.metrics)
+    ? (liveReadinessReport.metrics as Record<string, unknown>)
+    : {};
   const publicRpcGate = liveReadinessGates.find((record) => record.id === "public-rpc-edge");
   const backupGate = liveReadinessGates.find((record) => record.id === "state-backup") ?? liveReadinessGates.find((record) => record.id === "state-backup-owner-path-dry-run");
   const bridgeRelayerGate = liveReadinessGates.find((record) => record.id === "base8453-bridge-relayer-queue");
@@ -167,6 +173,11 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
   const packetShareable = factValue(liveReadinessSummary, ["packet shareable"], "false");
   const relayerChildTimeout = factValue(liveReadinessSummary, ["relayer child timeout"], "not recorded");
   const relayerTimedOutSteps = factValue(liveReadinessSummary, ["relayer timed out steps"], "0");
+  const bridgeNoSecretAuditStatus = factValue(liveReadinessSummary, ["bridge no-secret audit"], "not recorded");
+  const bridgeNoSecretAuditScannedFiles = factValue(liveReadinessSummary, ["bridge no-secret scanned files"], "0");
+  const bridgeNoSecretAuditFindings = factValue(liveReadinessSummary, ["bridge no-secret findings"], "0");
+  const bridgeNoSecretAuditFailedChecks = factValue(liveReadinessSummary, ["bridge no-secret failed checks"], "0");
+  const bridgeNoSecretAuditReady = liveMetrics.bridgeNoSecretAuditReady === true;
   const alertRules = factValue(liveReadinessSummary, ["alert rules"], "0");
   const unmappedFindings = factValue(liveReadinessSummary, ["unmapped findings"], "0");
   const publicRpcLiveHeaderProbe = factValue(liveReadinessSummary, ["RPC live header probe"], "false");
@@ -290,6 +301,15 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
       status: bridgeRelayerGate?.status ?? "pending",
       targetCategory: "bridge",
       Icon: ArrowRightLeft,
+    },
+    {
+      id: "bridge-audit",
+      label: "Bridge audit",
+      detail: `${bridgeNoSecretAuditScannedFiles} evidence files scanned; failed ${bridgeNoSecretAuditFailedChecks}`,
+      value: `${bridgeNoSecretAuditStatus}; findings ${bridgeNoSecretAuditFindings}`,
+      status: bridgeNoSecretAuditReady ? "verified" : liveReadinessSummary?.status ?? "pending",
+      targetCategory: "bridge",
+      Icon: ShieldCheck,
     },
     {
       id: "alert-coverage",
