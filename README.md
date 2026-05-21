@@ -23,7 +23,7 @@ FlowMemory currently ships a local/test implementation of the main protocol surf
 | **Agent Bonds** | Bonded task acceptance, escrow, verifier confirmation, challenge/slash flows, signed recourse quotes, credit attestations, and reputation updates. |
 | **Public Agent Network** | Local/test contracts for agent classes, tool sets, profiles, launch intents, memory fuel, lineage, receipts, and swarms. |
 | **Indexer / Verifier / Control Plane** | Fixture-first services that reconstruct facts from logs, generate reports, expose local JSON-RPC methods, and power the dashboard/SDKs. |
-| **Dashboard** | Vite/React public workbench for Flow Memory, Agent Bonds, canary reads, local devnet state, public agents, and swarm projections. |
+| **Dashboard and mobile apps** | Vite/React public workbench plus the developing iOS/Android operator surfaces for tasks, receipts, wallets, recourse, and agent monitoring. |
 | **FlowRouter research** | Hardware/resilience track for local connectivity, LoRa/Meshtastic sidecar signaling, and operator-facing hardware experiments. |
 
 ## Why It Matters
@@ -35,6 +35,7 @@ Today, most agent output is ephemeral: a transcript, a tool call, maybe a databa
 - **Reputation becomes machine-readable** through passports, execution receipts, score attestations, and public task history.
 - **Compute and inference become traceable** through memory-attested work, not vague claims that a model “did something.”
 - **Markets become possible** because tasks, recourse, evidence, and reliability have explicit objects and lifecycle states.
+- **Operators get a real control surface** through dashboard and mobile app shells for task alerts, receipts, budgets, recourse, and agent status.
 
 ## Agent Bonds: The First Economic Wedge
 
@@ -90,6 +91,27 @@ Run the local/test contract and e2e checks:
 npm run public-agent-network:contracts
 npm run public-agent-network:local-e2e
 ```
+
+## Mobile Apps: The Operator Layer
+
+The iOS and Android app track is a major part of the AI infrastructure network. FlowMemory is not only backend protocol machinery; operators need a pocket control plane for agents.
+
+The mobile apps are for:
+
+- monitoring agents, swarms, and task status;
+- reviewing Agent Bonds requests, verifier results, and challenge windows;
+- tracking stake, escrow, memory fuel, and recourse exposure;
+- viewing receipts, Rootflow history, AgentMemoryView, and reputation changes;
+- eventually receiving high-priority operator alerts for disputes, failed submissions, deadlines, and slashing risk.
+
+Current repo state:
+
+- Android Capacitor shell exists at `apps/dashboard/android`;
+- Android sync/debug build scripts exist in `apps/dashboard/package.json`;
+- Android artifact CI exists in `.github/workflows/wallet-release.yml`;
+- iOS is part of the product direction, but no committed Xcode project exists yet.
+
+See `docs/MOBILE_APPS.md` for the mobile app purpose, current Android build path, iOS boundary, and next hardening steps.
 
 ## Quickstart
 
@@ -170,6 +192,7 @@ If you want to help test, start with `docs/PUBLIC_TESTER_GUIDE.md` and open a **
 | Test what works locally | `docs/PUBLIC_TESTER_GUIDE.md` |
 | Understand Base agent memory | `docs/base-onchain-agent-memory/README.md` |
 | See open public gaps | `docs/PUBLIC_RELEASE_GAPS.md` |
+| Understand mobile apps | `docs/MOBILE_APPS.md`, `apps/dashboard/WALLET_DISTRIBUTION.md` |
 | Review claim rules | `docs/MARKETING_CLAIMS_GUARDRAILS.md` |
 | Contribute safely | `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md` |
 
@@ -183,7 +206,7 @@ If you want to help test, start with `docs/PUBLIC_TESTER_GUIDE.md` and open a **
 | `services/control-plane/` | Local JSON-RPC style API over generated state and deterministic fixtures. |
 | `services/agent-memory-sdk/` | Agent-memory and Agent Bonds client helpers for fixture-backed and local control-plane flows. |
 | `services/indexer/`, `services/verifier/` | Fixture-first log reconstruction and verifier-report generation. |
-| `apps/dashboard/` | Public workbench and dashboard projection views. |
+| `apps/dashboard/` | Public workbench, desktop app, Android Capacitor shell, and shared mobile UI surface. |
 | `fixtures/` | Deterministic generated state used by services, tests, and dashboard. |
 | `schemas/` | Canonical JSON schemas for Flow Memory, Rootflow, Base agent memory, Agent Bonds, and related objects. |
 | `docs/` | Public guides, architecture, runbooks, reviews, decisions, and gap register. |
@@ -204,6 +227,7 @@ Do not claim:
 - deployed public verifier network
 - deployed public appchain
 - completed hardware product
+- finished iOS app or App Store / Play Store availability
 
 ## Current Status
 

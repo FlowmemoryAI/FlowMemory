@@ -74,6 +74,21 @@ Missing work:
 - reputation / receipt inheritance projection;
 - forked swarm and child-agent replay report.
 
+
+### 6. Mobile operator apps and iOS shell
+
+Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/174
+
+Current state: the shared dashboard/workbench has a committed Android Capacitor shell and desktop Electron builds. The iOS app is a documented product track, but no Xcode project or macOS CI lane is committed yet.
+
+Missing work:
+
+- Android debug APK public tester lane and clean-clone evidence;
+- mobile-first Agent Bonds, receipts, recourse, wallet/budget, public-agent, and alert views;
+- iOS Capacitor/Xcode project;
+- macOS CI build lane for iOS simulator/device testing;
+- mobile signing and release runbook that does not require committed secrets.
+
 ## Verification Rule
 
 A gap closes only when the implementation, docs, tests, and public-safe evidence all exist in the repository or linked GitHub issue/PR history. A passing unit test alone is not enough.

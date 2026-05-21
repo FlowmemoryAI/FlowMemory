@@ -1,6 +1,6 @@
-# Flowchain Wallet Distribution
+# FlowMemory App Distribution
 
-The wallet is distributed as native desktop builds through Electron and as a native Android shell through Capacitor.
+The FlowMemory operator app is distributed as native desktop builds through Electron and as a native Android shell through Capacitor. The same React/Vite surface powers the browser dashboard, desktop app, and mobile app shell.
 
 ## Local Windows Desktop Build
 
@@ -16,6 +16,13 @@ For a local unsigned unpacked build plus zip:
 npm run desktop:pack --prefix apps/dashboard
 ```
 
+
+## Mobile Purpose
+
+The Android app is the first committed mobile shell for the FlowMemory operator console. It is used to inspect agent work, Agent Bonds state, task receipts, public-agent status, wallet/budget surfaces, and operator alerts from the AI infrastructure network.
+
+The iOS app is part of the product direction but no Xcode project is committed yet. Do not claim an iOS build exists until `apps/dashboard/ios` and a macOS CI lane are added.
+
 ## Android Build
 
 The Android app source lives in `apps/dashboard/android`.
@@ -30,6 +37,8 @@ Building an APK requires Java and the Android SDK. On CI, `.github/workflows/wal
 - `FLOWCHAIN_ANDROID_KEYSTORE_PASSWORD`
 - `FLOWCHAIN_ANDROID_KEY_ALIAS`
 - `FLOWCHAIN_ANDROID_KEY_PASSWORD`
+
+The secret names still use the older internal wallet prefix for compatibility with the existing release workflow; they are signing inputs only and must never be committed.
 
 ## Public Downloads
 

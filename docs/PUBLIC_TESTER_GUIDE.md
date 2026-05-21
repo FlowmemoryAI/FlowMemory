@@ -11,7 +11,7 @@ This guide is for people who want to try something real in the public repo and r
 | Quick JS smoke | Public-agent helpers, SDK wrappers, agent-memory client, control-plane-backed flows | Node.js + npm | `npm run public:test:quick` |
 | Public-agent contracts | Agent class/tool registries, launch factory, shell factory, swarms, budget vault | Foundry | `npm run public:test:contracts` |
 | Local public-agent e2e | Full local public-agent + swarm script path | Foundry | `npm run public:test:e2e` |
-| Dashboard workbench | React dashboard views and production build | Node.js + npm | `npm run public:test:dashboard` |
+| Dashboard/mobile workbench | React dashboard views, shared mobile UI surface, and production build | Node.js + npm | `npm run public:test:dashboard` |
 | Public hardening gate | Public docs, scripts, issue-template, and CI wiring | Node.js + npm | `npm run public:hardening` |
 | Full public local pass | All public tester lanes plus hardening and claim guardrails | Node.js + npm + Foundry | `npm run public:test:all` |
 
@@ -53,6 +53,7 @@ You can include more lanes:
 ```powershell
 npm run public:test:report -- --contracts --e2e
 npm run public:test:report -- --all
+```
 ```
 
 
@@ -135,12 +136,14 @@ Open the local URL printed by Vite and review:
 - Public Agent Network view;
 - Base canary boundary copy;
 - raw JSON views.
+- Mobile app purpose and boundary from `docs/MOBILE_APPS.md`;
 
 Useful feedback:
 
 - Could you tell what was fixture-backed versus live?
 - Were unsafe claims or production-sounding copy visible?
 - Which view felt most real, and which felt like a placeholder?
+- Is the mobile/operator app purpose clear from the dashboard and docs?
 
 ## Lane 5: CLI / Control-Plane Trial
 
@@ -162,7 +165,6 @@ npm run public:devkit -- public-swarm-replay --json
 ```
 
 Useful feedback:
-
 - Did the commands return useful JSON?
 - Were field names understandable?
 - What should the CLI summarize for non-protocol users?
@@ -226,7 +228,10 @@ The maintainer can pin tester issues with the `public-tester` label. Good first 
 3. Run `npm run public:test:e2e` and report the emitted local ids.
 4. Run the dashboard and review public-agent / Agent Bonds copy for clarity.
 5. Start the control-plane and try the public-agent CLI commands.
+6. Review `docs/MOBILE_APPS.md` and confirm the Android/iOS boundary is clear.
 
 ## Boundary Reminder
 
 Passing these tests means the local/test public surfaces are reproducible. It does not mean the contracts are audited, production-ready, mainnet-ready, or approved for uncapped value-bearing use.
+
+Mobile note: Android shell code is committed and documented. iOS is a product track, but public testers should not expect a runnable iOS app until `apps/dashboard/ios` exists.

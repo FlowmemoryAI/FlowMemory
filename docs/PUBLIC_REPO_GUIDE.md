@@ -15,6 +15,7 @@ The repository currently contains:
 - deterministic Rootflow and Flow Memory V0 fixtures;
 - signed Agent Bonds quote attestations, recourse-policy fixtures, and requester quote/create SDK helpers;
 - a public-agent launch and swarm stack with Foundry tests and a local e2e script;
+- a developing mobile operator surface, with an Android Capacitor shell committed today and iOS documented as a product track that still needs an Xcode project;
 - FlowRouter hardware/resilience research materials;
 - public docs that describe what exists, what works locally, and what must be verified before broader value-bearing claims are allowed.
 
@@ -27,7 +28,7 @@ contracts emit compact events and store compact state
   -> Flow Memory generates MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and AgentMemoryView objects
   -> control-plane exposes JSON-RPC style local APIs
   -> SDK and CLI wrap those APIs
-  -> dashboard renders the generated and projected state
+  -> dashboard and mobile shells render the generated and projected state
 ```
 
 The public-agent network adds this path:
@@ -52,6 +53,7 @@ registered class + approved tool set
 | See exactly what is still missing | `docs/PUBLIC_RELEASE_GAPS.md` and GitHub issues #164-#168 |
 | Understand Base on-chain agent memory | `docs/base-onchain-agent-memory/README.md` |
 | Understand Rootflow and Flow Memory V0 | `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, `docs/V0_LAUNCH_ACCEPTANCE.md` |
+| Understand mobile apps | `docs/MOBILE_APPS.md`, `apps/dashboard/WALLET_DISTRIBUTION.md` |
 | Operate or contribute safely | `AGENTS.md`, `docs/START_HERE.md`, `CONTRIBUTING.md`, `SECURITY.md` |
 | Check deployment and claim boundaries | `docs/PRODUCTION_READINESS_CHECKLIST.md`, `contracts/DEPLOYMENT_BOUNDARY.md`, `contracts/ACCESS_CONTROL_REVIEW.md` |
 
@@ -119,7 +121,7 @@ Some checks require local tools such as Foundry, Rust, dashboard dependencies, o
 | `services/control-plane/` | Local JSON-RPC style control-plane methods and smoke client. |
 | `services/flowchain-sdk/` | Client and CLI wrappers for the separate chain-devnet research track; not required for the main public quickstart. |
 | `services/agent-memory-sdk/` | Agent-memory client for fixture-backed and local control-plane flows. |
-| `apps/dashboard/` | Vite/React fixture-backed dashboard and public-network projection views. |
+| `apps/dashboard/` | Vite/React fixture-backed dashboard, desktop shell, Android Capacitor shell, and future shared mobile UI. |
 | `fixtures/` | Deterministic local/test outputs used by services and dashboard. |
 | `schemas/` | JSON schemas for Flow Memory, Rootflow, Base agent memory, Agent Bonds, and related objects. |
 | `docs/` | Source-of-truth architecture, runbooks, reviews, decisions, public release docs, and gap register. |

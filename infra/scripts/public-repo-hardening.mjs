@@ -24,6 +24,8 @@ function includes(text, needle) {
 
 const packageJson = JSON.parse(readText("package.json"));
 const scripts = packageJson.scripts ?? {};
+const dashboardPackageJson = JSON.parse(readText("apps/dashboard/package.json"));
+const dashboardScripts = dashboardPackageJson.scripts ?? {};
 const requiredScripts = [
   "public:hardening",
   "public:test:quick",
@@ -32,6 +34,7 @@ const requiredScripts = [
   "public:test:dashboard",
   "public:test:all",
   "public:test:report",
+  "public:test:cli",
   "public:devkit",
   "public-agent-network:contracts",
   "public-agent-network:local-e2e",
@@ -40,6 +43,7 @@ for (const scriptName of requiredScripts) {
   assert(typeof scripts[scriptName] === "string" && scripts[scriptName].length > 0, `missing package script: ${scriptName}`);
 }
 assert(String(scripts["public:test:all"] ?? "").includes("public:hardening"), "public:test:all must include public:hardening");
+assert(String(scripts["public:test:all"] ?? "").includes("public:test:cli"), "public:test:all must include CLI smoke");
 assert(String(scripts["public:test:all"] ?? "").includes("check-unsafe-claims"), "public:test:all must run claim guardrails");
 
 const requiredFiles = [
@@ -52,6 +56,11 @@ const requiredFiles = [
   ".github/ISSUE_TEMPLATE/public-tester-report.yml",
   "infra/scripts/public-tester-report.mjs",
   "infra/scripts/check-unsafe-claims.mjs",
+  "docs/MOBILE_APPS.md",
+  "apps/dashboard/WALLET_DISTRIBUTION.md",
+  "apps/dashboard/package.json",
+  "apps/dashboard/capacitor.config.ts",
+  "apps/dashboard/android/app/src/main/res/values/strings.xml",
 ];
 for (const path of requiredFiles) readText(path);
 
@@ -60,6 +69,11 @@ const publicGuide = readText("docs/PUBLIC_REPO_GUIDE.md");
 const testerGuide = readText("docs/PUBLIC_TESTER_GUIDE.md");
 const issueTemplate = readText(".github/ISSUE_TEMPLATE/public-tester-report.yml");
 const ci = readText(".github/workflows/ci.yml");
+const mobileDocs = readText("docs/MOBILE_APPS.md");
+const walletDistribution = readText("apps/dashboard/WALLET_DISTRIBUTION.md");
+const capacitorConfig = readText("apps/dashboard/capacitor.config.ts");
+const androidStrings = readText("apps/dashboard/android/app/src/main/res/values/strings.xml");
+const publicGaps = readText("docs/PUBLIC_RELEASE_GAPS.md");
 
 const publicDocs = `${readme}\n${publicGuide}\n${testerGuide}`;
 const bannedPublicEntrypoints = [
@@ -82,6 +96,8 @@ const requiredReadmePhrases = [
   "task-scoped, capital-backed recourse records",
   "npm run public:test:quick",
   "docs/PUBLIC_TESTER_GUIDE.md",
+  "iOS and Android app track",
+  "docs/MOBILE_APPS.md",
 ];
 for (const phrase of requiredReadmePhrases) {
   assert(includes(readme, phrase), `README missing public positioning phrase: ${phrase}`);
@@ -121,6 +137,25 @@ for (const scriptName of documentedScriptMatches) {
 assert(includes(ci, "Public repository readiness"), "CI missing Public repository readiness job");
 assert(includes(ci, "npm run public:hardening"), "CI must run public:hardening");
 assert(includes(ci, "npm run public:test:all"), "CI must run public:test:all");
+
+const requiredMobilePhrases = [
+  "FlowMemory's mobile apps are the user-facing control surface",
+  "Android Capacitor shell exists",
+  "iOS is part of the product direction but no Xcode project is committed yet",
+  "task inbox for objective Agent Bonds work",
+  "recourse quote and failure-waterfall viewer",
+];
+for (const phrase of requiredMobilePhrases) {
+  assert(includes(mobileDocs, phrase), `MOBILE_APPS missing mobile positioning phrase: ${phrase}`);
+}
+assert(includes(walletDistribution, "FlowMemory operator app"), "WALLET_DISTRIBUTION must describe FlowMemory operator app");
+assert(includes(capacitorConfig, "appName: \"FlowMemory\""), "Capacitor app name must be FlowMemory");
+assert(includes(androidStrings, "<string name=\"app_name\">FlowMemory</string>"), "Android display app name must be FlowMemory");
+for (const scriptName of ["mobile:sync", "mobile:android:sync", "mobile:android:debug"]) {
+  assert(typeof dashboardScripts[scriptName] === "string" && dashboardScripts[scriptName].length > 0, `missing dashboard mobile script: ${scriptName}`);
+}
+assert(includes(publicGaps, "Mobile operator apps and iOS shell"), "PUBLIC_RELEASE_GAPS must track mobile operator app hardening");
+assert(includes(publicGaps, "https://github.com/FlowmemoryAI/FlowMemory/issues/174"), "PUBLIC_RELEASE_GAPS must link the mobile operator app tracking issue");
 
 if (failures.length > 0) {
   console.error("FlowMemory public repository hardening failed:");
