@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T01:39:09.9908147Z",
+    "generatedAt":  "2026-05-21T02:19:10.8191984Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -111,9 +111,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, verification, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, concrete owner-host plan/apply/rollback script, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -125,7 +125,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=108292, finalizedHeight=108292",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=108548, finalizedHeight=108548",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -441,7 +441,7 @@
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.686, transferSeconds=0.548",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.845, transferSeconds=0.695",
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate"
                                    ],

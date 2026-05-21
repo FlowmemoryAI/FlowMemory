@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.architecture_audit_report.v0",
-    "generatedAt":  "2026-05-21T01:47:30.1280390Z",
+    "generatedAt":  "2026-05-21T02:19:26.4857550Z",
     "status":  "blocked",
     "blockedOnlyOnKnownExternalOwnerInputs":  true,
     "objectiveDeliverables":  [
@@ -30,7 +30,7 @@
                       "layer":  "L1 runtime",
                       "requirement":  "The block-producing node and service lifecycle are separated from RPC, run in live profile, and expose fresh state evidence.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=108316, finalizedHeight=108316",
+                      "evidence":  "serviceStatus=passed, liveProfile=True, maxBlocks=0, nodeRunning=True, controlPlaneRunning=True, latestHeight=108548, finalizedHeight=108548",
                       "files":  [
                                     "crates/flowmemory-devnet/src/cli.rs",
                                     "crates/flowmemory-devnet/src/storage.rs",
@@ -388,7 +388,7 @@
                       "layer":  "Bridge",
                       "requirement":  "The bridge runtime has a local production-shaped proof that a Base 8453 handoff becomes spendable on L1 within the settlement target, can be transferred by the credited wallet, rejects replay, and survives restart/export/import without broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.686, transferSeconds=0.548",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.845, transferSeconds=0.695",
                       "files":  [
                                     "infra/scripts/flowchain-bridge-runtime-credit-validation.ps1",
                                     "infra/scripts/flowchain-real-value-pilot-runtime.ps1",

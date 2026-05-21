@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_status_report.v0",
-    "generatedAt":  "2026-05-20T14:05:56.9210074Z",
+    "generatedAt":  "2026-05-21T02:15:47.9529758Z",
     "status":  "passed",
     "bind":  {
                  "host":  "127.0.0.1",
@@ -9,27 +9,27 @@
              },
     "node":  {
                  "status":  "running",
-                 "pid":  42500,
+                 "pid":  47580,
                  "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\node\\flowchain-node.pid",
                  "pidSource":  "pid-file",
                  "commandLineMatched":  true
              },
     "controlPlane":  {
                          "status":  "running",
-                         "pid":  46780,
+                         "pid":  41248,
                          "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\services\\control-plane.pid",
                          "commandLineMatched":  true
                      },
     "controlPlanePortProcess":  null,
     "bridgeRelayerLoop":  {
                               "status":  "running",
-                              "pid":  27048,
+                              "pid":  17596,
                               "pidPath":  "devnet\\local\\bridge-relayer-loop-validation\\services\\bridge-relayer-loop.pid",
                               "commandLineMatched":  true,
                               "report":  {
                                              "path":  "devnet/local/bridge-live-readiness/bridge-relayer-loop-report.json",
                                              "status":  "blocked",
-                                             "ageSeconds":  0.969,
+                                             "ageSeconds":  2.438,
                                              "maxAgeSeconds":  180,
                                              "fresh":  true,
                                              "acceptableStatus":  true,
@@ -53,12 +53,12 @@
                               },
     "chain":  {
                   "stateFileReadable":  true,
-                  "latestHeight":  "307",
-                  "latestHash":  "0x17c50393605197ab5b313499edd3c728470d6daf0c6b071a8f1d95286705557c",
+                  "latestHeight":  "328",
+                  "latestHash":  "0xa6763c1bafe5d15ea8c4704a51be1d53f525f413d598056bf884165d379dec99",
                   "latestRoot":  "0x149b8017ed2be0fb192c295383d2a198798a24e8509978c678fe78205ca8ee58",
                   "stateFileLastWriteAgeSeconds":  1,
-                  "finalizedHeight":  "307",
-                  "finalizedHash":  "0x17c50393605197ab5b313499edd3c728470d6daf0c6b071a8f1d95286705557c",
+                  "finalizedHeight":  "328",
+                  "finalizedHash":  "0xa6763c1bafe5d15ea8c4704a51be1d53f525f413d598056bf884165d379dec99",
                   "mempoolDepth":  0,
                   "peerCount":  null
               },
