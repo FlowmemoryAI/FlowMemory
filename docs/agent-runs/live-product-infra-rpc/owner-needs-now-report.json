@@ -1,14 +1,14 @@
 {
     "schema":  "flowchain.owner_needs_now_report.v0",
-    "generatedAt":  "2026-05-21T12:39:12.9550784Z",
+    "generatedAt":  "2026-05-21T15:22:16.4247404Z",
     "status":  "passed",
     "launchReadinessStatus":  "blocked-owner-input",
     "releaseReady":  false,
     "deploymentReady":  false,
     "packetShareable":  false,
     "completionReady":  false,
-    "latestHeight":  "112761",
-    "finalizedHeight":  "112761",
+    "latestHeight":  "113355",
+    "finalizedHeight":  "113355",
     "truthTableClassificationCounts":  {
                                            "passed":  53,
                                            "blocked-owner-input":  17,
@@ -57,6 +57,8 @@
     "groupCount":  4,
     "neededNowGroupCount":  3,
     "readyGroupCount":  1,
+    "setupItemCount":  9,
+    "externalSignupItemCount":  3,
     "deploymentGateCount":  35,
     "blockedDeploymentGateCount":  7,
     "failedDeploymentGateCount":  0,
@@ -747,6 +749,185 @@
                                        ]
                         }
                     ],
+    "setupItems":  [
+                       {
+                           "id":  "always-on-host",
+                           "title":  "Always-on FlowChain host",
+                           "externalSignup":  false,
+                           "ownerGets":  "A machine or VPS that stays online, runs the FlowChain node/control-plane privately, and exposes only the owner TLS edge.",
+                           "envNames":  [
+
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:service:status",
+                                                      "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30",
+                                                      "npm run flowchain:service:install:validate"
+                                                  ],
+                           "doNotSend":  [
+                                             "root password",
+                                             "SSH private key",
+                                             "provider dashboard password"
+                                         ]
+                       },
+                       {
+                           "id":  "public-rpc-domain",
+                           "title":  "Public RPC domain or subdomain",
+                           "externalSignup":  true,
+                           "ownerGets":  "A DNS name for the FlowChain public RPC edge, for example an rpc subdomain pointed at the owner host or tunnel.",
+                           "envNames":  [
+                                            "FLOWCHAIN_RPC_PUBLIC_URL"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                                                      "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "registrar password",
+                                             "DNS provider password",
+                                             "admin session cookie"
+                                         ]
+                       },
+                       {
+                           "id":  "tls-reverse-proxy",
+                           "title":  "TLS reverse proxy or tunnel",
+                           "externalSignup":  true,
+                           "ownerGets":  "A TLS-terminating edge such as Nginx/Caddy/Traefik, a load balancer, or a tunnel that proxies to the private origin.",
+                           "envNames":  [
+                                            "FLOWCHAIN_RPC_TLS_TERMINATED"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:public-rpc:deployment-bundle",
+                                                      "npm run flowchain:public-rpc:deployment:automation",
+                                                      "npm run flowchain:public-deployment:contract -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "TLS private key",
+                                             "tunnel token",
+                                             "certificate account credentials"
+                                         ]
+                       },
+                       {
+                           "id":  "cors-rate-limit",
+                           "title":  "Allowed origins and public rate limit",
+                           "externalSignup":  false,
+                           "ownerGets":  "Exact HTTPS origins for wallet/dashboard/tester clients and a positive pilot request limit per minute.",
+                           "envNames":  [
+                                            "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
+                                            "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:public-rpc:check -- -AllowBlocked",
+                                                      "npm run flowchain:public-rpc:abuse-test"
+                                                  ],
+                           "doNotSend":  [
+                                             "origin wildcard",
+                                             "unbounded rate limit",
+                                             "private dashboard URL with credentials"
+                                         ]
+                       },
+                       {
+                           "id":  "backup-storage",
+                           "title":  "Durable backup directory",
+                           "externalSignup":  false,
+                           "ownerGets":  "An existing writable directory on durable disk, mounted volume, or owner-managed backup storage for manifest-backed snapshots.",
+                           "envNames":  [
+                                            "FLOWCHAIN_RPC_STATE_BACKUP_PATH"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:backup:owner-path:dry-run",
+                                                      "npm run flowchain:backup:check -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "cloud storage secret",
+                                             "backup provider account password",
+                                             "private backup credentials"
+                                         ]
+                       },
+                       {
+                           "id":  "tester-write-token",
+                           "title":  "Friends-and-family tester write token",
+                           "externalSignup":  false,
+                           "ownerGets":  "A random bearer token kept out of GitHub/chat, its SHA-256 digest in the ignored owner env file, and a small per-send cap.",
+                           "envNames":  [
+                                            "FLOWCHAIN_TESTER_WRITE_ENABLED",
+                                            "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
+                                            "FLOWCHAIN_TESTER_MAX_SEND_UNITS"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:tester:token:setup",
+                                                      "npm run flowchain:tester:gateway:e2e",
+                                                      "npm run flowchain:external-tester:packet -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "raw tester bearer token",
+                                             "owner env file contents",
+                                             "token hash together with the raw token"
+                                         ]
+                       },
+                       {
+                           "id":  "base8453-rpc",
+                           "title":  "Base 8453 RPC endpoint",
+                           "externalSignup":  true,
+                           "ownerGets":  "A Base mainnet chain-id 8453 HTTPS JSON-RPC endpoint for read-only bridge observation.",
+                           "envNames":  [
+                                            "FLOWCHAIN_BASE8453_RPC_URL"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                                                      "npm run flowchain:bridge:diagnose:tx"
+                                                  ],
+                           "doNotSend":  [
+                                             "provider dashboard password",
+                                             "provider API secret pasted in chat",
+                                             "secret-bearing RPC URL"
+                                         ]
+                       },
+                       {
+                           "id":  "base8453-pilot-bridge",
+                           "title":  "Base bridge pilot contract and caps",
+                           "externalSignup":  false,
+                           "ownerGets":  "The lockbox address, supported token, decimals, start block, explicit capped-pilot ack, per-deposit cap, total cap, and confirmation depth.",
+                           "envNames":  [
+                                            "FLOWCHAIN_PILOT_OPERATOR_ACK",
+                                            "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+                                            "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+                                            "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
+                                            "FLOWCHAIN_BASE8453_FROM_BLOCK",
+                                            "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
+                                            "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+                                            "FLOWCHAIN_PILOT_CONFIRMATIONS"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:bridge:live:check -- -AllowBlocked",
+                                                      "npm run flowchain:bridge:infra:check -- -AllowBlocked",
+                                                      "npm run flowchain:bridge:relayer:once -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "deployer private key",
+                                             "wallet seed words",
+                                             "unbounded pilot caps"
+                                         ]
+                       },
+                       {
+                           "id":  "owner-env-file",
+                           "title":  "Ignored local owner env file",
+                           "externalSignup":  false,
+                           "ownerGets":  "A local NAME=value file referenced by FLOWCHAIN_OWNER_ENV_FILE or equivalent service environment variables.",
+                           "envNames":  [
+                                            "FLOWCHAIN_OWNER_ENV_FILE"
+                                        ],
+                           "validationCommands":  [
+                                                      "npm run flowchain:owner-env:template",
+                                                      "npm run flowchain:owner-env:readiness:validate",
+                                                      "npm run flowchain:owner-env:readiness -- -AllowBlocked"
+                                                  ],
+                           "doNotSend":  [
+                                             "owner env file contents",
+                                             "private keys",
+                                             "wallet recovery words"
+                                         ]
+                       }
+                   ],
     "reportStatuses":  [
                            {
                                "name":  "ownerInputs",
@@ -837,6 +1018,14 @@
                    "reportStatusDeckPresent":  true,
                    "groupCountMinimumMet":  true,
                    "requiredEnvCoverageComplete":  true,
+                   "setupItemsCountMinimumMet":  true,
+                   "setupItemsCoverAllRequiredOwnerInputs":  true,
+                   "setupItemsValidationCommandsPresent":  true,
+                   "setupItemsDoNotSendPresent":  true,
+                   "setupItemsSignupFlagsPresent":  true,
+                   "setupItemsIncludeExternalSignup":  true,
+                   "setupItemsIncludeAlwaysOnHost":  true,
+                   "setupItemsIncludeOwnerEnvFile":  true,
                    "groupCommandsPresent":  true,
                    "groupDoNotSendPresent":  true,
                    "deploymentGateSummaryPresent":  true,
@@ -861,6 +1050,18 @@
     "missingRequiredCoverage":  [
 
                                 ],
+    "missingSetupCoverage":  [
+
+                             ],
+    "setupItemsMissingValidation":  [
+
+                                    ],
+    "setupItemsMissingDoNotSend":  [
+
+                                   ],
+    "setupItemsMissingSignupFlag":  [
+
+                                    ],
     "unknownNeededNowEnvNames":  [
 
                                  ],

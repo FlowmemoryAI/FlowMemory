@@ -785,6 +785,10 @@ $definitions = @(
             "failedChecks",
             "secretMarkerFindings",
             "missingRequiredCoverage",
+            "missingSetupCoverage",
+            "setupItemsMissingValidation",
+            "setupItemsMissingDoNotSend",
+            "setupItemsMissingSignupFlag",
             "unknownNeededNowEnvNames",
             "optionalNeededNowEnvNames",
             "invalidEnvNames"
@@ -792,6 +796,8 @@ $definitions = @(
         requiredMinimums = [ordered]@{
             groupCount = 4
             neededNowGroupCount = 1
+            setupItemCount = 8
+            externalSignupItemCount = 3
         }
         requiredChecks = @(
             "packageScriptPresent",
@@ -802,6 +808,14 @@ $definitions = @(
             "reportStatusDeckPresent",
             "groupCountMinimumMet",
             "requiredEnvCoverageComplete",
+            "setupItemsCountMinimumMet",
+            "setupItemsCoverAllRequiredOwnerInputs",
+            "setupItemsValidationCommandsPresent",
+            "setupItemsDoNotSendPresent",
+            "setupItemsSignupFlagsPresent",
+            "setupItemsIncludeExternalSignup",
+            "setupItemsIncludeAlwaysOnHost",
+            "setupItemsIncludeOwnerEnvFile",
             "groupCommandsPresent",
             "groupDoNotSendPresent",
             "knownNeededNowOwnerInputsOnly",

@@ -161,7 +161,7 @@ function New-NeedsGroup {
         [Parameter(Mandatory = $true)][string] $Title,
         [Parameter(Mandatory = $true)][string] $WhyNeeded,
         [Parameter(Mandatory = $true)][string] $OwnerAction,
-        [Parameter(Mandatory = $true)][string[]] $EnvNames,
+        [AllowEmptyCollection()][string[]] $EnvNames = @(),
         [Parameter(Mandatory = $true)][string[]] $ValidationCommands,
         [Parameter(Mandatory = $true)][string[]] $DoNotSend,
         [AllowNull()][object[]] $Inputs
@@ -202,6 +202,28 @@ function New-NeedsGroup {
         validationCommands = @($ValidationCommands)
         doNotSend = @($DoNotSend)
         inputs = @($states)
+    }
+}
+
+function New-NeedsSetupItem {
+    param(
+        [Parameter(Mandatory = $true)][string] $Id,
+        [Parameter(Mandatory = $true)][string] $Title,
+        [Parameter(Mandatory = $true)][bool] $ExternalSignup,
+        [Parameter(Mandatory = $true)][string] $OwnerGets,
+        [AllowEmptyCollection()][string[]] $EnvNames = @(),
+        [Parameter(Mandatory = $true)][string[]] $ValidationCommands,
+        [Parameter(Mandatory = $true)][string[]] $DoNotSend
+    )
+
+    return [ordered]@{
+        id = $Id
+        title = $Title
+        externalSignup = $ExternalSignup
+        ownerGets = $OwnerGets
+        envNames = @($EnvNames)
+        validationCommands = @($ValidationCommands)
+        doNotSend = @($DoNotSend)
     }
 }
 
@@ -263,8 +285,62 @@ $groups = @(
         -Inputs $ownerInputRows
 )
 
+$setupItems = @(
+    New-NeedsSetupItem -Id "always-on-host" -Title "Always-on FlowChain host" -ExternalSignup $false `
+        -OwnerGets "A machine or VPS that stays online, runs the FlowChain node/control-plane privately, and exposes only the owner TLS edge." `
+        -EnvNames @() `
+        -ValidationCommands @("npm run flowchain:service:status", "npm run flowchain:service:monitor -- -DurationSeconds 300 -PollSeconds 30", "npm run flowchain:service:install:validate") `
+        -DoNotSend @("root password", "SSH private key", "provider dashboard password")
+    New-NeedsSetupItem -Id "public-rpc-domain" -Title "Public RPC domain or subdomain" -ExternalSignup $true `
+        -OwnerGets "A DNS name for the FlowChain public RPC edge, for example an rpc subdomain pointed at the owner host or tunnel." `
+        -EnvNames @("FLOWCHAIN_RPC_PUBLIC_URL") `
+        -ValidationCommands @("npm run flowchain:public-rpc:check -- -AllowBlocked", "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked") `
+        -DoNotSend @("registrar password", "DNS provider password", "admin session cookie")
+    New-NeedsSetupItem -Id "tls-reverse-proxy" -Title "TLS reverse proxy or tunnel" -ExternalSignup $true `
+        -OwnerGets "A TLS-terminating edge such as Nginx/Caddy/Traefik, a load balancer, or a tunnel that proxies to the private origin." `
+        -EnvNames @("FLOWCHAIN_RPC_TLS_TERMINATED") `
+        -ValidationCommands @("npm run flowchain:public-rpc:deployment-bundle", "npm run flowchain:public-rpc:deployment:automation", "npm run flowchain:public-deployment:contract -- -AllowBlocked") `
+        -DoNotSend @("TLS private key", "tunnel token", "certificate account credentials")
+    New-NeedsSetupItem -Id "cors-rate-limit" -Title "Allowed origins and public rate limit" -ExternalSignup $false `
+        -OwnerGets "Exact HTTPS origins for wallet/dashboard/tester clients and a positive pilot request limit per minute." `
+        -EnvNames @("FLOWCHAIN_RPC_ALLOWED_ORIGINS", "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE") `
+        -ValidationCommands @("npm run flowchain:public-rpc:check -- -AllowBlocked", "npm run flowchain:public-rpc:abuse-test") `
+        -DoNotSend @("origin wildcard", "unbounded rate limit", "private dashboard URL with credentials")
+    New-NeedsSetupItem -Id "backup-storage" -Title "Durable backup directory" -ExternalSignup $false `
+        -OwnerGets "An existing writable directory on durable disk, mounted volume, or owner-managed backup storage for manifest-backed snapshots." `
+        -EnvNames @("FLOWCHAIN_RPC_STATE_BACKUP_PATH") `
+        -ValidationCommands @("npm run flowchain:backup:owner-path:dry-run", "npm run flowchain:backup:check -- -AllowBlocked") `
+        -DoNotSend @("cloud storage secret", "backup provider account password", "private backup credentials")
+    New-NeedsSetupItem -Id "tester-write-token" -Title "Friends-and-family tester write token" -ExternalSignup $false `
+        -OwnerGets "A random bearer token kept out of GitHub/chat, its SHA-256 digest in the ignored owner env file, and a small per-send cap." `
+        -EnvNames @("FLOWCHAIN_TESTER_WRITE_ENABLED", "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256", "FLOWCHAIN_TESTER_MAX_SEND_UNITS") `
+        -ValidationCommands @("npm run flowchain:tester:token:setup", "npm run flowchain:tester:gateway:e2e", "npm run flowchain:external-tester:packet -- -AllowBlocked") `
+        -DoNotSend @("raw tester bearer token", "owner env file contents", "token hash together with the raw token")
+    New-NeedsSetupItem -Id "base8453-rpc" -Title "Base 8453 RPC endpoint" -ExternalSignup $true `
+        -OwnerGets "A Base mainnet chain-id 8453 HTTPS JSON-RPC endpoint for read-only bridge observation." `
+        -EnvNames @("FLOWCHAIN_BASE8453_RPC_URL") `
+        -ValidationCommands @("npm run flowchain:bridge:live:check -- -AllowBlocked", "npm run flowchain:bridge:diagnose:tx") `
+        -DoNotSend @("provider dashboard password", "provider API secret pasted in chat", "secret-bearing RPC URL")
+    New-NeedsSetupItem -Id "base8453-pilot-bridge" -Title "Base bridge pilot contract and caps" -ExternalSignup $false `
+        -OwnerGets "The lockbox address, supported token, decimals, start block, explicit capped-pilot ack, per-deposit cap, total cap, and confirmation depth." `
+        -EnvNames @("FLOWCHAIN_PILOT_OPERATOR_ACK", "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", "FLOWCHAIN_BASE8453_ASSET_DECIMALS", "FLOWCHAIN_BASE8453_FROM_BLOCK", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI", "FLOWCHAIN_PILOT_CONFIRMATIONS") `
+        -ValidationCommands @("npm run flowchain:bridge:live:check -- -AllowBlocked", "npm run flowchain:bridge:infra:check -- -AllowBlocked", "npm run flowchain:bridge:relayer:once -- -AllowBlocked") `
+        -DoNotSend @("deployer private key", "wallet seed words", "unbounded pilot caps")
+    New-NeedsSetupItem -Id "owner-env-file" -Title "Ignored local owner env file" -ExternalSignup $false `
+        -OwnerGets "A local NAME=value file referenced by FLOWCHAIN_OWNER_ENV_FILE or equivalent service environment variables." `
+        -EnvNames @("FLOWCHAIN_OWNER_ENV_FILE") `
+        -ValidationCommands @("npm run flowchain:owner-env:template", "npm run flowchain:owner-env:readiness:validate", "npm run flowchain:owner-env:readiness -- -AllowBlocked") `
+        -DoNotSend @("owner env file contents", "private keys", "wallet recovery words")
+)
+
 $coveredRequired = @($groups | ForEach-Object { @($_.envNames) } | Where-Object { $_ -in $requiredOwnerEnvNames } | Select-Object -Unique)
 $missingCoverage = @($requiredOwnerEnvNames | Where-Object { $_ -notin $coveredRequired })
+$setupCoveredRequired = @($setupItems | ForEach-Object { @($_.envNames) } | Where-Object { $_ -in $requiredOwnerEnvNames } | Select-Object -Unique)
+$missingSetupCoverage = @($requiredOwnerEnvNames | Where-Object { $_ -notin $setupCoveredRequired })
+$setupItemsMissingValidation = @($setupItems | Where-Object { @($_.validationCommands).Count -eq 0 } | ForEach-Object { $_.id })
+$setupItemsMissingDoNotSend = @($setupItems | Where-Object { @($_.doNotSend).Count -eq 0 } | ForEach-Object { $_.id })
+$setupItemsMissingSignupFlag = @($setupItems | Where-Object { $null -eq (Get-NeedsProp -Object $_ -Name "externalSignup" -Default $null) } | ForEach-Object { $_.id })
+$externalSignupItems = @($setupItems | Where-Object { $_.externalSignup -eq $true })
 $unknownNeededNow = @($neededNow | Where-Object { $_ -notin $knownOwnerEnvNames })
 $optionalNeededNow = @($neededNow | Where-Object { $_ -in $optionalOwnerEnvNames })
 $neededNowGroups = @($groups | Where-Object { @($_.missingEnvNames).Count -gt 0 -or @($_.invalidEnvNames).Count -gt 0 -or @($_.unknownEnvNames).Count -gt 0 })
@@ -312,6 +388,14 @@ $checks = [ordered]@{
     reportStatusDeckPresent = $reportStatuses.Count -ge 9
     groupCountMinimumMet = $groups.Count -ge 4
     requiredEnvCoverageComplete = $missingCoverage.Count -eq 0
+    setupItemsCountMinimumMet = $setupItems.Count -ge 8
+    setupItemsCoverAllRequiredOwnerInputs = $missingSetupCoverage.Count -eq 0
+    setupItemsValidationCommandsPresent = $setupItemsMissingValidation.Count -eq 0
+    setupItemsDoNotSendPresent = $setupItemsMissingDoNotSend.Count -eq 0
+    setupItemsSignupFlagsPresent = $setupItemsMissingSignupFlag.Count -eq 0
+    setupItemsIncludeExternalSignup = $externalSignupItems.Count -ge 3
+    setupItemsIncludeAlwaysOnHost = @($setupItems | Where-Object { $_.id -eq "always-on-host" }).Count -eq 1
+    setupItemsIncludeOwnerEnvFile = @($setupItems | Where-Object { $_.id -eq "owner-env-file" }).Count -eq 1
     groupCommandsPresent = @($groups | Where-Object { @($_.validationCommands).Count -eq 0 }).Count -eq 0
     groupDoNotSendPresent = @($groups | Where-Object { @($_.doNotSend).Count -eq 0 }).Count -eq 0
     deploymentGateSummaryPresent = $deploymentGateSummaries.Count -gt 0
@@ -361,6 +445,8 @@ $report = [ordered]@{
     groupCount = $groups.Count
     neededNowGroupCount = $neededNowGroups.Count
     readyGroupCount = $readyGroups.Count
+    setupItemCount = $setupItems.Count
+    externalSignupItemCount = $externalSignupItems.Count
     deploymentGateCount = $deploymentGateSummaries.Count
     blockedDeploymentGateCount = $blockedDeploymentGates.Count
     failedDeploymentGateCount = $failedDeploymentGates.Count
@@ -369,10 +455,15 @@ $report = [ordered]@{
     groups = @($groups)
     neededNowGroups = @($neededNowGroups)
     readyGroups = @($readyGroups)
+    setupItems = @($setupItems)
     reportStatuses = @($reportStatuses)
     checks = $checks
     failedChecks = @($failedChecks)
     missingRequiredCoverage = @($missingCoverage)
+    missingSetupCoverage = @($missingSetupCoverage)
+    setupItemsMissingValidation = @($setupItemsMissingValidation)
+    setupItemsMissingDoNotSend = @($setupItemsMissingDoNotSend)
+    setupItemsMissingSignupFlag = @($setupItemsMissingSignupFlag)
     unknownNeededNowEnvNames = @($unknownNeededNow)
     optionalNeededNowEnvNames = @($optionalNeededNow)
     secretMarkerFindings = @()
@@ -400,6 +491,19 @@ $markdownLines.Add("- Release ready: $releaseReady")
 $markdownLines.Add("- Deployment ready: $deploymentReady")
 $markdownLines.Add("- External tester packet shareable: $packetShareable")
 $markdownLines.Add("- Completion ready: $completionReady")
+$markdownLines.Add("")
+$markdownLines.Add("## Setup Items To Get")
+$markdownLines.Add("")
+$markdownLines.Add("| Item | External signup? | What to get | Produces names | Validate with |")
+$markdownLines.Add("| --- | --- | --- | --- | --- |")
+foreach ($item in $setupItems) {
+    $itemEnvNames = @($item.envNames)
+    $envText = if ($itemEnvNames.Count -gt 0) { "``$($itemEnvNames -join '`, `')``" } else { "none" }
+    $firstCommand = if (@($item.validationCommands).Count -gt 0) { [string]$item.validationCommands[0] } else { "not recorded" }
+    $ownerGets = [string]$item.ownerGets
+    $ownerGets = $ownerGets.Replace("|", "/")
+    $markdownLines.Add("| $($item.title) | $($item.externalSignup) | $ownerGets | $envText | ``$firstCommand`` |")
+}
 $markdownLines.Add("")
 $markdownLines.Add("## Needed Now")
 $markdownLines.Add("")
