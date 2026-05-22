@@ -63,6 +63,6 @@ function readJson(path) {
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = validateLocalAlphaFixtures(process.argv[2]);
   console.log(
-    `FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=${result.documents} envelopes=${result.envelopes} transactions=${result.transactions} schemas=${result.schemas}`
+    `FLOWMEMORY_LOCAL_ALPHA_FIXTURES_OK documents=${result.documents} envelopes=${result.envelopes} transactions=${result.transactions} schemas=${result.schemas}`
   );
 }

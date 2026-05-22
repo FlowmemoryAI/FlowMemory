@@ -237,7 +237,7 @@ switch (preview.action) {
 
 ## Example external review brief
 
-Use this with GPT, DeepSeek, or another off-chain model. Do not include secrets.
+Use this with an external off-chain reviewer. Do not include secrets.
 
 ```text
 You are reviewing FlowMemory's Base on-chain agent memory architecture.
@@ -254,7 +254,7 @@ Review tasks:
 3. Find replay gaps that would let memory drift from receipts.
 4. Find memory poisoning and tool-routing attacks.
 5. Suggest simplifications that make the first implementation safer.
-6. Identify anything that is copied too broadly from Nookplot instead of sharpening FlowMemory's memory/replay wedge.
+6. Identify anything that broadens the scope instead of sharpening FlowMemory's memory/replay wedge.
 
 Return:
 - critical blockers;

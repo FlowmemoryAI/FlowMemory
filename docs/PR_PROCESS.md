@@ -40,7 +40,7 @@ Every PR must show:
 - Forbidden folders were not touched.
 - `git diff --check` passed.
 - Area-specific tests or checks were run, or the PR explains why none exist.
-- The PR does not add gated work such as tokenomics, dynamic fees, production deployment, production L1/appchain, production hooks, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation.
+- The PR does not add gated work such as tokenomics, dynamic fees, production deployment, separate production network, production hooks, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation.
 
 ## Merge Order
 
@@ -74,7 +74,7 @@ Dirty worktrees are expected in multi-agent work, but they must be explicit.
 Before assigning an agent:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\status-report.ps1
 ```
 
@@ -115,7 +115,7 @@ Stop and ask for HQ review if a PR starts adding:
 - Dynamic fees.
 - Mainnet or production deployment.
 - Production Uniswap v4 hook deployment.
-- Production L1/appchain implementation.
+- Separate production network implementation.
 - Hardware manufacturing or production field deployment.
 - GPU proofs or verifier economics.
 - Full dashboard implementation.

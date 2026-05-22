@@ -1,6 +1,6 @@
-# FlowChain Control Plane V0
+# FlowMemory Control Plane V0
 
-This package exposes a local JSON-RPC 2.0 control-plane for FlowMemory and FlowChain local runtime data. It prefers `devnet/local/` runtime state, falls back to deterministic committed fixtures, and keeps all mutable intake local-file backed.
+This package exposes a local JSON-RPC 2.0 control-plane for FlowMemory and FlowMemory local runtime data. It prefers `local-runtime/local/` runtime state, falls back to deterministic committed fixtures, and keeps all mutable intake local-file backed.
 
 It is not a production RPC endpoint, hosted service, wallet, sequencer, verifier network, production token system, or production chain API.
 
@@ -12,9 +12,9 @@ From the repository root:
 npm run control-plane:demo
 npm run control-plane:test
 npm run control-plane:smoke
-npm run flowchain:rpc:e2e
+npm run flowmemory:rpc:e2e
 npm run control-plane:serve
-npm run flowchain:real-value-pilot:control-dashboard
+npm run flowmemory:real-value-pilot:control-dashboard
 ```
 
 The demo and tests require no secrets, RPC URLs, wallets, or production services.
@@ -39,7 +39,7 @@ The dispatcher supports:
 - `pilot_pause_status`
 - `pilot_retry_status`
 - `pilot_emergency_status`
-- `devnet_state`
+- `localRuntime_state`
 - `block_get`
 - `block_list`
 - `mempool_list`
@@ -98,19 +98,19 @@ The dispatcher supports:
 - `provenance_get`
 - `raw_json_get`
 
-The API contract is documented in [docs/FLOWCHAIN_CONTROL_PLANE_API.md](../../docs/FLOWCHAIN_CONTROL_PLANE_API.md).
+The API contract is documented in [docs/FLOWMEMORY_CONTROL_PLANE_API.md](../../docs/FLOWMEMORY_CONTROL_PLANE_API.md).
 
 ## Data Sources
 
 The loader reads local runtime state first, then committed deterministic outputs:
 
-- `devnet/local/state.json`
-- `devnet/local/launch-v0-state.json`
+- `local-runtime/local/state.json`
+- `local-runtime/local/launch-v0-state.json`
 - `fixtures/launch-core/flowmemory-launch-v0.json`
-- `fixtures/launch-core/generated/devnet/state.json`
-- `fixtures/launch-core/generated/devnet/indexer-handoff.json`
-- `fixtures/launch-core/generated/devnet/verifier-handoff.json`
-- `fixtures/launch-core/generated/devnet/control-plane-handoff.json`
+- `fixtures/launch-core/generated/local-runtime/state.json`
+- `fixtures/launch-core/generated/local-runtime/indexer-handoff.json`
+- `fixtures/launch-core/generated/local-runtime/verifier-handoff.json`
+- `fixtures/launch-core/generated/local-runtime/control-plane-handoff.json`
 - `services/indexer/out/indexer-state.json`
 - `services/verifier/out/reports.json`
 - `services/verifier/fixtures/artifacts.json`
@@ -120,12 +120,12 @@ The loader reads local runtime state first, then committed deterministic outputs
 
 If the launch-core fixture is missing, the loader rebuilds the in-memory view from indexer/verifier outputs or the raw fixture receipts and artifact resolver. It does not fetch from live RPC or write production state.
 
-`transaction_submit` accepts signed local test transaction envelopes only and writes them to `devnet/local/intake/transactions.ndjson` by default. When called with `runtimeSubmit: true` or `runtimeSubmitMode: "direct"`, it also forwards the contained devnet transaction into the active Rust runtime state file so `mempool_list`, block production, transaction reads, account reads, and balance reads can see it. `bridge_observation_submit` writes bridge-agent observations to `devnet/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
+`transaction_submit` accepts signed local test transaction envelopes only and writes them to `local-runtime/local/intake/transactions.ndjson` by default. When called with `runtimeSubmit: true` or `runtimeSubmitMode: "direct"`, it also forwards the contained localRuntime transaction into the active Rust runtime state file so `mempool_list`, block production, transaction reads, account reads, and balance reads can see it. `bridge_observation_submit` writes bridge-agent observations to `local-runtime/local/intake/bridge-observations.ndjson`. These files are local runtime intake, not committed fixtures.
 
 `npm run control-plane:smoke` runs an in-process JSON-RPC client over the complete local lifecycle surface: RPC discovery/readiness, health, node status, peers, chain status, real-value pilot status/list/status methods, blocks, transactions, mempool, accounts, balances, tokens, token balances, pools, LP positions, swaps, product-flow status, faucet events, wallet public metadata, rootfields, agents, models, work receipts, artifact availability, verifier modules, verifier reports, memory cells, challenges, finality, bridge observations, bridge deposits, bridge credits, withdrawals, provenance, and raw JSON.
 
-`npm run flowchain:rpc:e2e` verifies the FlowChain-native JSON-RPC discovery and readiness methods, required method coverage, no-secret report boundary, runtime-backed transaction submission, mempool visibility, block/transaction/account/balance/token-balance/provenance reads, and restart continuity. It writes `devnet/local/rpc-e2e/flowchain-rpc-e2e-report.json` and intentionally reports public RPC readiness as blocked until the explicit public RPC deployment inputs are configured.
+`npm run flowmemory:rpc:e2e` verifies the FlowMemory-native JSON-RPC discovery and readiness methods, required method coverage, no-secret report boundary, runtime-backed transaction submission, mempool visibility, block/transaction/account/balance/token-balance/provenance reads, and restart continuity. It writes `local-runtime/local/rpc-e2e/flowmemory-rpc-e2e-report.json` and intentionally reports public RPC readiness as blocked until the explicit public RPC deployment inputs are configured.
 
-`npm run flowchain:real-value-pilot:control-dashboard` verifies that the API exposes the capped owner-testing pilot lifecycle, rejects secret-shaped material, and that the dashboard source renders the pilot evidence and next operator command without browser secret storage. The root `flowchain:real-value-pilot:e2e` command is the upstream final HQ pilot gate and depends on proof commands from multiple owner branches.
+`npm run flowmemory:real-value-pilot:control-dashboard` verifies that the API exposes the capped owner-testing pilot lifecycle, rejects secret-shaped material, and that the dashboard source renders the pilot evidence and next operator command without browser secret storage. The root `flowmemory:real-value-pilot:e2e` command is the upstream final HQ pilot gate and depends on proof commands from multiple owner branches.
 
 All JSON-RPC responses are scanned before return and rejected if they contain private-key, mnemonic, seed phrase, RPC credential, API key, or webhook URL shaped material.

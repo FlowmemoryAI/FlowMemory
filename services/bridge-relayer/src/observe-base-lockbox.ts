@@ -15,10 +15,10 @@ import {
 } from "../../shared/src/index.ts";
 import {
   bridgeSourceEventReplayKey,
-  flowchainBridgeCreditId,
-  flowchainBridgeEvidenceHash,
-  flowchainBridgeObservationId,
-} from "../../../crypto/src/production-l1.js";
+  flowmemoryBridgeCreditId,
+  flowmemoryBridgeEvidenceHash,
+  flowmemoryBridgeObservationId,
+} from "../../../crypto/src/production-network.js";
 import { canonicalJsonHash } from "../../../crypto/src/hashes.js";
 
 export const BASE_MAINNET_CHAIN_ID = 8453;
@@ -29,7 +29,7 @@ export const MAX_CANARY_USD = "25";
 export const MAX_PILOT_USD = "25";
 export const MAX_BLOCK_RANGE = 5_000n;
 export const ZERO_BYTES32 = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const PLACEHOLDER_FLOWCHAIN_RECIPIENT_PATTERN = /^0x5{64}$/i;
+export const PLACEHOLDER_FLOWMEMORY_RECIPIENT_PATTERN = /^0x5{64}$/i;
 export const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const DEFAULT_ASSET_DECIMALS = 18;
 export const BRIDGE_DEPOSIT_EVENT_SIGNATURE_TEXT =
@@ -38,9 +38,9 @@ export const BRIDGE_DEPOSIT_LEGACY_EVENT_SIGNATURE_TEXT =
   "BridgeDeposit(bytes32,uint256,address,address,uint256,bytes32,uint256,bytes32)";
 export const BRIDGE_DEPOSIT_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_EVENT_SIGNATURE_TEXT);
 export const BRIDGE_DEPOSIT_LEGACY_TOPIC0 = keccak256Utf8(BRIDGE_DEPOSIT_LEGACY_EVENT_SIGNATURE_TEXT);
-export const PILOT_MODE_TAG = keccak256Utf8("flowchain.base8453.owner-pilot.v0");
+export const PILOT_MODE_TAG = keccak256Utf8("flowmemory.base8453.owner-pilot.v0");
 export const FIXED_TEST_OBSERVED_AT = "2026-05-13T00:00:00.000Z";
-export const FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID = "31337";
+export const FLOWMEMORY_LOCAL_RUNTIME_CHAIN_ID = "31337";
 const APPLICATION_STATE_LOCK_TIMEOUT_MS = 10_000;
 const APPLICATION_STATE_LOCK_RETRY_MS = 25;
 
@@ -80,7 +80,7 @@ export interface BridgeDeposit {
   token: `0x${string}`;
   amount: string;
   sender: `0x${string}`;
-  flowchainRecipient: `0x${string}`;
+  flowmemoryRecipient: `0x${string}`;
   nonce: string;
   metadataHash?: `0x${string}`;
   status: "observed" | "accepted_local" | "rejected" | "released" | "failed";
@@ -142,7 +142,7 @@ export interface BridgeCredit {
   token: `0x${string}`;
   asset: BridgeAssetIdentity;
   amount: string;
-  flowchainRecipient: `0x${string}`;
+  flowmemoryRecipient: `0x${string}`;
   status: "pending" | "applied" | "rejected";
   pendingReason?: string;
   appliedAt?: string;
@@ -170,7 +170,7 @@ export interface BridgeWithdrawalIntent {
   token: `0x${string}`;
   asset: BridgeAssetIdentity;
   amount: string;
-  flowchainAccount: `0x${string}`;
+  flowmemoryAccount: `0x${string}`;
   baseRecipient: `0x${string}`;
   status: "requested" | "cancelled" | "released_test_record" | "rejected";
   requestedAt: string;
@@ -195,7 +195,7 @@ export interface BridgeRuntimeCreditApplication {
   creditId: `0x${string}`;
   depositId: `0x${string}`;
   replayKey: `0x${string}`;
-  flowchainRecipient: `0x${string}`;
+  flowmemoryRecipient: `0x${string}`;
   asset: BridgeAssetIdentity;
   amount: string;
   status: "applied" | "idempotent_replay" | "rejected";
@@ -294,7 +294,7 @@ export interface BridgeRuntimeHandoff {
   };
   runtimeIntake: {
     status: "handoff_file";
-    consumer: "flowchain-runtime-agent";
+    consumer: "flowmemory-runtime-agent";
     expectedPath: string;
     note: string;
   };
@@ -498,8 +498,8 @@ function isBasePublicNetworkMode(mode: BridgeMode): boolean {
   return mode === "base-mainnet-canary" || mode === "base-mainnet-pilot";
 }
 
-export function isPlaceholderFlowchainRecipient(value: `0x${string}`): boolean {
-  return PLACEHOLDER_FLOWCHAIN_RECIPIENT_PATTERN.test(value);
+export function isPlaceholderFlowMemoryRecipient(value: `0x${string}`): boolean {
+  return PLACEHOLDER_FLOWMEMORY_RECIPIENT_PATTERN.test(value);
 }
 
 function chainIdHex(chainId: BridgeSourceChainId): `0x${string}` {
@@ -815,7 +815,7 @@ export function validateDeposit(value: unknown): BridgeDeposit {
     token: asAddress(String(deposit.token), "token"),
     amount: asDecimalString(deposit.amount, "amount"),
     sender: asAddress(String(deposit.sender), "sender"),
-    flowchainRecipient: asHash(String(deposit.flowchainRecipient), "flowchainRecipient"),
+    flowmemoryRecipient: asHash(String(deposit.flowmemoryRecipient), "flowmemoryRecipient"),
     nonce: asDecimalString(deposit.nonce, "nonce"),
     metadataHash: deposit.metadataHash === undefined ? undefined : asHash(String(deposit.metadataHash), "metadataHash"),
     status,
@@ -842,12 +842,12 @@ export function bridgeReplayKey(deposit: BridgeDeposit): `0x${string}` {
 }
 
 function bridgeObservationId(deposit: BridgeDeposit): `0x${string}` {
-  return flowchainBridgeObservationId({
+  return flowmemoryBridgeObservationId({
     sourceChainId: deposit.sourceChainId,
     lockbox: deposit.sourceContract,
     token: deposit.token,
     depositor: deposit.sender,
-    recipient: deposit.flowchainRecipient,
+    recipient: deposit.flowmemoryRecipient,
     amount: deposit.amount,
     txHash: deposit.txHash,
     logIndex: deposit.logIndex,
@@ -857,10 +857,10 @@ function bridgeObservationId(deposit: BridgeDeposit): `0x${string}` {
 }
 
 function bridgeCreditId(observation: BridgeObservation): `0x${string}` {
-  return flowchainBridgeCreditId({
+  return flowmemoryBridgeCreditId({
     observationId: observation.observationId,
-    localRecipient: observation.deposit.flowchainRecipient,
-    localChainId: FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID,
+    localRecipient: observation.deposit.flowmemoryRecipient,
+    localChainId: FLOWMEMORY_LOCAL_RUNTIME_CHAIN_ID,
     creditAmount: observation.deposit.amount,
   }) as `0x${string}`;
 }
@@ -920,8 +920,8 @@ export function makeObservation(
     || guardrails.supportedTokens.map((token) => token.toLowerCase()).includes(deposit.token.toLowerCase());
   const amountAllowed = guardrails.maxDepositAmount === undefined
     || BigInt(deposit.amount) <= BigInt(guardrails.maxDepositAmount);
-  const recipientAllowed = deposit.flowchainRecipient !== ZERO_BYTES32
-    && !isPlaceholderFlowchainRecipient(deposit.flowchainRecipient);
+  const recipientAllowed = deposit.flowmemoryRecipient !== ZERO_BYTES32
+    && !isPlaceholderFlowMemoryRecipient(deposit.flowmemoryRecipient);
   const productionReady = livePilot
     && deposit.sourceChainId === BASE_MAINNET_CHAIN_ID
     && recipientAllowed
@@ -990,7 +990,7 @@ export function makeBridgeCredit(
     token: deposit.token,
     asset: observation.asset,
     amount: deposit.amount,
-    flowchainRecipient: deposit.flowchainRecipient,
+    flowmemoryRecipient: deposit.flowmemoryRecipient,
     status,
     pendingReason: status === "pending" ? "runtime_intake_pending_handoff_file" : undefined,
     appliedAt: status === "applied" ? FIXED_TEST_OBSERVED_AT : undefined,
@@ -1047,7 +1047,7 @@ export function makeWithdrawalIntent(
       token: credit.token,
       asset: credit.asset,
       amount: credit.amount,
-      flowchainAccount: credit.flowchainRecipient,
+      flowmemoryAccount: credit.flowmemoryRecipient,
       baseRecipient,
       testMode: true,
     }),
@@ -1058,7 +1058,7 @@ export function makeWithdrawalIntent(
     token: credit.token,
     asset: credit.asset,
     amount: credit.amount,
-    flowchainAccount: credit.flowchainRecipient,
+    flowmemoryAccount: credit.flowmemoryRecipient,
     baseRecipient,
     status: "requested",
     requestedAt: FIXED_TEST_OBSERVED_AT,
@@ -1194,7 +1194,7 @@ function withApplicationStateLock<T>(statePath: string | undefined, operation: (
   }
   const lock = acquireApplicationStateLock(statePath);
   try {
-    const testHoldMs = Number(process.env.FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS ?? "0");
+    const testHoldMs = Number(process.env.FLOWMEMORY_BRIDGE_STATE_LOCK_TEST_HOLD_MS ?? "0");
     if (Number.isFinite(testHoldMs) && testHoldMs > 0) {
       sleepSync(Math.min(testHoldMs, 1_000));
     }
@@ -1223,7 +1223,7 @@ function makeRuntimeApplication(
     creditId: credit.creditId,
     depositId: credit.depositId,
     replayKey: credit.replayKey,
-    flowchainRecipient: credit.flowchainRecipient,
+    flowmemoryRecipient: credit.flowmemoryRecipient,
     asset: credit.asset,
     amount: credit.amount,
     status,
@@ -1449,7 +1449,7 @@ export function makeRuntimeHandoff(
       status: "pending",
       objectId: firstCredit.creditId,
       title: "Credit pending",
-      summary: `${firstCredit.amount} ${amountUnit} queued for ${firstCredit.flowchainRecipient}.`,
+      summary: `${firstCredit.amount} ${amountUnit} queued for ${firstCredit.flowmemoryRecipient}.`,
     });
   }
   if (firstAppliedCredit !== undefined) {
@@ -1459,7 +1459,7 @@ export function makeRuntimeHandoff(
       objectId: firstAppliedCredit.creditId,
       title: "Credit applied",
       summary: livePilot
-        ? `${firstAppliedCredit.amount} smallest units applied to the configured FlowChain recipient.`
+        ? `${firstAppliedCredit.amount} smallest units applied to the configured FlowMemory recipient.`
         : `${firstAppliedCredit.amount} test units applied in local bridge smoke state.`,
     });
   }
@@ -1499,7 +1499,7 @@ export function makeRuntimeHandoff(
       summary: `Credit ${credit.status} for deposit ${credit.depositId}.`,
       status: credit.status === "applied" ? "verified" as const : credit.status === "pending" ? "pending" as const : "observed" as const,
       facts: [
-        { label: "recipient", value: credit.flowchainRecipient },
+        { label: "recipient", value: credit.flowmemoryRecipient },
         { label: "amount", value: credit.amount },
         { label: "token", value: credit.token },
         { label: "replay key", value: credit.replayKey },
@@ -1553,10 +1553,10 @@ export function makeRuntimeHandoff(
     },
     runtimeIntake: {
       status: "handoff_file",
-      consumer: "flowchain-runtime-agent",
+      consumer: "flowmemory-runtime-agent",
       expectedPath: normalizedExpectedPath,
       note: productionReady
-        ? "Confirmed Base 8453 pilot deposit handoff is ready for explicit FlowChain runtime intake."
+        ? "Confirmed Base 8453 pilot deposit handoff is ready for explicit FlowMemory runtime intake."
         : "Runtime/control-plane bridge intake is not merged in this scope. Consume this file as the deterministic bridge credit handoff.",
     },
     workbenchTimeline,
@@ -1620,12 +1620,12 @@ function nextOperatorCommands(options: CliOptions): string[] {
     return [
       "Get-Content services/bridge-relayer/out/base8453-pilot-evidence.json",
       "Get-Content services/bridge-relayer/out/base8453-pilot-release-evidence.json",
-      "npm run flowchain:product-e2e",
+      "npm run flowmemory:product-e2e",
     ];
   }
   return [
-    "npm run flowchain:bridge:local-credit:smoke",
-    "npm run flowchain:product-e2e",
+    "npm run flowmemory:bridge:local-credit:smoke",
+    "npm run flowmemory:product-e2e",
   ];
 }
 
@@ -1712,12 +1712,12 @@ function makeReleaseEvidence(intent: BridgeWithdrawalIntent, deposit: BridgeDepo
     amount: intent.amount,
     baseRecipient: intent.baseRecipient,
   };
-  const evidenceHash = flowchainBridgeEvidenceHash({
+  const evidenceHash = flowmemoryBridgeEvidenceHash({
     sourceEventReplayKey: bridgeReplayKey(deposit),
     observationId: bridgeObservationId(deposit),
     creditId: intent.creditId,
     depositId: intent.depositId,
-    localChainId: FLOWCHAIN_LOCAL_RUNTIME_CHAIN_ID,
+    localChainId: FLOWMEMORY_LOCAL_RUNTIME_CHAIN_ID,
     evidencePayloadHash: canonicalJsonHash(evidencePayload),
   }) as `0x${string}`;
   const productionReady = intent.sourceChainId === BASE_MAINNET_CHAIN_ID && intent.destinationChainId === BASE_MAINNET_CHAIN_ID;
@@ -1813,11 +1813,11 @@ function pilotDepositRejectionReason(deposit: BridgeDeposit, options: CliOptions
   if (deposit.sourceChainId !== BASE_MAINNET_CHAIN_ID) {
     return "wrong_source_chain";
   }
-  if (deposit.flowchainRecipient === ZERO_BYTES32) {
-    return "missing_flowchain_recipient";
+  if (deposit.flowmemoryRecipient === ZERO_BYTES32) {
+    return "missing_flowmemory_recipient";
   }
-  if (isPlaceholderFlowchainRecipient(deposit.flowchainRecipient)) {
-    return "blocked_placeholder_flowchain_recipient";
+  if (isPlaceholderFlowMemoryRecipient(deposit.flowmemoryRecipient)) {
+    return "blocked_placeholder_flowmemory_recipient";
   }
   try {
     assertApprovedLockbox(deposit.sourceContract, options);
@@ -1902,7 +1902,7 @@ export function parseBridgeDepositLog(log: RpcLog, expectedChainId: BridgeSource
     token: addressFromAbiWord(decodeBytes32Word(data, tokenOffset), "token"),
     amount: decodeUint256Word(data, tokenOffset + 1).toString(),
     sender: asAddress(decodeAddressTopic(log.topics[3] ?? ""), "sender"),
-    flowchainRecipient: decodeBytes32Word(data, tokenOffset + 2),
+    flowmemoryRecipient: decodeBytes32Word(data, tokenOffset + 2),
     nonce: decodeUint256Word(data, tokenOffset + 3).toString(),
     metadataHash: decodeBytes32Word(data, tokenOffset + 4),
     status: "observed",

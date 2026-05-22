@@ -1,0 +1,379 @@
+{
+  "schema": "flowmemory.live_readiness_dashboard_report.v0",
+  "generatedAt": "not recorded",
+  "status": "unresolved",
+  "deploymentReady": false,
+  "packetShareable": false,
+  "blockedOnlyOnKnownExternalOwnerInputs": false,
+  "summary": "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.",
+  "privateRpcUrl": "http://127.0.0.1:8787",
+  "metrics": {
+    "latestHeight": "not recorded",
+    "finalizedHeight": "not recorded",
+    "monitorHeightAdvanced": false,
+    "bridgeRelayerStatus": "not recorded",
+    "bridgeQueuedTransactions": "0",
+    "bridgeRelayerChildTimeoutSeconds": "not recorded",
+    "bridgeRelayerStepCount": 0,
+    "bridgeRelayerTimedOutStepCount": 0,
+    "bridgeRelayerNoChildTimeouts": false,
+    "bridgeRelayerGuardrailStatus": "not recorded",
+    "bridgeRelayerLoopValidationStatus": "not recorded",
+    "backupOwnerPathDryRunStatus": "not recorded",
+    "publicRpcDeploymentBundleStatus": "not recorded",
+    "publicRpcOwnerRenderValidationStatus": "not recorded",
+    "publicRpcDeploymentAutomationStatus": "not recorded",
+    "publicRpcDeploymentAutomationAction": "not recorded",
+    "externalTesterPacketStatus": "not recorded",
+    "externalTesterConnectPackStatus": "not recorded",
+    "ownerInputReady": false,
+    "noSecretStatus": "not recorded",
+    "opsSnapshotStatus": "not recorded",
+    "opsAlertState": "not recorded",
+    "opsCriticalCount": "0",
+    "opsBlockedCount": "0",
+    "opsActiveRuleCount": 0,
+    "opsRuleCount": "0",
+    "opsCriticalRuleCount": "0",
+    "opsBlockedRuleCount": "0",
+    "opsUnmappedCurrentFindingCount": 0,
+    "incidentDrillStatus": "not recorded",
+    "alertInstallValidationStatus": "not recorded",
+    "opsEscalationDryRunStatus": "not recorded",
+    "opsEscalationDryRunEvents": "0",
+    "statusCounts": {
+      "unresolved": 12
+    }
+  },
+  "ops": {
+    "snapshotStatus": "not recorded",
+    "alertRulesStatus": "not recorded",
+    "alertState": "not recorded",
+    "incidentDrillStatus": "not recorded",
+    "alertInstallValidationStatus": "not recorded",
+    "escalationDryRunStatus": "not recorded",
+    "escalationDryRunEvents": "0",
+    "bridgeRelayerGuardrailStatus": "not recorded",
+    "bridgeRelayerGuardrailReady": false,
+    "criticalCount": "0",
+    "blockedCount": "0",
+    "latestHeight": "not recorded",
+    "finalizedHeight": "not recorded",
+    "monitorStatus": "not recorded",
+    "monitorHeightAdvanced": false,
+    "findings": [],
+    "activeRuleIds": [],
+    "coveredFindingCodes": [],
+    "activeRules": [],
+    "ruleCount": "0",
+    "criticalRuleCount": "0",
+    "blockedRuleCount": "0",
+    "unmappedCurrentFindingCodes": [],
+    "incidentCommands": {},
+    "dryRunEvents": [],
+    "sendsNetworkNotifications": false,
+    "storesSecrets": false
+  },
+  "testerLaunch": {
+    "status": "not recorded",
+    "readinessStatus": "not recorded",
+    "packetStatus": "not recorded",
+    "connectPackStatus": "not recorded",
+    "gatewayStatus": "not recorded",
+    "shareable": false,
+    "connectPackShareable": false,
+    "connectPackReady": false,
+    "connectPackNetwork": {
+      "name": "not recorded",
+      "chainId": "not recorded",
+      "rpcEndpointPlaceholder": "not recorded",
+      "explorerSummaryUrlPlaceholder": "not recorded"
+    },
+    "externalSharingReady": false,
+    "localTesterRehearsalReady": false,
+    "publicTesterGatewayReady": false,
+    "gatewayConfigured": false,
+    "testerNetworkFresh": false,
+    "faucetRouteValidated": false,
+    "packetExecutableSmokeValidated": false,
+    "packetSmokeRoutes": [],
+    "connectPackReadOnlyRoutes": [],
+    "connectPackTesterWriteRoutes": [],
+    "gatewayRoutes": [],
+    "ownerInputGroups": {},
+    "commands": {
+      "readiness": [
+        "npm run flowmemory:tester:readiness -- -AllowBlocked",
+        "npm run flowmemory:external-tester:packet -- -AllowBlocked"
+      ],
+      "gateway": [
+        "npm run flowmemory:tester:gateway:e2e"
+      ],
+      "wallet": [
+        "npm run flowmemory:wallet:live-tester:e2e"
+      ],
+      "explorer": [
+        "npm run flowmemory:public-deployment:contract -- -AllowBlocked"
+      ]
+    },
+    "envValuesPrinted": false,
+    "noSecrets": false
+  },
+  "ownerInputs": [],
+  "gates": [
+    {
+      "id": "private-service-origin",
+      "label": "Private network origin",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "pre-share-monitoring",
+      "label": "Block production monitor",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "service-autorecovery",
+      "label": "Service autorecovery",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "service-install-automation",
+      "label": "Windows service install",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "public-rpc-edge",
+      "label": "Public RPC edge",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "state-backup",
+      "label": "State backup proof",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "state-backup-owner-path-dry-run",
+      "label": "Backup dry run",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "base8453-bridge-edge",
+      "label": "Base 8453 bridge edge",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "base8453-bridge-relayer-queue",
+      "label": "Bridge relayer queue",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "external-tester-sharing",
+      "label": "External tester packet",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "public-tester-write-gateway",
+      "label": "Tester write gateway",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    },
+    {
+      "id": "no-secret-no-broadcast",
+      "label": "No secrets or broadcasts",
+      "status": "unresolved",
+      "summary": "The deployment contract did not include this gate in the current report.",
+      "evidence": "missing from public deployment contract report",
+      "commands": [],
+      "blockers": []
+    }
+  ],
+  "commands": {
+    "preExposure": [],
+    "rollback": []
+  },
+  "sourceReports": [
+    {
+      "fileName": "public-deployment-contract-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "flowmemory-live-infra-check-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "service-status-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "service-monitor-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "public-rpc-deployment-bundle-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "public-rpc-deployment-automation-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "public-rpc-readiness-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "backup-readiness-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "backup-owner-path-dry-run-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "bridge-relayer-once-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "bridge-relayer-guardrail-validation-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "bridge-relayer-loop-validation-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "external-tester-packet-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "external-tester-connect-pack.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "external-tester-readiness-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "public-tester-gateway-e2e-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "ops-snapshot-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "ops-alert-rules-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "incident-drill-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "alert-install-validation-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "ops-escalation-dry-run-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "owner-inputs-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    },
+    {
+      "fileName": "no-secret-scan-report.json",
+      "schema": "not recorded",
+      "status": "missing",
+      "generatedAt": "not recorded"
+    }
+  ],
+  "envValuesPrinted": false,
+  "noSecrets": true
+}

@@ -3,17 +3,17 @@ import { verifyDigest } from "./attestations.js";
 import { eip712Digest } from "./flowpulse.js";
 import { canonicalJsonHash, domainSeparator, keccakUtf8, typedHash } from "./hashes.js";
 import {
-  FLOWCHAIN_NETWORK_PROFILES,
-  flowchainNetworkProfileHash,
-  flowchainProductionDomain,
-  flowchainProductionDomainSeparator,
-  flowchainTransactionId
-} from "./production-l1.js";
+  FLOWMEMORY_NETWORK_PROFILES,
+  flowmemoryNetworkProfileHash,
+  flowmemoryProductionDomain,
+  flowmemoryProductionDomainSeparator,
+  flowmemoryTransactionId
+} from "./production-network.js";
 import {
-  flowchainAccountId,
-  flowchainAddressFromPublicKey,
-  isFlowchainRole,
-  normalizeFlowchainPublicKey
+  flowmemoryAccountId,
+  flowmemoryAddressFromPublicKey,
+  isFlowMemoryRole,
+  normalizeFlowMemoryPublicKey
 } from "./identity.js";
 import {
   localAlphaObjectDescriptor,
@@ -22,11 +22,11 @@ import {
 } from "./objects.js";
 
 export function localTransactionEnvelopeHash(input) {
-  if (isProductionL1EnvelopeInput(input)) {
-    return typedHash(TYPE_STRINGS.localTransactionEnvelopeProductionL1V0, [
+  if (isProductionNetworkEnvelopeInput(input)) {
+    return typedHash(TYPE_STRINGS.localTransactionEnvelopeProductionNetworkV0, [
       ["uint16", input.schemaVersion],
       ["uint256", input.chainId],
-      ["bytes32", input.networkProfileHash ?? flowchainNetworkProfileHash(input.networkProfile)],
+      ["bytes32", input.networkProfileHash ?? flowmemoryNetworkProfileHash(input.networkProfile)],
       ["bytes32", input.domainSeparator],
       ["bytes32", input.signerId],
       ["bytes32", input.signerKeyId],
@@ -80,7 +80,7 @@ export function localTransactionEnvelopeInput(envelope) {
     objectTypeHash: envelope.objectTypeHash,
     issuedAtUnixMs: envelope.issuedAtUnixMs
   };
-  if (isProductionL1EnvelopeInput(envelope)) {
+  if (isProductionNetworkEnvelopeInput(envelope)) {
     return {
       schemaVersion: envelope.schemaVersion,
       chainId: envelope.chainId,
@@ -116,14 +116,14 @@ export function localTransactionReplayKey(envelope) {
 
 export function localTransactionDomain(chainId, networkProfile) {
   if (networkProfile) {
-    return flowchainProductionDomain({ chainId, networkProfile });
+    return flowmemoryProductionDomain({ chainId, networkProfile });
   }
   return `${DOMAIN_STRINGS.localTransactionEnvelope}:chain:${chainId}`;
 }
 
 export function localTransactionDomainSeparator(chainId, networkProfile) {
   if (networkProfile) {
-    return flowchainProductionDomainSeparator({ chainId, networkProfile });
+    return flowmemoryProductionDomainSeparator({ chainId, networkProfile });
   }
   return keccakUtf8(localTransactionDomain(chainId));
 }
@@ -138,7 +138,7 @@ export function buildUnsignedLocalTransactionEnvelope({
   publicKey,
   issuedAtUnixMs,
   expiresAtUnixMs,
-  networkProfile = FLOWCHAIN_NETWORK_PROFILES.localChain,
+  networkProfile = FLOWMEMORY_NETWORK_PROFILES.localChain,
   payloadType,
   localExecutionCost = defaultLocalExecutionCost(),
   fee = defaultFee(),
@@ -162,7 +162,7 @@ export function buildUnsignedLocalTransactionEnvelope({
       ? {
           schemaVersion: 1,
           networkProfile,
-          networkProfileHash: flowchainNetworkProfileHash(networkProfile),
+          networkProfileHash: flowmemoryNetworkProfileHash(networkProfile),
           payloadType: payloadType ?? descriptor.objectType,
           payloadTypeHash: keccakUtf8(payloadType ?? descriptor.objectType),
           expiresAtUnixMs: expiresAtUnixMs ?? defaultExpiresAtUnixMs(issuedAtUnixMs),
@@ -186,7 +186,7 @@ export function buildUnsignedLocalTransactionEnvelope({
   const payload = localTransactionEnvelopePayload(envelopeInput);
 
   return {
-    schema: "flowchain.local_transaction_envelope.v0",
+    schema: "flowmemory.local_transaction_envelope.v0",
     ...(canonical
       ? {
           schemaVersion: envelopeInput.schemaVersion,
@@ -203,11 +203,11 @@ export function buildUnsignedLocalTransactionEnvelope({
     signerKeyId,
     signerRole,
     signerRoleCode,
-    publicKey: canonical ? normalizeFlowchainPublicKey(publicKey) : publicKey,
+    publicKey: canonical ? normalizeFlowMemoryPublicKey(publicKey) : publicKey,
     ...(canonical
       ? {
           publicKeyEncoding: "secp256k1-compressed-hex",
-          signerAddress: flowchainAddressFromPublicKey(publicKey)
+          signerAddress: flowmemoryAddressFromPublicKey(publicKey)
         }
       : {}),
     objectSchema: document.schema,
@@ -251,7 +251,7 @@ export function validateLocalTransactionEnvelope({
     return { valid: false, errors: ["missing-signer"] };
   }
 
-  const canonicalEnvelope = isProductionL1EnvelopeInput(envelope);
+  const canonicalEnvelope = isProductionNetworkEnvelopeInput(envelope);
   const expectedDomain = localTransactionDomain(envelope.chainId, canonicalEnvelope ? envelope.networkProfile : undefined);
   const expectedDomainSeparator = localTransactionDomainSeparator(
     envelope.chainId,
@@ -336,7 +336,7 @@ export function validateLocalTransactionEnvelope({
       errors.push("bad-payload-hash");
     }
     if (canonicalEnvelope) {
-      validateProductionL1EnvelopeExtension(envelope, errors, context);
+      validateProductionNetworkEnvelopeExtension(envelope, errors, context);
     }
 
     const input = localTransactionEnvelopeInput(envelope);
@@ -373,7 +373,7 @@ function isHex32(value) {
   return typeof value === "string" && /^0x[0-9a-fA-F]{64}$/.test(value);
 }
 
-function isProductionL1EnvelopeInput(input) {
+function isProductionNetworkEnvelopeInput(input) {
   return Boolean(input?.schemaVersion || input?.networkProfile || input?.payloadType || input?.expiresAtUnixMs);
 }
 
@@ -397,7 +397,7 @@ function defaultExpiresAtUnixMs(issuedAtUnixMs) {
   return (BigInt(issuedAtUnixMs) + 3_600_000n).toString();
 }
 
-function validateProductionL1EnvelopeExtension(envelope, errors, context) {
+function validateProductionNetworkEnvelopeExtension(envelope, errors, context) {
   const required = [
     "schemaVersion",
     "networkProfile",
@@ -420,7 +420,7 @@ function validateProductionL1EnvelopeExtension(envelope, errors, context) {
   if (envelope.schemaVersion !== 1) {
     errors.push("wrong-schema-version");
   }
-  if (envelope.networkProfileHash !== flowchainNetworkProfileHash(envelope.networkProfile)) {
+  if (envelope.networkProfileHash !== flowmemoryNetworkProfileHash(envelope.networkProfile)) {
     errors.push("wrong-network-profile");
   }
   if (envelope.payloadTypeHash !== keccakUtf8(envelope.payloadType)) {
@@ -442,16 +442,16 @@ function validateProductionL1EnvelopeExtension(envelope, errors, context) {
     errors.push("expired-tx");
   }
   try {
-    normalizeFlowchainPublicKey(envelope.publicKey);
+    normalizeFlowMemoryPublicKey(envelope.publicKey);
   } catch {
     errors.push("malformed-public-key");
   }
-  if (isFlowchainRole(envelope.signerRole)) {
-    const derivedSignerId = flowchainAccountId({ publicKey: envelope.publicKey, role: envelope.signerRole });
+  if (isFlowMemoryRole(envelope.signerRole)) {
+    const derivedSignerId = flowmemoryAccountId({ publicKey: envelope.publicKey, role: envelope.signerRole });
     if (envelope.signerId !== derivedSignerId) {
       errors.push("wrong-signer");
     }
-    if (envelope.signerAddress && envelope.signerAddress !== flowchainAddressFromPublicKey(envelope.publicKey)) {
+    if (envelope.signerAddress && envelope.signerAddress !== flowmemoryAddressFromPublicKey(envelope.publicKey)) {
       errors.push("wrong-signer");
     }
   }
@@ -459,7 +459,7 @@ function validateProductionL1EnvelopeExtension(envelope, errors, context) {
     errors.push("malformed-signature");
   }
   if (envelope.signature) {
-    const expectedTransactionId = flowchainTransactionId(envelope);
+    const expectedTransactionId = flowmemoryTransactionId(envelope);
     if (envelope.transactionId && envelope.transactionId !== expectedTransactionId) {
       errors.push("bad-transaction-id");
     }

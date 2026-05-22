@@ -6,7 +6,7 @@ let cachedToolchain: string | null | undefined;
 
 function uniqueCandidates(): string[] {
   const candidates = [
-    process.env.FLOWCHAIN_RUSTUP_TOOLCHAIN,
+    process.env.FLOWMEMORY_RUSTUP_TOOLCHAIN,
     process.env.RUSTUP_TOOLCHAIN,
     "1.95.0-x86_64-pc-windows-gnu",
     "stable-x86_64-pc-windows-gnu",
@@ -59,15 +59,15 @@ export function spawnCargoSync(
 ): SpawnSyncReturns<string> {
   const toolchain = resolveCargoToolchain();
   const cwd = typeof options.cwd === "string" ? options.cwd : process.cwd();
-  const configuredTargetDir = process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
-  const defaultTargetDir = resolve(cwd, "devnet", "local", "cargo-target", "control-plane-runtime");
+  const configuredTargetDir = process.env.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR;
+  const defaultTargetDir = resolve(cwd, "localRuntime", "local", "cargo-target", "control-plane-runtime");
   const targetDir = configuredTargetDir !== undefined && configuredTargetDir.trim().length > 0
     ? resolve(cwd, configuredTargetDir)
     : defaultTargetDir;
-  const tempDir = resolve(cwd, "devnet", "local", "tmp", `control-plane-${process.pid}`);
+  const tempDir = resolve(cwd, "localRuntime", "local", "tmp", `control-plane-${process.pid}`);
   const relativeTarget = relative(cwd, targetDir);
   if (relativeTarget === "" || relativeTarget.startsWith("..") || isAbsolute(relativeTarget)) {
-    throw new Error("FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR must stay inside the repository.");
+    throw new Error("FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR must stay inside the repository.");
   }
   mkdirSync(targetDir, { recursive: true });
   mkdirSync(tempDir, { recursive: true });
@@ -75,13 +75,13 @@ export function spawnCargoSync(
     ...process.env,
     ...options.env,
     CARGO_TARGET_DIR: options.env?.CARGO_TARGET_DIR ?? process.env.CARGO_TARGET_DIR ?? targetDir,
-    FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR: options.env?.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR ?? targetDir,
+    FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR: options.env?.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR ?? targetDir,
     TEMP: options.env?.TEMP ?? process.env.TEMP ?? tempDir,
     TMP: options.env?.TMP ?? process.env.TMP ?? tempDir,
     ...(toolchain === null
       ? {}
       : {
-          FLOWCHAIN_RUSTUP_TOOLCHAIN: toolchain,
+          FLOWMEMORY_RUSTUP_TOOLCHAIN: toolchain,
           RUSTUP_TOOLCHAIN: toolchain,
         }),
   };

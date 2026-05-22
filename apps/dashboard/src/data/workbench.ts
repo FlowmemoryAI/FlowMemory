@@ -2,13 +2,13 @@ import type { DashboardData, DashboardStatus, Provenance, SourceSubsystem } from
 import { publicAssetPath } from "./loadDashboardData";
 
 export const DEFAULT_CONTROL_PLANE_URL = "http://127.0.0.1:8787";
-export const WORKBENCH_DEVNET_STATE_PATH = "/data/flowchain-local-devnet-state.json";
-export const WORKBENCH_DEVNET_DASHBOARD_STATE_PATH = "/data/flowchain-local-devnet-dashboard-state.json";
-export const WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH = "/data/flowchain-bridge-test-deposit.json";
-export const WORKBENCH_LIVE_READINESS_REPORT_PATH = "/data/flowchain-live-readiness-report.json";
-export const WORKBENCH_EXPLORER_FALLBACK_PATH = "/data/flowchain-l1-explorer-fallback.json";
+export const WORKBENCH_LOCAL_RUNTIME_STATE_PATH = "/data/flowmemory-local-runtime-state.json";
+export const WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH = "/data/flowmemory-local-runtime-dashboard-state.json";
+export const WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH = "/data/flowmemory-bridge-test-deposit.json";
+export const WORKBENCH_LIVE_READINESS_REPORT_PATH = "/data/flowmemory-live-readiness-report.json";
+export const WORKBENCH_EXPLORER_FALLBACK_PATH = "/data/flowmemory-network-explorer-fallback.json";
 
-const FIXTURE_CHAIN_CONTEXT = "flowchain-private-local-testnet";
+const FIXTURE_CHAIN_CONTEXT = "flowmemory-private-local-testnet";
 const CONTROL_PLANE_TIMEOUT_MS = 900;
 
 const CONTROL_PLANE_RPC_REQUESTS = [
@@ -158,8 +158,8 @@ export interface WorkbenchSnapshot {
   loadIssues: string[];
   raw: {
     dashboard: DashboardData;
-    devnetState: unknown | null;
-    devnetDashboardState: unknown | null;
+    localRuntimeState: unknown | null;
+    localRuntimeDashboardState: unknown | null;
     bridgeTestDeposit: unknown | null;
     liveReadinessReport: unknown | null;
     explorerFallback: unknown | null;
@@ -182,128 +182,128 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     label: "Node Status",
     detail: "Runtime health, chain head, genesis, state root, and local API availability.",
     expectedEndpoint: "GET /health + GET /state",
-    missingCommand: "npm run flowchain:start",
-    missingService: "FlowChain control-plane API on http://127.0.0.1:8787",
+    missingCommand: "npm run flowmemory:start",
+    missingService: "FlowMemory control-plane API on http://127.0.0.1:8787",
   },
   {
     key: "peers",
     label: "Peers",
     detail: "Private/local peer inventory when the control-plane exposes network state.",
     expectedEndpoint: "GET /peers",
-    missingCommand: "npm run flowchain:start",
-    missingService: "FlowChain peer service /peers",
+    missingCommand: "npm run flowmemory:start",
+    missingService: "FlowMemory peer service /peers",
   },
   {
     key: "blocks",
     label: "Blocks",
     detail: "Private/local chain blocks, state roots, parent hashes, and receipt counts.",
     expectedEndpoint: "GET /blocks",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain state export /blocks",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory state export /blocks",
   },
   {
     key: "transactions",
     label: "Transactions",
     detail: "Smoke-flow transaction ids and receipt application status.",
     expectedEndpoint: "GET /transactions",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain state export /transactions",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory state export /transactions",
   },
   {
     key: "mempool",
     label: "Mempool",
     detail: "Pending local transaction pool before deterministic block production.",
     expectedEndpoint: "GET /mempool",
-    missingCommand: "npm run flowchain:start",
-    missingService: "FlowChain control-plane /mempool",
+    missingCommand: "npm run flowmemory:start",
+    missingService: "FlowMemory control-plane /mempool",
   },
   {
     key: "accounts",
     label: "Accounts",
     detail: "Public account/controller metadata for local agent and operator identities.",
     expectedEndpoint: "GET /accounts",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain account registry /accounts",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory account registry /accounts",
   },
   {
     key: "balances",
     label: "Local Balances",
     detail: "No-value local balance or credit metadata when exported by the private testnet API.",
     expectedEndpoint: "GET /balances + GET /accounts/:id/balances",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain no-value balance view /balances",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory no-value balance view /balances",
   },
   {
     key: "faucetEvents",
     label: "Faucet Events",
     detail: "Local faucet or no-value credit events for demo accounts only.",
     expectedEndpoint: "GET /faucet-events",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain local faucet event view /faucet-events",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory local faucet event view /faucet-events",
   },
   {
     key: "walletMetadata",
     label: "Wallet Metadata",
     detail: "Public key references and browser-safe wallet metadata. Private keys are never read here.",
     expectedEndpoint: "GET /wallets/public",
-    missingCommand: "npm run flowchain:init",
-    missingService: "FlowChain public wallet metadata /wallets/public",
+    missingCommand: "npm run flowmemory:init",
+    missingService: "FlowMemory public wallet metadata /wallets/public",
   },
   {
     key: "tokenLaunches",
     label: "Token Launch",
     detail: "Local/testnet token definition and launch receipts. This surface does not represent tokenomics or a production coin sale.",
     expectedEndpoint: "GET /tokens + GET /token-launches",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain product-testnet token launch view /tokens",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory product-testnet token launch view /tokens",
   },
   {
     key: "tokenBalances",
     label: "Token Balances",
     detail: "Browser-safe token balances for local/testnet accounts. Private keys and signing secrets stay outside browser storage.",
     expectedEndpoint: "GET /token-balances",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain token balance view /token-balances",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory token balance view /token-balances",
   },
   {
     key: "tokenTransfers",
     label: "Token Transfers",
     detail: "Local/testnet token transfer records by account, token, and transaction id.",
     expectedEndpoint: "POST /rpc token_transfer_list",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain token transfer view token_transfer_list",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory token transfer view token_transfer_list",
   },
   {
     key: "dexPools",
     label: "DEX Pools",
     detail: "Local/testnet pool definitions, reserve state, quote metadata, and status for the product-testnet DEX path.",
     expectedEndpoint: "GET /dex/pools",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain DEX pool view /dex/pools",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory DEX pool view /dex/pools",
   },
   {
     key: "liquidityPositions",
     label: "Liquidity",
     detail: "Local/testnet LP positions and add/remove liquidity receipts.",
     expectedEndpoint: "GET /dex/liquidity",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain liquidity position view /dex/liquidity",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory liquidity position view /dex/liquidity",
   },
   {
     key: "swaps",
     label: "Swaps",
     detail: "Local/testnet swap receipts and balance deltas for the DEX path.",
     expectedEndpoint: "GET /dex/swaps",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain swap receipt view /dex/swaps",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory swap receipt view /dex/swaps",
   },
   {
     key: "explorerRecords",
     label: "Explorer Records",
     detail: "Unified explorer rollup for blocks, transactions, receipts, token records, pool records, swap records, and bridge records.",
     expectedEndpoint: "GET /explorer",
-    missingCommand: "npm run flowchain:product-e2e",
-    missingService: "FlowChain explorer API /explorer",
+    missingCommand: "npm run flowmemory:product-e2e",
+    missingService: "FlowMemory explorer API /explorer",
   },
   {
     key: "realValuePilot",
@@ -311,47 +311,47 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     detail: "Capped owner-testing lifecycle for Base deposit observation, exact local credit, wallet transferability, withdrawal/release evidence, readiness blockers, caps, pause, and emergency state.",
     expectedEndpoint: "GET /bridge/live-readiness + GET /pilot/lifecycle + GET /pilot/status",
     missingCommand: "npm run control-plane:serve",
-    missingService: "FlowChain real-value pilot control-plane /pilot/status",
+    missingService: "FlowMemory real-value pilot control-plane /pilot/status",
   },
   {
     key: "liveReadiness",
     label: "Live Readiness",
-    detail: "Public launch contract, private L1 origin, public RPC, backup, bridge relayer, tester packet, and no-secret gates from the latest infra reports.",
+    detail: "Public launch contract, private network origin, public RPC, backup, bridge relayer, tester packet, and no-secret gates from the latest infra reports.",
     expectedEndpoint: WORKBENCH_LIVE_READINESS_REPORT_PATH,
-    missingCommand: "npm run flowchain:public-deployment:contract",
-    missingService: "FlowChain live deployment readiness summary",
+    missingCommand: "npm run flowmemory:public-deployment:contract",
+    missingService: "FlowMemory live deployment readiness summary",
   },
   {
     key: "rootfields",
     label: "Rootfields",
     detail: "Rootfield namespaces, owners, compact roots, schema hashes, and active state.",
     expectedEndpoint: "GET /rootfields",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain rootfield registry /rootfields",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory rootfield registry /rootfields",
   },
   {
     key: "agents",
     label: "Agents",
     detail: "Operators, workers, verifier identities, and observed contract actors.",
     expectedEndpoint: "GET /agents",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain agent registry /agents",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory agent registry /agents",
   },
   {
     key: "models",
     label: "Models",
     detail: "ModelPassport objects when the private testnet runtime exports them.",
     expectedEndpoint: "GET /models",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain model registry /models",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory model registry /models",
   },
   {
     key: "receipts",
     label: "Work Receipts",
-    detail: "Work receipts from the launch fixture and local devnet handoff.",
+    detail: "Work receipts from the launch fixture and local runtime handoff.",
     expectedEndpoint: "GET /receipts",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain receipt view /receipts",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory receipt view /receipts",
   },
   {
     key: "receiptEvents",
@@ -359,87 +359,87 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     detail: "Transaction receipts, FlowPulse events, rejected logs, and failed transaction errors indexed by block and transaction.",
     expectedEndpoint: "POST /rpc receipt_list + transaction_list",
     missingCommand: "npm run control-plane:smoke",
-    missingService: "FlowChain receipt/event explorer methods",
+    missingService: "FlowMemory receipt/event explorer methods",
   },
   {
     key: "memoryCells",
     label: "Memory Cells",
     detail: "Native MemoryCell records or rootfield-bundle projections while the API is pending.",
     expectedEndpoint: "GET /memory-cells",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain memory-cell registry /memory-cells",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory memory-cell registry /memory-cells",
   },
   {
     key: "artifacts",
     label: "Artifacts",
     detail: "Artifact availability commitments and receipt-linked artifact URIs.",
     expectedEndpoint: "GET /artifacts",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain artifact registry /artifacts",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory artifact registry /artifacts",
   },
   {
     key: "verifierModules",
     label: "Verifier Modules",
     detail: "Verifier module identities or derived module projections from local reports.",
     expectedEndpoint: "GET /verifier-modules",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain verifier module registry /verifier-modules",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory verifier module registry /verifier-modules",
   },
   {
     key: "verifierReports",
     label: "Verifier Reports",
     detail: "Verifier reports, report digests, policies, checks, and reason codes.",
     expectedEndpoint: "GET /verifier-reports",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain verifier report view /verifier-reports",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory verifier report view /verifier-reports",
   },
   {
     key: "challenges",
     label: "Challenges",
     detail: "Challenge lifecycle objects once the runtime/control-plane exports them.",
     expectedEndpoint: "GET /challenges",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain challenge registry /challenges",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory challenge registry /challenges",
   },
   {
     key: "finality",
     label: "Finality",
     detail: "Local finality distance, anchor placeholders, and latest finalized state.",
     expectedEndpoint: "GET /finality",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain finality view /finality",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory finality view /finality",
   },
   {
     key: "bridgeDeposits",
     label: "Bridge Deposits",
     detail: "Private/local bridge-deposit test objects only; this is not a production bridge.",
     expectedEndpoint: "GET /bridge/deposits",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain bridge deposit view /bridge/deposits",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory bridge deposit view /bridge/deposits",
   },
   {
     key: "bridgeCredits",
     label: "Bridge Credits",
     detail: "Private/local bridge-credit test objects only; no real-funds flow is available.",
     expectedEndpoint: "GET /bridge/credits",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain bridge credit view /bridge/credits",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory bridge credit view /bridge/credits",
   },
   {
     key: "bridgeWithdrawals",
     label: "Bridge Withdrawals",
     detail: "Private/local bridge-withdrawal test objects only; production bridge work is out of scope.",
     expectedEndpoint: "GET /bridge/withdrawals",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain bridge withdrawal view /bridge/withdrawals",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory bridge withdrawal view /bridge/withdrawals",
   },
   {
     key: "bridgeReleases",
     label: "Bridge Releases",
     detail: "Release evidence for withdrawal intents, including pending or recorded operator evidence rows.",
     expectedEndpoint: "POST /rpc pilot_release_evidence_list",
-    missingCommand: "npm run flowchain:real-value-pilot:e2e",
-    missingService: "FlowChain pilot release evidence list",
+    missingCommand: "npm run flowmemory:real-value-pilot:e2e",
+    missingService: "FlowMemory pilot release evidence list",
   },
   {
     key: "errorsRecovery",
@@ -447,7 +447,7 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     detail: "Runtime, API, storage, bridge, chain-id, lockbox, broad-scan, duplicate-event, and build recovery references.",
     expectedEndpoint: "GET /health + fallback errors",
     missingCommand: "npm run control-plane:smoke",
-    missingService: "FlowChain error and recovery state",
+    missingService: "FlowMemory error and recovery state",
   },
   {
     key: "provenance",
@@ -462,13 +462,13 @@ export const WORKBENCH_SECTIONS: WorkbenchSectionDefinition[] = [
     label: "Hardware Signals",
     detail: "FlowRouter, gateway, and low-bandwidth sidecar heartbeat/control-signal records.",
     expectedEndpoint: "GET /hardware-signals",
-    missingCommand: "npm run flowchain:smoke",
-    missingService: "FlowChain hardware signal export /hardware-signals",
+    missingCommand: "npm run flowmemory:smoke",
+    missingService: "FlowMemory hardware signal export /hardware-signals",
   },
   {
     key: "rawJson",
     label: "Raw JSON",
-    detail: "Loaded dashboard, devnet, and control-plane payloads for direct inspection.",
+    detail: "Loaded dashboard, localRuntime, and control-plane payloads for direct inspection.",
     expectedEndpoint: "GET /raw",
     missingCommand: "npm run dev --prefix apps/dashboard",
     missingService: "Dashboard raw JSON inspector",
@@ -690,7 +690,7 @@ function makeLocalRecord(
   };
 }
 
-function relabelDevnetRecordsAsControlPlane(
+function relabelLocalRuntimeRecordsAsControlPlane(
   sections: Record<WorkbenchSectionKey, WorkbenchRecord[]>,
   controlPlane: ControlPlaneProbe,
 ): Record<WorkbenchSectionKey, WorkbenchRecord[]> {
@@ -699,8 +699,8 @@ function relabelDevnetRecordsAsControlPlane(
       key,
       records.map((record) => {
         const fromFallbackFile =
-          record.provenance.fixturePath === WORKBENCH_DEVNET_STATE_PATH ||
-          record.provenance.fixturePath === WORKBENCH_DEVNET_DASHBOARD_STATE_PATH;
+          record.provenance.fixturePath === WORKBENCH_LOCAL_RUNTIME_STATE_PATH ||
+          record.provenance.fixturePath === WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH;
 
         if (!fromFallbackFile) {
           return record;
@@ -715,8 +715,8 @@ function relabelDevnetRecordsAsControlPlane(
   ) as Record<WorkbenchSectionKey, WorkbenchRecord[]>;
 }
 
-function latestBlockFromDevnet(devnetState: unknown): UnknownRecord | null {
-  const blocks = collectionFrom(devnetState, ["blocks"]);
+function latestBlockFromLocalRuntime(localRuntimeState: unknown): UnknownRecord | null {
+  const blocks = collectionFrom(localRuntimeState, ["blocks"]);
   return blocks.length > 0 ? blocks[blocks.length - 1] : null;
 }
 
@@ -782,7 +782,7 @@ function uniqueEndpoints(...sources: Array<string[] | undefined>): string[] {
 
 function getControlPlaneUrl(): string {
   const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
-  const configured = env?.VITE_FLOWCHAIN_CONTROL_PLANE_URL?.trim();
+  const configured = env?.VITE_FLOWMEMORY_CONTROL_PLANE_URL?.trim();
   return configured && configured.length > 0 ? configured.replace(/\/+$/, "") : DEFAULT_CONTROL_PLANE_URL;
 }
 
@@ -949,14 +949,14 @@ function buildLocalActions(controlPlane: ControlPlaneProbe): WorkbenchAction[] {
   return WORKBENCH_ACTIONS.filter((action) => advertised.has(action.endpoint.toUpperCase()));
 }
 
-function buildNodeStatusRecords(data: DashboardData, devnetState: unknown, controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
-  const node = buildNodeStatus(data, devnetState, controlPlane);
-  const devnet = isRecord(devnetState) ? devnetState : {};
-  const config = isRecord(devnet.config) ? devnet.config : {};
+function buildNodeStatusRecords(data: DashboardData, localRuntimeState: unknown, controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
+  const node = buildNodeStatus(data, localRuntimeState, controlPlane);
+  const localRuntime = isRecord(localRuntimeState) ? localRuntimeState : {};
+  const config = isRecord(localRuntime.config) ? localRuntime.config : {};
 
   return [
     makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: "local-control-plane",
@@ -974,28 +974,28 @@ function buildNodeStatusRecords(data: DashboardData, devnetState: unknown, contr
       },
       controlPlane.checkedAt,
     ),
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id: "local-chain-state",
       kind: "Private/local chain",
-      title: text(devnet.chainId ?? data.chain.chainId),
+      title: text(localRuntime.chainId ?? data.chain.chainId),
       summary: "Committed local chain state used by the workbench when the API is offline or partial.",
-      status: devnetState ? "finalized" : "stale",
+      status: localRuntimeState ? "finalized" : "stale",
       facts: [
-        { label: "genesis hash", value: text(devnet.genesisHash ?? config.genesisHash) },
-        { label: "next block", value: text(devnet.nextBlockNumber) },
-        { label: "logical time", value: text(devnet.logicalTime ?? config.genesisLogicalTime) },
+        { label: "genesis hash", value: text(localRuntime.genesisHash ?? config.genesisHash) },
+        { label: "next block", value: text(localRuntime.nextBlockNumber) },
+        { label: "logical time", value: text(localRuntime.logicalTime ?? config.genesisLogicalTime) },
         { label: "consensus", value: text(config.consensus, "local deterministic") },
         { label: "no value", value: text(config.noValue, "true") },
       ],
-      raw: devnetState,
+      raw: localRuntimeState,
     }),
   ];
 }
 
-function buildPeerRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["peers", "networkPeers", "peerState", "nodes"]).map((peer, index) => {
+function buildPeerRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["peers", "networkPeers", "peerState", "nodes"]).map((peer, index) => {
     const id = text(peer.peerId ?? peer.nodeId ?? peer.id ?? peer.address, `peer:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Peer",
       title: id,
@@ -1012,10 +1012,10 @@ function buildPeerRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildMempoolRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["pendingTxs", "mempool", "txPool", "pendingTransactions"]).map((tx, index) => {
+function buildMempoolRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["pendingTxs", "mempool", "txPool", "pendingTransactions"]).map((tx, index) => {
     const id = text(tx.txId ?? tx.hash ?? tx.id, `pending-tx:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Pending transaction",
       title: id,
@@ -1032,10 +1032,10 @@ function buildMempoolRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildAccountRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["agentAccounts", "accounts", "accountRegistry"]).map((account, index) => {
+function buildAccountRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["agentAccounts", "accounts", "accountRegistry"]).map((account, index) => {
     const id = text(account.accountId ?? account.agentId ?? account.id ?? account.controller, `account:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Account",
       title: id,
@@ -1053,8 +1053,8 @@ function buildAccountRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, [
+function buildBalanceRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, [
     "localTestUnitBalances",
     "balances",
     "accountBalances",
@@ -1063,7 +1063,7 @@ function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
     "creditBalances",
   ]).map((balance, index) => {
     const id = text(balance.balanceId ?? balance.accountId ?? balance.agentId ?? balance.id, `balance:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Local test-unit balance",
       title: id,
@@ -1082,10 +1082,10 @@ function buildBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["faucetRecords", "faucetEvents", "faucetClaims", "faucetCredits", "faucet"]).map((event, index) => {
+function buildFaucetEventRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["faucetRecords", "faucetEvents", "faucetClaims", "faucetCredits", "faucet"]).map((event, index) => {
     const id = text(event.eventId ?? event.faucetRecordId ?? event.faucetEventId ?? event.txId ?? event.id, `faucet-event:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Faucet event",
       title: id,
@@ -1103,10 +1103,10 @@ function buildFaucetEventRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildWalletMetadataRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["wallets", "walletMetadata", "publicWallets", "publicAccounts", "operatorKeyReferences"]).map((wallet, index) => {
+function buildWalletMetadataRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["wallets", "walletMetadata", "publicWallets", "publicAccounts", "operatorKeyReferences"]).map((wallet, index) => {
     const id = text(wallet.walletId ?? wallet.keyReferenceId ?? wallet.operatorId ?? wallet.id, `wallet:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Public wallet/account metadata",
       title: id,
@@ -1127,10 +1127,10 @@ function buildWalletMetadataRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildTokenLaunchRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["tokenLaunches", "tokenDefinitions", "tokens", "localTokens", "launchedTokens"]).map((token, index) => {
+function buildTokenLaunchRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["tokenLaunches", "tokenDefinitions", "tokens", "localTokens", "launchedTokens"]).map((token, index) => {
     const id = text(token.tokenId ?? token.launchId ?? token.id ?? token.symbol, `token-launch:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Token launch",
       title: text(token.symbol ?? token.name ?? id),
@@ -1152,8 +1152,8 @@ function buildTokenLaunchRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildTokenBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, [
+function buildTokenBalanceRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, [
     "tokenBalances",
     "tokenAccountBalances",
     "accountTokenBalances",
@@ -1164,7 +1164,7 @@ function buildTokenBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
       balance.balanceId ?? balance.tokenBalanceId ?? balance.id ?? `${text(balance.accountId)}:${text(balance.tokenId ?? balance.symbol)}`,
       `token-balance:${index + 1}`,
     );
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Token balance",
       title: id,
@@ -1182,10 +1182,10 @@ function buildTokenBalanceRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildTokenTransferRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]).map((transfer, index) => {
+function buildTokenTransferRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]).map((transfer, index) => {
     const id = text(transfer.transferId ?? transfer.tokenTransferId ?? transfer.txId ?? transfer.id, `token-transfer:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Token transfer",
       title: id,
@@ -1204,10 +1204,10 @@ function buildTokenTransferRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildDexPoolRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["dexPools", "pools", "ammPools", "liquidityPools"]).map((pool, index) => {
+function buildDexPoolRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["dexPools", "pools", "ammPools", "liquidityPools"]).map((pool, index) => {
     const id = text(pool.poolId ?? pool.id ?? `${text(pool.baseToken ?? pool.tokenA)}:${text(pool.quoteToken ?? pool.tokenB)}`, `pool:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "DEX pool",
       title: id,
@@ -1226,8 +1226,8 @@ function buildDexPoolRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildLiquidityPositionRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, [
+function buildLiquidityPositionRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, [
     "liquidityPositions",
     "lpPositions",
     "positions",
@@ -1235,7 +1235,7 @@ function buildLiquidityPositionRecords(devnetState: unknown): WorkbenchRecord[] 
     "liquidityReceipts",
   ]).map((position, index) => {
     const id = text(position.positionId ?? position.lpPositionId ?? position.id, `liquidity:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Liquidity position",
       title: id,
@@ -1254,10 +1254,10 @@ function buildLiquidityPositionRecords(devnetState: unknown): WorkbenchRecord[] 
   });
 }
 
-function buildSwapRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["swaps", "swapReceipts", "swapEvents", "dexSwaps"]).map((swap, index) => {
+function buildSwapRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["swaps", "swapReceipts", "swapEvents", "dexSwaps"]).map((swap, index) => {
     const id = text(swap.swapId ?? swap.receiptId ?? swap.txId ?? swap.id, `swap:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Swap",
       title: id,
@@ -1285,7 +1285,7 @@ function bridgeFixtureRecords(kind: "deposits" | "credits" | "withdrawals", brid
 }
 
 function buildBridgeRecords(
-  devnetState: unknown,
+  localRuntimeState: unknown,
   kind: "deposits" | "credits" | "withdrawals",
   bridgeTestDeposit: unknown | null = null,
 ): WorkbenchRecord[] {
@@ -1295,17 +1295,17 @@ function buildBridgeRecords(
     withdrawals: ["bridgeWithdrawals", "withdrawals"],
   } satisfies Record<typeof kind, string[]>;
 
-  return [...collectionFrom(devnetState, keyMap[kind]), ...bridgeFixtureRecords(kind, bridgeTestDeposit)].map((event, index) => {
+  return [...collectionFrom(localRuntimeState, keyMap[kind]), ...bridgeFixtureRecords(kind, bridgeTestDeposit)].map((event, index) => {
     const id = text(event.bridgeEventId ?? event.depositId ?? event.creditId ?? event.withdrawalId ?? event.id, `bridge-${kind}:${index + 1}`);
-    const fixturePath = event === bridgeTestDeposit ? WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH : WORKBENCH_DEVNET_STATE_PATH;
-    return makeRecord("devnet", fixturePath, {
+    const fixturePath = event === bridgeTestDeposit ? WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH : WORKBENCH_LOCAL_RUNTIME_STATE_PATH;
+    return makeRecord("localRuntime", fixturePath, {
       id,
       kind: `Bridge ${kind.slice(0, -1)}`,
       title: id,
       summary: text(event.summary, "Private/local or Base Sepolia bridge lifecycle test object exported for workbench inspection."),
       status: statusFrom(event.status, "pending"),
       facts: [
-        { label: "account", value: text(event.accountId ?? event.wallet ?? event.recipient ?? event.flowchainRecipient) },
+        { label: "account", value: text(event.accountId ?? event.wallet ?? event.recipient ?? event.flowmemoryRecipient) },
         { label: "amount", value: text(event.amount) },
         { label: "source", value: text(event.sourceChain ?? event.sourceChainId ?? event.fromChain) },
         { label: "destination", value: text(event.destinationChain ?? event.toChain) },
@@ -1318,7 +1318,7 @@ function buildBridgeRecords(
 }
 
 function commandFromStep(step: unknown): string {
-  return isRecord(step) ? text(step.command, "npm run flowchain:real-value-pilot:e2e") : "npm run flowchain:real-value-pilot:e2e";
+  return isRecord(step) ? text(step.command, "npm run flowmemory:real-value-pilot:e2e") : "npm run flowmemory:real-value-pilot:e2e";
 }
 
 function readinessStatus(value: unknown): DashboardStatus {
@@ -1345,7 +1345,7 @@ function readinessPayload(controlPlane: ControlPlaneProbe, pilot: UnknownRecord 
 function bridgeReadinessRecord(controlPlane: ControlPlaneProbe, readiness: UnknownRecord | null): WorkbenchRecord {
   if (!readiness) {
     return makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: "bridge-live-readiness",
@@ -1375,7 +1375,7 @@ function bridgeReadinessRecord(controlPlane: ControlPlaneProbe, readiness: Unkno
   const failClosedStatus = text(readiness.failClosedStatus, "BLOCKED");
 
   return makeLocalRecord(
-    "devnet",
+    "localRuntime",
     controlPlane.url,
     {
       id: "bridge-live-readiness",
@@ -1409,7 +1409,7 @@ function bridgeReadinessIssueRecords(controlPlane: ControlPlaneProbe, readiness:
 
   return collectionFrom(readiness, ["issues"]).map((issue, index) =>
     makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: `bridge-readiness-issue:${text(issue.reasonCode, String(index + 1))}`,
@@ -1456,7 +1456,7 @@ function bridgeLifecycleRecord(controlPlane: ControlPlaneProbe, row: UnknownReco
   const releaseEvidenceId = text(row.releaseEvidenceId ?? releaseEvidence.releaseEvidenceId);
 
   return makeLocalRecord(
-    "devnet",
+    "localRuntime",
     controlPlane.url,
     {
       id: text(row.lifecycleRecordId, `${baseTxHash}:${text(row.logIndex, String(index))}`),
@@ -1495,7 +1495,7 @@ function bridgeLifecycleRecord(controlPlane: ControlPlaneProbe, row: UnknownReco
 function buildControlPlaneWalletBalanceRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   return collectionFrom(controlPlane.walletBalances, ["balances"]).map((balance, index) =>
     makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: text(balance.balanceId, `wallet-balance:${index + 1}`),
@@ -1521,7 +1521,7 @@ function buildControlPlaneWalletBalanceRecords(controlPlane: ControlPlaneProbe):
 function buildControlPlaneWalletTransferRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   return collectionFrom(controlPlane.walletTransfers, ["transfers"]).map((transfer, index) =>
     makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: text(transfer.transferId ?? transfer.txId, `wallet-transfer:${index + 1}`),
@@ -1552,7 +1552,7 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   if (!pilot) {
     records.push(
       makeLocalRecord(
-        "devnet",
+        "localRuntime",
         controlPlane.url,
         {
           id: "real-value-pilot-api",
@@ -1588,7 +1588,7 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
 
   records.push(
     makeLocalRecord(
-      "devnet",
+      "localRuntime",
       controlPlane.url,
       {
         id: text(pilot.pilotId, "real-value-pilot-status"),
@@ -1599,7 +1599,7 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
         facts: [
           { label: "state", value: state },
           { label: "base chain", value: text(pilot.baseChainId, "8453") },
-          { label: "scope", value: text(pilot.label, "FlowChain capped owner real-value pilot") },
+          { label: "scope", value: text(pilot.label, "FlowMemory capped owner real-value pilot") },
           { label: "public readiness", value: text(pilot.broadPublicReadiness, "false") },
           { label: "browser stores secrets", value: text(pilot.browserStoresSecrets, "false") },
           { label: "next command", value: commandFromStep(nextStep) },
@@ -1621,7 +1621,7 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   lifecycle.forEach((step, index) => {
     records.push(
       makeLocalRecord(
-        "devnet",
+        "localRuntime",
         controlPlane.url,
         {
           id: text(step.phase, `pilot-step:${index + 1}`),
@@ -1654,7 +1654,7 @@ function buildPilotRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
     }
     records.push(
       makeLocalRecord(
-        "devnet",
+        "localRuntime",
         controlPlane.url,
         {
           id: item.id,
@@ -1702,7 +1702,7 @@ function makeRpcRecord(
 
 function buildRpcBlockRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   return rpcRows(controlPlane, "block_list", ["blocks"]).map((block, index) =>
-    makeRpcRecord(controlPlane, "block_list", "devnet", {
+    makeRpcRecord(controlPlane, "block_list", "localRuntime", {
       id: text(block.blockHash ?? block.hash, `api-block:${index + 1}`),
       kind: "Block",
       title: `Block ${text(block.blockNumber ?? block.height)}`,
@@ -1744,7 +1744,7 @@ function buildRpcTransactionRecords(controlPlane: ControlPlaneProbe): WorkbenchR
 
 function buildRpcTokenTransferRecords(controlPlane: ControlPlaneProbe): WorkbenchRecord[] {
   return rpcRows(controlPlane, "token_transfer_list", ["transfers"]).map((transfer, index) =>
-    makeRpcRecord(controlPlane, "token_transfer_list", "devnet", {
+    makeRpcRecord(controlPlane, "token_transfer_list", "localRuntime", {
       id: text(transfer.transferId ?? transfer.txId, `api-token-transfer:${index + 1}`),
       kind: "Token transfer",
       title: text(transfer.transferId ?? transfer.txId, `api-token-transfer:${index + 1}`),
@@ -1824,10 +1824,10 @@ function buildRpcPilotListRecords(
   kind: string,
   idFields: string[],
 ): WorkbenchRecord[] {
-  return buildRpcRecords(controlPlane, method, [key], "devnet", kind, idFields, (row) => [
+  return buildRpcRecords(controlPlane, method, [key], "localRuntime", kind, idFields, (row) => [
     { label: "chain", value: text(row.sourceChainId ?? row.destinationChainId, "8453") },
     { label: "tx", value: text(row.txHash ?? row.releaseTxHash) },
-    { label: "account", value: text(row.accountId ?? row.flowchainRecipient ?? row.flowchainAccount) },
+    { label: "account", value: text(row.accountId ?? row.flowmemoryRecipient ?? row.flowmemoryAccount) },
     { label: "amount", value: text(row.amount) },
     { label: "replay", value: text(row.replayStatus ?? row.rejectionReason, "accepted") },
     { label: "production ready", value: text(row.productionReady, "false") },
@@ -1899,7 +1899,7 @@ function buildControlPlaneRpcSections(
   }
 
   return {
-    nodeStatus: buildRpcRecords(controlPlane, "node_status", [""], "devnet", "Node status", ["nodeId"], (node) => [
+    nodeStatus: buildRpcRecords(controlPlane, "node_status", [""], "localRuntime", "Node status", ["nodeId"], (node) => [
       { label: "status", value: text(node.status) },
       { label: "latest height", value: text(node.latestBlockNumber) },
       { label: "latest hash", value: text(node.latestBlockHash) },
@@ -1907,7 +1907,7 @@ function buildControlPlaneRpcSections(
       { label: "mempool", value: text(node.mempoolSize) },
       { label: "source", value: text(node.runtimeStateSource) },
     ]),
-    peers: buildRpcRecords(controlPlane, "peer_list", ["peers"], "devnet", "Peer", ["peerId", "address"], (peer) => [
+    peers: buildRpcRecords(controlPlane, "peer_list", ["peers"], "localRuntime", "Peer", ["peerId", "address"], (peer) => [
       { label: "address", value: text(peer.address) },
       { label: "status", value: text(peer.status) },
       { label: "height", value: text(peer.height ?? peer.blockHeight) },
@@ -1915,37 +1915,37 @@ function buildControlPlaneRpcSections(
     ]),
     blocks: buildRpcBlockRecords(controlPlane),
     transactions: buildRpcTransactionRecords(controlPlane),
-    mempool: buildRpcRecords(controlPlane, "mempool_list", ["transactions"], "devnet", "Pending transaction", ["transactionId", "txId"], (tx) => [
+    mempool: buildRpcRecords(controlPlane, "mempool_list", ["transactions"], "localRuntime", "Pending transaction", ["transactionId", "txId"], (tx) => [
       { label: "status", value: text(tx.status) },
       { label: "source", value: text(tx.source) },
       { label: "mode", value: text(tx.intakeMode) },
     ]),
-    accounts: buildRpcRecords(controlPlane, "account_list", ["accounts"], "devnet", "Account", ["accountId"], (account) => [
+    accounts: buildRpcRecords(controlPlane, "account_list", ["accounts"], "localRuntime", "Account", ["accountId"], (account) => [
       { label: "type", value: text(account.accountType) },
       { label: "controller", value: text(account.controller) },
       { label: "balance", value: text(account.balance) },
       { label: "source", value: text(account.source) },
     ]),
-    walletMetadata: buildRpcRecords(controlPlane, "wallet_metadata_list", ["wallets"], "devnet", "Wallet public metadata", ["walletId", "accountId"], (wallet) => [
+    walletMetadata: buildRpcRecords(controlPlane, "wallet_metadata_list", ["wallets"], "localRuntime", "Wallet public metadata", ["walletId", "accountId"], (wallet) => [
       { label: "account", value: text(wallet.accountId) },
       { label: "type", value: text(wallet.accountType) },
       { label: "public only", value: text(wallet.publicOnly, "true") },
     ]),
-    tokenLaunches: buildRpcRecords(controlPlane, "token_list", ["tokens"], "devnet", "Token", ["tokenId", "symbol"], (token) => [
+    tokenLaunches: buildRpcRecords(controlPlane, "token_list", ["tokens"], "localRuntime", "Token", ["tokenId", "symbol"], (token) => [
       { label: "symbol", value: text(token.symbol) },
       { label: "name", value: text(token.name) },
       { label: "supply", value: text(token.totalSupply) },
       { label: "owner", value: text(token.owner) },
       { label: "source", value: text(token.source) },
     ]),
-    tokenBalances: buildRpcRecords(controlPlane, "token_balance_list", ["balances"], "devnet", "Token balance", ["balanceId", "accountId"], (balance) => [
+    tokenBalances: buildRpcRecords(controlPlane, "token_balance_list", ["balances"], "localRuntime", "Token balance", ["balanceId", "accountId"], (balance) => [
       { label: "account", value: text(balance.accountId) },
       { label: "token", value: text(balance.tokenId) },
       { label: "amount", value: text(balance.amount) },
       { label: "source", value: text(balance.source) },
     ]),
     tokenTransfers: buildRpcTokenTransferRecords(controlPlane),
-    dexPools: buildRpcRecords(controlPlane, "pool_list", ["pools"], "devnet", "DEX pool", ["poolId"], (pool) => [
+    dexPools: buildRpcRecords(controlPlane, "pool_list", ["pools"], "localRuntime", "DEX pool", ["poolId"], (pool) => [
       { label: "token 0", value: text(pool.token0) },
       { label: "token 1", value: text(pool.token1) },
       { label: "reserve 0", value: text(pool.reserve0) },
@@ -1953,13 +1953,13 @@ function buildControlPlaneRpcSections(
       { label: "lp supply", value: text(pool.lpSupply) },
       { label: "source", value: text(pool.source) },
     ]),
-    liquidityPositions: buildRpcRecords(controlPlane, "lp_position_list", ["positions"], "devnet", "LP position", ["positionId", "accountId"], (position) => [
+    liquidityPositions: buildRpcRecords(controlPlane, "lp_position_list", ["positions"], "localRuntime", "LP position", ["positionId", "accountId"], (position) => [
       { label: "account", value: text(position.accountId) },
       { label: "pool", value: text(position.poolId) },
       { label: "liquidity", value: text(position.liquidity) },
       { label: "source", value: text(position.source) },
     ]),
-    swaps: buildRpcRecords(controlPlane, "swap_list", ["swaps"], "devnet", "Swap", ["swapId", "txId"], (swap) => [
+    swaps: buildRpcRecords(controlPlane, "swap_list", ["swaps"], "localRuntime", "Swap", ["swapId", "txId"], (swap) => [
       { label: "tx", value: text(swap.txId) },
       { label: "pool", value: text(swap.poolId) },
       { label: "token in", value: text(swap.tokenIn) },
@@ -1982,14 +1982,14 @@ function buildControlPlaneRpcSections(
       ]),
     ],
     receiptEvents: buildRpcReceiptEventRecords(controlPlane),
-    finality: buildRpcRecords(controlPlane, "finality_list", ["finality"], "devnet", "Finality", ["finalityId", "objectId", "receiptId"], (finality) => [
+    finality: buildRpcRecords(controlPlane, "finality_list", ["finality"], "localRuntime", "Finality", ["finalityId", "objectId", "receiptId"], (finality) => [
       { label: "object", value: text(finality.objectId) },
       { label: "rootfield", value: text(finality.rootfieldId) },
       { label: "status", value: text(finality.status) },
       { label: "source", value: text(finality.source) },
     ]),
     bridgeDeposits: [
-      ...buildRpcRecords(controlPlane, "bridge_observation_list", ["observations"], "devnet", "Bridge observation", ["observationId"], (row) => [
+      ...buildRpcRecords(controlPlane, "bridge_observation_list", ["observations"], "localRuntime", "Bridge observation", ["observationId"], (row) => [
         { label: "deposit", value: text(row.depositId ?? (isRecord(row.deposit) ? row.deposit.depositId : undefined)) },
         { label: "tx", value: text(row.txHash ?? (isRecord(row.deposit) ? row.deposit.txHash : undefined)) },
         { label: "chain", value: text(row.sourceChainId ?? (isRecord(row.deposit) ? row.deposit.sourceChainId : undefined)) },
@@ -1998,7 +1998,7 @@ function buildControlPlaneRpcSections(
       ...buildRpcPilotListRecords(controlPlane, "pilot_deposit_observation_list", "depositObservations", "Pilot deposit observation", ["observationId", "depositId"]),
     ],
     bridgeCredits: [
-      ...buildRpcRecords(controlPlane, "bridge_credit_list", ["credits"], "devnet", "Bridge credit", ["creditId"], (credit) => [
+      ...buildRpcRecords(controlPlane, "bridge_credit_list", ["credits"], "localRuntime", "Bridge credit", ["creditId"], (credit) => [
         { label: "deposit", value: text(credit.depositId) },
         { label: "account", value: text(credit.accountId) },
         { label: "amount", value: text(credit.amount) },
@@ -2008,7 +2008,7 @@ function buildControlPlaneRpcSections(
       ...buildRpcPilotListRecords(controlPlane, "pilot_credit_list", "credits", "Pilot credit", ["creditId"]),
     ],
     bridgeWithdrawals: [
-      ...buildRpcRecords(controlPlane, "withdrawal_list", ["withdrawals"], "devnet", "Withdrawal", ["withdrawalIntentId", "withdrawalId"], (withdrawal) => [
+      ...buildRpcRecords(controlPlane, "withdrawal_list", ["withdrawals"], "localRuntime", "Withdrawal", ["withdrawalIntentId", "withdrawalId"], (withdrawal) => [
         { label: "credit", value: text(withdrawal.creditId) },
         { label: "deposit", value: text(withdrawal.depositId) },
         { label: "account", value: text(withdrawal.accountId) },
@@ -2057,7 +2057,7 @@ function makeExplorerFallbackRecord(
   summary: string,
 ): WorkbenchRecord {
   const id = firstRecordText(row, idKeys, `${kind.toLowerCase().replace(/\s+/g, "-")}:${index + 1}`);
-  return makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+  return makeRecord("localRuntime", WORKBENCH_EXPLORER_FALLBACK_PATH, {
     id,
     kind,
     title: `${kind} ${id}`,
@@ -2085,7 +2085,7 @@ function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Recor
     : null;
   const realValuePilot = pilotReadiness
     ? [
-        makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+        makeRecord("localRuntime", WORKBENCH_EXPLORER_FALLBACK_PATH, {
           id: "explorer-fallback-base-pilot-readiness",
           kind: "Base pilot readiness",
           title: `Base pilot ${text(pilotReadiness.state, "degraded")}`,
@@ -2175,7 +2175,7 @@ function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Recor
       { label: "source chain", value: text(deposit.sourceChainId) },
       { label: "log index", value: text(deposit.logIndex) },
       { label: "lockbox", value: text(deposit.lockboxAddress ?? deposit.sourceContract) },
-      { label: "recipient", value: text(deposit.flowchainRecipient) },
+      { label: "recipient", value: text(deposit.flowmemoryRecipient) },
       { label: "replay status", value: text(deposit.status) },
     ], "Bridge deposit observation from deterministic explorer fallback.");
   });
@@ -2183,7 +2183,7 @@ function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Recor
     makeExplorerFallbackRecord("Bridge credit", credit, index, ["creditId"], [
       { label: "observation", value: text(credit.observationId) },
       { label: "deposit", value: text(credit.depositId) },
-      { label: "recipient", value: text(credit.flowchainRecipient) },
+      { label: "recipient", value: text(credit.flowmemoryRecipient) },
       { label: "amount", value: text(credit.amount) },
       { label: "status", value: text(credit.status) },
     ], "Bridge credit record from deterministic explorer fallback."),
@@ -2193,7 +2193,7 @@ function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Recor
       makeExplorerFallbackRecord("Withdrawal intent", withdrawal, index, ["withdrawalIntentId"], [
         { label: "credit", value: text(withdrawal.creditId) },
         { label: "deposit", value: text(withdrawal.depositId) },
-        { label: "account", value: text(withdrawal.flowchainAccount) },
+        { label: "account", value: text(withdrawal.flowmemoryAccount) },
         { label: "Base recipient", value: text(withdrawal.baseRecipient) },
         { label: "amount", value: text(withdrawal.amount) },
       ], "Bridge withdrawal intent from deterministic explorer fallback."),
@@ -2242,8 +2242,8 @@ function buildExplorerFallbackSections(explorerFallback: unknown): Partial<Recor
   };
 }
 
-function buildBlockRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const blocks = collectionFrom(devnetState, ["blocks"]);
+function buildBlockRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const blocks = collectionFrom(localRuntimeState, ["blocks"]);
 
   if (blocks.length > 0) {
     return blocks
@@ -2253,7 +2253,7 @@ function buildBlockRecords(data: DashboardData, devnetState: unknown): Workbench
         const failedReceipt = receipts.some((receipt) => statusFrom(receipt.status) === "failed");
         const blockNumber = text(block.blockNumber);
 
-        return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+        return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
           id: text(block.blockHash, `block:${blockNumber}`),
           kind: "Block",
           title: `Block ${blockNumber}`,
@@ -2273,8 +2273,8 @@ function buildBlockRecords(data: DashboardData, devnetState: unknown): Workbench
       .sort((left, right) => Number(right.title.replace("Block ", "")) - Number(left.title.replace("Block ", "")));
   }
 
-  return data.devnetBlocks.map((block) =>
-    makeRecord("devnet", data.metadata.fixturePath, {
+  return data.localRuntimeBlocks.map((block) =>
+    makeRecord("localRuntime", data.metadata.fixturePath, {
       id: block.blockHash,
       kind: "Block",
       title: `Block ${block.blockNumber}`,
@@ -2292,8 +2292,8 @@ function buildBlockRecords(data: DashboardData, devnetState: unknown): Workbench
   );
 }
 
-function buildTransactionRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const blocks = collectionFrom(devnetState, ["blocks"]);
+function buildTransactionRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const blocks = collectionFrom(localRuntimeState, ["blocks"]);
   const records: WorkbenchRecord[] = [];
 
   for (const block of blocks) {
@@ -2305,7 +2305,7 @@ function buildTransactionRecords(data: DashboardData, devnetState: unknown): Wor
       const receipt = receipts.find((candidate) => text(candidate.txId) === txId) ?? receipts[index];
       const receiptStatus = statusFrom(receipt?.status, "pending");
       records.push(
-        makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+        makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
           id: txId,
           kind: "Transaction",
           title: txId,
@@ -2345,19 +2345,19 @@ function buildTransactionRecords(data: DashboardData, devnetState: unknown): Wor
   );
 }
 
-function buildExplorerRecords(data: DashboardData, devnetState: unknown, bridgeTestDeposit: unknown | null): WorkbenchRecord[] {
+function buildExplorerRecords(data: DashboardData, localRuntimeState: unknown, bridgeTestDeposit: unknown | null): WorkbenchRecord[] {
   const explorerRecords = [
-    ...buildBlockRecords(data, devnetState).slice(0, 4),
-    ...buildTransactionRecords(data, devnetState).slice(0, 8),
-    ...buildReceiptRecords(data, devnetState).slice(0, 6),
-    ...buildTokenLaunchRecords(devnetState).slice(0, 4),
-    ...buildTokenBalanceRecords(devnetState).slice(0, 4),
-    ...buildDexPoolRecords(devnetState).slice(0, 4),
-    ...buildLiquidityPositionRecords(devnetState).slice(0, 4),
-    ...buildSwapRecords(devnetState).slice(0, 4),
-    ...buildBridgeRecords(devnetState, "deposits", bridgeTestDeposit).slice(0, 4),
-    ...buildBridgeRecords(devnetState, "credits", bridgeTestDeposit).slice(0, 4),
-    ...buildBridgeRecords(devnetState, "withdrawals", bridgeTestDeposit).slice(0, 4),
+    ...buildBlockRecords(data, localRuntimeState).slice(0, 4),
+    ...buildTransactionRecords(data, localRuntimeState).slice(0, 8),
+    ...buildReceiptRecords(data, localRuntimeState).slice(0, 6),
+    ...buildTokenLaunchRecords(localRuntimeState).slice(0, 4),
+    ...buildTokenBalanceRecords(localRuntimeState).slice(0, 4),
+    ...buildDexPoolRecords(localRuntimeState).slice(0, 4),
+    ...buildLiquidityPositionRecords(localRuntimeState).slice(0, 4),
+    ...buildSwapRecords(localRuntimeState).slice(0, 4),
+    ...buildBridgeRecords(localRuntimeState, "deposits", bridgeTestDeposit).slice(0, 4),
+    ...buildBridgeRecords(localRuntimeState, "credits", bridgeTestDeposit).slice(0, 4),
+    ...buildBridgeRecords(localRuntimeState, "withdrawals", bridgeTestDeposit).slice(0, 4),
   ];
 
   return explorerRecords.map((record) => ({
@@ -2368,12 +2368,12 @@ function buildExplorerRecords(data: DashboardData, devnetState: unknown, bridgeT
   }));
 }
 
-function buildRootfieldRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const devnetRootfields = collectionFrom(devnetState, ["rootfields", "rootfieldState", "rootfieldsById"]).map((rootfield, index) => {
+function buildRootfieldRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const localRuntimeRootfields = collectionFrom(localRuntimeState, ["rootfields", "rootfieldState", "rootfieldsById"]).map((rootfield, index) => {
     const id = text(rootfield.rootfieldId ?? rootfield.id, `rootfield:${index + 1}`);
     const isActive = rootfield.active === true;
 
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Local Rootfield",
       title: id,
@@ -2394,7 +2394,7 @@ function buildRootfieldRecords(data: DashboardData, devnetState: unknown): Workb
   });
 
   const dashboardRootfields = data.rootfields.map((rootfield) =>
-    makeRecord("devnet", data.metadata.fixturePath, {
+    makeRecord("localRuntime", data.metadata.fixturePath, {
       id: rootfield.rootfieldId,
       kind: "Dashboard Rootfield",
       title: rootfield.rootfieldId,
@@ -2412,10 +2412,10 @@ function buildRootfieldRecords(data: DashboardData, devnetState: unknown): Workb
     }),
   );
 
-  return [...devnetRootfields, ...dashboardRootfields];
+  return [...localRuntimeRootfields, ...dashboardRootfields];
 }
 
-function buildAgentRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
+function buildAgentRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
   const agents = new Map<string, { roles: Set<string>; raw: unknown[] }>();
 
   const addAgent = (id: unknown, role: string, raw: unknown) => {
@@ -2433,11 +2433,11 @@ function buildAgentRecords(data: DashboardData, devnetState: unknown): Workbench
   data.workLanes.forEach((lane) => addAgent(lane.operator, "work-lane operator", lane));
   data.flowPulseObservations.forEach((observation) => addAgent(observation.actor, "FlowPulse actor", observation));
 
-  collectionFrom(devnetState, ["workReceipts"]).forEach((receipt) => addAgent(receipt.workerId, "worker", receipt));
-  collectionFrom(devnetState, ["verifierReports"]).forEach((report) => addAgent(report.verifierId, "verifier", report));
+  collectionFrom(localRuntimeState, ["workReceipts"]).forEach((receipt) => addAgent(receipt.workerId, "worker", receipt));
+  collectionFrom(localRuntimeState, ["verifierReports"]).forEach((report) => addAgent(report.verifierId, "verifier", report));
 
   return [...agents.entries()].map(([agentId, agent]) =>
-    makeRecord("devnet", data.metadata.fixturePath, {
+    makeRecord("localRuntime", data.metadata.fixturePath, {
       id: agentId,
       kind: "Agent identity",
       title: agentId,
@@ -2453,15 +2453,15 @@ function buildAgentRecords(data: DashboardData, devnetState: unknown): Workbench
   );
 }
 
-function buildModelRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["models", "modelPassports", "modelPassportsById"]).map((model, index) => {
+function buildModelRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["models", "modelPassports", "modelPassportsById"]).map((model, index) => {
     const id = text(model.modelId ?? model.passportId ?? model.id, `model:${index + 1}`);
 
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "ModelPassport",
       title: id,
-      summary: text(model.summary ?? model.description ?? model.name, "Model passport exported by the control-plane/devnet state."),
+      summary: text(model.summary ?? model.description ?? model.name, "Model passport exported by the control-plane/localRuntime state."),
       status: statusFrom(model.status, "observed"),
       facts: [
         { label: "publisher", value: text(model.publisher ?? model.owner ?? model.agentId) },
@@ -2473,7 +2473,7 @@ function buildModelRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildReceiptRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
+function buildReceiptRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
   const dashboardReceipts = data.workReceipts.map((receipt) =>
     makeRecord("worker", data.metadata.fixturePath, {
       id: receipt.receiptId,
@@ -2492,10 +2492,10 @@ function buildReceiptRecords(data: DashboardData, devnetState: unknown): Workben
     }),
   );
 
-  const devnetReceipts = collectionFrom(devnetState, ["workReceipts"]).map((receipt) =>
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+  const localRuntimeReceipts = collectionFrom(localRuntimeState, ["workReceipts"]).map((receipt) =>
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id: text(receipt.receiptId),
-      kind: "Devnet WorkReceipt",
+      kind: "LocalRuntime WorkReceipt",
       title: text(receipt.receiptId),
       summary: `Worker ${text(receipt.workerId)} moved ${text(receipt.inputRoot)} to ${text(receipt.outputRoot)}.`,
       status: "verified",
@@ -2510,15 +2510,15 @@ function buildReceiptRecords(data: DashboardData, devnetState: unknown): Workben
     }),
   );
 
-  return [...dashboardReceipts, ...devnetReceipts];
+  return [...dashboardReceipts, ...localRuntimeReceipts];
 }
 
-function buildMemoryCellRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const nativeCells = collectionFrom(devnetState, ["memoryCells", "memoryCellState", "cells"]);
+function buildMemoryCellRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const nativeCells = collectionFrom(localRuntimeState, ["memoryCells", "memoryCellState", "cells"]);
   if (nativeCells.length > 0) {
     return nativeCells.map((cell, index) => {
       const id = text(cell.cellId ?? cell.memoryCellId ?? cell.id, `memory-cell:${index + 1}`);
-      return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
         id,
         kind: "MemoryCell",
         title: id,
@@ -2536,7 +2536,7 @@ function buildMemoryCellRecords(data: DashboardData, devnetState: unknown): Work
   }
 
   return data.rootfieldBundles.map((bundle) =>
-    makeRecord("devnet", data.metadata.fixturePath, {
+    makeRecord("localRuntime", data.metadata.fixturePath, {
       id: `memory-cell-projection:${bundle.rootfieldId}`,
       kind: "Memory cell projection",
       title: bundle.rootfieldId,
@@ -2554,13 +2554,13 @@ function buildMemoryCellRecords(data: DashboardData, devnetState: unknown): Work
   );
 }
 
-function buildArtifactRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const artifacts = collectionFrom(devnetState, ["artifactCommitments", "artifacts", "artifactAvailabilityProofs"]).map((artifact) =>
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+function buildArtifactRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const artifacts = collectionFrom(localRuntimeState, ["artifactCommitments", "artifacts", "artifactAvailabilityProofs"]).map((artifact) =>
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id: text(artifact.artifactId ?? artifact.id ?? artifact.proofId),
       kind: "Artifact",
       title: text(artifact.artifactId ?? artifact.id ?? artifact.proofId),
-      summary: text(artifact.uriHint ?? artifact.uri ?? artifact.evidenceURI, "Artifact commitment from local devnet state."),
+      summary: text(artifact.uriHint ?? artifact.uri ?? artifact.evidenceURI, "Artifact commitment from local runtime state."),
       status: statusFrom(artifact.status, "verified"),
       facts: [
         { label: "rootfield", value: text(artifact.rootfieldId) },
@@ -2590,8 +2590,8 @@ function buildArtifactRecords(data: DashboardData, devnetState: unknown): Workbe
   return [...artifacts, ...receiptArtifacts];
 }
 
-function buildVerifierModuleRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const nativeModules = collectionFrom(devnetState, [
+function buildVerifierModuleRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const nativeModules = collectionFrom(localRuntimeState, [
     "verifierModules",
     "verifierModuleRegistry",
     "verifierModulesById",
@@ -2599,11 +2599,11 @@ function buildVerifierModuleRecords(data: DashboardData, devnetState: unknown): 
   ]).map((module, index) => {
     const id = text(module.moduleId ?? module.verifierModuleId ?? module.verifierId ?? module.id, `verifier-module:${index + 1}`);
 
-    return makeRecord("verifier", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("verifier", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "VerifierModule",
       title: id,
-      summary: text(module.summary ?? module.description, "Verifier module exported by the local control-plane/devnet state."),
+      summary: text(module.summary ?? module.description, "Verifier module exported by the local control-plane/localRuntime state."),
       status: statusFrom(module.status, "observed"),
       facts: [
         { label: "owner", value: text(module.owner ?? module.operator ?? module.verifierId) },
@@ -2638,7 +2638,7 @@ function buildVerifierModuleRecords(data: DashboardData, devnetState: unknown): 
     derived.set(key, current);
   }
 
-  for (const report of collectionFrom(devnetState, ["verifierReports"])) {
+  for (const report of collectionFrom(localRuntimeState, ["verifierReports"])) {
     const verifierId = text(report.verifierId, "verifier:local");
     const key = `${verifierId}:${text(report.rootfieldId)}`;
     const current =
@@ -2648,7 +2648,7 @@ function buildVerifierModuleRecords(data: DashboardData, devnetState: unknown): 
         statuses: new Set<DashboardStatus>(),
         raw: [],
         policy: text(report.rootfieldId),
-        spec: "local-devnet",
+        spec: "local-runtime",
       } satisfies { reports: number; statuses: Set<DashboardStatus>; raw: unknown[]; policy: string; spec: string });
     current.reports += 1;
     current.statuses.add(statusFrom(report.status, "observed"));
@@ -2680,7 +2680,7 @@ function buildVerifierModuleRecords(data: DashboardData, devnetState: unknown): 
   );
 }
 
-function buildVerifierRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
+function buildVerifierRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
   const dashboardReports = data.verifierReports.map((report) =>
     makeRecord("verifier", data.metadata.fixturePath, {
       id: report.reportId,
@@ -2700,10 +2700,10 @@ function buildVerifierRecords(data: DashboardData, devnetState: unknown): Workbe
     }),
   );
 
-  const devnetReports = collectionFrom(devnetState, ["verifierReports"]).map((report) =>
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+  const localRuntimeReports = collectionFrom(localRuntimeState, ["verifierReports"]).map((report) =>
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id: text(report.reportId),
-      kind: "Devnet VerifierReport",
+      kind: "LocalRuntime VerifierReport",
       title: text(report.reportId),
       summary: `Verifier ${text(report.verifierId)} reported ${text(report.status)} for ${text(report.receiptId)}.`,
       status: statusFrom(report.status, "observed"),
@@ -2718,13 +2718,13 @@ function buildVerifierRecords(data: DashboardData, devnetState: unknown): Workbe
     }),
   );
 
-  return [...dashboardReports, ...devnetReports];
+  return [...dashboardReports, ...localRuntimeReports];
 }
 
-function buildChallengeRecords(devnetState: unknown): WorkbenchRecord[] {
-  return collectionFrom(devnetState, ["challenges", "challengeState", "openChallenges"]).map((challenge, index) => {
+function buildChallengeRecords(localRuntimeState: unknown): WorkbenchRecord[] {
+  return collectionFrom(localRuntimeState, ["challenges", "challengeState", "openChallenges"]).map((challenge, index) => {
     const id = text(challenge.challengeId ?? challenge.id, `challenge:${index + 1}`);
-    return makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Challenge",
       title: id,
@@ -2741,9 +2741,9 @@ function buildChallengeRecords(devnetState: unknown): WorkbenchRecord[] {
   });
 }
 
-function buildFinalityRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
+function buildFinalityRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
   const records: WorkbenchRecord[] = [
-    makeRecord("devnet", data.metadata.fixturePath, {
+    makeRecord("localRuntime", data.metadata.fixturePath, {
       id: "dashboard-finality-window",
       kind: "Finality window",
       title: `${data.chain.finalizedBlock} finalized`,
@@ -2759,16 +2759,16 @@ function buildFinalityRecords(data: DashboardData, devnetState: unknown): Workbe
     }),
   ];
 
-  collectionFrom(devnetState, ["baseAnchors"]).forEach((anchor) => {
+  collectionFrom(localRuntimeState, ["baseAnchors"]).forEach((anchor) => {
     records.push(
-      makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
+      makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
         id: text(anchor.anchorId),
         kind: "Local anchor",
         title: text(anchor.anchorId),
         summary: `Blocks ${text(anchor.blockRangeStart)}-${text(anchor.blockRangeEnd)} are marked ${text(anchor.finalityStatus)}.`,
         status: statusFrom(anchor.finalityStatus, "pending"),
         facts: [
-          { label: "appchain", value: text(anchor.appchainChainId) },
+          { label: "local runtime", value: text(anchor.localRuntimeChainId) },
           { label: "state root", value: text(anchor.stateRoot) },
           { label: "work receipt root", value: text(anchor.workReceiptRoot) },
           { label: "verifier root", value: text(anchor.verifierReportRoot) },
@@ -2796,7 +2796,7 @@ function buildLiveReadinessRecords(liveReadinessReport: unknown | null): Workben
         facts: [
           { label: "deployment ready", value: "false" },
           { label: "packet shareable", value: "false" },
-          { label: "next command", value: "npm run flowchain:public-deployment:contract" },
+          { label: "next command", value: "npm run flowmemory:public-deployment:contract" },
         ],
         raw: null,
       }),
@@ -2881,7 +2881,7 @@ function buildLiveReadinessRecords(liveReadinessReport: unknown | null): Workben
         facts: [
           { label: "required names", value: names.join(", ") },
           { label: "values printed", value: "false" },
-          { label: "setup command", value: "npm run flowchain:owner-env:template" },
+          { label: "setup command", value: "npm run flowmemory:owner-env:template" },
         ],
         raw: { group, names },
       }),
@@ -2909,8 +2909,8 @@ function buildLiveReadinessRecords(liveReadinessReport: unknown | null): Workben
   return records;
 }
 
-function buildHardwareSignalRecords(data: DashboardData, devnetState: unknown): WorkbenchRecord[] {
-  const nativeSignals = collectionFrom(devnetState, [
+function buildHardwareSignalRecords(data: DashboardData, localRuntimeState: unknown): WorkbenchRecord[] {
+  const nativeSignals = collectionFrom(localRuntimeState, [
     "hardwareSignals",
     "hardwareHeartbeats",
     "heartbeats",
@@ -2920,7 +2920,7 @@ function buildHardwareSignalRecords(data: DashboardData, devnetState: unknown): 
   ]).map((signal, index) => {
     const id = text(signal.signalId ?? signal.heartbeatId ?? signal.nodeId ?? signal.id, `hardware-signal:${index + 1}`);
 
-    return makeRecord("hardware", WORKBENCH_DEVNET_STATE_PATH, {
+    return makeRecord("hardware", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
       id,
       kind: "Hardware signal",
       title: id,
@@ -2965,8 +2965,8 @@ function topLevelKeys(value: unknown): string {
 function buildRawJsonRecords(
   data: DashboardData,
   controlPlane: ControlPlaneProbe,
-  devnetState: unknown | null,
-  devnetDashboardState: unknown | null,
+  localRuntimeState: unknown | null,
+  localRuntimeDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
   liveReadinessReport: unknown | null,
   explorerFallback: unknown | null,
@@ -2985,33 +2985,33 @@ function buildRawJsonRecords(
       ],
       raw: data,
     }),
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
-      id: "raw-devnet-state",
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
+      id: "raw-localRuntime-state",
       kind: "Raw JSON",
-      title: WORKBENCH_DEVNET_STATE_PATH,
-      summary: devnetState ? "Launch-core local devnet state loaded." : "Launch-core local devnet state was not loaded.",
-      status: devnetState ? "verified" : "unresolved",
+      title: WORKBENCH_LOCAL_RUNTIME_STATE_PATH,
+      summary: localRuntimeState ? "Launch-core local runtime state loaded." : "Launch-core local runtime state was not loaded.",
+      status: localRuntimeState ? "verified" : "unresolved",
       facts: [
-        { label: "schema", value: isRecord(devnetState) ? text(devnetState.schema) : "missing" },
-        { label: "keys", value: topLevelKeys(devnetState) },
+        { label: "schema", value: isRecord(localRuntimeState) ? text(localRuntimeState.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(localRuntimeState) },
       ],
-      raw: devnetState,
+      raw: localRuntimeState,
     }),
-    makeRecord("devnet", WORKBENCH_DEVNET_DASHBOARD_STATE_PATH, {
-      id: "raw-devnet-dashboard-state",
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH, {
+      id: "raw-localRuntime-dashboard-state",
       kind: "Raw JSON",
-      title: WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
-      summary: devnetDashboardState
-        ? "Launch-core devnet dashboard projection loaded."
-        : "Launch-core devnet dashboard projection was not loaded.",
-      status: devnetDashboardState ? "verified" : "unresolved",
+      title: WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH,
+      summary: localRuntimeDashboardState
+        ? "Launch-core localRuntime dashboard projection loaded."
+        : "Launch-core localRuntime dashboard projection was not loaded.",
+      status: localRuntimeDashboardState ? "verified" : "unresolved",
       facts: [
-        { label: "schema", value: isRecord(devnetDashboardState) ? text(devnetDashboardState.schema) : "missing" },
-        { label: "keys", value: topLevelKeys(devnetDashboardState) },
+        { label: "schema", value: isRecord(localRuntimeDashboardState) ? text(localRuntimeDashboardState.schema) : "missing" },
+        { label: "keys", value: topLevelKeys(localRuntimeDashboardState) },
       ],
-      raw: devnetDashboardState,
+      raw: localRuntimeDashboardState,
     }),
-    makeRecord("devnet", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
+    makeRecord("localRuntime", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
       id: "raw-bridge-test-deposit",
       kind: "Raw JSON",
       title: WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
@@ -3039,13 +3039,13 @@ function buildRawJsonRecords(
       ],
       raw: liveReadinessReport,
     }),
-    makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+    makeRecord("localRuntime", WORKBENCH_EXPLORER_FALLBACK_PATH, {
       id: "raw-explorer-fallback",
       kind: "Raw JSON",
       title: WORKBENCH_EXPLORER_FALLBACK_PATH,
       summary: explorerFallback
-        ? "FlowChain L1 explorer fallback loaded for offline block, token, DEX, bridge, and recovery inspection."
-        : "FlowChain L1 explorer fallback was not loaded.",
+        ? "FlowMemory network explorer fallback loaded for offline block, token, DEX, bridge, and recovery inspection."
+        : "FlowMemory network explorer fallback was not loaded.",
       status: explorerFallback ? "verified" : "unresolved",
       facts: [
         { label: "schema", value: isRecord(explorerFallback) ? text(explorerFallback.schema) : "missing" },
@@ -3091,8 +3091,8 @@ function buildRawJsonRecords(
 function buildProvenanceRecords(
   data: DashboardData,
   controlPlane: ControlPlaneProbe,
-  devnetState: unknown | null,
-  devnetDashboardState: unknown | null,
+  localRuntimeState: unknown | null,
+  localRuntimeDashboardState: unknown | null,
   bridgeTestDeposit: unknown | null,
   liveReadinessReport: unknown | null,
   explorerFallback: unknown | null,
@@ -3133,33 +3133,33 @@ function buildProvenanceRecords(
       ],
       raw: data.metadata,
     }),
-    makeRecord("devnet", WORKBENCH_DEVNET_STATE_PATH, {
-      id: "devnet-state-fixture",
-      kind: "Devnet state fixture",
-      title: WORKBENCH_DEVNET_STATE_PATH,
-      summary: devnetState ? "Existing launch-core devnet state loaded into the workbench." : "Devnet state fixture was not loaded.",
-      status: devnetState ? "verified" : "unresolved",
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_STATE_PATH, {
+      id: "localRuntime-state-fixture",
+      kind: "LocalRuntime state fixture",
+      title: WORKBENCH_LOCAL_RUNTIME_STATE_PATH,
+      summary: localRuntimeState ? "Existing launch-core localRuntime state loaded into the workbench." : "LocalRuntime state fixture was not loaded.",
+      status: localRuntimeState ? "verified" : "unresolved",
       facts: [
-        { label: "schema", value: isRecord(devnetState) ? text(devnetState.schema) : "missing" },
-        { label: "source", value: "fixtures/launch-core/generated/devnet/state.json" },
+        { label: "schema", value: isRecord(localRuntimeState) ? text(localRuntimeState.schema) : "missing" },
+        { label: "source", value: "fixtures/launch-core/generated/local-runtime/state.json" },
       ],
-      raw: devnetState,
+      raw: localRuntimeState,
     }),
-    makeRecord("devnet", WORKBENCH_DEVNET_DASHBOARD_STATE_PATH, {
-      id: "devnet-dashboard-state-fixture",
-      kind: "Devnet dashboard-state fixture",
-      title: WORKBENCH_DEVNET_DASHBOARD_STATE_PATH,
-      summary: devnetDashboardState
-        ? "Existing devnet dashboard-state fixture loaded for raw/provenance inspection."
-        : "Devnet dashboard-state fixture was not loaded.",
-      status: devnetDashboardState ? "verified" : "unresolved",
+    makeRecord("localRuntime", WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH, {
+      id: "localRuntime-dashboard-state-fixture",
+      kind: "LocalRuntime dashboard-state fixture",
+      title: WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH,
+      summary: localRuntimeDashboardState
+        ? "Existing localRuntime dashboard-state fixture loaded for raw/provenance inspection."
+        : "LocalRuntime dashboard-state fixture was not loaded.",
+      status: localRuntimeDashboardState ? "verified" : "unresolved",
       facts: [
-        { label: "schema", value: isRecord(devnetDashboardState) ? text(devnetDashboardState.schema) : "missing" },
-        { label: "source", value: "fixtures/launch-core/generated/devnet/dashboard-state.json" },
+        { label: "schema", value: isRecord(localRuntimeDashboardState) ? text(localRuntimeDashboardState.schema) : "missing" },
+        { label: "source", value: "fixtures/launch-core/generated/local-runtime/dashboard-state.json" },
       ],
-      raw: devnetDashboardState,
+      raw: localRuntimeDashboardState,
     }),
-    makeRecord("devnet", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
+    makeRecord("localRuntime", WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH, {
       id: "bridge-test-deposit-fixture",
       kind: "Bridge fixture",
       title: WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH,
@@ -3187,30 +3187,30 @@ function buildProvenanceRecords(
       ],
       raw: liveReadinessReport,
     }),
-    makeRecord("devnet", WORKBENCH_EXPLORER_FALLBACK_PATH, {
-      id: "flowchain-l1-explorer-fallback",
+    makeRecord("localRuntime", WORKBENCH_EXPLORER_FALLBACK_PATH, {
+      id: "flowmemory-network-explorer-fallback",
       kind: "Explorer fixture",
       title: WORKBENCH_EXPLORER_FALLBACK_PATH,
       summary: explorerFallback
-        ? "FlowChain L1 explorer fallback is loaded with explicit fixture provenance."
-        : "FlowChain L1 explorer fallback was not loaded.",
+        ? "FlowMemory network explorer fallback is loaded with explicit fixture provenance."
+        : "FlowMemory network explorer fallback was not loaded.",
       status: explorerFallback ? "verified" : "unresolved",
       facts: [
         { label: "schema", value: isRecord(explorerFallback) ? text(explorerFallback.schema) : "missing" },
-        { label: "source", value: "fixtures/dashboard/flowchain-l1-explorer-fallback.json" },
+        { label: "source", value: "fixtures/dashboard/flowmemory-network-explorer-fallback.json" },
       ],
       raw: explorerFallback,
     }),
   ];
 }
 
-function buildNodeStatus(data: DashboardData, devnetState: unknown, controlPlane: ControlPlaneProbe): WorkbenchNodeStatus {
-  const latestBlock = latestBlockFromDevnet(devnetState);
-  const devnet = isRecord(devnetState) ? devnetState : {};
-  const nextBlockNumber = numberValue(devnet.nextBlockNumber);
+function buildNodeStatus(data: DashboardData, localRuntimeState: unknown, controlPlane: ControlPlaneProbe): WorkbenchNodeStatus {
+  const latestBlock = latestBlockFromLocalRuntime(localRuntimeState);
+  const localRuntime = isRecord(localRuntimeState) ? localRuntimeState : {};
+  const nextBlockNumber = numberValue(localRuntime.nextBlockNumber);
   const blockHeight = nextBlockNumber !== null ? Math.max(0, nextBlockNumber - 1) : data.chain.currentBlock;
-  const stateRoot = text(latestBlock?.stateRoot ?? devnet.stateRoot ?? data.devnetBlocks[0]?.stateRoot);
-  const pendingTxs = recordValues(devnet.pendingTxs).length;
+  const stateRoot = text(latestBlock?.stateRoot ?? localRuntime.stateRoot ?? data.localRuntimeBlocks[0]?.stateRoot);
+  const pendingTxs = recordValues(localRuntime.pendingTxs).length;
   const status: DashboardStatus = controlPlane.status === "available" ? "verified" : "offline";
 
   return {
@@ -3221,10 +3221,10 @@ function buildNodeStatus(data: DashboardData, devnetState: unknown, controlPlane
         ? "The local API health endpoint responded. The workbench will use API state when the state endpoint is available."
         : "No local API responded at the configured URL, so this screen is rendering committed deterministic fixtures.",
     facts: [
-      { label: "chain id", value: text(devnet.chainId ?? data.chain.chainId) },
+      { label: "chain id", value: text(localRuntime.chainId ?? data.chain.chainId) },
       { label: "block height", value: blockHeight.toString() },
-      { label: "genesis hash", value: text(devnet.genesisHash) },
-      { label: "parent/head hash", value: text(devnet.parentHash ?? latestBlock?.blockHash) },
+      { label: "genesis hash", value: text(localRuntime.genesisHash) },
+      { label: "parent/head hash", value: text(localRuntime.parentHash ?? latestBlock?.blockHash) },
       { label: "state root", value: stateRoot },
       { label: "pending txs", value: pendingTxs.toString() },
       { label: "api url", value: controlPlane.url },
@@ -3247,13 +3247,13 @@ function buildSetupSteps(controlPlane: ControlPlaneProbe): WorkbenchSetupStep[] 
       detail: "Current root command validates launch-core data before the workbench consumes it.",
     },
     {
-      command: "npm run flowchain:start",
+      command: "npm run flowmemory:start",
       label: "Start private testnet services",
       state: "expected",
       detail: "Integration point for the runtime/control-plane package; not provided by this dashboard change.",
     },
     {
-      command: "npm run flowchain:smoke",
+      command: "npm run flowmemory:smoke",
       label: "Run full object smoke flow",
       state: "expected",
       detail: "Expected to populate agents, models, receipts, artifacts, challenges, finality, and API state.",
@@ -3274,8 +3274,8 @@ export function buildWorkbenchSnapshot(
   data: DashboardData,
   options: {
     controlPlane?: ControlPlaneProbe;
-    devnetState?: unknown | null;
-    devnetDashboardState?: unknown | null;
+    localRuntimeState?: unknown | null;
+    localRuntimeDashboardState?: unknown | null;
     bridgeTestDeposit?: unknown | null;
     liveReadinessReport?: unknown | null;
     explorerFallback?: unknown | null;
@@ -3292,7 +3292,7 @@ export function buildWorkbenchSnapshot(
       error: "not probed",
     } satisfies ControlPlaneProbe);
   const controlPlaneState = extractControlPlaneState(controlPlane.state);
-  const activeDevnetState = controlPlaneState ?? options.devnetState ?? null;
+  const activeLocalRuntimeState = controlPlaneState ?? options.localRuntimeState ?? null;
   const bridgeTestDeposit = options.bridgeTestDeposit ?? null;
   const liveReadinessReport = options.liveReadinessReport ?? null;
   const rawExplorerFallback = rpcPayload(controlPlane, "raw_json_explorer_fallback");
@@ -3300,42 +3300,42 @@ export function buildWorkbenchSnapshot(
   const source: WorkbenchSource = controlPlane.status === "available" && controlPlaneState ? "control-plane" : "fixture-fallback";
 
   const sections: Record<WorkbenchSectionKey, WorkbenchRecord[]> = {
-    nodeStatus: buildNodeStatusRecords(data, activeDevnetState, controlPlane),
-    peers: buildPeerRecords(activeDevnetState),
-    blocks: buildBlockRecords(data, activeDevnetState),
-    transactions: buildTransactionRecords(data, activeDevnetState),
-    mempool: buildMempoolRecords(activeDevnetState),
-    accounts: buildAccountRecords(activeDevnetState),
-    balances: [...buildBalanceRecords(activeDevnetState), ...buildControlPlaneWalletBalanceRecords(controlPlane)],
-    faucetEvents: buildFaucetEventRecords(activeDevnetState),
-    walletMetadata: buildWalletMetadataRecords(activeDevnetState),
-    tokenLaunches: buildTokenLaunchRecords(activeDevnetState),
-    tokenBalances: buildTokenBalanceRecords(activeDevnetState),
-    tokenTransfers: buildTokenTransferRecords(activeDevnetState),
-    dexPools: buildDexPoolRecords(activeDevnetState),
-    liquidityPositions: buildLiquidityPositionRecords(activeDevnetState),
-    swaps: buildSwapRecords(activeDevnetState),
-    explorerRecords: buildExplorerRecords(data, activeDevnetState, bridgeTestDeposit),
-    rootfields: buildRootfieldRecords(data, activeDevnetState),
-    agents: buildAgentRecords(data, activeDevnetState),
-    models: buildModelRecords(activeDevnetState),
-    receipts: buildReceiptRecords(data, activeDevnetState),
+    nodeStatus: buildNodeStatusRecords(data, activeLocalRuntimeState, controlPlane),
+    peers: buildPeerRecords(activeLocalRuntimeState),
+    blocks: buildBlockRecords(data, activeLocalRuntimeState),
+    transactions: buildTransactionRecords(data, activeLocalRuntimeState),
+    mempool: buildMempoolRecords(activeLocalRuntimeState),
+    accounts: buildAccountRecords(activeLocalRuntimeState),
+    balances: [...buildBalanceRecords(activeLocalRuntimeState), ...buildControlPlaneWalletBalanceRecords(controlPlane)],
+    faucetEvents: buildFaucetEventRecords(activeLocalRuntimeState),
+    walletMetadata: buildWalletMetadataRecords(activeLocalRuntimeState),
+    tokenLaunches: buildTokenLaunchRecords(activeLocalRuntimeState),
+    tokenBalances: buildTokenBalanceRecords(activeLocalRuntimeState),
+    tokenTransfers: buildTokenTransferRecords(activeLocalRuntimeState),
+    dexPools: buildDexPoolRecords(activeLocalRuntimeState),
+    liquidityPositions: buildLiquidityPositionRecords(activeLocalRuntimeState),
+    swaps: buildSwapRecords(activeLocalRuntimeState),
+    explorerRecords: buildExplorerRecords(data, activeLocalRuntimeState, bridgeTestDeposit),
+    rootfields: buildRootfieldRecords(data, activeLocalRuntimeState),
+    agents: buildAgentRecords(data, activeLocalRuntimeState),
+    models: buildModelRecords(activeLocalRuntimeState),
+    receipts: buildReceiptRecords(data, activeLocalRuntimeState),
     receiptEvents: [],
-    memoryCells: buildMemoryCellRecords(data, activeDevnetState),
-    artifacts: buildArtifactRecords(data, activeDevnetState),
-    verifierModules: buildVerifierModuleRecords(data, activeDevnetState),
-    verifierReports: buildVerifierRecords(data, activeDevnetState),
-    challenges: buildChallengeRecords(activeDevnetState),
-    finality: buildFinalityRecords(data, activeDevnetState),
-    bridgeDeposits: buildBridgeRecords(activeDevnetState, "deposits", bridgeTestDeposit),
-    bridgeCredits: buildBridgeRecords(activeDevnetState, "credits", bridgeTestDeposit),
-    bridgeWithdrawals: buildBridgeRecords(activeDevnetState, "withdrawals", bridgeTestDeposit),
+    memoryCells: buildMemoryCellRecords(data, activeLocalRuntimeState),
+    artifacts: buildArtifactRecords(data, activeLocalRuntimeState),
+    verifierModules: buildVerifierModuleRecords(data, activeLocalRuntimeState),
+    verifierReports: buildVerifierRecords(data, activeLocalRuntimeState),
+    challenges: buildChallengeRecords(activeLocalRuntimeState),
+    finality: buildFinalityRecords(data, activeLocalRuntimeState),
+    bridgeDeposits: buildBridgeRecords(activeLocalRuntimeState, "deposits", bridgeTestDeposit),
+    bridgeCredits: buildBridgeRecords(activeLocalRuntimeState, "credits", bridgeTestDeposit),
+    bridgeWithdrawals: buildBridgeRecords(activeLocalRuntimeState, "withdrawals", bridgeTestDeposit),
     bridgeReleases: [],
     realValuePilot: buildPilotRecords(controlPlane),
     liveReadiness: buildLiveReadinessRecords(liveReadinessReport),
     errorsRecovery: [],
     provenance: [],
-    hardwareSignals: buildHardwareSignalRecords(data, activeDevnetState),
+    hardwareSignals: buildHardwareSignalRecords(data, activeLocalRuntimeState),
     rawJson: [],
   };
 
@@ -3367,7 +3367,7 @@ export function buildWorkbenchSnapshot(
   }
   sections.receiptEvents = sections.receiptEvents.length > 0
     ? sections.receiptEvents
-    : buildReceiptRecords(data, activeDevnetState).slice(0, 8);
+    : buildReceiptRecords(data, activeLocalRuntimeState).slice(0, 8);
   sections.bridgeReleases = sections.bridgeReleases.length > 0
     ? sections.bridgeReleases
     : buildPilotRecords(controlPlane).filter((record) => record.kind.toLowerCase().includes("release"));
@@ -3397,8 +3397,8 @@ export function buildWorkbenchSnapshot(
   sections.provenance = buildProvenanceRecords(
     data,
     controlPlane,
-    options.devnetState ?? null,
-    options.devnetDashboardState ?? null,
+    options.localRuntimeState ?? null,
+    options.localRuntimeDashboardState ?? null,
     bridgeTestDeposit,
     liveReadinessReport,
     explorerFallback,
@@ -3406,27 +3406,27 @@ export function buildWorkbenchSnapshot(
   sections.rawJson = buildRawJsonRecords(
     data,
     controlPlane,
-    options.devnetState ?? null,
-    options.devnetDashboardState ?? null,
+    options.localRuntimeState ?? null,
+    options.localRuntimeDashboardState ?? null,
     bridgeTestDeposit,
     liveReadinessReport,
     explorerFallback,
   );
-  const displayedSections = source === "control-plane" ? relabelDevnetRecordsAsControlPlane(sections, controlPlane) : sections;
+  const displayedSections = source === "control-plane" ? relabelLocalRuntimeRecordsAsControlPlane(sections, controlPlane) : sections;
 
   return {
     source,
     generatedAt: new Date().toISOString(),
     controlPlane,
-    node: buildNodeStatus(data, activeDevnetState, controlPlane),
+    node: buildNodeStatus(data, activeLocalRuntimeState, controlPlane),
     setupSteps: buildSetupSteps(controlPlane),
     actions: buildLocalActions(controlPlane),
     sections: displayedSections,
     loadIssues: options.loadIssues ?? [],
     raw: {
       dashboard: data,
-      devnetState: options.devnetState ?? null,
-      devnetDashboardState: options.devnetDashboardState ?? null,
+      localRuntimeState: options.localRuntimeState ?? null,
+      localRuntimeDashboardState: options.localRuntimeDashboardState ?? null,
       bridgeTestDeposit,
       liveReadinessReport,
       explorerFallback,
@@ -3445,22 +3445,22 @@ export function buildWorkbenchSnapshot(
 export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<WorkbenchSnapshot> {
   const [
     controlPlane,
-    devnetStateResult,
-    devnetDashboardStateResult,
+    localRuntimeStateResult,
+    localRuntimeDashboardStateResult,
     bridgeTestDepositResult,
     liveReadinessResult,
     explorerFallbackResult,
   ] = await Promise.all([
     probeControlPlane(),
-    fetchOptionalJson(WORKBENCH_DEVNET_STATE_PATH),
-    fetchOptionalJson(WORKBENCH_DEVNET_DASHBOARD_STATE_PATH),
+    fetchOptionalJson(WORKBENCH_LOCAL_RUNTIME_STATE_PATH),
+    fetchOptionalJson(WORKBENCH_LOCAL_RUNTIME_DASHBOARD_STATE_PATH),
     fetchOptionalJson(WORKBENCH_BRIDGE_TEST_DEPOSIT_PATH),
     fetchOptionalJson(WORKBENCH_LIVE_READINESS_REPORT_PATH),
     fetchOptionalJson(WORKBENCH_EXPLORER_FALLBACK_PATH),
   ]);
   const loadIssues = [
-    devnetStateResult.error,
-    devnetDashboardStateResult.error,
+    localRuntimeStateResult.error,
+    localRuntimeDashboardStateResult.error,
     bridgeTestDepositResult.error,
     liveReadinessResult.error,
     explorerFallbackResult.error,
@@ -3468,8 +3468,8 @@ export async function fetchWorkbenchSnapshot(data: DashboardData): Promise<Workb
 
   return buildWorkbenchSnapshot(data, {
     controlPlane,
-    devnetState: devnetStateResult.value,
-    devnetDashboardState: devnetDashboardStateResult.value,
+    localRuntimeState: localRuntimeStateResult.value,
+    localRuntimeDashboardState: localRuntimeDashboardStateResult.value,
     bridgeTestDeposit: bridgeTestDepositResult.value,
     liveReadinessReport: liveReadinessResult.value,
     explorerFallback: explorerFallbackResult.value,

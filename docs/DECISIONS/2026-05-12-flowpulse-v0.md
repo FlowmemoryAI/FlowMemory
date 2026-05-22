@@ -35,7 +35,7 @@ Heavy AI, memory, model, artifact, media, and evidence data stays off-chain beca
 
 URI fields are advisory and unenforced in v0. `metadataURI` and `evidenceURI` are arbitrary caller-supplied strings accepted by the current skeleton contract. The contract does not enforce length, content, format, resolvability, or "short pointer" behavior, and emitted URI bytes are still on-chain log data. Keeping heavy or sensitive data out of URI fields is a caller responsibility and verifier policy, not a contract guarantee.
 
-FlowPulse is intentionally minimal so that the first contracts foundation can establish stable event semantics without prematurely committing to fee design, token design, hook integration, verifier economics, proof formats, or appchain assumptions.
+FlowPulse is intentionally minimal so that the first contracts foundation can establish stable event semantics without prematurely committing to fee design, token design, hook integration, verifier economics, proof formats, or dedicated-network assumptions.
 
 ## Consequences
 
@@ -67,7 +67,7 @@ The minimal design leaves several responsibilities outside the contract:
 - Uniswap v4 hooks
 - Full indexer or verifier implementation
 - Cryptographic proof system design
-- Appchain or L1 design
+- Dedicated network design
 - Hardware signaling semantics
 - Storing raw AI memory, model, artifact, media, or evidence data on-chain
 

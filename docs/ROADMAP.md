@@ -168,7 +168,7 @@ Status: blocked until explicit go/no-go decisions exist.
 - Tokenomics or value-bearing systems.
 - Mainnet deployment.
 - Production Uniswap v4 hook deployment.
-- Verifier networks, staking, slashing, or incentives.
+- Verifier services, staking, slashing, or incentives.
 - Hardware manufacturing or production decentralized internet claims.
 - Any dedicated network infrastructure not directly required by the public FlowMemory launch path.
 
@@ -183,5 +183,5 @@ The public launch merge preference is:
 5. Dashboard public navigation and copy cleanup.
 6. Direct contract-backed SDK completion with provider security boundaries.
 7. Base Sepolia public-agent deployment/readback evidence when explicitly scoped.
-8. Static analysis follow-up findings triaged for any public testnet deployment.
+8. Static analysis follow-up findings triaged for any public deployment.
 9. Operator ownership separation and multisig/recovery decision before further live deployments.

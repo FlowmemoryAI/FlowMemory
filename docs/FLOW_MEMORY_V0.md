@@ -181,7 +181,7 @@ Not allowed:
 - "All memory is stored on-chain."
 - "Storage is free."
 - "The hook knows txHash or logIndex during execution."
-- "FlowMemory is a production L1."
+- "FlowMemory is a separate production network."
 - "V0 verification is fully trustless."
 
 ## Dashboard Display Path

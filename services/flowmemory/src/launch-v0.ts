@@ -26,8 +26,8 @@ function runStep(name: string, command: string, args: string[]): void {
 
 export function runLaunchV0(): void {
   process.chdir(REPO_ROOT);
-  mkdirSync("fixtures/launch-core/generated/devnet", { recursive: true });
-  mkdirSync("devnet/local", { recursive: true });
+  mkdirSync("fixtures/launch-core/generated/local-runtime", { recursive: true });
+  mkdirSync("local-runtime/local", { recursive: true });
 
   runStep("observe FlowPulse fixtures with indexer", "npm", [
     "run",
@@ -43,16 +43,16 @@ export function runLaunchV0(): void {
     "services/verifier",
   ]);
 
-  runStep("run no-value local devnet handoff", "cargo", [
+  runStep("run no-value local runtime handoff", "cargo", [
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
-    "devnet/local/launch-v0-state.json",
+    "local-runtime/local/launch-v0-state.json",
     "demo",
     "--out-dir",
-    "fixtures/launch-core/generated/devnet",
+    "fixtures/launch-core/generated/local-runtime",
   ]);
 
   runStep("validate FlowRouter hardware POC fixture", "python", [

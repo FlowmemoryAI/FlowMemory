@@ -31,7 +31,7 @@ export function FlowMemoryView({ data }: { data: DashboardData }) {
       <SectionHeader
         eyebrow="launch core"
         title="Rootflow and Flow Memory"
-        detail="Generated V0 state built from indexer observations, verifier reports, local devnet output, and hardware fixture data."
+        detail="Generated V0 state built from indexer observations, verifier reports, local runtime output, and hardware fixture data."
         action={
           <label className="search-box">
             <Search size={16} aria-hidden="true" />

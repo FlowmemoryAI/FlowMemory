@@ -261,8 +261,8 @@
       "expected": "0xaf8489608eca0cfb4b25880355fd5d36ad96df15005906191c21bd6d58f6d9c6"
     },
     {
-      "name": "devnet.blockHash",
-      "function": "devnetBlockHash",
+      "name": "localRuntime.blockHash",
+      "function": "localRuntimeBlockHash",
       "input": {
         "chainId": 8453,
         "blockNumber": 12345678,
@@ -270,7 +270,7 @@
         "stateRoot": "0x8a693dbe4f75fa223c6891bebaefa82f8135bff2597a17687945949a0b6082e4",
         "timestamp": 1778640000
       },
-      "expected": "0x90cb545229eb785f0583ca5abafb3da199a5c68a1aa8ef140e169c024ca48e54"
+      "expected": "0x4a448f8ac87b1b7c79007b797494bbf06dc369a1601ecba5266fc8c15822f797"
     },
     {
       "name": "local-alpha.agentAccountId",
@@ -285,7 +285,7 @@
         "spendingLimitPerEpoch": "0",
         "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
       },
-      "expected": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
+      "expected": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240"
     },
     {
       "name": "local-alpha.modelPassportId",
@@ -300,7 +300,7 @@
         "metadataHash": "0x198ae9ec53443e3a46f8762e4b9ee166c2927d7faec07ce2bdc8714859504d17",
         "nonce": "0x6550e26ef27367750192911d54ae8c97af6f828e52f4b696a25f215581a34b6b"
       },
-      "expected": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879"
+      "expected": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316"
     },
     {
       "name": "local-alpha.memoryCellId",
@@ -315,7 +315,7 @@
         "updatedAtUnixMs": "1778702400000",
         "cellVersion": 0
       },
-      "expected": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f"
+      "expected": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29"
     },
     {
       "name": "local-alpha.artifactAvailabilityProofId",
@@ -331,7 +331,7 @@
         "status": 7,
         "nonce": "0xb68051d46145d6360b963e755c6950ea087bc7bbdb3ad4a0dc4508150a2c7685"
       },
-      "expected": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e"
+      "expected": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217"
     },
     {
       "name": "local-alpha.verifierModuleId",
@@ -346,7 +346,7 @@
         "moduleVersion": 0,
         "status": 2
       },
-      "expected": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360"
+      "expected": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863"
     },
     {
       "name": "local-alpha.challengeId",
@@ -361,7 +361,7 @@
         "status": 1,
         "nonce": "0x3fae75c35d96efdccce46b8d8223846defbb52752d3332afc0a799b84a55020d"
       },
-      "expected": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403"
+      "expected": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd"
     },
     {
       "name": "local-alpha.finalityReceiptId",
@@ -376,7 +376,7 @@
         "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
       },
-      "expected": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf"
+      "expected": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879"
     },
     {
       "name": "local-alpha.controlPlaneProvenanceResponseId",
@@ -393,7 +393,7 @@
         "issuedAtUnixMs": "1778702400000",
         "responseVersion": 0
       },
-      "expected": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb"
+      "expected": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a"
     },
     {
       "name": "local-alpha.workReceiptId",
@@ -437,7 +437,7 @@
         "transport": 1,
         "nonce": "0x1b85840b67182a89cf64394167db32108e00798b043aad5c6c2cab58d8726110"
       },
-      "expected": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10"
+      "expected": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52"
     },
     {
       "name": "local-alpha.localSignatureEnvelopeHash.agent-account",
@@ -454,7 +454,7 @@
         "expiresAtUnixMs": "1810238400000",
         "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
       },
-      "expected": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279"
+      "expected": "0xe71fb0898079897591b6cd6e10b9d9a3d1c81589ad329d3ea158fbea940b6b05"
     },
     {
       "name": "local-alpha.bridgeDepositId",
@@ -467,11 +467,11 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "nonce": "1",
         "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
       },
-      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe"
+      "expected": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350"
     },
     {
       "name": "local-alpha.bridgeCreditId",
@@ -486,7 +486,7 @@
         "status": 3,
         "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
       },
-      "expected": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb"
+      "expected": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891"
     },
     {
       "name": "local-alpha.bridgeWithdrawalId",
@@ -504,7 +504,7 @@
         "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
         "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
       },
-      "expected": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805"
+      "expected": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c"
     },
     {
       "name": "local-alpha.localBalanceRecordId",
@@ -520,7 +520,7 @@
         "updatedAtBlockNumber": "5",
         "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
       },
-      "expected": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076"
+      "expected": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe"
     },
     {
       "name": "local-alpha.localTransactionEnvelopeHash",
@@ -537,7 +537,7 @@
         "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
         "issuedAtUnixMs": "1778702400000"
       },
-      "expected": "0xb8de3add81640848961aa8e0ba73c5c2ff3e30aed480dbba8e70d1345dba6210"
+      "expected": "0x909e5f8261323a512c23e9acff0af4fe133d4739d2154ed01ae9869ae6dcba5f"
     },
     {
       "name": "product-testnet.product-transfer.demo.productTransferId",
@@ -551,7 +551,7 @@
         "deadlineBlock": "120",
         "memoHash": "0xfef9324c5f1619c4e94c9b7ab42bc3d978f8e5cfdfa2c17d0dd05bc4eac2f2f0"
       },
-      "expected": "0x904418c2e5c39edadf6fc86d855e10777d9653eac043a2edd763bbe432abb8d0"
+      "expected": "0x6dc8cb378c5b9f4e8d4fa7187c5b27134016fb5d833fc61902c047cee01c63b3"
     },
     {
       "name": "product-testnet.product-token-launch.demo.productTokenLaunchId",
@@ -568,7 +568,7 @@
         "accountNonce": "2",
         "launchPolicyHash": "0x01e3f368278e99ac565a3ab853f18b6096ba085aee814d3ae190894058a29de4"
       },
-      "expected": "0x32f218a6d5f89f2e2b2050113a68c705cffdfd902862eb6f1197d9a9f19a292d"
+      "expected": "0xf50ea563a8ccab0ca7fe7eb797443f79e3117ad8d649527b7b051040aaa5b148"
     },
     {
       "name": "product-testnet.product-pool-create.demo.productPoolCreateId",
@@ -583,7 +583,7 @@
         "metadataHash": "0x4e1568bbeb8b0af8e7c982e0c07d6faebd92eb17c74c92a6ff5baea65c4c0645",
         "accountNonce": "3"
       },
-      "expected": "0x2a2e8e30e9bf74a7653c5646c6261004ac4d4cc9eb3db5e742a2e242ab406591"
+      "expected": "0x19cb3fc43dff4b6c68e2bdeb2f7680ef26dc133b2af288f136089bea944030ab"
     },
     {
       "name": "product-testnet.product-add-liquidity.demo.productAddLiquidityId",
@@ -597,7 +597,7 @@
         "deadlineBlock": "160",
         "accountNonce": "4"
       },
-      "expected": "0xc1e9a397a0d3d464917d578ecc9713353ef024a9a62ae67d3c2382315c613adb"
+      "expected": "0x98b6b7dc07db1ffd6b49500ee8267721db277bb26cfd038e760fa1eb4be4cd44"
     },
     {
       "name": "product-testnet.product-remove-liquidity.demo.productRemoveLiquidityId",
@@ -611,7 +611,7 @@
         "deadlineBlock": "200",
         "accountNonce": "5"
       },
-      "expected": "0xfd2e45bd620c09873c25c1ca85f9ff85b56057f5982987e96bb09b009eaf1fa4"
+      "expected": "0xb31a2b04c061d4fc63c650798abe772d275159469e38b70c115d8beb90a195b9"
     },
     {
       "name": "product-testnet.product-swap.demo.productSwapId",
@@ -626,7 +626,7 @@
         "deadlineBlock": "240",
         "accountNonce": "6"
       },
-      "expected": "0xac7dca996c3d80e9e2ef389e380d6208b6d827fdfb0b1a680dab66f4defb434d"
+      "expected": "0x47b1e47d00034ff64a7099f224351bd658d8a186440634cd8cdf8ee0a0215b39"
     },
     {
       "name": "product-testnet.product-bridge-credit-ack.demo.productBridgeCreditAckId",
@@ -640,7 +640,7 @@
         "acknowledgedAtBlockNumber": "8",
         "accountNonce": "7"
       },
-      "expected": "0xefa2208dc5a9873f549031a8404169b8a192b9d8c8c866dd39f0f304d7f740b8"
+      "expected": "0x5f196a3756e2ced2a25649a15f287800153cff8f8d5762242224a732206de472"
     },
     {
       "name": "product-testnet.bridge-withdrawal-intent.demo.bridgeWithdrawalIntentId",
@@ -652,7 +652,7 @@
         "destinationChainId": 84532,
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "5000000",
-        "flowchainAccount": "0x43df29be6dcbf171c042f86227b45acf58938e981c539759335d76798778fde3",
+        "flowmemoryAccount": "0x43df29be6dcbf171c042f86227b45acf58938e981c539759335d76798778fde3",
         "baseRecipient": "0x4444444444444444444444444444444444444444",
         "status": "requested",
         "requestedAt": "2026-05-13T23:00:00.000Z",
@@ -661,7 +661,7 @@
         "releasePolicy": "test_record_only",
         "productionReady": false
       },
-      "expected": "0x7be29323cef21fc50c828a7e18d125056c82e5735cb7e1d47f9efc40e2b77c9a"
+      "expected": "0x306b684f8a80cbffd0602bec02aebab34b096503de3ff2f67245cbdf7799f6e4"
     }
   ]
 }

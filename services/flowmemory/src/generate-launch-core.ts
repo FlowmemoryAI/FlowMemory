@@ -118,7 +118,7 @@ interface VerifierReport {
 export interface LaunchCorePaths {
   indexerPath: string;
   verifierPath: string;
-  devnetPath: string;
+  localRuntimePath: string;
   hardwarePath: string;
   launchOutPath: string;
   transitionsOutPath: string;
@@ -160,7 +160,7 @@ export interface DashboardData {
   agentBondRecourseDecisions: JsonObject[];
   agentBondFailureWaterfalls: JsonObject[];
   baseAgentMemoryScouts: JsonObject[];
-  devnetBlocks: JsonObject[];
+  localRuntimeBlocks: JsonObject[];
   hardwareNodes: JsonObject[];
   alerts: JsonObject[];
 }
@@ -168,7 +168,7 @@ export interface DashboardData {
 export const DEFAULT_LAUNCH_CORE_PATHS: LaunchCorePaths = {
   indexerPath: "services/indexer/out/indexer-state.json",
   verifierPath: "services/verifier/out/reports.json",
-  devnetPath: "fixtures/launch-core/generated/devnet/state.json",
+  localRuntimePath: "fixtures/launch-core/generated/local-runtime/state.json",
   hardwarePath: "hardware/fixtures/flowrouter_sample_seed42.json",
   launchOutPath: "fixtures/launch-core/flowmemory-launch-v0.json",
   transitionsOutPath: "fixtures/launch-core/rootflow-transitions.json",
@@ -534,7 +534,7 @@ export function buildLaunchCore(
     sourcePaths: {
       indexer: paths.indexerPath,
       verifier: paths.verifierPath,
-      devnet: paths.devnetPath,
+      localRuntime: paths.localRuntimePath,
       hardware: paths.hardwarePath,
       agentBondFixture: paths.agentBondFixturePath,
       agentMemoryFixture: paths.agentMemoryFixturePath,
@@ -580,7 +580,7 @@ function buildDashboardData(
   launchCore: LaunchCoreOutput,
   indexer: IndexerPersistence,
   verifier: VerifierPersistence,
-  devnet: JsonObject,
+  localRuntime: JsonObject,
   hardware: JsonObject,
   taskScoutFixture: TaskScoutFixtureEnvelope,
 ): DashboardData {
@@ -598,7 +598,7 @@ function buildDashboardData(
   const gateway = packets?.gateway_discovery as JsonObject | undefined;
   const cache = packets?.local_cache_status as JsonObject | undefined;
   const sidecar = packets?.sidecar_status as JsonObject | undefined;
-  const blocks = Array.isArray(devnet.blocks) ? devnet.blocks as JsonObject[] : [];
+  const blocks = Array.isArray(localRuntime.blocks) ? localRuntime.blocks as JsonObject[] : [];
 
   const rootfields = launchCore.rootfieldBundles.map((bundle) => ({
     id: bundle.bundleId,
@@ -877,13 +877,13 @@ function buildDashboardData(
       schema: "flowmemory.dashboard.fixture.v0",
       generatedAt: GENERATED_AT,
       mode: "fixture",
-      description: "Generated local FlowMemory Dashboard V0 fixture from services, local devnet, and hardware POC outputs. It does not claim live production data.",
+      description: "Generated local FlowMemory Dashboard V0 fixture from services, local runtime, and hardware POC outputs. It does not claim live production data.",
       fixturePath: "fixtures/dashboard/flowmemory-dashboard-v0.json",
       runtimeDataPath: "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
       futureGeneratedPaths: {
         indexer: "services/indexer/out/indexer-state.json",
         verifier: "services/verifier/out/reports.json",
-        devnet: "fixtures/launch-core/generated/devnet/state.json",
+        localRuntime: "fixtures/launch-core/generated/local-runtime/state.json",
         hardware: "hardware/fixtures/flowrouter_sample_seed42.json",
         agentBondFixture: "fixtures/agent-bonds/agent-bonds-v1.json",
         agentMemoryFixture: "fixtures/base-agent-memory/task-scout-v0.json",
@@ -892,8 +892,8 @@ function buildDashboardData(
     chain: {
       chainId: "8453",
       name: "FlowMemory local V0 fixture stack",
-      environment: "local-devnet",
-      settlementContext: "Base-native fixture observations plus no-value local devnet handoff; not Base mainnet production data.",
+      environment: "local-runtime",
+      settlementContext: "Base-native fixture observations plus no-value local runtime handoff; not Base mainnet production data.",
       currentBlock,
       finalizedBlock,
       source: "fixture",
@@ -1012,7 +1012,7 @@ function buildDashboardData(
       ...phase2Gate,
       status: phase2Gate.foundationReady ? "verified" : "unresolved",
       lastUpdated: GENERATED_AT,
-      provenance: provenance("worker", "devnet/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"),
+      provenance: provenance("worker", "local-runtime/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"),
     },
     agentBondA2A: {
       agentCards: a2aCardFixtures,
@@ -1043,20 +1043,20 @@ function buildDashboardData(
       provenance: provenance("worker", "fixtures/agent-bonds/claims"),
     },
     baseAgentMemoryScouts,
-    devnetBlocks: blocks.map((block) => ({
+    localRuntimeBlocks: blocks.map((block) => ({
       id: String(block.blockHash),
       blockNumber: Number(block.blockNumber),
       blockHash: String(block.blockHash),
       parentHash: String(block.parentHash),
       stateRoot: String(block.stateRoot),
-      receiptsRoot: stableId("flowmemory.dashboard.devnet.receipts_root.v0", block.receipts ?? []),
+      receiptsRoot: stableId("flowmemory.dashboard.localRuntime.receipts_root.v0", block.receipts ?? []),
       timestamp: new Date(Number(block.logicalTime ?? 0) * 1000).toISOString(),
       observationCount: launchCore.acceptance.indexedObservations,
       reportCount: launchCore.acceptance.verifierReports,
       finalityDistance: Math.max(0, currentBlock - Number(block.blockNumber ?? 0)),
       status: Number(block.blockNumber ?? 0) === blocks.length ? "finalized" : "stale",
       lastUpdated: GENERATED_AT,
-      provenance: provenance("devnet", "fixtures/launch-core/generated/devnet/state.json"),
+      provenance: provenance("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json"),
     })),
     hardwareNodes,
     alerts,
@@ -1069,12 +1069,12 @@ export function generateLaunchCore(paths: LaunchCorePaths = DEFAULT_LAUNCH_CORE_
 } {
   const indexer = readJson<IndexerPersistence>(paths.indexerPath);
   const verifier = readJson<VerifierPersistence>(paths.verifierPath);
-  const devnet = readJson<JsonObject>(paths.devnetPath);
+  const localRuntime = readJson<JsonObject>(paths.localRuntimePath);
   const hardware = readJson<JsonObject>(paths.hardwarePath);
   const agentBondFixture = readJson<AgentBondFixtureEnvelope>(paths.agentBondFixturePath);
   const taskScoutFixture = buildTaskScoutFixture();
   const launchCore = buildLaunchCore(indexer, verifier, paths, agentBondFixture, taskScoutFixture);
-  const dashboard = buildDashboardData(launchCore, indexer, verifier, devnet, hardware, taskScoutFixture);
+  const dashboard = buildDashboardData(launchCore, indexer, verifier, localRuntime, hardware, taskScoutFixture);
 
   writeJson(paths.launchOutPath, launchCore);
   writeJson(paths.transitionsOutPath, {
@@ -1099,7 +1099,7 @@ function parseCliPaths(): LaunchCorePaths {
   const optionMap: Record<string, keyof LaunchCorePaths> = {
     "--indexer": "indexerPath",
     "--verifier": "verifierPath",
-    "--devnet": "devnetPath",
+    "--localRuntime": "localRuntimePath",
     "--hardware": "hardwarePath",
     "--out": "launchOutPath",
     "--transitions-out": "transitionsOutPath",
@@ -1151,7 +1151,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       ...dashboard.agentBondTasks,
       ...dashboard.agentBondSettlements,
       ...dashboard.agentBondPassportViews,
-      ...dashboard.devnetBlocks,
+      ...dashboard.localRuntimeBlocks,
       ...dashboard.hardwareNodes,
       ...dashboard.alerts,
     ].length,

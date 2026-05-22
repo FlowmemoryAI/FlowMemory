@@ -26,7 +26,7 @@ import {
   controlPlaneProvenanceResponseId,
   contractPulseId,
   cursorId,
-  devnetBlockHash,
+  localRuntimeBlockHash,
   DOMAIN_STRINGS,
   domainSeparator,
   eip712DomainSeparator,
@@ -96,7 +96,7 @@ import {
   workerSignaturePayload
 } from "../src/index.js";
 import { validateLocalAlphaFixtures } from "../src/validate-local-alpha-fixtures.js";
-import { validateProductionL1Crypto } from "../src/validate-production-l1-crypto.js";
+import { validateProductionNetworkCrypto } from "../src/validate-production-network-crypto.js";
 import { validateProductTestnetFixtures } from "../src/validate-product-testnet-fixtures.js";
 import { validateVectors } from "../src/validate-vectors.js";
 
@@ -237,7 +237,7 @@ test("exports named domain separators and cursor/root identity helpers", () => {
     workerSequence: report.workerSignature.input.workerSequence,
     nonce: report.workerSignature.input.nonce
   };
-  const operatorId = keccakUtf8("operator:flowmemory-labs-devnet");
+  const operatorId = keccakUtf8("operator:flowmemory-labs-localRuntime");
 
   assert.equal(
     domainSeparator("flowPulseObservationId"),
@@ -265,7 +265,7 @@ test("exports named domain separators and cursor/root identity helpers", () => {
       workerKeyId: report.workerSignature.input.workerKeyId,
       scopeHash: keccakUtf8("scope:base:rootfield.beta")
     }),
-    "0x356c8e272ea376e5313a0bae08f9f154355c1658a526f557bd950bbb74c7065a"
+    "0x2cad4c10b1bd02dd0042f97784d3637ac4dd08ab112819482003de683454ac33"
   );
   assert.equal(
     verifierIdentity({
@@ -273,17 +273,17 @@ test("exports named domain separators and cursor/root identity helpers", () => {
       verifierKeyId: report.verifierSignature.input.verifierKeyId,
       verifierSetRoot: report.verifierSignature.input.verifierSetRoot
     }),
-    "0xaf8489608eca0cfb4b25880355fd5d36ad96df15005906191c21bd6d58f6d9c6"
+    "0xca929f014bbd4e927127949989d1b3a59b8d1bbe4d1561ba8d882afe74c84c99"
   );
   assert.equal(
-    devnetBlockHash({
+    localRuntimeBlockHash({
       chainId: observation.input.chainId,
       blockNumber: observation.input.blockNumber,
       parentHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
-      stateRoot: keccakUtf8("state:flowmemory:devnet"),
+      stateRoot: keccakUtf8("state:flowmemory:localRuntime"),
       timestamp: flowPulse.input.occurredAt
     }),
-    "0x90cb545229eb785f0583ca5abafb3da199a5c68a1aa8ef140e169c024ca48e54"
+    "0x72f2affffb524753d1fd477fa40b353f4a0e55f7046b73ba9d654f4d9f11d55a"
   );
 });
 
@@ -401,9 +401,9 @@ test("receipt-adjacent fields fail closed when changed", () => {
   assert.notEqual(wrongVerifierSet.signingDigest, report.verifierSignature.expected.signingDigest);
 });
 
-test("computes FlowChain Local Alpha object ids and validates schema documents", () => {
+test("computes FlowMemory Local Alpha object ids and validates schema documents", () => {
   assert.equal(localAlphaObjects.schema, "flowmemory.crypto.local-alpha-object-fixtures.v0");
-  assert.match(localAlphaObjects.rdBoundary.researchCryptoCrate, /noesis-crypto$/);
+  assert.equal(localAlphaObjects.rdBoundary.researchCryptoCrate, "external-rd/crypto");
   assert.match(localAlphaObjects.rdBoundary.consumeAs, /Research vocabulary/);
   assert.match(localAlphaObjects.rdBoundary.operatorVaultBoundary, /no-value test keys/);
 
@@ -417,7 +417,7 @@ test("computes FlowChain Local Alpha object ids and validates schema documents",
   }
 });
 
-test("validates FlowChain Local Alpha signed object envelopes", () => {
+test("validates FlowMemory Local Alpha signed object envelopes", () => {
   const documentsByName = new Map(localAlphaObjects.positive.map((entry) => [entry.name, entry.document]));
   const seenSequences = new Set();
 
@@ -560,8 +560,8 @@ test("validates Product Testnet V1 wallet transaction documents, envelopes, and 
   });
 });
 
-test("validates production-L1 runtime crypto vectors and exact negative failures", () => {
-  assert.deepEqual(validateProductionL1Crypto(), {
+test("validates production-network runtime crypto vectors and exact negative failures", () => {
+  assert.deepEqual(validateProductionNetworkCrypto(), {
     positive: 11,
     negative: 14,
     hashHelpers: 14,
@@ -586,8 +586,8 @@ test("Local Alpha object fixtures reject swapped fields, malformed hex, duplicat
 
   const modelPassport = localAlphaObjects.positive.find((entry) => entry.function === "modelPassportId");
   const changedTypeString = TYPE_STRINGS.modelPassportV0.replace(
-    "FlowChainModelPassportV0",
-    "FlowChainModelPassportV1"
+    "FlowMemoryModelPassportV0",
+    "FlowMemoryModelPassportV1"
   );
   const changedTypeHash = typedHash(changedTypeString, [
     ["bytes32", modelPassport.input.providerHash],
@@ -603,7 +603,7 @@ test("Local Alpha object fixtures reject swapped fields, malformed hex, duplicat
   assert.notEqual(changedTypeHash, modelPassport.expected);
   assert.notEqual(
     domainSeparator("modelPassportId"),
-    domainSeparator("flowchain.local-alpha.v1.model-passport.id")
+    domainSeparator("flowmemory.local-alpha.v1.model-passport.id")
   );
 });
 
@@ -721,7 +721,7 @@ test("human wallet metadata and signed envelopes cover transfer, token, DEX, wit
   const metadata = exportLocalWalletPublicMetadata(vault, { updatedAtUnixMs: issuedAtUnixMs });
 
   assert.deepEqual(validateLocalWalletPublicMetadata(metadata, { expectedChainId: chainId }), {
-    schema: "flowchain.local_wallet_public_metadata_verification.v0",
+    schema: "flowmemory.local_wallet_public_metadata_verification.v0",
     valid: true,
     secretFree: true,
     chainIdMatch: true,
@@ -790,7 +790,7 @@ test("human wallet metadata and signed envelopes cover transfer, token, DEX, wit
     destinationChainId: 8453,
     token: "0x3333333333333333333333333333333333333333",
     amount: "50",
-    flowchainAccount: account.address,
+    flowmemoryAccount: account.address,
     baseRecipient: "0x4444444444444444444444444444444444444444",
     requestedAt: "2026-05-14T00:00:00.000Z"
   });
@@ -861,27 +861,27 @@ test("capped real-value pilot operator messages sign, export public metadata, an
   });
   const operator = vault.publicAccounts[0];
   const env = {
-    FLOWCHAIN_PILOT_CHAIN_ID: "84532",
-    FLOWCHAIN_PILOT_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
-    FLOWCHAIN_PILOT_OPERATOR_ID: operator.signerId,
-    FLOWCHAIN_PILOT_CAP_ID: keccakUtf8("pilot-cap:test"),
-    FLOWCHAIN_PILOT_CAP_ASSET_ID: keccakUtf8("asset:usdc"),
-    FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "25000000",
-    FLOWCHAIN_PILOT_CAP_UNIT: "USDC-6",
-    FLOWCHAIN_PILOT_CAP_WINDOW_START_UNIX_MS: issuedAtUnixMs,
-    FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
-    FLOWCHAIN_PILOT_RPC_URL: fakeRpcUrl
+    FLOWMEMORY_PILOT_CHAIN_ID: "84532",
+    FLOWMEMORY_PILOT_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
+    FLOWMEMORY_PILOT_OPERATOR_ID: operator.signerId,
+    FLOWMEMORY_PILOT_CAP_ID: keccakUtf8("pilot-cap:test"),
+    FLOWMEMORY_PILOT_CAP_ASSET_ID: keccakUtf8("asset:usdc"),
+    FLOWMEMORY_PILOT_CAP_MAX_AMOUNT: "25000000",
+    FLOWMEMORY_PILOT_CAP_UNIT: "USDC-6",
+    FLOWMEMORY_PILOT_CAP_WINDOW_START_UNIX_MS: issuedAtUnixMs,
+    FLOWMEMORY_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
+    FLOWMEMORY_PILOT_RPC_URL: fakeRpcUrl
   };
   const config = createPilotOperatorConfigFromEnv({ env, createdAtUnixMs: issuedAtUnixMs });
   for (const [name, envPatch, errorPattern] of [
-    ["unsupported chain id", { FLOWCHAIN_PILOT_CHAIN_ID: "1" }, /unsupported pilot chain id/],
-    ["malformed cap id", { FLOWCHAIN_PILOT_CAP_ID: "not-a-cap-id" }, /invalid pilot cap id/],
-    ["zero max cap", { FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "0" }, /maxAmount must be positive/],
-    ["used cap above max", { FLOWCHAIN_PILOT_CAP_USED_AMOUNT: "25000001" }, /usedAmount/],
-    ["closed cap window", { FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: issuedAtUnixMs }, /window/],
-    ["secret-shaped config path", { FLOWCHAIN_PILOT_CONFIG_PATH: "devnet/local/pilot-wallet/rpc_url.json" }, /secret material/],
-    ["base mainnet non-usdc cap", { FLOWCHAIN_PILOT_CHAIN_ID: "8453", FLOWCHAIN_PILOT_CAP_UNIT: "ETH-18" }, /USDC-6/],
-    ["base mainnet cap above guardrail", { FLOWCHAIN_PILOT_CHAIN_ID: "8453", FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "25000001" }, /25 USD/]
+    ["unsupported chain id", { FLOWMEMORY_PILOT_CHAIN_ID: "1" }, /unsupported pilot chain id/],
+    ["malformed cap id", { FLOWMEMORY_PILOT_CAP_ID: "not-a-cap-id" }, /invalid pilot cap id/],
+    ["zero max cap", { FLOWMEMORY_PILOT_CAP_MAX_AMOUNT: "0" }, /maxAmount must be positive/],
+    ["used cap above max", { FLOWMEMORY_PILOT_CAP_USED_AMOUNT: "25000001" }, /usedAmount/],
+    ["closed cap window", { FLOWMEMORY_PILOT_CAP_WINDOW_END_UNIX_MS: issuedAtUnixMs }, /window/],
+    ["secret-shaped config path", { FLOWMEMORY_PILOT_CONFIG_PATH: "local-runtime/local/pilot-wallet/rpc_url.json" }, /secret material/],
+    ["base mainnet non-usdc cap", { FLOWMEMORY_PILOT_CHAIN_ID: "8453", FLOWMEMORY_PILOT_CAP_UNIT: "ETH-18" }, /USDC-6/],
+    ["base mainnet cap above guardrail", { FLOWMEMORY_PILOT_CHAIN_ID: "8453", FLOWMEMORY_PILOT_CAP_MAX_AMOUNT: "25000001" }, /25 USD/]
   ]) {
     assert.throws(
       () => createPilotOperatorConfigFromEnv({ env: { ...env, ...envPatch }, createdAtUnixMs: issuedAtUnixMs }),
@@ -907,7 +907,7 @@ test("capped real-value pilot operator messages sign, export public metadata, an
   assert.doesNotMatch(JSON.stringify(config), /redacted/i);
   assert.doesNotMatch(JSON.stringify(publicMetadata), /privateKey|mnemonic|seed|redacted|webhook|apiKey/i);
   assert.equal(publicMetadata.accounts.length, 1);
-  assert.equal(config.nextCommands.some((command) => command.includes("flowchain-wallet-pilot-observe.ps1")), true);
+  assert.equal(config.nextCommands.some((command) => command.includes("flowmemory-wallet-pilot-observe.ps1")), true);
 
   const document = buildPilotBridgeCreditAckDocument({
     chainId: config.chainId,

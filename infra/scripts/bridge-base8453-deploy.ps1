@@ -4,7 +4,7 @@ param(
 
     [switch]$AcknowledgeBroadcast,
 
-    [string]$ReportPath = "devnet/local/bridge-live-readiness/base8453-deploy-readiness.json"
+    [string]$ReportPath = "local-runtime/local/bridge-live-readiness/base8453-deploy-readiness.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -59,7 +59,7 @@ function Invoke-BaseChainCheck {
         $response = Invoke-RestMethod -Uri $RpcUrl -Method Post -ContentType "application/json" -Body $body -TimeoutSec 20
     }
     catch {
-        throw "Could not read eth_chainId from FLOWCHAIN_BASE8453_RPC_URL. Do not print or commit the endpoint."
+        throw "Could not read eth_chainId from FLOWMEMORY_BASE8453_RPC_URL. Do not print or commit the endpoint."
     }
     if ($response.result -ne "0x2105") {
         throw "Wrong chain id for Base 8453 deploy: expected 0x2105."
@@ -73,7 +73,7 @@ function Get-DeployerAddress {
     }
     $address = (& cast wallet address --private-key $PrivateKey 2>$null | Select-Object -First 1)
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($address)) {
-        throw "Could not derive deployer address from FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY."
+        throw "Could not derive deployer address from FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY."
     }
     $trimmed = ($address -as [string]).Trim()
     Assert-Address -Name "derived deployer address" -Value $trimmed
@@ -93,12 +93,12 @@ function Write-JsonReport {
 }
 
 $requiredEnvNames = @(
-    "FLOWCHAIN_BASE8453_RPC_URL",
-    "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
-    "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-    "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-    "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-    "FLOWCHAIN_PILOT_OPERATOR_ACK"
+    "FLOWMEMORY_BASE8453_RPC_URL",
+    "FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY",
+    "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
+    "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+    "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
+    "FLOWMEMORY_PILOT_OPERATOR_ACK"
 )
 
 $missing = @()
@@ -115,8 +115,8 @@ if ($Mode -eq "DryRun" -and $missing.Count -gt 0) {
         status = "blocked"
         missingEnvNames = $missing
         requiredEnvNames = $requiredEnvNames
-        exactDryRunCommand = "npm run flowchain:bridge:deploy:base8453"
-        exactBroadcastCommand = "npm run flowchain:bridge:deploy:base8453 -- -Mode Broadcast -AcknowledgeBroadcast"
+        exactDryRunCommand = "npm run flowmemory:bridge:deploy:base8453"
+        exactBroadcastCommand = "npm run flowmemory:bridge:deploy:base8453 -- -Mode Broadcast -AcknowledgeBroadcast"
         printsEnvValues = $false
         broadcasts = $false
         noSecrets = $true
@@ -125,28 +125,28 @@ if ($Mode -eq "DryRun" -and $missing.Count -gt 0) {
     throw "Base 8453 bridge deploy blocked by missing env names."
 }
 
-$rpcUrl = Require-BridgeEnv -Name "FLOWCHAIN_BASE8453_RPC_URL"
-$privateKey = Require-BridgeEnv -Name "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY"
-$supportedToken = Require-BridgeEnv -Name "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN"
-$maxDeposit = (Assert-Uint -Name "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI" -Value (Require-BridgeEnv -Name "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI")).ToString()
-$totalCap = (Assert-Uint -Name "FLOWCHAIN_PILOT_TOTAL_CAP_WEI" -Value (Require-BridgeEnv -Name "FLOWCHAIN_PILOT_TOTAL_CAP_WEI")).ToString()
-Assert-Address -Name "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN" -Value $supportedToken
+$rpcUrl = Require-BridgeEnv -Name "FLOWMEMORY_BASE8453_RPC_URL"
+$privateKey = Require-BridgeEnv -Name "FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY"
+$supportedToken = Require-BridgeEnv -Name "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN"
+$maxDeposit = (Assert-Uint -Name "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI" -Value (Require-BridgeEnv -Name "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI")).ToString()
+$totalCap = (Assert-Uint -Name "FLOWMEMORY_PILOT_TOTAL_CAP_WEI" -Value (Require-BridgeEnv -Name "FLOWMEMORY_PILOT_TOTAL_CAP_WEI")).ToString()
+Assert-Address -Name "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN" -Value $supportedToken
 
 if ([System.Numerics.BigInteger]::Parse($totalCap) -lt [System.Numerics.BigInteger]::Parse($maxDeposit)) {
-    throw "FLOWCHAIN_PILOT_TOTAL_CAP_WEI must be greater than or equal to FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI."
+    throw "FLOWMEMORY_PILOT_TOTAL_CAP_WEI must be greater than or equal to FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI."
 }
 
 Invoke-BaseChainCheck -RpcUrl $rpcUrl
 
-$ack = Require-BridgeEnv -Name "FLOWCHAIN_PILOT_OPERATOR_ACK"
+$ack = Require-BridgeEnv -Name "FLOWMEMORY_PILOT_OPERATOR_ACK"
 if ($ack -ne $requiredAck) {
-    throw "FLOWCHAIN_PILOT_OPERATOR_ACK must equal $requiredAck."
+    throw "FLOWMEMORY_PILOT_OPERATOR_ACK must equal $requiredAck."
 }
 
 $deployer = Get-DeployerAddress -PrivateKey $privateKey
-$owner = $(if (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_OWNER_ADDRESS") { Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_OWNER_ADDRESS" } else { $deployer })
-$releaseAuthority = $(if (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_RELEASE_AUTHORITY_ADDRESS") { Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_RELEASE_AUTHORITY_ADDRESS" } else { $deployer })
-$settlementSubmitter = $(if (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS") { Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS" } else { $deployer })
+$owner = $(if (Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_OWNER_ADDRESS") { Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_OWNER_ADDRESS" } else { $deployer })
+$releaseAuthority = $(if (Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_RELEASE_AUTHORITY_ADDRESS") { Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_RELEASE_AUTHORITY_ADDRESS" } else { $deployer })
+$settlementSubmitter = $(if (Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS") { Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_SETTLEMENT_SUBMITTER_ADDRESS" } else { $deployer })
 Assert-Address -Name "owner" -Value $owner
 Assert-Address -Name "release authority" -Value $releaseAuthority
 Assert-Address -Name "settlement submitter" -Value $settlementSubmitter
@@ -165,17 +165,17 @@ $report = [ordered]@{
     baseChainId = 8453
     assetPath = if ($allowNative) { "native-eth" } else { "erc20" }
     configuredEnvNames = @(
-        "FLOWCHAIN_BASE8453_RPC_URL",
-        "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY",
-        "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-        "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-        "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-        "FLOWCHAIN_PILOT_OPERATOR_ACK"
+        "FLOWMEMORY_BASE8453_RPC_URL",
+        "FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY",
+        "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
+        "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+        "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
+        "FLOWMEMORY_PILOT_OPERATOR_ACK"
     )
     pausedAfterDeploy = $false
     emergencyStoppedAfterDeploy = $false
-    exactDryRunCommand = "npm run flowchain:bridge:deploy:base8453"
-    exactBroadcastCommand = "npm run flowchain:bridge:deploy:base8453 -- -Mode Broadcast -AcknowledgeBroadcast"
+    exactDryRunCommand = "npm run flowmemory:bridge:deploy:base8453"
+    exactBroadcastCommand = "npm run flowmemory:bridge:deploy:base8453 -- -Mode Broadcast -AcknowledgeBroadcast"
     printsEnvValues = $false
     broadcasts = ($Mode -eq "Broadcast")
     noSecrets = $true
@@ -190,26 +190,26 @@ if ($Mode -eq "DryRun") {
 if (-not $AcknowledgeBroadcast) {
     throw "Broadcast mode requires -AcknowledgeBroadcast."
 }
-$broadcastAckValue = Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_BROADCAST_ACK"
+$broadcastAckValue = Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_BROADCAST_ACK"
 if ($broadcastAckValue -ne $broadcastAck) {
-    throw "FLOWCHAIN_BASE8453_BROADCAST_ACK must equal $broadcastAck."
+    throw "FLOWMEMORY_BASE8453_BROADCAST_ACK must equal $broadcastAck."
 }
 if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
     throw "forge is required for Base 8453 deployment broadcast."
 }
 
 $mappedEnv = @{
-    FLOWCHAIN_BASE8453_PILOT_ACK = "true"
-    FLOWCHAIN_BRIDGE_OWNER = $owner
-    FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY = $releaseAuthority
-    FLOWCHAIN_SETTLEMENT_SUBMITTER = $settlementSubmitter
-    FLOWCHAIN_BRIDGE_ALLOW_NATIVE = if ($allowNative) { "true" } else { "false" }
-    FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP = $nativePerDepositCap
-    FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP = $nativeTotalCap
-    FLOWCHAIN_BRIDGE_ALLOW_ERC20 = if ($allowErc20) { "true" } else { "false" }
-    FLOWCHAIN_BRIDGE_ERC20_TOKEN = if ($allowErc20) { $supportedToken } else { $zeroAddress }
-    FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP = $erc20PerDepositCap
-    FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP = $erc20TotalCap
+    FLOWMEMORY_BASE8453_PILOT_ACK = "true"
+    FLOWMEMORY_BRIDGE_OWNER = $owner
+    FLOWMEMORY_BRIDGE_RELEASE_AUTHORITY = $releaseAuthority
+    FLOWMEMORY_SETTLEMENT_SUBMITTER = $settlementSubmitter
+    FLOWMEMORY_BRIDGE_ALLOW_NATIVE = if ($allowNative) { "true" } else { "false" }
+    FLOWMEMORY_BRIDGE_NATIVE_PER_DEPOSIT_CAP = $nativePerDepositCap
+    FLOWMEMORY_BRIDGE_NATIVE_TOTAL_CAP = $nativeTotalCap
+    FLOWMEMORY_BRIDGE_ALLOW_ERC20 = if ($allowErc20) { "true" } else { "false" }
+    FLOWMEMORY_BRIDGE_ERC20_TOKEN = if ($allowErc20) { $supportedToken } else { $zeroAddress }
+    FLOWMEMORY_BRIDGE_ERC20_PER_DEPOSIT_CAP = $erc20PerDepositCap
+    FLOWMEMORY_BRIDGE_ERC20_TOTAL_CAP = $erc20TotalCap
 }
 
 $previous = @{}

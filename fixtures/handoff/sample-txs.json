@@ -1,5 +1,5 @@
 {
-  "schema": "flowmemory.local_devnet.fixture.txs.v0",
+  "schema": "flowmemory.local_runtime.fixture.txs.v0",
   "description": "No-value local FlowMemory transaction fixture covering the full smoke lifecycle.",
   "txs": [
     {
@@ -107,7 +107,7 @@
     },
     {
       "type": "AnchorBatchToBasePlaceholder",
-      "appchainChainId": "flowmemory-local-devnet-v0",
+      "localRuntimeChainId": "flowmemory-local-runtime-v0",
       "finalityStatus": "local-placeholder"
     }
   ]

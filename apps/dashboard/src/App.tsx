@@ -19,7 +19,6 @@ import { RootfieldsView } from "./views/RootfieldsView";
 import { UniswapHooksView } from "./views/UniswapHooksView";
 import { VerifierReportsView } from "./views/VerifierReportsView";
 import { WalletView } from "./views/WalletView";
-import { WorkbenchView } from "./views/WorkbenchView";
 import { WorkReceiptsView } from "./views/WorkReceiptsView";
 
 function LoadingState() {
@@ -120,7 +119,6 @@ export default function App() {
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
         <Route path="/" element={<OverviewView data={data} />} />
-        <Route path="/workbench" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
         <Route path="/wallet" element={<WalletView workbench={workbench} />} />
         <Route path="/hooks" element={<UniswapHooksView data={canaryData} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />

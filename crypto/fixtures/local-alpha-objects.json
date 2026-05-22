@@ -1,10 +1,10 @@
 {
   "schema": "flowmemory.crypto.local-alpha-object-fixtures.v0",
   "rdBoundary": {
-    "currentPackage": "E:\\FlowMemory\\flowmemory-crypto\\crypto",
-    "researchCryptoCrate": "E:\\FlowMemory\\github-research-sources\\noesis-l1\\crates\\noesis-crypto",
-    "researchZkCrate": "E:\\FlowMemory\\github-research-sources\\noesis-l1\\crates\\noesis-zk",
-    "consumeAs": "Research vocabulary and future proof input reference only. FlowChain Local Alpha object IDs are Keccak ABI typed hashes from this package.",
+    "currentPackage": "FLOWMEMORY_WORKTREE_ROOT\\flowmemory-crypto\\crypto",
+    "researchCryptoCrate": "external-rd/crypto",
+    "researchZkCrate": "external-rd/zk",
+    "consumeAs": "Research vocabulary and future proof input reference only. FlowMemory Local Alpha object IDs are Keccak ABI typed hashes from this package.",
     "operatorVaultBoundary": "Local Alpha signing keys are deterministic no-value test keys. Operator vault policy is a boundary document, not a wallet custody or value-bearing claim."
   },
   "signingKeys": {
@@ -49,10 +49,10 @@
         "spendingLimitPerEpoch": "0",
         "nonce": "0x37e916697be966b19c0cd7aa6073e78ffb7ee5cf27a4392383f9cfe5fa5025bb"
       },
-      "expected": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+      "expected": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240",
       "document": {
-        "schema": "flowchain.agent_account.v0",
-        "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
+        "schema": "flowmemory.agent_account.v0",
+        "agentId": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240",
         "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
         "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
         "policyRoot": "0x20121b5daa2be4de0d9dbcae292d1d3466a4e0a8b6cc3149ce46c30c352a1f0e",
@@ -79,10 +79,10 @@
         "metadataHash": "0x198ae9ec53443e3a46f8762e4b9ee166c2927d7faec07ce2bdc8714859504d17",
         "nonce": "0x6550e26ef27367750192911d54ae8c97af6f828e52f4b696a25f215581a34b6b"
       },
-      "expected": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+      "expected": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316",
       "document": {
-        "schema": "flowchain.model_passport.v0",
-        "modelId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
+        "schema": "flowmemory.model_passport.v0",
+        "modelId": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316",
         "providerHash": "0x1dcd953776be1cde4f3d9f516d8ecf3641d664d8c97623af60327315c5600d0a",
         "modelFamilyHash": "0x91c830851e70677b8aa487b104e05230fdd5d2ae5ee26b5423ca223b154b58cc",
         "versionHash": "0x7c56a7f2edbd518ffcf014b4155ec4ad47062390e3a1302550e5a080c5ef4975",
@@ -108,7 +108,7 @@
       },
       "expected": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
       "document": {
-        "schema": "flowchain.work_receipt.v0",
+        "schema": "flowmemory.work_receipt.v0",
         "workReceiptId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
         "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
         "receiptHash": "0xca2ebca63e004ff4b0ca9766acbb2862b45059a480d911b67dbc25e937c2e733",
@@ -134,10 +134,10 @@
         "status": 7,
         "nonce": "0xb68051d46145d6360b963e755c6950ea087bc7bbdb3ad4a0dc4508150a2c7685"
       },
-      "expected": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+      "expected": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217",
       "document": {
-        "schema": "flowchain.artifact_availability_proof.v0",
-        "proofId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
+        "schema": "flowmemory.artifact_availability_proof.v0",
+        "proofId": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217",
         "artifactRoot": "0x14d1fb24e2da3cdb25d55912b5f7b56fde462707343f827791dfb1c3945a0a99",
         "providerId": "0x0dc433e7afcaecae8532a1bd432c3954072ee62a73d9112e57bfd01a001c393f",
         "locationCommitment": "0x42dca9f7b94d6d927d5af2d65be01e2180f0f7992df017410fbe70118299eccd",
@@ -165,10 +165,10 @@
         "moduleVersion": 0,
         "status": 2
       },
-      "expected": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+      "expected": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863",
       "document": {
-        "schema": "flowchain.verifier_module.v0",
-        "moduleId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
+        "schema": "flowmemory.verifier_module.v0",
+        "moduleId": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863",
         "ownerId": "0x5453d44b67a39bcbd94ad71b4499798ea0f5b3e27b22ce51e9343c0223a3d58a",
         "codeRoot": "0x6900549a6f3c5becb720e7bc0176a85305dbfb1881a52ff84c269bddff77067c",
         "manifestRoot": "0x4d491666ff5482701f6ac44230cc7929030ce7f6f6b7b021c59b211eb88e6c1e",
@@ -199,7 +199,7 @@
       },
       "expected": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
       "document": {
-        "schema": "flowchain.verifier_report.v0",
+        "schema": "flowmemory.verifier_report.v0",
         "reportId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
         "reportSchemaHash": "0x487a3a70cf72c079fa8645f8d732cbe286f7f3aa0abd654f212ac1c1911a20ae",
         "observationId": "0xd80d0a3b317ceae266c9b7983c5a9376529f457a01469c96d8d3fd5a6c2d8a3f",
@@ -229,10 +229,10 @@
         "updatedAtUnixMs": "1778702400000",
         "cellVersion": 0
       },
-      "expected": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+      "expected": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29",
       "document": {
-        "schema": "flowchain.memory_cell.v0",
-        "memoryCellId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
+        "schema": "flowmemory.memory_cell.v0",
+        "memoryCellId": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29",
         "ownerAgentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
         "currentMemoryRoot": "0x4cddf39c05428ff95e92ad96a6a4199348dd19e9935b681ec3f111217f87dbc8",
         "previousMemoryRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -259,10 +259,10 @@
         "status": 1,
         "nonce": "0x3fae75c35d96efdccce46b8d8223846defbb52752d3332afc0a799b84a55020d"
       },
-      "expected": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+      "expected": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd",
       "document": {
-        "schema": "flowchain.challenge.v0",
-        "challengeId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
+        "schema": "flowmemory.challenge.v0",
+        "challengeId": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd",
         "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
         "challengerId": "0x40dc731df288781313d04725dc79f969488b910d9ed2220695c0e249477ffc57",
         "challengeType": "dependency_omission",
@@ -290,10 +290,10 @@
         "finalizedBlockHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "policyHash": "0xa6c5cdc9afc15dea4b2de2ab4bf4fa1ec5a6acee82e1864319ad8c46d2ae826d"
       },
-      "expected": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+      "expected": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879",
       "document": {
-        "schema": "flowchain.finality_receipt.v0",
-        "finalityReceiptId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
+        "schema": "flowmemory.finality_receipt.v0",
+        "finalityReceiptId": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879",
         "receiptId": "0x8e89965b455212cb3767352ae3adb0bb5dd0d59fba141cb5064245d05bdbb2aa",
         "reportId": "0x9577aa6df7026dfe6f46042d71397769591841ee8e0fd23bca3160a2032d2925",
         "challengeRoot": "0xf8962b5f9cf19578b6fe3cebc986cd054d594c0674e1fa48387c0278c6522967",
@@ -320,10 +320,10 @@
         "transport": 1,
         "nonce": "0x1b85840b67182a89cf64394167db32108e00798b043aad5c6c2cab58d8726110"
       },
-      "expected": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+      "expected": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52",
       "document": {
-        "schema": "flowchain.hardware_signal_envelope.v0",
-        "hardwareSignalEnvelopeId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
+        "schema": "flowmemory.hardware_signal_envelope.v0",
+        "hardwareSignalEnvelopeId": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52",
         "deviceId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
         "signalRoot": "0xf57eaf258fac37071f818115db61e6bb48bbdfb41424316199ed0963d59a75b3",
         "previousSignalEnvelopeId": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -353,10 +353,10 @@
         "issuedAtUnixMs": "1778702400000",
         "responseVersion": 0
       },
-      "expected": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+      "expected": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a",
       "document": {
-        "schema": "flowchain.control_plane_provenance_response.v0",
-        "provenanceResponseId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
+        "schema": "flowmemory.control_plane_provenance_response.v0",
+        "provenanceResponseId": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a",
         "requestId": "0x147deb7c7f91259726ff0b4146c5249836a162f93c14562847cc15dac768e8d7",
         "subjectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
         "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
@@ -393,14 +393,14 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "nonce": "1",
         "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666"
       },
-      "expected": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+      "expected": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
       "document": {
         "schema": "flowmemory.bridge_deposit.v0",
-        "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+        "depositId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
         "sourceChainId": 84532,
         "sourceContract": "0x1111111111111111111111111111111111111111",
         "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
@@ -411,7 +411,7 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "nonce": "1",
         "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
         "status": "observed"
@@ -432,10 +432,10 @@
         "status": 3,
         "nonce": "0xbef2dad8fd23f339439a0c731866be73a74379128394f7beb6dc01cb4dbbcc91"
       },
-      "expected": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+      "expected": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891",
       "document": {
-        "schema": "flowchain.bridge_credit.v0",
-        "creditId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
+        "schema": "flowmemory.bridge_credit.v0",
+        "creditId": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891",
         "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
         "recipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
@@ -465,10 +465,10 @@
         "nonce": "0x90a33185cd5337c093753c06818955d98ac711a9352d397ab3ccc5aee91921d2",
         "metadataHash": "0xce908e6f85c929fed22796952391e6a53b656f92d31c1c5e7fb89883c7eeabe5"
       },
-      "expected": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+      "expected": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c",
       "document": {
-        "schema": "flowchain.bridge_withdrawal.v0",
-        "withdrawalId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
+        "schema": "flowmemory.bridge_withdrawal.v0",
+        "withdrawalId": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c",
         "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "destinationChainId": 84532,
         "destinationContract": "0x7777777777777777777777777777777777777777",
@@ -499,10 +499,10 @@
         "updatedAtBlockNumber": "5",
         "nonce": "0x2d8034d0391a31483bc8f710ac19a333f617683632197ced2b9ff2b0ac03fdb7"
       },
-      "expected": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+      "expected": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe",
       "document": {
-        "schema": "flowchain.local_balance_record.v0",
-        "balanceRecordId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
+        "schema": "flowmemory.local_balance_record.v0",
+        "balanceRecordId": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe",
         "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
         "assetId": "0x4b000bcf935e50d5fb7eacb8a8f4c226ad36a19810a389a39dae72ad1ec012e3",
         "availableAmount": "15000000",
@@ -569,11 +569,11 @@
       "reason": "duplicate-id-rejection",
       "documents": [
         {
-          "schema": "flowchain.agent_account.v0",
+          "schema": "flowmemory.agent_account.v0",
           "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
         },
         {
-          "schema": "flowchain.agent_account.v0",
+          "schema": "flowmemory.agent_account.v0",
           "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61"
         }
       ],
@@ -588,14 +588,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
-          "envelopeId": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279",
-          "signingDigest": "0x5a6640f50a22ae2d72ebe1d0687bd557d2d33d5de0fc6563ccafba17de48273e"
+          "objectId": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240",
+          "envelopeId": "0xe74bfd09a50404a4f19f2733ed23f17498d97ce683314dcb8daf31c2c16be1f2",
+          "signingDigest": "0xbae0ad124e04147905418ef09d9d9ad18734a1905ec852a45ee527589b843796"
         },
         "input": {
-          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
-          "objectTypeHash": "0x0b32d0c8ec630542359a97b7b5c44804b7021b96433ba120572ad0609d81d029",
-          "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6",
+          "objectId": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240",
+          "objectTypeHash": "0xc6a905fa3a925f83eb7ea5d1bea3f83fd3cc218cf1a1df87141ed3dc3715ada2",
+          "domainSeparator": "0xa30601213cd0179f8b95be8e1b2047356b21acad5c6b1fb667335ec89975c803",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -605,14 +605,14 @@
           "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x55656083efaf8a511fbae76b2a1bb740b08c92959e506a14f489f0fedcef3279",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0xe74bfd09a50404a4f19f2733ed23f17498d97ce683314dcb8daf31c2c16be1f2",
           "objectType": "agent_account",
-          "objectSchema": "flowchain.agent_account.v0",
-          "objectId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
-          "objectTypeHash": "0x0b32d0c8ec630542359a97b7b5c44804b7021b96433ba120572ad0609d81d029",
-          "domain": "flowchain.local-alpha.v0.agent-account.id",
-          "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6",
+          "objectSchema": "flowmemory.agent_account.v0",
+          "objectId": "0x62a6c5459872d61269abc26db3e5fb41b9374d474e6ce7192f3b13e8df447240",
+          "objectTypeHash": "0xc6a905fa3a925f83eb7ea5d1bea3f83fd3cc218cf1a1df87141ed3dc3715ada2",
+          "domain": "flowmemory.local-alpha.v0.agent-account.id",
+          "domainSeparator": "0xa30601213cd0179f8b95be8e1b2047356b21acad5c6b1fb667335ec89975c803",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -622,8 +622,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xe9b99686c583dbed5b3bf743c2a3db8a5da8c8ceea4398eb45d57c518c555034",
-          "signingDigest": "0x5a6640f50a22ae2d72ebe1d0687bd557d2d33d5de0fc6563ccafba17de48273e",
-          "signature": "0xa9024e98d7ffacdfeb80e568609dc0ef5fac9c2b120762ab171e4e7e08f70bde0393d0eab85707c5c81aaf3318f5d9912e7e33af9db30e8842402984bb4dbb11"
+          "signingDigest": "0xbae0ad124e04147905418ef09d9d9ad18734a1905ec852a45ee527589b843796",
+          "signature": "0xcc0e7ffacc06d285511222beda07fa4824e80f7ea53e9c4c7aafeb378080fcea43b4ef8789019141b7baa331761c6a48ded158f7e1e9dcfd2053056e122af29f"
         }
       },
       {
@@ -632,14 +632,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
-          "envelopeId": "0x7f7eb2933ed962047f566b05a89a6572b398cf0de099c592827de5adf98ad830",
-          "signingDigest": "0xaf3b21f90c311952b732fbbfe58fd0cf9f5c5de4e130f6cdd0f59b59ef82c7bc"
+          "objectId": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316",
+          "envelopeId": "0x06eb0c1be28bfe8033759102d7f156267f7ecda7a74d155fd6619e537e669bba",
+          "signingDigest": "0x1afd1269a2853a9a941cf0af92f1f13b827049635f49a4d07087f2d0ef73f2c8"
         },
         "input": {
-          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
-          "objectTypeHash": "0x068eb5f8adc1d9e0b9c7bba728c6dc5b0fd01d25f895b4cf838c493981cfd8b7",
-          "domainSeparator": "0x9abbbfb63ea4784cfcd331c1cd76e009dbd88b7c4a05b08782778dc1bd2a804f",
+          "objectId": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316",
+          "objectTypeHash": "0xd9e2fa3984a327a8977305a1630131aa4d477f5db55cc87cd860c00fa1257b67",
+          "domainSeparator": "0x63b36b4b2f088c8c0df6d850adc0c108f5774a12d5a260a17dda11146b61ec27",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -649,14 +649,14 @@
           "nonce": "0xf73b964ab858057624a48b7dde73db2653ad9650d5a73644971471e9b0034d9a"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x7f7eb2933ed962047f566b05a89a6572b398cf0de099c592827de5adf98ad830",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x06eb0c1be28bfe8033759102d7f156267f7ecda7a74d155fd6619e537e669bba",
           "objectType": "model_passport",
-          "objectSchema": "flowchain.model_passport.v0",
-          "objectId": "0xf1e4695d11203b1fd1702d4294b001387da6f6e66278e6018026eab22fa38879",
-          "objectTypeHash": "0x068eb5f8adc1d9e0b9c7bba728c6dc5b0fd01d25f895b4cf838c493981cfd8b7",
-          "domain": "flowchain.local-alpha.v0.model-passport.id",
-          "domainSeparator": "0x9abbbfb63ea4784cfcd331c1cd76e009dbd88b7c4a05b08782778dc1bd2a804f",
+          "objectSchema": "flowmemory.model_passport.v0",
+          "objectId": "0x350a56ea420a8e9fff3c6d2014e0da80e108e09fd7f4a7bb38ab43ab920de316",
+          "objectTypeHash": "0xd9e2fa3984a327a8977305a1630131aa4d477f5db55cc87cd860c00fa1257b67",
+          "domain": "flowmemory.local-alpha.v0.model-passport.id",
+          "domainSeparator": "0x63b36b4b2f088c8c0df6d850adc0c108f5774a12d5a260a17dda11146b61ec27",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -666,8 +666,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xf73b964ab858057624a48b7dde73db2653ad9650d5a73644971471e9b0034d9a",
-          "signingDigest": "0xaf3b21f90c311952b732fbbfe58fd0cf9f5c5de4e130f6cdd0f59b59ef82c7bc",
-          "signature": "0xeace6a95d927fb422334500535147fe4ba35f4ca1d97e8789e3ce3245d3cd5b742bde6b1edad69c845951fda688857545bf3d31f3a01749f7e078cc73285111d"
+          "signingDigest": "0x1afd1269a2853a9a941cf0af92f1f13b827049635f49a4d07087f2d0ef73f2c8",
+          "signature": "0x5a51ab31b281a176ba8c672d9f0fb2c3d3b7a289b1167a944824286ba2f28ce167678b8637a9fa345e938e3a11c9269a0a72316368ed39e53c84605f9ac31a04"
         }
       },
       {
@@ -677,12 +677,12 @@
         "function": "localSignatureEnvelopeHash",
         "expected": {
           "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
-          "envelopeId": "0xa950d733414e06b7aff0823abd958a7974d65d4b5fe05674fab5a9fcf803af8e",
-          "signingDigest": "0xbd93059c8c963d193bc337ed6a480b285738a80583829cf74c323da81e82d64a"
+          "envelopeId": "0x3ed3615164fe79af7f40f4ab9a1f9ee1c6894a88d8bf7b8073c5e907a2cc77bd",
+          "signingDigest": "0x320c946a4a64710f6d060741c483f809f7e31d88138fcc3feda010a90bc36ea6"
         },
         "input": {
           "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
-          "objectTypeHash": "0x06e024249a151c7131610c5d00ee551983f967c010382a89004da89a6f158489",
+          "objectTypeHash": "0xb3fb2566d68c7dbfcf81f8e8ff1375aec8784a4ad82d162d17163c181fe4bc21",
           "domainSeparator": "0x4638694e800bc411c242b45deb8d2a911fabbd6ae454c39bfc668a1b88ea315f",
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
           "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
@@ -693,12 +693,12 @@
           "nonce": "0x6a7818dd52eaf447f0807f0c2b65672139275fefb3ed0435840d48410f2abc64"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0xa950d733414e06b7aff0823abd958a7974d65d4b5fe05674fab5a9fcf803af8e",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x3ed3615164fe79af7f40f4ab9a1f9ee1c6894a88d8bf7b8073c5e907a2cc77bd",
           "objectType": "work_receipt",
-          "objectSchema": "flowchain.work_receipt.v0",
+          "objectSchema": "flowmemory.work_receipt.v0",
           "objectId": "0xb7404c2b88e7f6a1991dfc5294f8f78932cbbf00ebecf302a1139950672f81f9",
-          "objectTypeHash": "0x06e024249a151c7131610c5d00ee551983f967c010382a89004da89a6f158489",
+          "objectTypeHash": "0xb3fb2566d68c7dbfcf81f8e8ff1375aec8784a4ad82d162d17163c181fe4bc21",
           "domain": "flowmemory.v0.work.receipt-id",
           "domainSeparator": "0x4638694e800bc411c242b45deb8d2a911fabbd6ae454c39bfc668a1b88ea315f",
           "signerRole": "agent",
@@ -710,8 +710,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x6a7818dd52eaf447f0807f0c2b65672139275fefb3ed0435840d48410f2abc64",
-          "signingDigest": "0xbd93059c8c963d193bc337ed6a480b285738a80583829cf74c323da81e82d64a",
-          "signature": "0x8853f2fdee647dba9461ea8b9b45ab9d5cb943e5508f1861521010d9146955f669da89c56b93407e4be4c52d6c5032f34dd4a9bd00fc079768d817155705b136"
+          "signingDigest": "0x320c946a4a64710f6d060741c483f809f7e31d88138fcc3feda010a90bc36ea6",
+          "signature": "0xcb234eb54b3a5b45710dd157ce6a9451a6daf84ee35dc9964ac954a8e77926403127dbb6e8514390b08498f7cb3ddfc783cd61c7e83e17c577d390df5f96b0fb"
         }
       },
       {
@@ -720,14 +720,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
-          "envelopeId": "0xeaa553befba878862c614b8ca9df9c3e5e90e6299ca415043e50d8cb2874f4b0",
-          "signingDigest": "0x6a0e253e6002840c3a8edbaf603211d156c1b5c56b8ddd5b0efa3753e5635da3"
+          "objectId": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217",
+          "envelopeId": "0xff3ba6b1866f977f24f3d8d48a03a8cadfb316951376e148443c111256bc74df",
+          "signingDigest": "0x3cc75e256a232aa36628754c17db5b6e8253c5c4e376345c34d24cc6e9a5d5ae"
         },
         "input": {
-          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
-          "objectTypeHash": "0x505f965c4ae6db350bdf73d2f85117ae099b4faec87b7ff83940e3854c6920c5",
-          "domainSeparator": "0xa7bbdb457725f7ad03fe4e6d2becb74c1ea54be06083f3d3e693f843615c7a20",
+          "objectId": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217",
+          "objectTypeHash": "0xc0c83ed390e577e90e9b5a9b34e71442cca6f21af62ad7f378afd1377a041e29",
+          "domainSeparator": "0xa93ed3258da0b69484621c45d188009fbcd67d1e2db81d6f59a4d8645f0d05b6",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -737,14 +737,14 @@
           "nonce": "0x64e8a1902689ca7d2c9eeb3200ddca8679faa549e898c639632a46cca55d88f2"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0xeaa553befba878862c614b8ca9df9c3e5e90e6299ca415043e50d8cb2874f4b0",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0xff3ba6b1866f977f24f3d8d48a03a8cadfb316951376e148443c111256bc74df",
           "objectType": "artifact_availability_proof",
-          "objectSchema": "flowchain.artifact_availability_proof.v0",
-          "objectId": "0x9d5fae6b0098c96fc0ab37e75ca34cef4a9dfcf18c7153762ba75ddf563e536e",
-          "objectTypeHash": "0x505f965c4ae6db350bdf73d2f85117ae099b4faec87b7ff83940e3854c6920c5",
-          "domain": "flowchain.local-alpha.v0.artifact-availability-proof.id",
-          "domainSeparator": "0xa7bbdb457725f7ad03fe4e6d2becb74c1ea54be06083f3d3e693f843615c7a20",
+          "objectSchema": "flowmemory.artifact_availability_proof.v0",
+          "objectId": "0x928474bfe437d2043ab4397f5ccaa16a64c6e251c6247ba0b7c8f63e80c3f217",
+          "objectTypeHash": "0xc0c83ed390e577e90e9b5a9b34e71442cca6f21af62ad7f378afd1377a041e29",
+          "domain": "flowmemory.local-alpha.v0.artifact-availability-proof.id",
+          "domainSeparator": "0xa93ed3258da0b69484621c45d188009fbcd67d1e2db81d6f59a4d8645f0d05b6",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -754,8 +754,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x64e8a1902689ca7d2c9eeb3200ddca8679faa549e898c639632a46cca55d88f2",
-          "signingDigest": "0x6a0e253e6002840c3a8edbaf603211d156c1b5c56b8ddd5b0efa3753e5635da3",
-          "signature": "0xabeedc2cd0390ab361c7b544d1a5cd52445e098d36e59766ddde9e64bfd105c1358fe95b576f26ac9498187e52936becdc8fd4181bf2f16ee5290469f41034f9"
+          "signingDigest": "0x3cc75e256a232aa36628754c17db5b6e8253c5c4e376345c34d24cc6e9a5d5ae",
+          "signature": "0x45811dbeec3cefb01e3af1ed4ec59214850803c714c236aeb133f265f170014772e37b236b245af77090fd9674870f312b29a0f563f8aed98d947d41a69bba80"
         }
       },
       {
@@ -764,14 +764,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
-          "envelopeId": "0x0db093584755eb839086ef8d06adb7f1f4283365abdc8e5fc0de3452a519b408",
-          "signingDigest": "0x0127126d3ca637a481b753b2e404a510d3a0ca97349ba907cfa3161f563cb836"
+          "objectId": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863",
+          "envelopeId": "0x30f16109018c13f08feaeb7082d4bbfe0bf91ed242ed34abe6c649661f50a566",
+          "signingDigest": "0xd87d7ccf0b1d5849e7d5ff5d2b8c3e07400f6b8e6a179d790e407f16f09982cb"
         },
         "input": {
-          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
-          "objectTypeHash": "0x9d02e1e5ef3686eef661fe474251de5ccffc5974c58c61fe6f34758c8a720275",
-          "domainSeparator": "0xfdb5ce2359d87d7546c9e5cdf604a270ffc2485dccc345df0c881daadd0e3aed",
+          "objectId": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863",
+          "objectTypeHash": "0xf1160511a7e14df7d1e82d29f22d56f330abf09c7f39cc3cfb848fbe17a42000",
+          "domainSeparator": "0xdc2598374e1153b639f57f2937e9c9ec9a6375d67c7f9b43e8aae750cac33786",
           "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
           "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
           "signerRole": 3,
@@ -781,14 +781,14 @@
           "nonce": "0xc2c56aa26345dc56be8c781635cb27c917d32b5da76cfc04996cd0d7cea1b49e"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x0db093584755eb839086ef8d06adb7f1f4283365abdc8e5fc0de3452a519b408",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x30f16109018c13f08feaeb7082d4bbfe0bf91ed242ed34abe6c649661f50a566",
           "objectType": "verifier_module",
-          "objectSchema": "flowchain.verifier_module.v0",
-          "objectId": "0xbb9456a90fd97dfe26d07d3a39111a43484568d9b2088e82ca64d86487e5e360",
-          "objectTypeHash": "0x9d02e1e5ef3686eef661fe474251de5ccffc5974c58c61fe6f34758c8a720275",
-          "domain": "flowchain.local-alpha.v0.verifier-module.id",
-          "domainSeparator": "0xfdb5ce2359d87d7546c9e5cdf604a270ffc2485dccc345df0c881daadd0e3aed",
+          "objectSchema": "flowmemory.verifier_module.v0",
+          "objectId": "0xa6ace2f212cf1abd68c72e3da024d63441a63528c7ea425e6a076b2e63bc7863",
+          "objectTypeHash": "0xf1160511a7e14df7d1e82d29f22d56f330abf09c7f39cc3cfb848fbe17a42000",
+          "domain": "flowmemory.local-alpha.v0.verifier-module.id",
+          "domainSeparator": "0xdc2598374e1153b639f57f2937e9c9ec9a6375d67c7f9b43e8aae750cac33786",
           "signerRole": "verifier",
           "signerRoleCode": 3,
           "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
@@ -798,8 +798,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xc2c56aa26345dc56be8c781635cb27c917d32b5da76cfc04996cd0d7cea1b49e",
-          "signingDigest": "0x0127126d3ca637a481b753b2e404a510d3a0ca97349ba907cfa3161f563cb836",
-          "signature": "0x8d47ba1876c942f4eac15cfdc153406a47eb7233c9a44506702311755dd01d212933de6d1b96f7f5be49986325c5e4ea0f89ef4f27a8174520a466fa4c5d45fa"
+          "signingDigest": "0xd87d7ccf0b1d5849e7d5ff5d2b8c3e07400f6b8e6a179d790e407f16f09982cb",
+          "signature": "0xdb6784d0561cec5fa998b04b6fc471ad3c6ea2ef3f51b8dc4c92c1857215fc3243ca4caedfb0b2aeae87cfa3580a278e006c823d102147939d06cee89c7b85b2"
         }
       },
       {
@@ -809,12 +809,12 @@
         "function": "localSignatureEnvelopeHash",
         "expected": {
           "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
-          "envelopeId": "0xbe0d02653b37c8c6fc9dd2691bad7d7ccfe7ad89dfca899a44760144aa30c295",
-          "signingDigest": "0xd93b37d75d937c09e9603c8159e20e396931d1fd1cb257a176864526cd7432b3"
+          "envelopeId": "0x232f29c0a35ffc37ddd7fc9722d95c60317016525361f47284ac88ff4f02990d",
+          "signingDigest": "0x2ca87cc51c4034c04327c36a833d0d3b213f5b82832a073222c349107c4c6c68"
         },
         "input": {
           "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
-          "objectTypeHash": "0x3c1d703293c54d61da59603a7ccdb51b8b5ca21a96ef34c34570864e1943c242",
+          "objectTypeHash": "0x923017d1e7142c6888550795d63e317f4323b40ff7f6c4ea17775d99c7e8a851",
           "domainSeparator": "0x8ef53353c77dafe36cddcee05e4f11cc5027f7b54a9c0cbbc215a71bea8323f8",
           "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
           "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
@@ -825,12 +825,12 @@
           "nonce": "0x61e313795f9590163b38135b400bb0438d81787ec59ef9d628497320179a87d0"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0xbe0d02653b37c8c6fc9dd2691bad7d7ccfe7ad89dfca899a44760144aa30c295",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x232f29c0a35ffc37ddd7fc9722d95c60317016525361f47284ac88ff4f02990d",
           "objectType": "verifier_report",
-          "objectSchema": "flowchain.verifier_report.v0",
+          "objectSchema": "flowmemory.verifier_report.v0",
           "objectId": "0x1b1c2940d6e83ee78a7e0a8285e4ce2530da1ce7964817806e61520a2e767355",
-          "objectTypeHash": "0x3c1d703293c54d61da59603a7ccdb51b8b5ca21a96ef34c34570864e1943c242",
+          "objectTypeHash": "0x923017d1e7142c6888550795d63e317f4323b40ff7f6c4ea17775d99c7e8a851",
           "domain": "flowmemory.v0.verifier.report-digest",
           "domainSeparator": "0x8ef53353c77dafe36cddcee05e4f11cc5027f7b54a9c0cbbc215a71bea8323f8",
           "signerRole": "verifier",
@@ -842,8 +842,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x61e313795f9590163b38135b400bb0438d81787ec59ef9d628497320179a87d0",
-          "signingDigest": "0xd93b37d75d937c09e9603c8159e20e396931d1fd1cb257a176864526cd7432b3",
-          "signature": "0x9870e8ce192cfaa2a78ab7a749076c5308218edb6918b75d9e04fe3403e29b6965ae945140b8d415af91d7bb1638e28cf06ac2b50889a33c0a9a137261c717ae"
+          "signingDigest": "0x2ca87cc51c4034c04327c36a833d0d3b213f5b82832a073222c349107c4c6c68",
+          "signature": "0x134ac4533fe148be06feb4836aef645fdc3ce75076eba6ef7f72a1443b66fe3c186bbf1fef9d653ea39c6c367cb2330dd3eeb97abe3ebf31f372632d696e82a5"
         }
       },
       {
@@ -852,14 +852,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
-          "envelopeId": "0x374082e4aaa3c940eeba7b53d0348cf81415652a3e0127cccb403677b47674fd",
-          "signingDigest": "0x2df8a5742b883c13c7bb5ebec91c92a6283101236971f0d62128eaffb1e589cf"
+          "objectId": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29",
+          "envelopeId": "0x2017f0ae1e0500176f6987fc848e07682a99102e3bdf87d0784d159cc31396d4",
+          "signingDigest": "0xa4c9f76f3b376a4931fccad44f74ddea50741261da81918654c39dbaa0d7c827"
         },
         "input": {
-          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
-          "objectTypeHash": "0x6ed0f1045cef52eba52442242fbfc74a44bc1e0568866319b88e6c5b38ff43e0",
-          "domainSeparator": "0x06e4e0e2491dee22170b7dc2a29131b92db1bf405e1e4a9018b1f8b042c1f003",
+          "objectId": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29",
+          "objectTypeHash": "0x02214daae659e88f51a17de0cb1acf3b899ab9380f7d286923b134412fdc83e1",
+          "domainSeparator": "0x152b918a44799f07f17af8c853cb2fae24ca1709ce390d1038d0d89c5a0e8a7f",
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
           "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
           "signerRole": 2,
@@ -869,14 +869,14 @@
           "nonce": "0xf4dfd21727eda874622b35788a9a8c4953fe53bcd9d12a97cf207bcbe88937f9"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x374082e4aaa3c940eeba7b53d0348cf81415652a3e0127cccb403677b47674fd",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x2017f0ae1e0500176f6987fc848e07682a99102e3bdf87d0784d159cc31396d4",
           "objectType": "memory_cell",
-          "objectSchema": "flowchain.memory_cell.v0",
-          "objectId": "0x30823bd70635dac8e0b72968f57f46450566ac4dede63820f7ceafdfb7a4f13f",
-          "objectTypeHash": "0x6ed0f1045cef52eba52442242fbfc74a44bc1e0568866319b88e6c5b38ff43e0",
-          "domain": "flowchain.local-alpha.v0.memory-cell.id",
-          "domainSeparator": "0x06e4e0e2491dee22170b7dc2a29131b92db1bf405e1e4a9018b1f8b042c1f003",
+          "objectSchema": "flowmemory.memory_cell.v0",
+          "objectId": "0xfe52249a19b048ead33dbe7ef67989cd85a9aabf921a8e328fdfe7e602f89b29",
+          "objectTypeHash": "0x02214daae659e88f51a17de0cb1acf3b899ab9380f7d286923b134412fdc83e1",
+          "domain": "flowmemory.local-alpha.v0.memory-cell.id",
+          "domainSeparator": "0x152b918a44799f07f17af8c853cb2fae24ca1709ce390d1038d0d89c5a0e8a7f",
           "signerRole": "agent",
           "signerRoleCode": 2,
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
@@ -886,8 +886,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xf4dfd21727eda874622b35788a9a8c4953fe53bcd9d12a97cf207bcbe88937f9",
-          "signingDigest": "0x2df8a5742b883c13c7bb5ebec91c92a6283101236971f0d62128eaffb1e589cf",
-          "signature": "0x07cd84afb338d899d25cdc420f46911789ea5da876a4e1f845a54ac35f90d8cd1ceb8769c02f6b2d28308658e645d691a46217c7d92fa8b0ae877e2bf9d878af"
+          "signingDigest": "0xa4c9f76f3b376a4931fccad44f74ddea50741261da81918654c39dbaa0d7c827",
+          "signature": "0x336ce2a2c1d26993e37977584e0beda2ca9845a251a0f696911754119e48c86578a50c3e7ea510fc6105fc41bd4ded3142d1b4fc9009ee4dbbf012528f453ed3"
         }
       },
       {
@@ -896,14 +896,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
-          "envelopeId": "0x0b0269ba2354d34b121062b3aeb0918826695af5b56bc9796ebfe915bc19a57e",
-          "signingDigest": "0xa4b0a44c3d2292fec4d22d664d9babef4e8e925951160797221933b47ab05367"
+          "objectId": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd",
+          "envelopeId": "0x3f94ee15dca02ceefe902376d7e985886b67d2d18a244564f22cab05db914dda",
+          "signingDigest": "0xb0161dfc539a00cd8703404e32b092c189814d0439a4b437bdfe6aeddaee2159"
         },
         "input": {
-          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
-          "objectTypeHash": "0x83372cb17c18bc1eefba613367a330e190119898aac881c685b08b6e47fb42d3",
-          "domainSeparator": "0x9ef9b9d51f8deab79f1b2a18cf1fd9cef8325daccd42015312cdc857c39c7568",
+          "objectId": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd",
+          "objectTypeHash": "0xf9364fafad38c7a16e956319fd2f57a40a159dc17c896421a3d3a85f99a1971c",
+          "domainSeparator": "0xe99f7b356d1f24655b0f8b4596ef425dc2ff8d10ae0ca63969404733273acd99",
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
           "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
           "signerRole": 2,
@@ -913,14 +913,14 @@
           "nonce": "0xe413acc238046a9cdf67715e02b2aeb359b242250554d29f764ef14634bafe0c"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x0b0269ba2354d34b121062b3aeb0918826695af5b56bc9796ebfe915bc19a57e",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x3f94ee15dca02ceefe902376d7e985886b67d2d18a244564f22cab05db914dda",
           "objectType": "challenge",
-          "objectSchema": "flowchain.challenge.v0",
-          "objectId": "0x184dbda3f9e19adfe64d8ef4636dc9a3e6ab8f62761589653816dc574ffb3403",
-          "objectTypeHash": "0x83372cb17c18bc1eefba613367a330e190119898aac881c685b08b6e47fb42d3",
-          "domain": "flowchain.local-alpha.v0.challenge.id",
-          "domainSeparator": "0x9ef9b9d51f8deab79f1b2a18cf1fd9cef8325daccd42015312cdc857c39c7568",
+          "objectSchema": "flowmemory.challenge.v0",
+          "objectId": "0x56660cfdc7a3dc2c6bff71051e44d66031d00b1bc212fdb82104bbc2547b20fd",
+          "objectTypeHash": "0xf9364fafad38c7a16e956319fd2f57a40a159dc17c896421a3d3a85f99a1971c",
+          "domain": "flowmemory.local-alpha.v0.challenge.id",
+          "domainSeparator": "0xe99f7b356d1f24655b0f8b4596ef425dc2ff8d10ae0ca63969404733273acd99",
           "signerRole": "agent",
           "signerRoleCode": 2,
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
@@ -930,8 +930,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xe413acc238046a9cdf67715e02b2aeb359b242250554d29f764ef14634bafe0c",
-          "signingDigest": "0xa4b0a44c3d2292fec4d22d664d9babef4e8e925951160797221933b47ab05367",
-          "signature": "0x768a36b2053f7c8da468d7c422a057180c234cf766df24fff785c3a3370d9ed567adb7b5bd1bbf7098dfb3f2e7cb70fc1056d90e4037332ac3661ff959807319"
+          "signingDigest": "0xb0161dfc539a00cd8703404e32b092c189814d0439a4b437bdfe6aeddaee2159",
+          "signature": "0x89fc24b5571c7eb1dabeb6157b48bba26747b8c5e2e53696a049237129cd6ee60ad2ee1bd69d52ba6f374d90e5f12aad27cf38a59c42d022ebab171d47ce827f"
         }
       },
       {
@@ -940,14 +940,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
-          "envelopeId": "0x662920534f0ae5d94b327cc7374d91cced76cf7b79752f4c0ef44db2edcc0a8e",
-          "signingDigest": "0x4b2644f8ae78f7d15075e1d6037fd855b1b84e23d3d58c628e8e68dc464b6541"
+          "objectId": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879",
+          "envelopeId": "0x8bc566ef3d17c5ee7015e8980d000c8acb6a39903c1a5b62a8d07961a79aa7be",
+          "signingDigest": "0x5885caaf04dd125725f40f369440fb4db6e6d0b91d31200b02f9f7aa2f1fd1bb"
         },
         "input": {
-          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
-          "objectTypeHash": "0x381c5cc90ae4f9e807ffbefd2190f856678a0a7d4ff518970bf95859c5c29560",
-          "domainSeparator": "0x20f563bef0df073d41d9b981bbc82d8a9606a6f1055fa0c541b8bca28efaaeb1",
+          "objectId": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879",
+          "objectTypeHash": "0xedf120ebf35c94ccb4fea2516319974cb345272949fadc7278d1c6e809650c7c",
+          "domainSeparator": "0xcea9e069cc84f87bd10e14cbf9e29ead6f2d46986b9d29084113a88de5aa1d00",
           "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
           "signerKeyId": "0x9bc6e07b6ca6b1f21697ed511d211b82186960d193036d5817f1a8a46a6daff5",
           "signerRole": 3,
@@ -957,14 +957,14 @@
           "nonce": "0x0acb03f13a6705e9458fac25c44575707ee7ab8f92104da4e3216230e11b72a8"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x662920534f0ae5d94b327cc7374d91cced76cf7b79752f4c0ef44db2edcc0a8e",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x8bc566ef3d17c5ee7015e8980d000c8acb6a39903c1a5b62a8d07961a79aa7be",
           "objectType": "finality_receipt",
-          "objectSchema": "flowchain.finality_receipt.v0",
-          "objectId": "0x95216aeaec225965a4ce35eb2b136e27819642e68284201feade0d68dc4f9ddf",
-          "objectTypeHash": "0x381c5cc90ae4f9e807ffbefd2190f856678a0a7d4ff518970bf95859c5c29560",
-          "domain": "flowchain.local-alpha.v0.finality-receipt.id",
-          "domainSeparator": "0x20f563bef0df073d41d9b981bbc82d8a9606a6f1055fa0c541b8bca28efaaeb1",
+          "objectSchema": "flowmemory.finality_receipt.v0",
+          "objectId": "0xb6d73ebd880640e1768c866ec21c3cfd5b8544fef7d9beda23474aec4666a879",
+          "objectTypeHash": "0xedf120ebf35c94ccb4fea2516319974cb345272949fadc7278d1c6e809650c7c",
+          "domain": "flowmemory.local-alpha.v0.finality-receipt.id",
+          "domainSeparator": "0xcea9e069cc84f87bd10e14cbf9e29ead6f2d46986b9d29084113a88de5aa1d00",
           "signerRole": "verifier",
           "signerRoleCode": 3,
           "signerId": "0xaf0bdaa3ef421cfa8494019fb436baabcfdc65b55cf858c2d605a348c8c0aa48",
@@ -974,8 +974,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x0acb03f13a6705e9458fac25c44575707ee7ab8f92104da4e3216230e11b72a8",
-          "signingDigest": "0x4b2644f8ae78f7d15075e1d6037fd855b1b84e23d3d58c628e8e68dc464b6541",
-          "signature": "0x31fbb8b88c5b56888a402c748333f56ccb51300852aab105cbb80d2a176aebf501a6eadf9bb452a41d31dd20fa043eff270601243e0e5a24fb6647bdd33d10b6"
+          "signingDigest": "0x5885caaf04dd125725f40f369440fb4db6e6d0b91d31200b02f9f7aa2f1fd1bb",
+          "signature": "0x27e0dbf15b286840aeed6211d7b12d437bbd4e48166517e9af55617cadaed869431a3a0612ff2bf33ba398601d425f7675b8cd09573f3877fdfa87b9ca4874aa"
         }
       },
       {
@@ -984,14 +984,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
-          "envelopeId": "0xf278b187bcb6bc7e0abf3b198555d0b018f54c4eced2580d2805dfc710034d07",
-          "signingDigest": "0x00c4b16aa80e0960887445ac34dda98f57d451d5d07d6564affcc35d89b46f14"
+          "objectId": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52",
+          "envelopeId": "0x12ea1e99801da7a9737325e9a328d27a4e613e5217f3a6b25af20512751dd96e",
+          "signingDigest": "0x79ede0d8e6272d49d8617ad9c42c7a4376976dfdf1dc904631a488eb177c7d2f"
         },
         "input": {
-          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
-          "objectTypeHash": "0x9e89c0262e9aaa8bf0dbc60037de26f6368d42fce5dc49ee4301a663047be5ee",
-          "domainSeparator": "0x4344c72bae8d1c167094207afb2b3f64b8318b099ff3eaf5c8f5c518bf215863",
+          "objectId": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52",
+          "objectTypeHash": "0x854ad12fd5076cd37705321b5dfb89849d7bfee6e89c90242aa051c305d67095",
+          "domainSeparator": "0x237ebbd274c19cf68831893bb4493f1d0851280cc6a0d63470f7aca4910f154b",
           "signerId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
           "signerKeyId": "0x2960db74c119e17ca2323f749c1df8bfdb1b7e5eaddf640d52fda9d96b59c61b",
           "signerRole": 4,
@@ -1001,14 +1001,14 @@
           "nonce": "0x35e2f19224f77e09e149fa37ef5db44d7e3f7175df36ba22c0df233457ebbcb5"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0xf278b187bcb6bc7e0abf3b198555d0b018f54c4eced2580d2805dfc710034d07",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x12ea1e99801da7a9737325e9a328d27a4e613e5217f3a6b25af20512751dd96e",
           "objectType": "hardware_signal_envelope",
-          "objectSchema": "flowchain.hardware_signal_envelope.v0",
-          "objectId": "0xde6601ee3fc7e925d2d54b1dca26cf7cb560432f066f93b3f3bf1f31b4934a10",
-          "objectTypeHash": "0x9e89c0262e9aaa8bf0dbc60037de26f6368d42fce5dc49ee4301a663047be5ee",
-          "domain": "flowchain.local-alpha.v0.hardware-signal-envelope.id",
-          "domainSeparator": "0x4344c72bae8d1c167094207afb2b3f64b8318b099ff3eaf5c8f5c518bf215863",
+          "objectSchema": "flowmemory.hardware_signal_envelope.v0",
+          "objectId": "0x2c46dbff0c15c52f23aaacdd504c1fa09a748c9b5596c2110c7a48bbc2f67b52",
+          "objectTypeHash": "0x854ad12fd5076cd37705321b5dfb89849d7bfee6e89c90242aa051c305d67095",
+          "domain": "flowmemory.local-alpha.v0.hardware-signal-envelope.id",
+          "domainSeparator": "0x237ebbd274c19cf68831893bb4493f1d0851280cc6a0d63470f7aca4910f154b",
           "signerRole": "hardware",
           "signerRoleCode": 4,
           "signerId": "0xc3a21c4e3c455b2388d06fb384165ff7156a3d40d877a19f88d814a8a1edeaea",
@@ -1018,8 +1018,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x35e2f19224f77e09e149fa37ef5db44d7e3f7175df36ba22c0df233457ebbcb5",
-          "signingDigest": "0x00c4b16aa80e0960887445ac34dda98f57d451d5d07d6564affcc35d89b46f14",
-          "signature": "0xd72b87d4d4547dff9366672f78fbe9bd6f494617dd14442b458612be200d8f2540b3684e6bc485ef763d18931393aebda3411fc550b83d7aba54a9af1384e0f5"
+          "signingDigest": "0x79ede0d8e6272d49d8617ad9c42c7a4376976dfdf1dc904631a488eb177c7d2f",
+          "signature": "0x7131cf3985027ad159240c9245f1088452839ecadf3331897fb4c0b5bcff362b23bc639011297e7a8bfa9b2c7b75c11092de099763234da1987ca5a1672a8e73"
         }
       },
       {
@@ -1028,14 +1028,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
-          "envelopeId": "0x4580f51a5ca0eb672ce045a0e239707e977715919362612a258a01663bd2fc39",
-          "signingDigest": "0x7daa08228e60cb637c775723700f2245e414546158f4e230ac32c9a2a3e7d404"
+          "objectId": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a",
+          "envelopeId": "0xaab6bb823955ba87e2bb187942cb9583f46acc51c23455ffbdc4bdf4645d14a1",
+          "signingDigest": "0x413e3f74b4a111f8c6a6cdf3158e8c0c95f711fdaa6bcd668951e7db96c0a21a"
         },
         "input": {
-          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
-          "objectTypeHash": "0x7a3514a376146e3a8988dd397b42da1579bf8d074a53a8e8f4d207415b84e8a7",
-          "domainSeparator": "0xfe47c0668c801d02e4e7c5af1c4131ba03a6547f329546ba23c9ba66b7e0e4e6",
+          "objectId": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a",
+          "objectTypeHash": "0x09e708c6cf87634a5015f2cd782780da7e282a6b0686e6cecd8b303cd3dc8c18",
+          "domainSeparator": "0x7b5e22b333c758293a8971c48f3128d45d8d3242ad52eccd80ee544b0dc68471",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -1045,14 +1045,14 @@
           "nonce": "0xba6419eff070c057f965640d866f97e4a30b170e18f2c071b327b47b8ebedcde"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x4580f51a5ca0eb672ce045a0e239707e977715919362612a258a01663bd2fc39",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0xaab6bb823955ba87e2bb187942cb9583f46acc51c23455ffbdc4bdf4645d14a1",
           "objectType": "control_plane_provenance_response",
-          "objectSchema": "flowchain.control_plane_provenance_response.v0",
-          "objectId": "0xb0336e11f4e939bbf8b423c7d57cc383a9cdf4982fb90b004c6d94ea5a3ec0eb",
-          "objectTypeHash": "0x7a3514a376146e3a8988dd397b42da1579bf8d074a53a8e8f4d207415b84e8a7",
-          "domain": "flowchain.local-alpha.v0.control-plane-provenance-response.id",
-          "domainSeparator": "0xfe47c0668c801d02e4e7c5af1c4131ba03a6547f329546ba23c9ba66b7e0e4e6",
+          "objectSchema": "flowmemory.control_plane_provenance_response.v0",
+          "objectId": "0xe5dc460eec17a8d2c5de2eef2448bbec7611a9b2ad1cf395bb8fcf67c97e752a",
+          "objectTypeHash": "0x09e708c6cf87634a5015f2cd782780da7e282a6b0686e6cecd8b303cd3dc8c18",
+          "domain": "flowmemory.local-alpha.v0.control-plane-provenance-response.id",
+          "domainSeparator": "0x7b5e22b333c758293a8971c48f3128d45d8d3242ad52eccd80ee544b0dc68471",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -1062,8 +1062,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xba6419eff070c057f965640d866f97e4a30b170e18f2c071b327b47b8ebedcde",
-          "signingDigest": "0x7daa08228e60cb637c775723700f2245e414546158f4e230ac32c9a2a3e7d404",
-          "signature": "0x1dd7f91706ecb742ab4cbde578dff7e1571eb892c3db90a358ba8b1db65c7e49153ccd063dce1ae932548fa3e9af40bacf1c0f42690895517343f7b7a3548ff4"
+          "signingDigest": "0x413e3f74b4a111f8c6a6cdf3158e8c0c95f711fdaa6bcd668951e7db96c0a21a",
+          "signature": "0x7c5576e82973132a1869160cb68eb29cde9ca31826211148f6e0ef4bf3d180077aca38ec883b57fa2a3f9b59fc5b5c48da1e8b3c8e25362d62570e9e2d0668b9"
         }
       },
       {
@@ -1072,14 +1072,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
-          "envelopeId": "0xf4d73516e6e1978377ec89b71bac6153ada4c24c785b5edb227be1dac9f91caa",
-          "signingDigest": "0x026773a8db7a39ff087deec82ef7b7de2f4e625cae798932e8118db88595e538"
+          "objectId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
+          "envelopeId": "0x5a94bcad1a614fa07df6ccf0d45ee71d51751a0a2ff7d4325994f2905ac2cb58",
+          "signingDigest": "0x9cb8758f63d7e4116a7859d40f0b3394c6cd20d1f80cf7e08a9a313d07c27143"
         },
         "input": {
-          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "objectId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
-          "domainSeparator": "0x49a259504a71742e27acd328bf9cdf393dd693611dab3a0f2702a76341e5c4f7",
+          "domainSeparator": "0x751b576623f26419e44032c616b36e646651988583ad842f87ecb69d6246788a",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -1089,14 +1089,14 @@
           "nonce": "0x6acb09a72f4a049d9af5fa1dabc65d14d244880dd627d4228dec417e4980c21a"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0xf4d73516e6e1978377ec89b71bac6153ada4c24c785b5edb227be1dac9f91caa",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x5a94bcad1a614fa07df6ccf0d45ee71d51751a0a2ff7d4325994f2905ac2cb58",
           "objectType": "bridge_deposit",
           "objectSchema": "flowmemory.bridge_deposit.v0",
-          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "objectId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
-          "domain": "flowchain.local-alpha.v0.bridge-deposit.id",
-          "domainSeparator": "0x49a259504a71742e27acd328bf9cdf393dd693611dab3a0f2702a76341e5c4f7",
+          "domain": "flowmemory.local-alpha.v0.bridge-deposit.id",
+          "domainSeparator": "0x751b576623f26419e44032c616b36e646651988583ad842f87ecb69d6246788a",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -1106,8 +1106,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0x6acb09a72f4a049d9af5fa1dabc65d14d244880dd627d4228dec417e4980c21a",
-          "signingDigest": "0x026773a8db7a39ff087deec82ef7b7de2f4e625cae798932e8118db88595e538",
-          "signature": "0x370a10d1535bc74d1c88bd994686b4dc281774a18b8a18288a407c0754ff95d84a83466b97c4800becd4ae17e6d4c3de6693b352f09ac3e2bca9fe6823970ce9"
+          "signingDigest": "0x9cb8758f63d7e4116a7859d40f0b3394c6cd20d1f80cf7e08a9a313d07c27143",
+          "signature": "0x88a16935f81c48a5fcbe5cd6c6f9365106f2f77ffd7b2988749e93521f5304f1019f200aa99e90bcabc4a01e7ab4bbe7e01d6ab3ef10684900e050c238cd22a9"
         }
       },
       {
@@ -1116,14 +1116,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
-          "envelopeId": "0x1815b0ab82b9c3fb97a4e02f7a5037e10150de5865b6f723653641634ee0e657",
-          "signingDigest": "0x2ea1ae02896d6b50239a0e3a99dc33df8f106970e9a17555ccfb9639467360c5"
+          "objectId": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891",
+          "envelopeId": "0x83c0ae341328884475114fbcb3bc9763cce29b3f0e40ddf33ec3d7947f1e3f24",
+          "signingDigest": "0x5645aaadbd1da1a7768555f062613b4df7d3e61f5ad9329e643dfee8b50261cd"
         },
         "input": {
-          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
-          "objectTypeHash": "0x5c492a94b36aa3beb3b9ceb9dc5124464beeba9ac9fd2d04f88118cf73f3e912",
-          "domainSeparator": "0x4aa3ae071cb71e1c9b0cce8162ac5a6406fc00efc0ee507089092cfcfbb33506",
+          "objectId": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891",
+          "objectTypeHash": "0x785bf7428b0420299494cdd5acf1cb59df25482639a00f25b2521f8104703003",
+          "domainSeparator": "0xd6d448cd2130a24d70cc090aceb61b06e8126d452ee006bb1520d9bb7ae00f88",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -1133,14 +1133,14 @@
           "nonce": "0xf4b9163f67593a26ed9b11f3fe26e8faae0fafea4937bca3197d72ef23d82736"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x1815b0ab82b9c3fb97a4e02f7a5037e10150de5865b6f723653641634ee0e657",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x83c0ae341328884475114fbcb3bc9763cce29b3f0e40ddf33ec3d7947f1e3f24",
           "objectType": "bridge_credit",
-          "objectSchema": "flowchain.bridge_credit.v0",
-          "objectId": "0xb1d6d957acf4a61f52f1046c792815eab6e1b21f706c4aba88cb0efe2200d1cb",
-          "objectTypeHash": "0x5c492a94b36aa3beb3b9ceb9dc5124464beeba9ac9fd2d04f88118cf73f3e912",
-          "domain": "flowchain.local-alpha.v0.bridge-credit.id",
-          "domainSeparator": "0x4aa3ae071cb71e1c9b0cce8162ac5a6406fc00efc0ee507089092cfcfbb33506",
+          "objectSchema": "flowmemory.bridge_credit.v0",
+          "objectId": "0xaa7d1c37dc568ee0847ea7f9845ad601a8c787d9717e88f000fc33f3530d9891",
+          "objectTypeHash": "0x785bf7428b0420299494cdd5acf1cb59df25482639a00f25b2521f8104703003",
+          "domain": "flowmemory.local-alpha.v0.bridge-credit.id",
+          "domainSeparator": "0xd6d448cd2130a24d70cc090aceb61b06e8126d452ee006bb1520d9bb7ae00f88",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -1150,8 +1150,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xf4b9163f67593a26ed9b11f3fe26e8faae0fafea4937bca3197d72ef23d82736",
-          "signingDigest": "0x2ea1ae02896d6b50239a0e3a99dc33df8f106970e9a17555ccfb9639467360c5",
-          "signature": "0x3b81e339c1e7559afffa0c51c9225168925b12f99cd08301e56204863af8b9fb62b1b2aaa2e09f004f0284e1b30ee358c4977cdc82dc260048abef4cc1a94c8a"
+          "signingDigest": "0x5645aaadbd1da1a7768555f062613b4df7d3e61f5ad9329e643dfee8b50261cd",
+          "signature": "0xa22bf4cb48bc42b96d2ab1c49d1b56bf95856740147d6f1fcd8120318a416943290158d698cc6f8484e98a9469e86887dccc01b43e71a7dc10727f69a6f4bfe9"
         }
       },
       {
@@ -1160,14 +1160,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
-          "envelopeId": "0x0ae32c66cf666bbeb354e7581db661ce417376a01212c5f368733eeb21be94d8",
-          "signingDigest": "0xc39c5ee1133bf52ae94f438b1da2a3d697c0313626b0276e0a4ff3c73e855ffa"
+          "objectId": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c",
+          "envelopeId": "0x0b127ce7bbefedab021cd810e386d8d783850200a63dfcf35283d3026c80868d",
+          "signingDigest": "0x45e3e2a69652d19e2384ee4ff76d18017f50779ffd5f726ca1246cf0cbde61a6"
         },
         "input": {
-          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
-          "objectTypeHash": "0xef86851dbdc4b959a0f0538dffda519a385f0f27f0cc1757d5d90be513915246",
-          "domainSeparator": "0x83587b5c98812cd130f24e2c1aaf4bdcafd7700ccda6c7d0845c2adf4a1c2d77",
+          "objectId": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c",
+          "objectTypeHash": "0x4ea65140544a48963809069bde37b243d5427117f67b8c7eaf11c3e7c60997ba",
+          "domainSeparator": "0xc24532d87eaea472c685009b269367f8aab55708020df2c1ae2e704aad2eda4d",
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
           "signerKeyId": "0x0cd3ace447934998e0819d90cf89904776a2407e816541c1c43b99d38c351893",
           "signerRole": 2,
@@ -1177,14 +1177,14 @@
           "nonce": "0xf92e0a6709a05b38048336f55670194b0b6f3b5a00082faadf903a11920efeb5"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x0ae32c66cf666bbeb354e7581db661ce417376a01212c5f368733eeb21be94d8",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x0b127ce7bbefedab021cd810e386d8d783850200a63dfcf35283d3026c80868d",
           "objectType": "bridge_withdrawal",
-          "objectSchema": "flowchain.bridge_withdrawal.v0",
-          "objectId": "0x7612720b0b5c872c2325305a3dda6642f7cdabec1c20043663e4346cff5f7805",
-          "objectTypeHash": "0xef86851dbdc4b959a0f0538dffda519a385f0f27f0cc1757d5d90be513915246",
-          "domain": "flowchain.local-alpha.v0.bridge-withdrawal.id",
-          "domainSeparator": "0x83587b5c98812cd130f24e2c1aaf4bdcafd7700ccda6c7d0845c2adf4a1c2d77",
+          "objectSchema": "flowmemory.bridge_withdrawal.v0",
+          "objectId": "0xd7452fea2b6e51f924c97fa43c5cc7244312414d36b451ea6450c5f128e4399c",
+          "objectTypeHash": "0x4ea65140544a48963809069bde37b243d5427117f67b8c7eaf11c3e7c60997ba",
+          "domain": "flowmemory.local-alpha.v0.bridge-withdrawal.id",
+          "domainSeparator": "0xc24532d87eaea472c685009b269367f8aab55708020df2c1ae2e704aad2eda4d",
           "signerRole": "agent",
           "signerRoleCode": 2,
           "signerId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
@@ -1194,8 +1194,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xf92e0a6709a05b38048336f55670194b0b6f3b5a00082faadf903a11920efeb5",
-          "signingDigest": "0xc39c5ee1133bf52ae94f438b1da2a3d697c0313626b0276e0a4ff3c73e855ffa",
-          "signature": "0xdf7c57cf2294d9439f235160908f30d469347aa11049fb9bb4023fd78cae4fd6621f9ccdb391e7a47e4b39849a5571310b1c210d12646f0273a140f43e19f017"
+          "signingDigest": "0x45e3e2a69652d19e2384ee4ff76d18017f50779ffd5f726ca1246cf0cbde61a6",
+          "signature": "0xb0e1fdf59696da9a0a031c5a1207f3933d33ef114a67a24372e9b044179e04d52ddaf58d3f4b8faad9d2b2757fa39fce717ea31dd0d831102192a98718bf944c"
         }
       },
       {
@@ -1204,14 +1204,14 @@
         "schemaPath": "../../schemas/flowmemory/local-signature-envelope.schema.json",
         "function": "localSignatureEnvelopeHash",
         "expected": {
-          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
-          "envelopeId": "0x9ac7e8c7ea1673066666f16b9d95de904ba487a40679e4464b4a8a903688f512",
-          "signingDigest": "0x793f34c30ebc1d305ba4f153999a411948a0bc139a540b8faaf0f3e1c7d10b98"
+          "objectId": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe",
+          "envelopeId": "0x36cf27230fc93b964d76cb3a7d21633e025b19a25ce5996905ad76e89aae105a",
+          "signingDigest": "0xa5c415e7c4ab657ff48b2511a1effbb57425f46fd633489196806fc855f6aa8b"
         },
         "input": {
-          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
-          "objectTypeHash": "0x70eff29faa99904e952128eb87e6d95d13548d1b44f4be4c97d036d84811d569",
-          "domainSeparator": "0x27332aee7fa8158fd74963ab7b7e042c0f9418391856a3f32d9c8daf6272e92a",
+          "objectId": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe",
+          "objectTypeHash": "0x721956365fbff8d18bf76b240810823f8d8a0ae03b4fddcce8cf36550d1340a3",
+          "domainSeparator": "0x175a6839edecfbb9d087786e2f65767b1da807dbd29f83b3fc8deaf7a5ac70d0",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
@@ -1221,14 +1221,14 @@
           "nonce": "0xa9b262a6b6c28c5451ff4bb0cd011276c6fdc9d6027ab62749cf36620bbcee80"
         },
         "envelope": {
-          "schema": "flowchain.local_signature_envelope.v0",
-          "envelopeId": "0x9ac7e8c7ea1673066666f16b9d95de904ba487a40679e4464b4a8a903688f512",
+          "schema": "flowmemory.local_signature_envelope.v0",
+          "envelopeId": "0x36cf27230fc93b964d76cb3a7d21633e025b19a25ce5996905ad76e89aae105a",
           "objectType": "local_balance_record",
-          "objectSchema": "flowchain.local_balance_record.v0",
-          "objectId": "0x7b4331b20142a093153ea7d07d226dbf824deaff3b517a203edd7f058de1b076",
-          "objectTypeHash": "0x70eff29faa99904e952128eb87e6d95d13548d1b44f4be4c97d036d84811d569",
-          "domain": "flowchain.local-alpha.v0.local-balance-record.id",
-          "domainSeparator": "0x27332aee7fa8158fd74963ab7b7e042c0f9418391856a3f32d9c8daf6272e92a",
+          "objectSchema": "flowmemory.local_balance_record.v0",
+          "objectId": "0xb7b3d874ad0775de5ccbe52f3d564e4243194ffc40f32fade2f910af98a215fe",
+          "objectTypeHash": "0x721956365fbff8d18bf76b240810823f8d8a0ae03b4fddcce8cf36550d1340a3",
+          "domain": "flowmemory.local-alpha.v0.local-balance-record.id",
+          "domainSeparator": "0x175a6839edecfbb9d087786e2f65767b1da807dbd29f83b3fc8deaf7a5ac70d0",
           "signerRole": "operator",
           "signerRoleCode": 1,
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -1238,8 +1238,8 @@
           "issuedAtUnixMs": "1778702400000",
           "expiresAtUnixMs": "1810238400000",
           "nonce": "0xa9b262a6b6c28c5451ff4bb0cd011276c6fdc9d6027ab62749cf36620bbcee80",
-          "signingDigest": "0x793f34c30ebc1d305ba4f153999a411948a0bc139a540b8faaf0f3e1c7d10b98",
-          "signature": "0xbed71407cff68fc06c6fe72d3a6c0f68786fcd8b91995340e73f07f037b349d62ff6bea3eb45520d3c1651b9375686d4b8a4b73609946ffea9d7fd918938b3e2"
+          "signingDigest": "0xa5c415e7c4ab657ff48b2511a1effbb57425f46fd633489196806fc855f6aa8b",
+          "signature": "0x9fa2b97528111057ab7e7bcd708cdcbfe0ac4821558b49ac7fe51b9614778a1b38e98d3b5c58d1ed73bff27271288f61dff6dfd9e00c192f1c17512a8290cc17"
         }
       }
     ],
@@ -1331,7 +1331,7 @@
         "baseEnvelope": "hardware-signal-envelope.demo.hardware-signature-envelope",
         "mutation": {
           "envelope": {
-            "objectSchema": "flowchain.model_passport.v0",
+            "objectSchema": "flowmemory.model_passport.v0",
             "objectType": "model_passport"
           }
         },
@@ -1541,27 +1541,27 @@
         "schemaPath": "../../schemas/flowmemory/local-transaction-envelope.schema.json",
         "function": "localTransactionEnvelopeHash",
         "expected": {
-          "envelopeId": "0x11a8286288f46a7164e627d66a09f4e63f0d8c48bce2cf00df7b9fd9388aaf8e",
-          "signingDigest": "0x6d02b95313e31b9e13f0f223bde4a78ce215cc18d0ebbdd55568d2d58b6ec78a",
-          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e"
+          "envelopeId": "0x1b7ac78e864ce8a540167b0602d89d56f78e73c4492c267e904037f7305beca4",
+          "signingDigest": "0x1ce041694b00e46c718714d479980637712f121459e73fd80bf51285a515c49e",
+          "payloadHash": "0x84b4477acea54ec598dd456120ce4c82540aaf7bbc6aeed4ca1e6796d6cd8027"
         },
         "input": {
           "chainId": "31337",
-          "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+          "domainSeparator": "0x31d514748c8c751b932ac666106182f6bdd781ab818a77981e39aedc02518ef8",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
           "signerKeyId": "0x2409a6f84adce8b773bb8f47e18b4179df21e1957816c464efa481118f25d40a",
           "signerRole": 1,
           "nonce": "1",
-          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e",
-          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
+          "payloadHash": "0x84b4477acea54ec598dd456120ce4c82540aaf7bbc6aeed4ca1e6796d6cd8027",
+          "objectId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
           "issuedAtUnixMs": "1778702400000"
         },
         "envelope": {
-          "schema": "flowchain.local_transaction_envelope.v0",
-          "envelopeId": "0x11a8286288f46a7164e627d66a09f4e63f0d8c48bce2cf00df7b9fd9388aaf8e",
-          "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:31337",
-          "domainSeparator": "0xff516fcab184623fe60f12b4d1e0430a57e6d18685d1356887ada50f5f20b36c",
+          "schema": "flowmemory.local_transaction_envelope.v0",
+          "envelopeId": "0x1b7ac78e864ce8a540167b0602d89d56f78e73c4492c267e904037f7305beca4",
+          "domain": "flowmemory.local-alpha.v0.local-transaction-envelope:chain:31337",
+          "domainSeparator": "0x31d514748c8c751b932ac666106182f6bdd781ab818a77981e39aedc02518ef8",
           "chainId": "31337",
           "nonce": "1",
           "signerId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
@@ -1572,11 +1572,11 @@
           "objectSchema": "flowmemory.bridge_deposit.v0",
           "objectType": "bridge_deposit",
           "objectTypeHash": "0x97bcbbe7a3f24fdb7cab668fc751ca8757b59b3fe8ed71674fdaca140a22d408",
-          "objectId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
-          "payloadHash": "0x8e9dc6a1c3249e51eb8da32a47b122ef362fb59928e98877d432e1c3b899c48e",
+          "objectId": "0x2815a7120283275ec75d72ca46f35aa819848ba508c369c229762303d5fb6350",
+          "payloadHash": "0x84b4477acea54ec598dd456120ce4c82540aaf7bbc6aeed4ca1e6796d6cd8027",
           "issuedAtUnixMs": "1778702400000",
-          "signingDigest": "0x6d02b95313e31b9e13f0f223bde4a78ce215cc18d0ebbdd55568d2d58b6ec78a",
-          "signature": "0xe5b909398cd6e4f09f897c4588f94df7ea8c35aaf4680ec5ee56184b12a381371055850a7e0cf37e71cce901bcdb15bd3db09d85aa6b3fb47923e77ea54d3fa3"
+          "signingDigest": "0x1ce041694b00e46c718714d479980637712f121459e73fd80bf51285a515c49e",
+          "signature": "0x98d95de62461c6f0084752e8e5aaba46077442f20c206e6cedd7bb692b82a86d0a01fc915e5953b5dd3308d58bcd6bbea75c6b686736d46c6cb87dd9fbdfb915"
         }
       }
     ],
@@ -1598,7 +1598,7 @@
         "baseTransaction": "local-transaction.bridge-deposit.operator-signature",
         "mutation": {
           "envelope": {
-            "domain": "flowchain.local-alpha.v0.local-transaction-envelope:chain:999"
+            "domain": "flowmemory.local-alpha.v0.local-transaction-envelope:chain:999"
           }
         },
         "expectErrors": [

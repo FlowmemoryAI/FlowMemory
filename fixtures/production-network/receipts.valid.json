@@ -1,0 +1,446 @@
+{
+  "schema": "flowmemory.production_l1.receipt_fixture_set.v0",
+  "receipts": [
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xaab66440be842f3a695bb4c3939c050ef52f8b73d238a3c7f0effc388e7e8d4d",
+      "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+      "payloadType": "native_transfer",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1000",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xcf625c6f805b7fba9da7c9b68741e52b9702497c08fae5c7965e44ce05b48dde",
+      "emittedEvents": [
+        "0xc6f8e2e9c44e10a90e458a7e97baa8c21d2662bbf01c4f0617f9f52f11615ec2"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xae2106e2b4b3636ca6aea26d035901d1632f1641bf3e1d22afe370680f230c75"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x4d2f916288f57f7c89a4612d3bb30c5251b6eaae5d702000fbafa9319159ddee",
+      "txId": "0x74b37fa211b380912250d589cbd52a7f08ef9e34ec68bcf034ef38d07697465a",
+      "payloadType": "faucet_funding",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1010",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x1eb20d6e22ed2674ec0aec53ce794eb6f6c6d6646187828ff9507d8c7c1e449a",
+      "emittedEvents": [
+        "0x3113e8fc0d6c3cd517bd106edaf1759c05ecedbd9f269e09e1f1b5185e48a533"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x663c95dc1df22014837e55cb57fc55dac29ee716efd6eb14f9f5c589e46ff721"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x6ab4628784b485df65f9c0da7c17b74e65ef63cadecf01ef7bb167555095c173",
+      "txId": "0x36f329a0663b99955a5778cefa40aed22fbafedea1230e559253aef782bbe42a",
+      "payloadType": "bridge_credit",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1020",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x15611c30fc281144fe3d5cc8abfdfbf11986eac503dd4af5dbd77256b237e6cd",
+      "emittedEvents": [
+        "0x18ab2a4773227935db49d5c55f829605523fa9f792a53fcb4db56f9dda74831e"
+      ],
+      "bridgeEvidenceRefs": [
+        "0x013b5052df9be23c0816f77258d50bddfad0d73eb62af5fdd96a0b45d16fee21"
+      ],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x81d11beec24893cc8454c41e38ef8ea5b0c5b7bb71e022166fc33e4db09967af"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x55db075836a0a940577fe6bbc9390929e41130149f85ec7742882232725a8b71",
+      "txId": "0x6ca72702d734aea0d6b969b8aaa3328d0862f4b21ea0a8262ccc7839468c8c65",
+      "payloadType": "token_launch",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1030",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xe02d860c7dafde20cb298fb491f5d263904d7c4aaf40d427cb6c1dd76bbacc52",
+      "emittedEvents": [
+        "0x43bc800f9038b28b8b63cbb08163fb2b254b1b292ad8a35e1345c02fbf35d26d"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x8258c11d2deb44fa14fbecc5bd9e744c6cc8ec888dac4ffea3bb71668d4ab149"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x57bd4ce1019d971caae3bc5a01c82daff0a82e8d227c004b71bc49e433361f12",
+      "txId": "0xc8cddac632390a6b736a7433c8fbc726028eb153517d5030ff17c94f5463a03a",
+      "payloadType": "token_mint",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1040",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x4a06659e1c9f97a0d487671dd4d05b412245a5c1b5b57419ea5ed44f4d7a2a49",
+      "emittedEvents": [
+        "0xe35c08ebb149330513eeb85e5bbc7f564e5962e12a1c1becd45907ec3d990dd7"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xddd2826a31c2344adcb3bed95c167b072436b84a9ff6e607544b7c17cc71f78c"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xc5961f384cf1c6effa725345efde771ce45b9783b737e8de0aa7478c94607f66",
+      "txId": "0x8a327e611d306b367d9794000a64395c96990d9d16b93d309e149fc56a8af9e7",
+      "payloadType": "token_transfer",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1050",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xff99693d7b298757481ee43c6ccf5fb60f6802335055f613a1cd624c8d03507d",
+      "emittedEvents": [
+        "0x136b2ed86c9330e651e5f22057d0e679f79a5c9054a9baa3e7d3c815fa0a5210"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xe6dacdeefb032004e7e7566dd26c1beedf9645f230272dfe17d4615d1d3b329b"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xf5b679bf1ca1ddf30680c5f5e336b1d7dde6afa5878a8eadfb18862f8528ecf7",
+      "txId": "0x459fd019e44fba8961ed3cab569eed08b906dfed8580c444002defe70b4147b4",
+      "payloadType": "pool_create",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1060",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x831459db37090c02b1fb26de723e2b36a9aacfb8193053fbaa63c6afe16f6023",
+      "emittedEvents": [
+        "0xade5c06b4eb9d2876a11cb85e3060a8e80ea53447b62f8e34e6e8ece40e9ee8b"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xcf6c6300b317e3e3632e3558e864b573bf381fef942496d7ded759bc2a46ea78"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x69a1cec77fdac4171b4d7d72ac1904f43910fa7d46b2a46dd56c7fcff7ecd142",
+      "txId": "0xd4d4e811d8f4e18334823af5c81ff769eb27ff6e4d88d9b2e197fd9378c54535",
+      "payloadType": "add_liquidity",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1070",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xa5c8e295c1844af03094af48f1580b52b6ea38670219a136e0735bb0c1e9dbc2",
+      "emittedEvents": [
+        "0xf00a265dd32f64efd0398ec799527cf9bee0c9044c17dd99f478f4d0aedab5b9"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x5f15474b3575f9431b79a4f07cbb2513bf669ae80c5d18aef68326d47b63b867"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xc2473bf8abe594ecd9f0bda46cb3e3728f83a3988c1d9f477d05a7dd78e6ba55",
+      "txId": "0xacef8f2d596a89b4f375e77d99a786fe50995f54558e0010f0d186a118303c03",
+      "payloadType": "remove_liquidity",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1080",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x82eb3fc263e910559e0ad051ac665384a67e47a85050ad8e2f2b5b79e8314b1b",
+      "emittedEvents": [
+        "0x71e243ad26c879cabaf041f5677774f0ab8ab1922b54a7173bb35a6088c81677"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xc0cebf1d3b1868abb732ecdcebba7950a769c7cdaa98b88dd9538a3a98b7627a"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xc04b5906bfe4d4a8dbf8a1ae4e67d118cae78cd286058b72da9e4b854a2b12dd",
+      "txId": "0xc651a70810a35b170cbc851580fbc39ed1d1eed3f6ba5a7aac9837640c2e6116",
+      "payloadType": "swap",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1090",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xefccc2d1cb910fd2e70ec001598b59c833da8c5da24e60e564d946487979a411",
+      "emittedEvents": [
+        "0x4c93abec1055989ee9e54a615bff00758acb593f957ebe0cbf6d1781100abb60"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x6562accb225e54ad8432ca1fda5db766afaa52167ce1643e594ba8bf894ad5cd"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x1ba588c12762f0aabcb7c76eb1e1746d93ab3d050de4fedb0baae5a1681af23d",
+      "txId": "0xb0db1c922d7bbfa58759dfde491317d41c9aee638b442df4dfe1985b73e34c48",
+      "payloadType": "withdrawal_intent",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1100",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x7b480f778881971d21c8045e82eeae9d92a1b5270bc802c42de6dbcb17115fbf",
+      "emittedEvents": [
+        "0xff43e6ec48d56966d680893de999d296a277ed4f77693922e833b0f0908219eb"
+      ],
+      "bridgeEvidenceRefs": [
+        "0x4b632f40672ceb7ab195def56d8bc86141f1878ec31ffc742ec3e5b5d0def15d"
+      ],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x6175b6964ddd7b713529a0f3e4d1862ad66580b2b03c83a58ebb51bb588c5bde"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x2cbdb8fab6b7c1c5057582a137e5f8e2f4a9c8d5fd195bdd6fe1f183fdcaa44c",
+      "txId": "0xd63772799f7ca1d3eddfcf9ba2ef9bf77444e46d8222d5721e5c38f4f86656c3",
+      "payloadType": "validator_authority_config",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1110",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x078c6abec319ffa4100e0477ba6b0924ef0c8c53d7d652e57b38f01669e2e231",
+      "emittedEvents": [
+        "0x4213e214b202b5bc5aa268dff471c42d4197d4075d50b9dd70954d51f336e69a"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xd8e3b577578b0063bb2552baf93b257a48321605c9b0f6a987223326b7cc0855"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x5c92898faf0c75e4ec9b39246c4629e464103f9005d23160c61845ca622f6616",
+      "txId": "0x10f8e2a10f9e7eeb66b7958c59cca95443c84504deeee7b45b3cd695ccd74c8a",
+      "payloadType": "finality_vote",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1120",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x36402784906678d57c64a2e7596ae7df8f519843c436c1eac874dd2b902ae83b",
+      "emittedEvents": [
+        "0x147b00cef5b801830faefd80f1e5b708677b0c62e320cf133dcec604a67aef38"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x5c83e35062dd5919f27bed6ddbf1e709f34b2287190cfd3864779054d5d747e0"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x73a0b8e32efca89f7a48e2f80bc5fd311b447fc41344b3887bf713c9c935852f",
+      "txId": "0x2bf8ab2f47a541f7c2808c8bf9decec6a8f60d4d026c5ce1e43be10af156ee6c",
+      "payloadType": "finality_certificate",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1130",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xe554cf8d92a51c8a0249968d16c648d310e82bf8eaca924ffe7b60637d5a2887",
+      "emittedEvents": [
+        "0x57da01213fdb57bc6687284efa5ce316c0f43ddedb9e9adcad924d62de4f1bab"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x4648ccb0d567460f7485b377d5fe0dc03c4415569947db22322fd8b16e92c0ac"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xc40dff53c1a8e16a65013d96fcabdd2ebdea0b37acdb25b6b17a7d001f43fea1",
+      "txId": "0xd1a8d36d371779c09ecf2a627e27ceb85854fb3797d8a4b70ad7aa2fdc0baa83",
+      "payloadType": "agent_account_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1140",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x5f9f51f8d28ad1a6008933569c49a6e323c17c00fcfd4cb7e7da0a0827d95682",
+      "emittedEvents": [
+        "0x381cfd3d9968a813c5a9c0e121c0852317c320d4b860fa1bbe4d53c7dc2d4266"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xd17172a44dfabbed9500c3d87cfe858a24b5134776fcf4c780ea23e253f79748"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x2261159f48fbb7b1a62b28f4156060594441987c49d6eaeecfe451f46c5bb517",
+      "txId": "0xb539c517573818f12fa8d1a3604ec24296225a26ef76fb9badeaabed55b4f3dd",
+      "payloadType": "model_passport_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1150",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x5214edb50cdb17c59f43840c870424ed6adf05ddad057e889f14dde9957d9263",
+      "emittedEvents": [
+        "0x9f6585f2178ba0d2efd9d37ce0f8625d7f802759f5c8dfa1ce37317d827c02ed"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x0e7529e5eaed1b160fccabe56ff4f0e7ec96fab63cf75d546f424c48792ce48a"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x5ff763d0fb238a08f859991582bf569c7b3c6d25ca9c6b1024d348a221b2ebdd",
+      "txId": "0x81650a8cda675785e199f8259b80fee11abadc43fffbf619ed694920c2b20fea",
+      "payloadType": "work_receipt_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1160",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x316d700b2807fdffc19c5f04487d83144bb731a2a452902ede6b7509f152ab1c",
+      "emittedEvents": [
+        "0x93f4077d3b4225a297ac3c652fe69d5e4b1e160a96201c8fd93538367ac095f8"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x98c0e82742fa16158dd81dd7aa9beaf9fd09426faf788b41aef95b2382ebea10"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x146d5001dd2bb2fca087b678f3aa265157b225e3442db20cf9361f360fba609d",
+      "txId": "0xf2755e509ad9a58d6c4d969ada79f08d7bfa7ceeef4d0b439959f8108ee8d026",
+      "payloadType": "artifact_availability_proof_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1170",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x55d1944b097a3f7b0f6e790caad761d9adc5419b3300a60aefc498b2f2a91436",
+      "emittedEvents": [
+        "0x23894d2f46ebe807e4c379a7c56a6df7231c5f5c0516aaa159f6ad2daf012bae"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xf3a79addad62c517cc109e66780cca44645d7cdd4a1c084c454cedd373a131f3"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xaa0a8a0b973625ce0a40c573a91613ff8460461e283a3ca92c08b6923975c64b",
+      "txId": "0x14c854dedf7535dc4b6d7aebf6891905d35889f95341e72df121c31d82bc2717",
+      "payloadType": "verifier_module_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1180",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xbeef686a1991ba9f08f5f5fb973b0c63593e6eed158ae1bddada8b3ef1f878a4",
+      "emittedEvents": [
+        "0x9abd63cbe0bcadd4341288bba2ad97bc88e64c785749c493e2f65220d884d289"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x55f64a360ba0fbbe386c551a44e848e83ce8ef437d92fecb18b1237c40ded508"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x6bd4278844d4803c92246f3e44ab1bdce702245f613af658776dcec59381dfb8",
+      "txId": "0xc86669294104fea26444eb412d85a6b4c940d0d05c3fdccef2c26bc7753ca0af",
+      "payloadType": "verifier_report_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1190",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xb3071da3579c43c4da7527464f9814d788e6ed33022850a35e40421f45f8f0fa",
+      "emittedEvents": [
+        "0x80e11e3a6ec9644110ec64329394c206b09e17396b61e56520ed6a00f8536ec7"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x10c569d0178d3765fbf28f7482dbaa57950fd0793d6ec081bf9c32cd0fd84ea9"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xcbdcebbe06f7354341395af5fc87d4b443d0cf59480761ab790e38e857c9fd1d",
+      "txId": "0x09b13bb36deeecd2f862620273e0c13b1c0c02e4545553117dc8eab61082a546",
+      "payloadType": "memory_cell_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1200",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xe7ae8cf639df17cdf73fd69579771b424e9586a7d764267f52343489ba186f5f",
+      "emittedEvents": [
+        "0xc4de82b39ea363819843ce71263a4e964742b11a7b241ce9aefb8d38d7c4f47f"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xa80ba204e441a64a0a870e13bebadb40af3ef4b9bc32314c0fb31945e9ea3821"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0x2ecb3769958751ff06259795a187b2ef9972cce62aea38d1809b71fe3fcf25d5",
+      "txId": "0xc20e5b49cac7f27690643613dac7e35f00452e826cbc22b4ddd7107d224a4b4a",
+      "payloadType": "challenge_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1210",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0x70474a9e4deb5e341d16249dc040492d91a4e4d481ccc1002b38261dc00cbfe9",
+      "emittedEvents": [
+        "0xe462a465a90e44bbb51e1b53aba5661cf0ad8039a84295c0819e8a4ff28744ec"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0xf5defa0cc92d5fc3f96cc1b9d34bdf487d5b4ca1c83efd209fad1002ec676d49"
+    },
+    {
+      "schema": "flowmemory.production_l1.receipt.v0",
+      "receiptId": "0xcb25bf4472251bf2e3320c7d2feed61ebd8fb831e887149906a226ef8bb14ce5",
+      "txId": "0x39cfb18c324d443d4096ea96c5f5a6f307558025a7bf1df7286df3d5811fe37d",
+      "payloadType": "finality_receipt_update",
+      "status": "succeeded",
+      "executionCost": {
+        "costUnits": "1220",
+        "meter": "local_execution_units"
+      },
+      "stateDeltaRef": "0xa7b0cd57ed0ceffb6a7aa7bb547708cc4fd2412355471bedf4d2414a96f155fd",
+      "emittedEvents": [
+        "0x098ee4110828ebd8b5246a3c67d4086c3205a1a43eec46139b2be182eabc941a"
+      ],
+      "bridgeEvidenceRefs": [],
+      "errorCode": null,
+      "failureReason": null,
+      "deterministicIdInput": "0x37f183226937e175cac7e0e4b01b324f21df0761121d6683907b08a16035e4c7"
+    }
+  ]
+}

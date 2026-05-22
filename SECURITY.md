@@ -10,7 +10,7 @@ Use GitHub private vulnerability reporting / Security Advisories for suspected v
 
 - Heavy AI, model, memory, media, and artifact data stays off-chain.
 - On-chain contracts store compact roots, receipts, commitments, attestations, proofs, and intentionally bounded work state only.
-- Current public-agent, Agent Bonds, FlowChain, Rootflow, and Flow Memory paths are local/test or capped-pilot surfaces unless a document explicitly says otherwise.
+- Current public-agent, Agent Bonds, Rootflow, and Flow Memory paths are local/test or capped-pilot surfaces unless a document explicitly says otherwise.
 - Public test keys and deterministic fixtures may appear in tests and scripts. Real secrets must never be committed.
 - Base mainnet canary references are historical, bounded test evidence only; they are not a production launch.
 

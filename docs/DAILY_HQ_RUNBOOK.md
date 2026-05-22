@@ -2,16 +2,12 @@
 
 This runbook is for the FlowMemory HQ operator. It keeps many Codex agents moving without overlapping folders or expanding into premature product work.
 
-Private/local testnet checklist companion:
-`docs/FLOWCHAIN_OPERATOR_CHECKLIST.md`. Troubleshooting companion:
-`docs/FLOWCHAIN_TROUBLESHOOTING.md`.
-
 ## Morning Review
 
 Run:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 git fetch --all --prune
 .\infra\scripts\status-report.ps1
 gh pr list --repo FlowmemoryAI/FlowMemory --state open
@@ -25,51 +21,29 @@ Check:
 - Blocked issues.
 - Issues missing labels or milestones.
 - Any PR touching forbidden folders.
+- Public launch issues and gaps in `docs/PUBLIC_RELEASE_GAPS.md`.
 - Rootflow and Flow Memory launch-core issues #63 through #67.
 - Evidence gaps in `docs/V0_LAUNCH_ACCEPTANCE.md`.
 - Current audit notes in `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md`.
 
-## FlowChain Full-Testnet Push Checklist
+## Public Launch Checklist
 
 Morning:
 
-- Confirm GitHub open PRs and issues still match `docs/CURRENT_STATE.md` and
-  `docs/ISSUE_BACKLOG.md`.
-- Confirm `docs/FLOWCHAIN_HQ_INTEGRATION_STATUS.md` matches GitHub milestone
-  #7, issues #99-#108, and open PRs.
+- Confirm GitHub open PRs and issues still match `docs/CURRENT_STATE.md` and `docs/ISSUE_BACKLOG.md`.
+- Confirm `README.md`, `docs/PUBLIC_REPO_GUIDE.md`, `docs/PUBLIC_TESTER_GUIDE.md`, `docs/MOBILE_APPS.md`, and `docs/PUBLIC_RELEASE_GAPS.md` agree on product scope.
 - Check all sibling worktrees for dirty changes before assigning agents.
-- Verify no two active agents are editing the same folder family or source-of-truth
-  doc without coordination.
-- Review `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md` for rows that changed from
-  missing to in flight or implemented after merges.
-- Verify root command aliases in `package.json` still match the scripts under
-  `infra/scripts/flowchain-*.ps1`.
-- Verify `npm run flowchain:full-smoke -- -AllowIncomplete -SkipMergedSmoke`
-  still reports missing subsystem commands with owning issue numbers until
-  #108 is ready to pass.
-- Confirm the next assigned work extends the existing devnet, control-plane,
-  crypto, dashboard, contracts, hardware, or research surface instead of adding
-  a replacement system.
-- Keep public-chain launch, tokenomics, public validator, value-bearing bridge,
-  audited-cryptography, production hook, and production hardware claims blocked.
+- Verify no two active agents are editing the same folder family or source-of-truth doc without coordination.
+- Run or queue `npm run public:hardening` and `npm run public:test:all` before any public-launch merge.
+- Confirm the next assigned work extends the existing contracts, services, dashboard, mobile, hardware, crypto, or research surface instead of adding a replacement system.
+- Keep public tokenomics, public validator, value-bearing bridge, audited-cryptography, production hook, hosted production API, and production hardware claims blocked unless a later issue explicitly scopes them.
 
 Evening:
 
-- Record merged PRs, open PRs, dirty worktrees, blockers, and next smallest
-  actions for the private/local testnet package.
-- Update `docs/CURRENT_STATE.md`, `docs/ROADMAP.md`, and
-  `docs/ISSUE_BACKLOG.md` if a merge changes implemented, in-flight, missing,
-  or later-gated state.
-- Update `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md` whenever a command lands or
-  a command name changes.
-- Check whether the second-computer path can now run farther than the previous
-  day, and name the first failing step.
-- Save or cite `devnet/local/smoke/flowchain-smoke-report.json` when full smoke
-  runs locally.
-- Save or cite `devnet/local/smoke/flowchain-full-smoke-report.json` when the
-  full-L1 wrapper is run, even if it is expected to report blockers.
-- Require `git diff --check` in each PR summary and area tests where the touched
-  area has tests.
+- Record merged PRs, open PRs, dirty worktrees, blockers, and next smallest public-launch actions.
+- Update `docs/CURRENT_STATE.md`, `docs/ROADMAP.md`, and `docs/ISSUE_BACKLOG.md` if a merge changes implemented, in-flight, missing, or later-gated state.
+- Require `git diff --check` in each PR summary and area tests where the touched area has tests.
+- Re-run public claim guardrails if README, docs, issue templates, CI, dashboard copy, mobile docs, or release workflows changed.
 
 ## Issue Triage
 
@@ -84,21 +58,23 @@ For each issue:
 
 Priority order:
 
-1. Repo OS and review process.
+1. Public repo OS and review process.
 2. Rootflow and Flow Memory V0 launch-core issues #63 through #67.
-3. Contracts foundation hardening.
-4. Crypto vocabulary and deterministic fixtures.
-5. Indexer/verifier fixture and schema work.
-6. Dashboard fixture-backed display path.
-7. Hardware POC specs.
-8. Research gates.
+3. Public-agent and Agent Bonds launch hardening.
+4. Mobile operator app packaging and iOS gap tracking.
+5. Contracts foundation hardening.
+6. Crypto vocabulary and deterministic fixtures.
+7. Indexer/verifier fixture and schema work.
+8. Dashboard fixture-backed display path.
+9. Hardware POC specs.
+10. Research gates.
 
 ## Starting Agents
 
 Use one terminal per agent:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-contracts
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts
 codex
 ```
 
@@ -118,31 +94,31 @@ For each open PR:
 - Check area-specific tests or documented absence.
 - Check for scope creep.
 - Check whether docs/current state need updates.
-- Check whether the PR satisfies named rows in `docs/V0_LAUNCH_ACCEPTANCE.md`.
+- Check whether the PR satisfies named rows in `docs/V0_LAUNCH_ACCEPTANCE.md` or public release gaps.
 
 Reject or send back any PR that adds:
 
 - Tokenomics.
 - Dynamic fees.
 - Production deployment.
-- Production L1/appchain implementation.
 - Production Uniswap v4 hook deployment.
 - Hardware manufacturing or production field deployment.
 - GPU proofs or verifier economics.
-- Full dashboard implementation.
+- Full dashboard replacement instead of fixture-backed launch views.
 
 ## Merge Order
 
 Prefer:
 
 1. Repo OS, labels, milestones, PR process, runbook.
-2. Rootflow and Flow Memory specs, current-state, roadmap, architecture, decision records.
-3. Contracts test/config hardening.
-4. Crypto vocabulary and launch-core fixtures.
-5. Indexer/verifier fixture/spec changes.
-6. Dashboard fixture-backed display path.
-7. Hardware scope docs.
-8. Research docs.
+2. Public launch docs, claim guardrails, and public tester lanes.
+3. Rootflow and Flow Memory specs, current-state, roadmap, architecture, decision records.
+4. Contracts test/config hardening.
+5. Crypto vocabulary and launch-core fixtures.
+6. Indexer/verifier fixture/spec changes.
+7. Dashboard and mobile operator surfaces.
+8. Hardware scope docs.
+9. Research docs.
 
 If two PRs touch the same source-of-truth doc, merge the one that updates shared process first and ask the second PR to rebase or refresh.
 
@@ -173,6 +149,6 @@ Record:
 Suggested command:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\status-report.ps1
 ```

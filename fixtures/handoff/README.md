@@ -1,10 +1,10 @@
 # FlowMemory Handoff Fixtures
 
-This directory contains prototype fixtures for the local FlowMemory devnet.
+This directory contains prototype fixtures for the local FlowMemory localRuntime.
 
 Committed examples:
 
-- `sample-txs.json`: local transaction fixture for the Rust devnet.
+- `sample-txs.json`: local transaction fixture for the Rust localRuntime.
 - `sample-flowpulse-observation.json`: synthetic FlowPulse observation import fixture.
 - `sample-verifier-report.json`: synthetic verifier report import fixture.
 - `local-operator-key-reference.json`: local operator/worker/verifier key reference boundary with no signing secret.
@@ -22,7 +22,7 @@ Generated examples:
 Generated outputs are produced by:
 
 ```powershell
-cargo run --manifest-path crates/flowmemory-devnet/Cargo.toml -- export-fixtures --out-dir fixtures/handoff/generated
+cargo run --manifest-path crates/flowmemory-local-runtime/Cargo.toml -- export-fixtures --out-dir fixtures/handoff/generated
 ```
 
 These fixtures are no-value and local-only. They must not contain secrets, private keys, raw AI memory, model artifacts, large evidence bundles, or production chain claims.

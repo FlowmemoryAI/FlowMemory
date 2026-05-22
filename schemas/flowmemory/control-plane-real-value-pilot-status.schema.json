@@ -32,7 +32,7 @@
   "properties": {
     "schema": { "const": "flowmemory.control_plane.real_value_pilot_status.v0" },
     "pilotId": { "$ref": "#/$defs/hex32" },
-    "label": { "const": "FlowChain capped owner real-value pilot" },
+    "label": { "const": "FlowMemory capped owner real-value pilot" },
     "state": { "$ref": "#/$defs/pilotState" },
     "stateReason": { "type": "string" },
     "generatedAt": { "type": "string" },

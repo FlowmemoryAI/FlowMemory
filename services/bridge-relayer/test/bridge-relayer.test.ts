@@ -109,7 +109,7 @@ function sampleBridgeDepositLog(
   const token = "0x3333333333333333333333333333333333333333";
   const recipient = overrides.recipient ?? "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
   const metadataHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
-  const pilotModeTag = "0x8edc10ba20d09d2f920c2135ea53baaa72ec90df339d57248f096ca150771a6e";
+  const pilotModeTag = "0xefaa6123a077975f7e3f91a9408b025c8eaf4422c372add208d3d0c5d8ce8f92";
 
   return {
     address,
@@ -364,8 +364,8 @@ test("mock pilot credit state is locked across concurrent CLI apply attempts", a
     ]);
 
     await Promise.all([
-      runBridgeCli(argsFor("a"), { FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
-      runBridgeCli(argsFor("b"), { FLOWCHAIN_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
+      runBridgeCli(argsFor("a"), { FLOWMEMORY_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
+      runBridgeCli(argsFor("b"), { FLOWMEMORY_BRIDGE_STATE_LOCK_TEST_HOLD_MS: "150" }),
     ]);
 
     const handoffs = ["a", "b"].map((name) => (
@@ -1081,7 +1081,7 @@ test("Base public-network pilot rejects placeholder recipients without blocking 
     assert.equal(result.observations.length, 2);
     assert.equal(result.credits.length, 2);
     assert.equal(result.credits[0]?.status, "rejected");
-    assert.equal(result.credits[0]?.rejectionReason, "blocked_placeholder_flowchain_recipient");
+    assert.equal(result.credits[0]?.rejectionReason, "blocked_placeholder_flowmemory_recipient");
     assert.equal(result.credits[0]?.productionReady, false);
     assert.equal(result.credits[0]?.localOnly, true);
     assert.equal(result.credits[1]?.status, "applied");
@@ -1216,7 +1216,7 @@ test("diagnoses a valid Base 8453 bridge deposit transaction by tx hash", async 
   }
 });
 
-test("diagnostic reports placeholder FlowChain recipients as invalid", async () => {
+test("diagnostic reports placeholder FlowMemory recipients as invalid", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body ?? "{}")) as { method: string; params: unknown[] };
@@ -1273,7 +1273,7 @@ test("diagnostic reports placeholder FlowChain recipients as invalid", async () 
 
     assert.equal(report.status, "invalid");
     assert.equal(report.safeReasonCode, "recipient-placeholder");
-    assert.equal((report.checks as Record<string, unknown>).flowchainRecipientNotPlaceholder, false);
+    assert.equal((report.checks as Record<string, unknown>).flowmemoryRecipientNotPlaceholder, false);
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -4,7 +4,7 @@ Status: V0 local, Base Sepolia, and capped Base public-network pilot boundary.
 
 The current contracts are a compact event and commitment spine. They store intentional roots, receipt/report commitments, registry metadata hashes, counters, and status fields only. Heavy artifacts, AI memory, media, model data, verifier evidence, and receipt reconstruction data remain off-chain.
 
-For the private/local FlowChain testnet package, these Solidity contracts are optional settlement/event anchors. They are not the private L1 runtime. The private/local runtime remains the Rust/local devnet and local services path; Solidity may mirror compact events or commitments for tests and canaries only when that boundary is explicit.
+For the private/local FlowMemory testnet package, these Solidity contracts are optional settlement/event anchors. They are not the private network runtime. The private/local runtime remains the Rust/local runtime and local services path; Solidity may mirror compact events or commitments for tests and canaries only when that boundary is explicit.
 
 ## Allowed Now
 
@@ -16,7 +16,7 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
 - Base Sepolia reads from explicit RPC URLs.
 - Guarded Base mainnet canary reads and source-verification dry runs for the documented V0 canary addresses only.
 - Capped Base chain id `8453` bridge-pilot dry runs and explicit broadcasts for
-  `BaseBridgeLockbox` and `FlowChainSettlementSpine` only, with local env
+  `BaseBridgeLockbox` and `FlowMemorySettlementSpine` only, with local env
   acknowledgement, explicit owner/release authority, allowlisted assets, and
   nonzero configured total caps.
 - Public docs that describe emitted events, roots, receipts, and off-chain verification paths.
@@ -25,8 +25,8 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
 
 - Base mainnet deployment claims.
 - Production-mainnet readiness claims.
-- Production L1 claims.
-- Claims that the Solidity contracts are the private/local FlowChain L1 runtime.
+- Production network claims.
+- Claims that the Solidity contracts are the private/local FlowMemory network runtime.
 - Production Base settlement-anchor claims.
 - Production bridge, production finality, or production challenge-resolution claims.
 - Broad Base mainnet scans outside the documented canary reader guardrails.
@@ -38,7 +38,7 @@ For the private/local FlowChain testnet package, these Solidity contracts are op
 
 ## Settlement Anchor Boundary
 
-Base anchoring is placeholder/research until separately approved. A future anchor must be scoped in its own issue or decision record with threat model, source/target chain assumptions, replay boundaries, event semantics, indexer/verifier responsibilities, and deployment review. The current V0 contracts do not implement a bridge, production settlement finality, token movement, or appchain/L1 launch path.
+Base anchoring is placeholder/research until separately approved. A future anchor must be scoped in its own issue or decision record with threat model, source/target chain assumptions, replay boundaries, event semantics, indexer/verifier responsibilities, and deployment review. The current V0 contracts do not implement a bridge, production settlement finality, token movement, or local runtime/network launch path.
 
 FlowPulse events intentionally omit `txHash` and `logIndex`; indexers derive those values after receipts and logs exist. URI fields are advisory caller-supplied log data unless a future contract explicitly validates format, length, resolvability, or content hash linkage.
 
@@ -69,9 +69,9 @@ chain, PoolManager address, source verification plan, and post-deploy reader
 range. A mined/testnet hook address is still not a production hook deployment
 or a Base mainnet approval.
 
-## Private/Local FlowChain Mirror Map
+## Private/Local FlowMemory Mirror Map
 
-The private/local FlowChain runtime owns object execution and final state. The Solidity spine may mirror or anchor only compact object references:
+The private/local FlowMemory runtime owns object execution and final state. The Solidity spine may mirror or anchor only compact object references:
 
 | Private/local object | Optional Solidity mirror |
 | --- | --- |
@@ -82,9 +82,9 @@ The private/local FlowChain runtime owns object execution and final state. The S
 | ArtifactAvailabilityProof or model metadata pointer | `ArtifactRegistry` commitment and schema hashes |
 | Indexer checkpoint | `CursorRegistry` cursor commitments |
 | MemoryCell or Rootflow state update | `RootfieldRegistry` root commitments and FlowPulse events |
-| Challenge or finality state | Not mirrored by Solidity V0; handled by the Rust/local devnet and local services |
+| Challenge or finality state | Not mirrored by Solidity V0; handled by the Rust/local runtime and local services |
 
-These mirrors do not make Solidity the private L1 runtime and do not create production bridge, settlement, fee, token, or validator semantics.
+These mirrors do not make Solidity the private network runtime and do not create production bridge, settlement, fee, token, or validator semantics.
 
 ## Local Hardening Commands
 
@@ -146,7 +146,7 @@ The detailed public testnet rehearsal runbook is
 
 `script/DeployBridgeSpine.s.sol` is a separate dry-run-by-default bridge-spine
 script for local Anvil `31337`, Base Sepolia `84532`, and the capped Base
-`8453` pilot. The `8453` path requires `FLOWCHAIN_BASE8453_PILOT_ACK=true` and
+`8453` pilot. The `8453` path requires `FLOWMEMORY_BASE8453_PILOT_ACK=true` and
 nonzero total caps for every configured asset. The script deploys the existing
 lockbox and settlement spine only; it does not create a new bridge architecture
 or broad public bridge approval.
@@ -178,7 +178,7 @@ submission uses `npm run verify:base-canary:sources:submit` and requires
 - `BaseBridgeLockbox`: capped bridge-pilot lockbox with owner configuration,
   explicit release authority, pause, allowlisted assets, per-deposit caps,
   per-asset total caps, deposit replay guards, and release replay guards.
-- `FlowChainSettlementSpine`: object commitment event spine for bridge,
+- `FlowMemorySettlementSpine`: object commitment event spine for bridge,
   control-plane, memory, and finality object references.
 
 ## Post-Deploy Checks

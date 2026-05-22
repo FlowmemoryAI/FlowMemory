@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "flowchain.local_wallet_public_metadata.v0",
-  "title": "FlowChain Local Wallet Public Metadata V0",
+  "$id": "flowmemory.local_wallet_public_metadata.v0",
+  "title": "FlowMemory Local Wallet Public Metadata V0",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "vaultId", "createdAtUnixMs", "updatedAtUnixMs", "accounts", "boundary"],
   "properties": {
-    "schema": { "const": "flowchain.local_wallet_public_metadata.v0" },
+    "schema": { "const": "flowmemory.local_wallet_public_metadata.v0" },
     "vaultId": { "$ref": "#/$defs/hex32" },
     "createdAtUnixMs": { "$ref": "#/$defs/uintString" },
     "updatedAtUnixMs": { "$ref": "#/$defs/uintString" },

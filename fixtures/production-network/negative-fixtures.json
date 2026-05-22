@@ -1,0 +1,3166 @@
+{
+  "schema": "flowmemory.production_l1.negative_fixture_set.v0",
+  "cases": [
+    {
+      "caseId": "wrong_chain_transaction",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_WRONG_CHAIN_ID",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "742999",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "native_transfer",
+        "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b639",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "native_transfer",
+          "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "1",
+          "details": {
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "10000",
+            "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+          },
+          "preconditions": [
+            "payload_type:native_transfer",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-10000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "10000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "NativeTransferRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "native_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+          "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+        }
+      }
+    },
+    {
+      "caseId": "wrong_genesis_hash_transaction",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_WRONG_GENESIS_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x2756ab5e2876284dda9fafbb4155bf331a5adcc22829f99e5c9fe2c17ba72420",
+        "nonce": "1",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "native_transfer",
+        "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b639",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "native_transfer",
+          "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "1",
+          "details": {
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "10000",
+            "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+          },
+          "preconditions": [
+            "payload_type:native_transfer",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-10000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "10000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "NativeTransferRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "native_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+          "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+        }
+      }
+    },
+    {
+      "caseId": "stale_nonce_transaction",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_STALE_NONCE",
+      "expectedNonce": "5",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "native_transfer",
+        "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b639",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "native_transfer",
+          "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "1",
+          "details": {
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "10000",
+            "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+          },
+          "preconditions": [
+            "payload_type:native_transfer",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-10000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "10000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "NativeTransferRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "native_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+          "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+        }
+      }
+    },
+    {
+      "caseId": "duplicate_tx_transaction_set",
+      "fixtureKind": "transaction_set",
+      "expectedErrorCode": "FC_PROTO_DUPLICATE_TX",
+      "transactions": [
+        {
+          "schema": "flowmemory.production_l1.transaction_envelope.v0",
+          "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+          "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+          "chainId": "7428453",
+          "networkProfile": "flowmemory-base8453-pilot",
+          "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+          "nonce": "1",
+          "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+          "signer": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+            "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+            "role": "user"
+          },
+          "payloadType": "native_transfer",
+          "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b639",
+          "payload": {
+            "schema": "flowmemory.production_l1.transaction_payload.v0",
+            "payloadType": "native_transfer",
+            "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+            "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "accountNonce": "1",
+            "details": {
+              "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "10000",
+              "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+            },
+            "preconditions": [
+              "payload_type:native_transfer",
+              "account_nonce:1"
+            ],
+            "stateWrites": [
+              "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+            ],
+            "balanceChanges": [
+              {
+                "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+                "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+                "delta": "-10000"
+              },
+              {
+                "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+                "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+                "delta": "10000"
+              }
+            ],
+            "nonceChange": {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "before": "1",
+              "after": "2"
+            },
+            "emittedEventTypes": [
+              "NativeTransferRecorded"
+            ],
+            "indexKeys": [
+              {
+                "key": "payloadType",
+                "value": "native_transfer"
+              },
+              {
+                "key": "actorAccountId",
+                "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+              }
+            ],
+            "localOnly": true,
+            "productionReady": false
+          },
+          "fee": {
+            "mode": "local_gas_units",
+            "gasLimit": "1000000",
+            "maxFeePerGas": "0",
+            "localExecutionCostLimit": "1000000"
+          },
+          "expiration": {
+            "validAfterBlock": "0",
+            "validUntilBlock": "100",
+            "expiresAtUnixMs": "1778691600000"
+          },
+          "signature": {
+            "scheme": "fixture-secp256k1-digest-only",
+            "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+            "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+          }
+        },
+        {
+          "schema": "flowmemory.production_l1.transaction_envelope.v0",
+          "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+          "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+          "chainId": "7428453",
+          "networkProfile": "flowmemory-base8453-pilot",
+          "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+          "nonce": "1",
+          "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+          "signer": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+            "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+            "role": "user"
+          },
+          "payloadType": "native_transfer",
+          "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b639",
+          "payload": {
+            "schema": "flowmemory.production_l1.transaction_payload.v0",
+            "payloadType": "native_transfer",
+            "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+            "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "accountNonce": "1",
+            "details": {
+              "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "10000",
+              "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+            },
+            "preconditions": [
+              "payload_type:native_transfer",
+              "account_nonce:1"
+            ],
+            "stateWrites": [
+              "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+            ],
+            "balanceChanges": [
+              {
+                "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+                "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+                "delta": "-10000"
+              },
+              {
+                "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+                "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+                "delta": "10000"
+              }
+            ],
+            "nonceChange": {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "before": "1",
+              "after": "2"
+            },
+            "emittedEventTypes": [
+              "NativeTransferRecorded"
+            ],
+            "indexKeys": [
+              {
+                "key": "payloadType",
+                "value": "native_transfer"
+              },
+              {
+                "key": "actorAccountId",
+                "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+              }
+            ],
+            "localOnly": true,
+            "productionReady": false
+          },
+          "fee": {
+            "mode": "local_gas_units",
+            "gasLimit": "1000000",
+            "maxFeePerGas": "0",
+            "localExecutionCostLimit": "1000000"
+          },
+          "expiration": {
+            "validAfterBlock": "0",
+            "validUntilBlock": "100",
+            "expiresAtUnixMs": "1778691600000"
+          },
+          "signature": {
+            "scheme": "fixture-secp256k1-digest-only",
+            "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+            "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "malformed_payload_hash_transaction",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "native_transfer",
+        "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b630",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "native_transfer",
+          "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "1",
+          "details": {
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "10000",
+            "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+          },
+          "preconditions": [
+            "payload_type:native_transfer",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-10000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "10000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "NativeTransferRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "native_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+          "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+        }
+      }
+    },
+    {
+      "caseId": "malformed_state_root_manifest",
+      "fixtureKind": "state_root_manifest",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_STATE_ROOT",
+      "stateRootManifest": {
+        "schema": "flowmemory.production_l1.state_root_manifest.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "stateRootAlgorithm": "keccak256(canonical-json-sorted-keys-v0)",
+        "components": [
+          {
+            "component": "accounts",
+            "root": "0xf4914d4bb9ced10596986f52eefbe15e6b775c8b0855d51f85addd175b61e046",
+            "count": 6,
+            "ownerAgent": "wallet",
+            "inputs": [
+              "accountId",
+              "publicKey",
+              "address",
+              "roleFlags",
+              "nonceDomain"
+            ]
+          },
+          {
+            "component": "balances",
+            "root": "0x8a4fbb966efb61bd6e8f78fb7b8b510086b2650504654cc82a61d3ed97ac4d1c",
+            "count": 7,
+            "ownerAgent": "runtime",
+            "inputs": [
+              "accountId",
+              "assetId",
+              "amount"
+            ]
+          },
+          {
+            "component": "tokens",
+            "root": "0x542972588a71cf20b19e18681adc3bfbdcf7ca2fed4d4e60858e7679c2cbe238",
+            "count": 1,
+            "ownerAgent": "runtime",
+            "inputs": [
+              "tokenId",
+              "symbol",
+              "decimals",
+              "totalSupply"
+            ]
+          },
+          {
+            "component": "pools",
+            "root": "0x66666b609cd2486e0b688b8967452a54b49e684f587c107c8392d58b62ae3897",
+            "count": 1,
+            "ownerAgent": "runtime",
+            "inputs": [
+              "poolId",
+              "baseAssetId",
+              "quoteAssetId",
+              "reserves"
+            ]
+          },
+          {
+            "component": "lp_positions",
+            "root": "0xac45ae606ad56a72fd38b75aad52ed9b46365dfcca5b7679e3f7397d88ef05d3",
+            "count": 1,
+            "ownerAgent": "runtime",
+            "inputs": [
+              "lpPositionId",
+              "poolId",
+              "ownerAccountId",
+              "lpUnits"
+            ]
+          },
+          {
+            "component": "bridge_credits",
+            "root": "0x0f91f6d8d6a014b6b9e5c271e8a746256c4ef3b00c2194e0b858e405b7044b9a",
+            "count": 1,
+            "ownerAgent": "bridge",
+            "inputs": [
+              "creditId",
+              "observationId",
+              "accountId",
+              "assetId",
+              "amount"
+            ]
+          },
+          {
+            "component": "withdrawals",
+            "root": "0x179cf78b41131caefd13d557b73e73258fcb027e103007115deeb98e7755959f",
+            "count": 1,
+            "ownerAgent": "bridge",
+            "inputs": [
+              "withdrawalIntentId",
+              "accountId",
+              "assetId",
+              "amount",
+              "releaseEvidenceId"
+            ]
+          },
+          {
+            "component": "object_store",
+            "root": "0x96cca38dd6e86995a2b3551676a5c5777c3d270762cab8769771f840a9ac23fd",
+            "count": 9,
+            "ownerAgent": "runtime",
+            "inputs": [
+              "objectType",
+              "objectId",
+              "objectHash",
+              "status"
+            ]
+          },
+          {
+            "component": "finality",
+            "root": "0xbc714da6fb6a0957172d578e52e611e35c2f5c7a5433435c31736e6da2abf6f6",
+            "count": 1,
+            "ownerAgent": "consensus",
+            "inputs": [
+              "height",
+              "status",
+              "certificateId"
+            ]
+          },
+          {
+            "component": "validator_state",
+            "root": "0x6ae2131489fb1d27c5a6786fe058ad7a4d70edc598c0d766028fc1f4d1532290",
+            "count": 1,
+            "ownerAgent": "consensus",
+            "inputs": [
+              "authorityId",
+              "accountId",
+              "votingPower",
+              "status"
+            ]
+          }
+        ],
+        "stateComponents": {
+          "accounts": [
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "label": "alice-user",
+              "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+              "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": true,
+                "validator": false,
+                "bridgeOperator": false,
+                "deployer": true,
+                "relayer": false,
+                "emergencyOperator": false
+              },
+              "metadataHash": "0x1c114222c149606293a4dac2c2b8bd53d64517a2cb4804b13c560e6f0e3e09de",
+              "status": "active",
+              "productionReady": false
+            },
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "label": "bob-user",
+              "publicKey": "0x02bd133d4df63458ed49a0d7acde36d546b80c735f04d9a37eb428f1d92505b6be",
+              "address": "0xc8d2f10666e1216121f6449f0fc5726f63590aa7",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x8a6124844f49d9390c78a1dfd812c43c1963edf9be78b4154bc50fabf0e12f9a",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": true,
+                "validator": false,
+                "bridgeOperator": false,
+                "deployer": false,
+                "relayer": false,
+                "emergencyOperator": false
+              },
+              "metadataHash": "0xd7456e440b78c346aa02b5fff11c181d45d40c691d836e571d464a595db02008",
+              "status": "active",
+              "productionReady": false
+            },
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+              "label": "validator-one",
+              "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+              "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x8aca75dd306f43261a9c58812a426a62ddf72e5a0823fe7ef6c4e0aff78b42d9",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": false,
+                "validator": true,
+                "bridgeOperator": false,
+                "deployer": false,
+                "relayer": false,
+                "emergencyOperator": false
+              },
+              "metadataHash": "0x18e55b4da0218551072142ab2f110626c3f47f0c6f2a8fc5dbb5efb2fa3b34eb",
+              "status": "active",
+              "productionReady": false
+            },
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+              "label": "bridge-relayer",
+              "publicKey": "0x02f90ad32b15b53c0e4abd4f2f0de6db96dbe0adee1dab1736b0cf596070f7ef05",
+              "address": "0x633621fec8e01f8346130d81c26be8e33d1dcea9",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x346974a0aa8346f9759dde1d56bb8962a36eb013ca5e7f8c1b8e673fcfebd08a",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": false,
+                "validator": false,
+                "bridgeOperator": true,
+                "deployer": false,
+                "relayer": true,
+                "emergencyOperator": false
+              },
+              "metadataHash": "0x09d6e50d1093be697a68f09a0a8c99c1c8b072dd71ea832305d5153ae585a3ff",
+              "status": "active",
+              "productionReady": false
+            },
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0x9f7090c47663019f3d7647a2d4b5895a529e9dbac911bb2fde2c359828cbb3b8",
+              "label": "bridge-release-authority",
+              "publicKey": "0x02be094d43f51fb0e267c4ed5767bf26ef1370dc3c7756d1399d8e152c3a59b602",
+              "address": "0xdb523727f85b4f6d0ff5f62fc4d6c25a337af90d",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x0df088a7e0abfe419a042ed6caf58dba22d3a4f7e8ca066c3585b859ae870e4f",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": false,
+                "validator": false,
+                "bridgeOperator": true,
+                "deployer": false,
+                "relayer": false,
+                "emergencyOperator": false
+              },
+              "metadataHash": "0x8f83b49dac9afecf998c810362df58ad3e05daa154a80f63cbf32acf3f435ed2",
+              "status": "active",
+              "productionReady": false
+            },
+            {
+              "schema": "flowmemory.production_l1.account_public_metadata.v0",
+              "accountId": "0x458a01532bc3ec202c267dbd715ef239d54e3844cb37c57f504ab7e7f077ac8a",
+              "label": "emergency-operator",
+              "publicKey": "0x0202837e867307660b83033448b53dae9fbf18646041ac72fc3797272b59d65d79",
+              "address": "0x9386458c8c48d14bfebedc4fd00a528c15727b9e",
+              "addressDerivation": {
+                "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+                "preimageFields": [
+                  "publicKey",
+                  "chainId",
+                  "networkProfile"
+                ],
+                "chainIdBinding": true
+              },
+              "nonceDomain": {
+                "domainId": "0x6c2e83ab478452519394a62c494432d5e6643b6fd28c95af2fb38e55644ab734",
+                "nextNonce": "1",
+                "replayScope": "chainId+networkProfile+genesisHash+accountId"
+              },
+              "roleFlags": {
+                "user": false,
+                "validator": false,
+                "bridgeOperator": false,
+                "deployer": false,
+                "relayer": false,
+                "emergencyOperator": true
+              },
+              "metadataHash": "0xc0602b4f0b0d0dd87908d4808189afb4e60c7d7100865cabaf215fdf1311996f",
+              "status": "active",
+              "productionReady": false
+            }
+          ],
+          "balances": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "1000000",
+              "balanceType": "native_local_unit",
+              "noValue": true
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "100000",
+              "balanceType": "native_local_unit",
+              "noValue": true
+            },
+            {
+              "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "50000",
+              "balanceType": "native_local_unit",
+              "noValue": true
+            },
+            {
+              "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "25000",
+              "balanceType": "native_local_unit",
+              "noValue": true
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "amount": "2640000",
+              "balanceType": "native_local_unit",
+              "noValue": true
+            },
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "amount": "995050000",
+              "balanceType": "test_token",
+              "noValue": true
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "amount": "349000",
+              "balanceType": "test_token",
+              "noValue": true
+            }
+          ],
+          "tokens": [
+            {
+              "tokenId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "symbol": "FLOWT",
+              "name": "FlowMemory Local Test Token",
+              "decimals": 6,
+              "totalSupply": "1000250000",
+              "noValue": true
+            }
+          ],
+          "pools": [
+            {
+              "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+              "baseAssetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "quoteAssetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "reserveBase": "99000",
+              "reserveQuote": "4951000",
+              "feeBps": 30,
+              "noValue": true
+            }
+          ],
+          "lp_positions": [
+            {
+              "lpPositionId": "0x027c83ae59eefcbea8ecb604e3a527e4392c82376866e2f1e6804bae5a1dbd7d",
+              "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+              "ownerAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "lpUnits": "99900",
+              "noValue": true
+            }
+          ],
+          "bridge_credits": [
+            {
+              "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+              "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "amount": "2500000",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024"
+            }
+          ],
+          "withdrawals": [
+            {
+              "withdrawalIntentId": "0xa3bd91f938d573c2e58bb34f4842a3f9acb85df7d2b4086a5949a65b95c55ee6",
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "amount": "100000",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "releaseEvidenceId": "0x4b632f40672ceb7ab195def56d8bc86141f1878ec31ffc742ec3e5b5d0def15d"
+            }
+          ],
+          "object_store": [
+            {
+              "objectType": "AgentAccount",
+              "objectId": "0x79587bf5b81d6b566fe12453bc30803a773997e1f85371b4ba399d761758004d",
+              "objectHash": "0x24ad98a6c242b0b361aa0c48f6331202eb55002dd43e0db3bcbab52b30ac8018",
+              "status": "active"
+            },
+            {
+              "objectType": "ModelPassport",
+              "objectId": "0xa73adb911f58e33dcd820471675d7a3d2b242be0574e217b144f4873135a4085",
+              "objectHash": "0xd5de49d30e0ff04ff2de2141d119bbfb46f3b741ce529f0594936a1cfba296d3",
+              "status": "active"
+            },
+            {
+              "objectType": "WorkReceipt",
+              "objectId": "0xa96483b49a3d6005d748a512e00ab0bf1feb77d2bad4dec4f7842310bfe401f7",
+              "objectHash": "0xeb0475e34e1b2818d882210c44d3a3d8c6f30b1e551b827c48d9b0619ad238d9",
+              "status": "active"
+            },
+            {
+              "objectType": "ArtifactAvailabilityProof",
+              "objectId": "0x7458f4ac71bc9008bc012e2a8cec5b529772b58f6fc86ab44bcd339a7070e069",
+              "objectHash": "0x67aed44d292f94b1bd141ec1f355955f96283783e08152a7237e2d37810fd49a",
+              "status": "active"
+            },
+            {
+              "objectType": "VerifierModule",
+              "objectId": "0x5194f738c5e5d252e0ae82f28883d732b762b9944f20181b854841875c45c54b",
+              "objectHash": "0xfef87b4fe768283b6e0e741bde3c43e635ce3f89f769285e356027c813877895",
+              "status": "active"
+            },
+            {
+              "objectType": "VerifierReport",
+              "objectId": "0x5d0ad9b32f26abc0cd7be3b8869c51aefbc3cdd5d3f01735a8820fb7ff0910e1",
+              "objectHash": "0xa8d1865f5910ec6a9b615c48d7768e6a6ad3d3647495ffd5e5f6e9a8870a9489",
+              "status": "active"
+            },
+            {
+              "objectType": "MemoryCell",
+              "objectId": "0xbcd05714eabfa7babbe32888041eaca0f715073f92e8c8cbd1f81922eeab5b16",
+              "objectHash": "0x86eeee0b28fa6533fd4220fb4953e78c29e1d545d3cffea2d985053157923619",
+              "status": "active"
+            },
+            {
+              "objectType": "Challenge",
+              "objectId": "0x927bb5cb7a259e9ef7a3ca9ed94f4f536928f87ecec25ef8e04eb3dd16884ad9",
+              "objectHash": "0xa73c3472a504f9dd8d98b3851f88a1fbaf9914524c0a7879172268bcc3225acf",
+              "status": "resolved"
+            },
+            {
+              "objectType": "FinalityReceipt",
+              "objectId": "0xd0017f1d9ab4a827a296feed92d8427582bb2eeac7bc1d006ecb843d2a2022fa",
+              "objectHash": "0xe8331685281b5709bcff0d968bff6a796d9e78057156c9ad4662bcc6bb8ef1ac",
+              "status": "finalized"
+            }
+          ],
+          "finality": [
+            {
+              "height": "1",
+              "status": "accepted",
+              "certificateId": "0x4b525f224cd71929a613f6235ffb03a641916851c2fc90843feec3bbad90a3b3"
+            }
+          ],
+          "validator_state": [
+            {
+              "schema": "flowmemory.production_l1.validator_authority.v0",
+              "authorityId": "0x4e7ad43d8db36ddde419d64fac4768a38167efd7b9e7abc503036f2ba22c92ba",
+              "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+              "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+              "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+              "authorityType": "validator",
+              "votingPower": "1",
+              "finalityWeight": "1",
+              "metadataHash": "0x708f6074acaf685798e4085ceb5d4c3053dfa72bc1ccf0078feb3dbcd39c5e15",
+              "status": "active",
+              "productionReady": false
+            }
+          ]
+        },
+        "deterministicReplay": {
+          "sameLogicalStateRoot": "0x716ccaf7e8946591973d4614d41ba39c047ef7e89bd67d62f1aa6d90b99133ef",
+          "replayCommand": "npm run validate:production-network-fixtures"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_bridge_source_chain",
+      "fixtureKind": "bridge_evidence",
+      "expectedErrorCode": "FC_PROTO_INVALID_BRIDGE_SOURCE_CHAIN",
+      "bridgeEvidence": {
+        "schema": "flowmemory.production_l1.bridge_evidence.v0",
+        "evidenceId": "0x013b5052df9be23c0816f77258d50bddfad0d73eb62af5fdd96a0b45d16fee21",
+        "evidenceType": "deposit_observation",
+        "sourceChainId": 1,
+        "sourceNetwork": "base-mainnet-source-for-local-private-pilot",
+        "lockboxAddress": "0xb9524481c154c195b4236846fe9d8fcffd6ce407",
+        "sourceTxHash": "0x4487b7f7bffffe4903117c8190d64e58c40ecf96c43a4d30e0483a2b9ece0ee0",
+        "sourceBlockNumber": "45960000",
+        "sourceLogIndex": 7,
+        "tokenAddress": "0xe257180eba8c3194bd24ead035549e8beffbab16",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "depositorAddress": "0x6c6f65541dd5c673e0e3c23ba09f5e8735eaffcc",
+        "localRecipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "amount": "2500000",
+        "observedByRelayerAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+        "finalityStatus": "source_finalized",
+        "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+        "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+        "release": null,
+        "duplicateKey": "0x55575733fb056aaedf2d14985fc891da67a4093c6bc7d6719e4fcb83023fb467",
+        "evidenceHash": "0x7b96b892961fdd0534f8966c5b01bc85a5fb68ec6e88167c0d4397563197505b",
+        "localOnly": true,
+        "productionReady": false
+      }
+    },
+    {
+      "caseId": "duplicate_bridge_event",
+      "fixtureKind": "bridge_evidence_set",
+      "expectedErrorCode": "FC_PROTO_DUPLICATE_BRIDGE_EVENT",
+      "bridgeEvidence": [
+        {
+          "schema": "flowmemory.production_l1.bridge_evidence.v0",
+          "evidenceId": "0x013b5052df9be23c0816f77258d50bddfad0d73eb62af5fdd96a0b45d16fee21",
+          "evidenceType": "deposit_observation",
+          "sourceChainId": 8453,
+          "sourceNetwork": "base-mainnet-source-for-local-private-pilot",
+          "lockboxAddress": "0xb9524481c154c195b4236846fe9d8fcffd6ce407",
+          "sourceTxHash": "0x4487b7f7bffffe4903117c8190d64e58c40ecf96c43a4d30e0483a2b9ece0ee0",
+          "sourceBlockNumber": "45960000",
+          "sourceLogIndex": 7,
+          "tokenAddress": "0xe257180eba8c3194bd24ead035549e8beffbab16",
+          "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+          "depositorAddress": "0x6c6f65541dd5c673e0e3c23ba09f5e8735eaffcc",
+          "localRecipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "amount": "2500000",
+          "observedByRelayerAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+          "finalityStatus": "source_finalized",
+          "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+          "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+          "release": null,
+          "duplicateKey": "0x55575733fb056aaedf2d14985fc891da67a4093c6bc7d6719e4fcb83023fb467",
+          "evidenceHash": "0x7b96b892961fdd0534f8966c5b01bc85a5fb68ec6e88167c0d4397563197505b",
+          "localOnly": true,
+          "productionReady": false
+        },
+        {
+          "schema": "flowmemory.production_l1.bridge_evidence.v0",
+          "evidenceId": "0x34ff08e292a1eeda30597d6de62364099164907b10665d961437c93e7ed7d582",
+          "evidenceType": "deposit_observation",
+          "sourceChainId": 8453,
+          "sourceNetwork": "base-mainnet-source-for-local-private-pilot",
+          "lockboxAddress": "0xb9524481c154c195b4236846fe9d8fcffd6ce407",
+          "sourceTxHash": "0x4487b7f7bffffe4903117c8190d64e58c40ecf96c43a4d30e0483a2b9ece0ee0",
+          "sourceBlockNumber": "45960000",
+          "sourceLogIndex": 7,
+          "tokenAddress": "0xe257180eba8c3194bd24ead035549e8beffbab16",
+          "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+          "depositorAddress": "0x6c6f65541dd5c673e0e3c23ba09f5e8735eaffcc",
+          "localRecipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "amount": "2500000",
+          "observedByRelayerAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+          "finalityStatus": "source_finalized",
+          "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+          "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+          "release": null,
+          "duplicateKey": "0x55575733fb056aaedf2d14985fc891da67a4093c6bc7d6719e4fcb83023fb467",
+          "evidenceHash": "0x7b96b892961fdd0534f8966c5b01bc85a5fb68ec6e88167c0d4397563197505b",
+          "localOnly": true,
+          "productionReady": false
+        }
+      ]
+    },
+    {
+      "caseId": "invalid_native_transfer_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x18e97cdd0f9b8222ae270a034b8b26daf6d73c43c425d0593100b1d889563930",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "native_transfer",
+        "payloadHash": "0xb314ed92273ef9aed93bcc16e4989067a8d7dbd362373e4f15bdf2ad15d2b630",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "native_transfer",
+          "payloadId": "0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "1",
+          "details": {
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "10000",
+            "memoHash": "0x9284d3dc2a7d698ae915b37d7e2811f36db10682e82d56aa6bd7664d1220ef06"
+          },
+          "preconditions": [
+            "payload_type:native_transfer",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "native_transfer:state_write:0xc812c43f614a33562fbdd8ea7c02ba4839f87e45f201bbeb8fd08e080b88d2fa"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-10000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "10000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "NativeTransferRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "native_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2ce",
+          "value": "0x1a4bd0898df04f0e790a8256a7d254412d22e06326f8b2b46ba4039e0fbfe2cedbb4b0f74b3d6f6b6c9cdea4aaaf227cc71941d46a3a2e4826f7ec07e15a7d2a"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_faucet_funding_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x74b37fa211b380912250d589cbd52a7f08ef9e34ec68bcf034ef38d07697465a",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "2",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "faucet_funding",
+        "payloadHash": "0x678de8bb69e2e7585fbbd059f014e9f3f7af59b970e55a7a1817709bf3a74c40",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "faucet_funding",
+          "payloadId": "0xa4e0c6b866e9ee38c2b31dd6a928388a7389c8058648609c80d490ce77f40073",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "2",
+          "details": {
+            "faucetId": "0x268c55ac11ea534f33a96f4738b075648a9603e41cc7054ee03a8eb7f0e55c34",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "5000",
+            "reasonHash": "0x8934e316445b4e6bcee5226b067a5eddc19fa23a869e272feb6be378dae8ed48",
+            "localOnly": true
+          },
+          "preconditions": [
+            "payload_type:faucet_funding",
+            "account_nonce:2"
+          ],
+          "stateWrites": [
+            "faucet_funding:state_write:0xa4e0c6b866e9ee38c2b31dd6a928388a7389c8058648609c80d490ce77f40073"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "5000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "2",
+            "after": "3"
+          },
+          "emittedEventTypes": [
+            "FaucetFundingRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "faucet_funding"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x5e1b2659f86f1f99703c8b54d0721b51c41eec36ba6ae9d89f1ca56df045092d",
+          "value": "0x5e1b2659f86f1f99703c8b54d0721b51c41eec36ba6ae9d89f1ca56df045092d387e84a80721b4291186c3a02d8a0511410504f1a702e1930a266c62333635e3"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_bridge_credit_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x36f329a0663b99955a5778cefa40aed22fbafedea1230e559253aef782bbe42a",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x346974a0aa8346f9759dde1d56bb8962a36eb013ca5e7f8c1b8e673fcfebd08a",
+        "signer": {
+          "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+          "publicKey": "0x02f90ad32b15b53c0e4abd4f2f0de6db96dbe0adee1dab1736b0cf596070f7ef05",
+          "address": "0x633621fec8e01f8346130d81c26be8e33d1dcea9",
+          "role": "relayer"
+        },
+        "payloadType": "bridge_credit",
+        "payloadHash": "0x5945c72f2b23e8f5f301a7610a066f516c26f2d64245f94bb59821e013861970",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "bridge_credit",
+          "payloadId": "0x7a8668dcd2bffa80eb280031bd7757ecbaf8cd880d766d04e9bfc1a5bd8c4d66",
+          "actorAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+          "accountNonce": "1",
+          "details": {
+            "bridgeEvidenceId": "0x013b5052df9be23c0816f77258d50bddfad0d73eb62af5fdd96a0b45d16fee21",
+            "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+            "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+            "sourceChainId": 8453,
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "2500000",
+            "recipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a"
+          },
+          "preconditions": [
+            "payload_type:bridge_credit",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "bridge_credit:state_write:0x7a8668dcd2bffa80eb280031bd7757ecbaf8cd880d766d04e9bfc1a5bd8c4d66"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "2500000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "BridgeCreditApplied"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "bridge_credit"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x28f6ace9b0b309f17bf28fa90976e64550d93889f9dd9b659caa6f46c46b005f",
+          "value": "0x28f6ace9b0b309f17bf28fa90976e64550d93889f9dd9b659caa6f46c46b005fb6f08e745ba67912ac7bb807db36c6a7dd4aee51335200624ea267da77652b62"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_token_launch_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x6ca72702d734aea0d6b969b8aaa3328d0862f4b21ea0a8262ccc7839468c8c65",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "3",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "token_launch",
+        "payloadHash": "0x8074dc0dbd44f3431dcca27687de12bc68ef9189d86286b630f94c73931b4e00",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "token_launch",
+          "payloadId": "0x58b3ad1cc7dea9851e1f6813760e021681c975a6f8ebfe29a8c5116c43ac813d",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "3",
+          "details": {
+            "tokenLaunchId": "0xb941d23378dd9e79573960c3fe836cced8c07f9a5d261abee1626ae66b38e15b",
+            "issuerAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "tokenId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+            "symbol": "FLOWT",
+            "name": "FlowMemory Local Test Token",
+            "decimals": 6,
+            "metadataHash": "0xfd3e99204deb1fb81c51aac93bf9468ba42b0a45d2c8a8201080db1627056dd5",
+            "initialSupply": "1000000000",
+            "recipientAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+          },
+          "preconditions": [
+            "payload_type:token_launch",
+            "account_nonce:3"
+          ],
+          "stateWrites": [
+            "token_launch:state_write:0x58b3ad1cc7dea9851e1f6813760e021681c975a6f8ebfe29a8c5116c43ac813d"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "1000000000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "3",
+            "after": "4"
+          },
+          "emittedEventTypes": [
+            "TokenLaunched"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "token_launch"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x674f36261cbf81240f959a8bf5dc9808862b64194e0e0bd42d547abd14ea8dde",
+          "value": "0x674f36261cbf81240f959a8bf5dc9808862b64194e0e0bd42d547abd14ea8dde22ceec74319ce2a380f816948f99db9385e907385eaae404b226673eef5a3650"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_token_mint_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xc8cddac632390a6b736a7433c8fbc726028eb153517d5030ff17c94f5463a03a",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "4",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "token_mint",
+        "payloadHash": "0xbfdef58cb485fa1d5e6eb16a166e0cab34350c5b0e9383509015b5929069b310",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "token_mint",
+          "payloadId": "0x9a084a321aab722fad0ed7f1e7bba27e4d9c72afe9d74b876a727ae2646cad9f",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "4",
+          "details": {
+            "mintId": "0x3e118238b7a7677dadb07a2df738838ae438f2fb1edc56235ec7267f85c8cc84",
+            "tokenId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "amount": "250000",
+            "reasonHash": "0xa1f900fe4d833267daf29d488dd8c4f106718feca017762e54306d640e903d75",
+            "localOrTestMode": true
+          },
+          "preconditions": [
+            "payload_type:token_mint",
+            "account_nonce:4"
+          ],
+          "stateWrites": [
+            "token_mint:state_write:0x9a084a321aab722fad0ed7f1e7bba27e4d9c72afe9d74b876a727ae2646cad9f"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "250000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "4",
+            "after": "5"
+          },
+          "emittedEventTypes": [
+            "TokenMinted"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "token_mint"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x13fe583db212ec1dcfbe6240ea7489ea9288688f423f78069413534f725cdde3",
+          "value": "0x13fe583db212ec1dcfbe6240ea7489ea9288688f423f78069413534f725cdde32211ac2917eb98093dd6f007b5c40de8e21e3d9b235a9f6b223088cb5a52a2a6"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_token_transfer_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x8a327e611d306b367d9794000a64395c96990d9d16b93d309e149fc56a8af9e7",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "5",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "token_transfer",
+        "payloadHash": "0x8aa5892acd6e69297bb30beccfcb9b97e224562cbbc6bcab6b45d11f820f2e20",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "token_transfer",
+          "payloadId": "0xf297b8f97f86900fca41aa854aee01e0d8413ae99488e217ef75eaa5da1fd98f",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "5",
+          "details": {
+            "tokenTransferId": "0x13d8066d6f4711e834f123b102087394e11495c646dc1aec74112a3bd72c562b",
+            "tokenId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+            "fromAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "toAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "amount": "50000",
+            "memoHash": "0xc8a014c9eef7461736465de0ed544a310bc26d386b932dca8e29ae2e34adffac"
+          },
+          "preconditions": [
+            "payload_type:token_transfer",
+            "account_nonce:5"
+          ],
+          "stateWrites": [
+            "token_transfer:state_write:0xf297b8f97f86900fca41aa854aee01e0d8413ae99488e217ef75eaa5da1fd98f"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "-50000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "50000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "5",
+            "after": "6"
+          },
+          "emittedEventTypes": [
+            "TokenTransferred"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "token_transfer"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x74294b063606729075950a0686094e3a7f5d8c6872ac4e62f5914cd75f8df417",
+          "value": "0x74294b063606729075950a0686094e3a7f5d8c6872ac4e62f5914cd75f8df4178028417a9d1a4519b66a088b401b8c2807dc44bcabbd04a7b95a6fd457de3696"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_pool_create_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x459fd019e44fba8961ed3cab569eed08b906dfed8580c444002defe70b4147b4",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "6",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "pool_create",
+        "payloadHash": "0x542609986958c9c723b621092c8ba0456d6a5da33bf94cf33457050acdb5bc70",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "pool_create",
+          "payloadId": "0x099a7f62c1af5c718644e22a2a96486c4bdad7852c52d4373ed69c9a7aca3ae9",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "6",
+          "details": {
+            "poolCreateId": "0x7d29c3a9eca221bddf7903d6a45f8bca0b6fd1a001741b50d003504ad67c5c53",
+            "creatorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+            "baseAssetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "quoteAssetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+            "feeBps": 30,
+            "tickSpacing": 1,
+            "metadataHash": "0xdf927b67c67e3761744ac6ae5ef35375d42eda3fc857a6ec1567b24b8f29845e"
+          },
+          "preconditions": [
+            "payload_type:pool_create",
+            "account_nonce:6"
+          ],
+          "stateWrites": [
+            "pool_create:state_write:0x099a7f62c1af5c718644e22a2a96486c4bdad7852c52d4373ed69c9a7aca3ae9"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "6",
+            "after": "7"
+          },
+          "emittedEventTypes": [
+            "PoolCreated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "pool_create"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1a059c36d2c22e3e4cf0ff31990cd4b60bfce93c38fd3bc68b23d09d396e3f09",
+          "value": "0x1a059c36d2c22e3e4cf0ff31990cd4b60bfce93c38fd3bc68b23d09d396e3f090dbea9d7dd5742e612e330ae16b848b093d21404e8a68f67580360b024a12c88"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_add_liquidity_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xd4d4e811d8f4e18334823af5c81ff769eb27ff6e4d88d9b2e197fd9378c54535",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "7",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "add_liquidity",
+        "payloadHash": "0x77d4968318412db65dcc0995cc2130af1d741d65c464a500b0982f91c2cb4dd0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "add_liquidity",
+          "payloadId": "0x222a60a6e50c7a8d205fd472bb75c216485f56b33f824138a2b83cedd2ab6f7b",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "7",
+          "details": {
+            "liquidityId": "0x9ea34509afbe23343522af862dad843cf73df7532606eeca817edc5e0c7c2272",
+            "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+            "providerAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "baseAmount": "100000",
+            "quoteAmount": "5000000",
+            "minLpUnits": "1"
+          },
+          "preconditions": [
+            "payload_type:add_liquidity",
+            "account_nonce:7"
+          ],
+          "stateWrites": [
+            "add_liquidity:state_write:0x222a60a6e50c7a8d205fd472bb75c216485f56b33f824138a2b83cedd2ab6f7b"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-100000"
+            },
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "-5000000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "7",
+            "after": "8"
+          },
+          "emittedEventTypes": [
+            "LiquidityAdded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "add_liquidity"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x3eb1a65a616eb8031c4889a20ed244423a404b95c636b73ee4cb284f5c6936bb",
+          "value": "0x3eb1a65a616eb8031c4889a20ed244423a404b95c636b73ee4cb284f5c6936bbe4ad5abcb31f55676be981456e1e1aeb84327afe3769b291fc874e8b2eea4884"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_remove_liquidity_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xacef8f2d596a89b4f375e77d99a786fe50995f54558e0010f0d186a118303c03",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "8",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "user"
+        },
+        "payloadType": "remove_liquidity",
+        "payloadHash": "0x589737d24bc2636d0b10aaf2790e7e3932810f05a311ac2c4644213f405715d0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "remove_liquidity",
+          "payloadId": "0xb32b8118708f2adda42c92c555efab29e973efd05fc0a694ebd0cdd78e2caca5",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "8",
+          "details": {
+            "liquidityId": "0xe4a3ca64db987b9fac69d0df9069eecc4ad31da806b912b1606ef0efce172dfc",
+            "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+            "providerAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "lpUnits": "100",
+            "minBaseAmount": "1",
+            "minQuoteAmount": "1"
+          },
+          "preconditions": [
+            "payload_type:remove_liquidity",
+            "account_nonce:8"
+          ],
+          "stateWrites": [
+            "remove_liquidity:state_write:0xb32b8118708f2adda42c92c555efab29e973efd05fc0a694ebd0cdd78e2caca5"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "2000"
+            },
+            {
+              "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "100000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "8",
+            "after": "9"
+          },
+          "emittedEventTypes": [
+            "LiquidityRemoved"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "remove_liquidity"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x1aaaaa0c3174718b5df8bc7899384de7a450c01286a6bd98af72959a42e023e5",
+          "value": "0x1aaaaa0c3174718b5df8bc7899384de7a450c01286a6bd98af72959a42e023e5fb7590a0f3441a51788d3952be34a3ae28eb0dff986d95167f815e8761326405"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_swap_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xc651a70810a35b170cbc851580fbc39ed1d1eed3f6ba5a7aac9837640c2e6116",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x8a6124844f49d9390c78a1dfd812c43c1963edf9be78b4154bc50fabf0e12f9a",
+        "signer": {
+          "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "publicKey": "0x02bd133d4df63458ed49a0d7acde36d546b80c735f04d9a37eb428f1d92505b6be",
+          "address": "0xc8d2f10666e1216121f6449f0fc5726f63590aa7",
+          "role": "user"
+        },
+        "payloadType": "swap",
+        "payloadHash": "0xcb6bc1a569412a08d52ef59b17463ddb63fb82f6396f3fff3cdf813c2707d4a0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "swap",
+          "payloadId": "0x15fa2e1e2c305a0d29bd6c674a1fec00b18346d9d60e31f7a7677bd18cb3aac9",
+          "actorAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "accountNonce": "1",
+          "details": {
+            "swapId": "0x671be20c2cae4a8f2b5cf9ed4de1dbe64528fdb50c5f6c052f56883f8be994d7",
+            "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+            "traderAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "assetInId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "assetOutId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+            "amountIn": "1000",
+            "minAmountOut": "40000",
+            "routeHash": "0x71a523049c4579ce011a78a263713e5a2d32ae7150158aa8015fc9cb8e4871f4"
+          },
+          "preconditions": [
+            "payload_type:swap",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "swap:state_write:0x15fa2e1e2c305a0d29bd6c674a1fec00b18346d9d60e31f7a7677bd18cb3aac9"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-1000"
+            },
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+              "delta": "49000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "SwapExecuted"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "swap"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x201504789fb3e32c01d8496c915ab1e448d048f49a20d9d9c0969e8b0ebe14bc",
+          "value": "0x201504789fb3e32c01d8496c915ab1e448d048f49a20d9d9c0969e8b0ebe14bc7d9349c8cdb4657fa66eb3aa7db3b8284401547b238bc98e92ff5920cc763b7f"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_withdrawal_intent_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xb0db1c922d7bbfa58759dfde491317d41c9aee638b442df4dfe1985b73e34c48",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "2",
+        "nonceDomain": "0x8a6124844f49d9390c78a1dfd812c43c1963edf9be78b4154bc50fabf0e12f9a",
+        "signer": {
+          "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "publicKey": "0x02bd133d4df63458ed49a0d7acde36d546b80c735f04d9a37eb428f1d92505b6be",
+          "address": "0xc8d2f10666e1216121f6449f0fc5726f63590aa7",
+          "role": "user"
+        },
+        "payloadType": "withdrawal_intent",
+        "payloadHash": "0xe638c78e1bc9a52ac1243b1da3f8d5f22707ad968d50d7a3fef03041bbf251c0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "withdrawal_intent",
+          "payloadId": "0x8c8be8335d98fc6337cbef75b34ef228d11a4cacabf0b8da0d93282785d4efcb",
+          "actorAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+          "accountNonce": "2",
+          "details": {
+            "withdrawalIntentId": "0xa3bd91f938d573c2e58bb34f4842a3f9acb85df7d2b4086a5949a65b95c55ee6",
+            "sourceAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "destinationChainId": 8453,
+            "destinationAddress": "0xb8eed8a8ec1ba09a1b46e79042399df3984f36df",
+            "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+            "amount": "100000",
+            "releasePolicyHash": "0x5a1af4db0125b5c9be8ae5c2ca236108de242dc1e259d6f89e2e931c80e601c1"
+          },
+          "preconditions": [
+            "payload_type:withdrawal_intent",
+            "account_nonce:2"
+          ],
+          "stateWrites": [
+            "withdrawal_intent:state_write:0x8c8be8335d98fc6337cbef75b34ef228d11a4cacabf0b8da0d93282785d4efcb"
+          ],
+          "balanceChanges": [
+            {
+              "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+              "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+              "delta": "-100000"
+            }
+          ],
+          "nonceChange": {
+            "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+            "before": "2",
+            "after": "3"
+          },
+          "emittedEventTypes": [
+            "WithdrawalIntentRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "withdrawal_intent"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x957fb4572398a908af8493a77464a05e1271c2806f1e33c6a3ead9357941d32f",
+          "value": "0x957fb4572398a908af8493a77464a05e1271c2806f1e33c6a3ead9357941d32f47918c7a7829133695cd334ba1efdcf68644b5ff423fcfd80526622ef40fb1d1"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_validator_authority_config_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xd63772799f7ca1d3eddfcf9ba2ef9bf77444e46d8222d5721e5c38f4f86656c3",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "1",
+        "nonceDomain": "0x8aca75dd306f43261a9c58812a426a62ddf72e5a0823fe7ef6c4e0aff78b42d9",
+        "signer": {
+          "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+          "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+          "role": "validator"
+        },
+        "payloadType": "validator_authority_config",
+        "payloadHash": "0xa9f7a299f1a986b88b7a73990c45a3d2e4bc607ffade4a73e24ac85137887b21",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "validator_authority_config",
+          "payloadId": "0x7536fd5ee06a6afa22228e339c896fa95e3a17c0b501c3556d8d88f07be5f908",
+          "actorAccountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "accountNonce": "1",
+          "details": {
+            "authorityConfigId": "0x1ef8f8fa3707b0f16f98ed88c79e0c7d5465b55a6c14b0236b1949fa5ffc1fb8",
+            "authorityId": "0x4e7ad43d8db36ddde419d64fac4768a38167efd7b9e7abc503036f2ba22c92ba",
+            "validatorAccountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+            "action": "update",
+            "authorityType": "validator",
+            "votingPower": "1",
+            "metadataHash": "0x2bf51245a695e6afc8cad010f197129cba1bca7f1ff689caccaaea01f77935c8"
+          },
+          "preconditions": [
+            "payload_type:validator_authority_config",
+            "account_nonce:1"
+          ],
+          "stateWrites": [
+            "validator_authority_config:state_write:0x7536fd5ee06a6afa22228e339c896fa95e3a17c0b501c3556d8d88f07be5f908"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+            "before": "1",
+            "after": "2"
+          },
+          "emittedEventTypes": [
+            "ValidatorAuthorityConfigured"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "validator_authority_config"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x30db85e4b20d362f057d21535de016ec43d9eb813821e072e4afbea9cc78e409",
+          "value": "0x30db85e4b20d362f057d21535de016ec43d9eb813821e072e4afbea9cc78e409b7bf7ec3e75551273d274db995655d1fbdfa863414a060d41a57040bf8234a7d"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_finality_vote_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x10f8e2a10f9e7eeb66b7958c59cca95443c84504deeee7b45b3cd695ccd74c8a",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "2",
+        "nonceDomain": "0x8aca75dd306f43261a9c58812a426a62ddf72e5a0823fe7ef6c4e0aff78b42d9",
+        "signer": {
+          "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+          "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+          "role": "validator"
+        },
+        "payloadType": "finality_vote",
+        "payloadHash": "0x4488eab003da8fd001e2d3411f9830140e816d72a580d1f00138c90ffe28ab70",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "finality_vote",
+          "payloadId": "0x680c40512bd8a86c0610e4787d5a346ed11ce7d487f37e51b49d8f347cbf4901",
+          "actorAccountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "accountNonce": "2",
+          "details": {
+            "voteId": "0x5bf522270da05b7f92d03344e49c7b9f3d82d825d4303b2bed722375e822fdce",
+            "validatorAccountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+            "height": "1",
+            "blockHash": "0x3746b76bda4221999bf94bc0b1a144002dcb08769da1878ae6e690bfaf3205c1",
+            "stateRoot": "0x6fb8606dcd290285bf0fa89dc40bf6ee98a766e9858cb0b18a85dd288848c4ab",
+            "voteRound": "1"
+          },
+          "preconditions": [
+            "payload_type:finality_vote",
+            "account_nonce:2"
+          ],
+          "stateWrites": [
+            "finality_vote:state_write:0x680c40512bd8a86c0610e4787d5a346ed11ce7d487f37e51b49d8f347cbf4901"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+            "before": "2",
+            "after": "3"
+          },
+          "emittedEventTypes": [
+            "FinalityVoteRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "finality_vote"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0xf8147b67f890077cebf74db5185632bb08e8128c45ae5b89569d5b9dd87aafd9",
+          "value": "0xf8147b67f890077cebf74db5185632bb08e8128c45ae5b89569d5b9dd87aafd9f5885301664a67492d1c64816684914d11ae78e9871877eebb8c34734006018c"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_finality_certificate_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x2bf8ab2f47a541f7c2808c8bf9decec6a8f60d4d026c5ce1e43be10af156ee6c",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "3",
+        "nonceDomain": "0x8aca75dd306f43261a9c58812a426a62ddf72e5a0823fe7ef6c4e0aff78b42d9",
+        "signer": {
+          "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+          "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+          "role": "validator"
+        },
+        "payloadType": "finality_certificate",
+        "payloadHash": "0x82e2a8a031b079adac6e41851df9cb44f05722eee933d7526765f4487e151ca0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "finality_certificate",
+          "payloadId": "0x527697a531538b1617cec46d668a01a8d6b0d8210adb42b1506c0210b2df8a80",
+          "actorAccountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+          "accountNonce": "3",
+          "details": {
+            "certificateId": "0x4b525f224cd71929a613f6235ffb03a641916851c2fc90843feec3bbad90a3b3",
+            "height": "1",
+            "blockHash": "0x3746b76bda4221999bf94bc0b1a144002dcb08769da1878ae6e690bfaf3205c1",
+            "stateRoot": "0x6fb8606dcd290285bf0fa89dc40bf6ee98a766e9858cb0b18a85dd288848c4ab",
+            "signerSetRoot": "0x65217700c09f22aa4d3a0da9b5ee0955e2e7a196106ae6a93982d607b33d4ea3",
+            "voteIds": [
+              "0x5bf522270da05b7f92d03344e49c7b9f3d82d825d4303b2bed722375e822fdce"
+            ],
+            "quorumNumerator": 1,
+            "quorumDenominator": 1
+          },
+          "preconditions": [
+            "payload_type:finality_certificate",
+            "account_nonce:3"
+          ],
+          "stateWrites": [
+            "finality_certificate:state_write:0x527697a531538b1617cec46d668a01a8d6b0d8210adb42b1506c0210b2df8a80"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+            "before": "3",
+            "after": "4"
+          },
+          "emittedEventTypes": [
+            "FinalityCertificateRecorded"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "finality_certificate"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x33bf4f0d795235b556ca8e4ad33226cf6bd41f78acfdf4519b32c9a94d074637",
+          "value": "0x33bf4f0d795235b556ca8e4ad33226cf6bd41f78acfdf4519b32c9a94d074637a202d048be2c634cf410b35ee519b9c00c371d08950416c4d96e4ccc5a0c5bff"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_agent_account_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xd1a8d36d371779c09ecf2a627e27ceb85854fb3797d8a4b70ad7aa2fdc0baa83",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "9",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "agent_account_update",
+        "payloadHash": "0xac1359e1af6c3632d5d7a2ea0b78f75beead7733d2268bd4a645e740ce358da0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "agent_account_update",
+          "payloadId": "0x00159178ecb25498ba211866e664bf321b41140d3283ffdf22adf5ff1afea75e",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "9",
+          "details": {
+            "lifecycleUpdateId": "0x6e36f280f28b502261bddc5928c67c7f7801575211f4109a4dfb0531a6257a5b",
+            "objectType": "AgentAccount",
+            "operation": "create",
+            "objectId": "0x79587bf5b81d6b566fe12453bc30803a773997e1f85371b4ba399d761758004d",
+            "objectHash": "0x24ad98a6c242b0b361aa0c48f6331202eb55002dd43e0db3bcbab52b30ac8018",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0xae4c481a9422d17fe8e2b45dfbc0ff9386850a6d5cfa9067c35d14857882143d",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:agent_account_update",
+            "account_nonce:9"
+          ],
+          "stateWrites": [
+            "agent_account_update:state_write:0x00159178ecb25498ba211866e664bf321b41140d3283ffdf22adf5ff1afea75e"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "9",
+            "after": "10"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "agent_account_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x203c268461b8f2a65bfcf75ec7e0c7d73e66cfe8f10d967304ecbaa1fa7211d6",
+          "value": "0x203c268461b8f2a65bfcf75ec7e0c7d73e66cfe8f10d967304ecbaa1fa7211d641f0bb70c6bc1acbb4949c9926fc4026d837be1e08434de9a186b46415d4421c"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_model_passport_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xb539c517573818f12fa8d1a3604ec24296225a26ef76fb9badeaabed55b4f3dd",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "10",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "model_passport_update",
+        "payloadHash": "0x1441fc64083c7cef50ff08f8e469ca59f0c09b80dc15e811b52700a7b87968f0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "model_passport_update",
+          "payloadId": "0xe3cab3f31196df112aea6f29a374fb337acdab4b06e38b4af4d7c791a7651c59",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "10",
+          "details": {
+            "lifecycleUpdateId": "0xf5a85105d2d5754e0c1b65b0007f87d468d2bd8213b8eb95ef1d384d61cd34d6",
+            "objectType": "ModelPassport",
+            "operation": "create",
+            "objectId": "0xa73adb911f58e33dcd820471675d7a3d2b242be0574e217b144f4873135a4085",
+            "objectHash": "0xd5de49d30e0ff04ff2de2141d119bbfb46f3b741ce529f0594936a1cfba296d3",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0xdea6e290610e42576dc9fa8855c1d8e4cbedb6106cff9976ff36ddb79b6ccbcb",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:model_passport_update",
+            "account_nonce:10"
+          ],
+          "stateWrites": [
+            "model_passport_update:state_write:0xe3cab3f31196df112aea6f29a374fb337acdab4b06e38b4af4d7c791a7651c59"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "10",
+            "after": "11"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "model_passport_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x374db9766c01ee8756caf4dc7d9c18b0c82b366a481aedbaf231c787472d761f",
+          "value": "0x374db9766c01ee8756caf4dc7d9c18b0c82b366a481aedbaf231c787472d761f1e31e11444a086edf6e2e1c946256dbbd6ece936f179408b30709a5db93599d4"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_work_receipt_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x81650a8cda675785e199f8259b80fee11abadc43fffbf619ed694920c2b20fea",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "11",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "work_receipt_update",
+        "payloadHash": "0xb808fb23de2a4c5931df1bd0793a50e300e384056191bf8ec43c40a63f72cd60",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "work_receipt_update",
+          "payloadId": "0x0f20ce102d27fae1dcd6e39ede8549a9ce20ea089bf7e850bd78bfbae1b3c904",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "11",
+          "details": {
+            "lifecycleUpdateId": "0x44a1288ac877ce018ed5e155c43be6131a3f861a2733bb964f60ee66eee4b9cd",
+            "objectType": "WorkReceipt",
+            "operation": "create",
+            "objectId": "0xa96483b49a3d6005d748a512e00ab0bf1feb77d2bad4dec4f7842310bfe401f7",
+            "objectHash": "0xeb0475e34e1b2818d882210c44d3a3d8c6f30b1e551b827c48d9b0619ad238d9",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0x9dd038e0ce4935319fda5f8a95674362d8b33b1d3ee787820e6c343b788cd58d",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:work_receipt_update",
+            "account_nonce:11"
+          ],
+          "stateWrites": [
+            "work_receipt_update:state_write:0x0f20ce102d27fae1dcd6e39ede8549a9ce20ea089bf7e850bd78bfbae1b3c904"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "11",
+            "after": "12"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "work_receipt_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x567bc1def071888630c1b448279a6d4a44e9d00e87f4258c49a5f2bd3eac7bbf",
+          "value": "0x567bc1def071888630c1b448279a6d4a44e9d00e87f4258c49a5f2bd3eac7bbfd31a9c86dfc12050deb8f11fd8b8b368016aefa60ebcac8ba5262ec4243cfff4"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_artifact_availability_proof_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xf2755e509ad9a58d6c4d969ada79f08d7bfa7ceeef4d0b439959f8108ee8d026",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "12",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "artifact_availability_proof_update",
+        "payloadHash": "0x12875a7d20ac4115fd8b73a789a08659c80b62fa43eb61ae307c918449665590",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "artifact_availability_proof_update",
+          "payloadId": "0x368dde5881c4ace9e3f79d3c0c0544a33c5f397138b566019a4582b334f91d5b",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "12",
+          "details": {
+            "lifecycleUpdateId": "0x60734dd1226e4077c9e65ca13677b93fa7ffa60f82842b5091bf78afb81e8a47",
+            "objectType": "ArtifactAvailabilityProof",
+            "operation": "create",
+            "objectId": "0x7458f4ac71bc9008bc012e2a8cec5b529772b58f6fc86ab44bcd339a7070e069",
+            "objectHash": "0x67aed44d292f94b1bd141ec1f355955f96283783e08152a7237e2d37810fd49a",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0x86d33924cdab0b02f52329c23c47a17fc366aaa1f25ffe86cb043d45dce2645e",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:artifact_availability_proof_update",
+            "account_nonce:12"
+          ],
+          "stateWrites": [
+            "artifact_availability_proof_update:state_write:0x368dde5881c4ace9e3f79d3c0c0544a33c5f397138b566019a4582b334f91d5b"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "12",
+            "after": "13"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "artifact_availability_proof_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x712e542a9bac78e3eaaf053ea5aa79579c48d11598be10b4ca1ff3464e66fbbd",
+          "value": "0x712e542a9bac78e3eaaf053ea5aa79579c48d11598be10b4ca1ff3464e66fbbddc65ca3fc5efda2596a2f0228be45b73b3bbc85552f8a65f29cf6721ad63b967"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_verifier_module_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x14c854dedf7535dc4b6d7aebf6891905d35889f95341e72df121c31d82bc2717",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "13",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "verifier_module_update",
+        "payloadHash": "0x0aca3f36b89204ac92eda6e6f868fc0b3ea6025c09c4ae96e7fb50ad81705fc0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "verifier_module_update",
+          "payloadId": "0x995dde6d97ac1eb6929e4bd4e039cf288b5be4d092c79f62701babcbeae04829",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "13",
+          "details": {
+            "lifecycleUpdateId": "0xc92d8a917522ff573364e22a1794e254f09dd825645397bb02657eb883e82eb5",
+            "objectType": "VerifierModule",
+            "operation": "create",
+            "objectId": "0x5194f738c5e5d252e0ae82f28883d732b762b9944f20181b854841875c45c54b",
+            "objectHash": "0xfef87b4fe768283b6e0e741bde3c43e635ce3f89f769285e356027c813877895",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0xa02d1408d6f854615536af9e3fcc3c691eb8c6fad87ef68a6401fe6618618c5c",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:verifier_module_update",
+            "account_nonce:13"
+          ],
+          "stateWrites": [
+            "verifier_module_update:state_write:0x995dde6d97ac1eb6929e4bd4e039cf288b5be4d092c79f62701babcbeae04829"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "13",
+            "after": "14"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "verifier_module_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x178b1397398ff39f53ede827aa50a384566c48f380f6ff70bbd2e30c17918745",
+          "value": "0x178b1397398ff39f53ede827aa50a384566c48f380f6ff70bbd2e30c179187456f7b1343945a7e3cafd48063b5029c6f4a7f64bdb2ba6425ceccf515cd201e1f"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_verifier_report_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xc86669294104fea26444eb412d85a6b4c940d0d05c3fdccef2c26bc7753ca0af",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "14",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "verifier_report_update",
+        "payloadHash": "0x9073c274dd94bfb13fbf1c40965935b5183f8f3151b09acbb020d9d94a9385f0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "verifier_report_update",
+          "payloadId": "0xb32efbce075e1cb579dd1f336f3e3f19f0376bb97a73d4e9c3a42908551aee40",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "14",
+          "details": {
+            "lifecycleUpdateId": "0x2908295b327e718d264dabc5f5498f56890e28243d77aee467b194f05dcdf86e",
+            "objectType": "VerifierReport",
+            "operation": "create",
+            "objectId": "0x5d0ad9b32f26abc0cd7be3b8869c51aefbc3cdd5d3f01735a8820fb7ff0910e1",
+            "objectHash": "0xa8d1865f5910ec6a9b615c48d7768e6a6ad3d3647495ffd5e5f6e9a8870a9489",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0xb5679c8d1628adadf665abcd5c9ba0654a9cddb98de4d2fad83da2e561a17d13",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:verifier_report_update",
+            "account_nonce:14"
+          ],
+          "stateWrites": [
+            "verifier_report_update:state_write:0xb32efbce075e1cb579dd1f336f3e3f19f0376bb97a73d4e9c3a42908551aee40"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "14",
+            "after": "15"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "verifier_report_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x34afe42f2c19ff474384a3fae65c8adca908053d4c74c6a52456954cdaa4ba3e",
+          "value": "0x34afe42f2c19ff474384a3fae65c8adca908053d4c74c6a52456954cdaa4ba3ec4829eee2eb535113d2a6c1f1713ce7e5fd15ffdfb34942478601ba4f92746b1"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_memory_cell_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x09b13bb36deeecd2f862620273e0c13b1c0c02e4545553117dc8eab61082a546",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "15",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "memory_cell_update",
+        "payloadHash": "0x95975da8734fca016e8c2f93ec5828fa0f19d6e571d871a2d0fe97f797b75d60",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "memory_cell_update",
+          "payloadId": "0x119ce8e2b8bff44f6dd3e58c5f55142f4b91192bd88dc4b342beb1dda2e4ec2b",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "15",
+          "details": {
+            "lifecycleUpdateId": "0x8dcd30dfa2af2149622159d554cfd4b406e3b957d33c20f2d24d5e93f062807f",
+            "objectType": "MemoryCell",
+            "operation": "create",
+            "objectId": "0xbcd05714eabfa7babbe32888041eaca0f715073f92e8c8cbd1f81922eeab5b16",
+            "objectHash": "0x86eeee0b28fa6533fd4220fb4953e78c29e1d545d3cffea2d985053157923619",
+            "status": "active",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0x58bd17bc953ceac0890366bbcb897f36926712b1f5b14b648e2fec47c8833281",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:memory_cell_update",
+            "account_nonce:15"
+          ],
+          "stateWrites": [
+            "memory_cell_update:state_write:0x119ce8e2b8bff44f6dd3e58c5f55142f4b91192bd88dc4b342beb1dda2e4ec2b"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "15",
+            "after": "16"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "memory_cell_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x02c6d16114becab27062bec4294a991a44cfad1a85c9c4203c852e442ee9423a",
+          "value": "0x02c6d16114becab27062bec4294a991a44cfad1a85c9c4203c852e442ee9423a88307792b4fa2188839c0c5075254977a8bb73f1ce79e3b5de1e741e122ff712"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_challenge_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0xc20e5b49cac7f27690643613dac7e35f00452e826cbc22b4ddd7107d224a4b4a",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "16",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "challenge_update",
+        "payloadHash": "0x098203b68b7bfa8eb206ba3e10aa3dcc86d203edffc05ffa01de503641f73a61",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "challenge_update",
+          "payloadId": "0x3b5f3c39e177cbe3f68b3e17c3386c42bc9bd233bc1481d53eac73751d910b38",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "16",
+          "details": {
+            "lifecycleUpdateId": "0xf83daf6567077f2d934cecbba620031985e36727c891e81311552640ef930ef3",
+            "objectType": "Challenge",
+            "operation": "create",
+            "objectId": "0x927bb5cb7a259e9ef7a3ca9ed94f4f536928f87ecec25ef8e04eb3dd16884ad9",
+            "objectHash": "0xa73c3472a504f9dd8d98b3851f88a1fbaf9914524c0a7879172268bcc3225acf",
+            "status": "resolved",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0xa148aa4f0555533c2cb50a4b7a6c705ea1952ed7622cd4f8f978868b66277863",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:challenge_update",
+            "account_nonce:16"
+          ],
+          "stateWrites": [
+            "challenge_update:state_write:0x3b5f3c39e177cbe3f68b3e17c3386c42bc9bd233bc1481d53eac73751d910b38"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "16",
+            "after": "17"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "challenge_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0xaea8ccac2f425c2e879919a426d2f0134490645480109e1ec4ab3989d6ee877a",
+          "value": "0xaea8ccac2f425c2e879919a426d2f0134490645480109e1ec4ab3989d6ee877a3225d734144d1cb416db73c545216ac6ab28fae4014816a910bc54aefd61d8db"
+        }
+      }
+    },
+    {
+      "caseId": "invalid_finality_receipt_update_malformed_payload_hash",
+      "fixtureKind": "transaction",
+      "expectedErrorCode": "FC_PROTO_MALFORMED_PAYLOAD_HASH",
+      "transaction": {
+        "schema": "flowmemory.production_l1.transaction_envelope.v0",
+        "txId": "0x39cfb18c324d443d4096ea96c5f5a6f307558025a7bf1df7286df3d5811fe37d",
+        "protocolVersion": "flowmemory.private_local_l1.protocol.v0",
+        "chainId": "7428453",
+        "networkProfile": "flowmemory-base8453-pilot",
+        "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+        "nonce": "17",
+        "nonceDomain": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+        "signer": {
+          "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+          "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+          "role": "deployer"
+        },
+        "payloadType": "finality_receipt_update",
+        "payloadHash": "0xd604885b817860cb2b3456884d3399d65b42386ff4651625542bfc73426aa9d0",
+        "payload": {
+          "schema": "flowmemory.production_l1.transaction_payload.v0",
+          "payloadType": "finality_receipt_update",
+          "payloadId": "0x696e3e7a10a04d7d980be69b0c29c7c92de93b98c829b33a33626bc7f6a51ddd",
+          "actorAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+          "accountNonce": "17",
+          "details": {
+            "lifecycleUpdateId": "0x8a5eaff64212d4663055accac2c71d212eb8c09fa387872c263357be1bb8fab9",
+            "objectType": "FinalityReceipt",
+            "operation": "finalize",
+            "objectId": "0xd0017f1d9ab4a827a296feed92d8427582bb2eeac7bc1d006ecb843d2a2022fa",
+            "objectHash": "0xe8331685281b5709bcff0d968bff6a796d9e78057156c9ad4662bcc6bb8ef1ac",
+            "status": "finalized",
+            "rootfieldId": "0xfe983c788ee8d26d12c5fe49c59eb9a641ef0032c8f44f5da893a3fb96f73a5d",
+            "sourceReceiptId": "0x055948ea197b6ddb3b4b24fa76231e753eed6326db549f88ac3026beb2d5ab94",
+            "parentObjectId": null
+          },
+          "preconditions": [
+            "payload_type:finality_receipt_update",
+            "account_nonce:17"
+          ],
+          "stateWrites": [
+            "finality_receipt_update:state_write:0x696e3e7a10a04d7d980be69b0c29c7c92de93b98c829b33a33626bc7f6a51ddd"
+          ],
+          "balanceChanges": [],
+          "nonceChange": {
+            "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+            "before": "17",
+            "after": "18"
+          },
+          "emittedEventTypes": [
+            "ObjectLifecycleUpdated"
+          ],
+          "indexKeys": [
+            {
+              "key": "payloadType",
+              "value": "finality_receipt_update"
+            },
+            {
+              "key": "actorAccountId",
+              "value": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908"
+            }
+          ],
+          "localOnly": true,
+          "productionReady": false
+        },
+        "fee": {
+          "mode": "local_gas_units",
+          "gasLimit": "1000000",
+          "maxFeePerGas": "0",
+          "localExecutionCostLimit": "1000000"
+        },
+        "expiration": {
+          "validAfterBlock": "0",
+          "validUntilBlock": "100",
+          "expiresAtUnixMs": "1778691600000"
+        },
+        "signature": {
+          "scheme": "fixture-secp256k1-digest-only",
+          "signingDigest": "0x14257ecfda35adc39a8373793133bd06935417159dc31980cd783db8cb124442",
+          "value": "0x14257ecfda35adc39a8373793133bd06935417159dc31980cd783db8cb12444226fe91f37110b380180f5549df1f929e714381dbb733f6020980717aff33ec3e"
+        }
+      }
+    }
+  ]
+}

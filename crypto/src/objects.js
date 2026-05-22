@@ -176,7 +176,7 @@ export function bridgeDepositId({
   token,
   amount,
   sender,
-  flowchainRecipient,
+  flowmemoryRecipient,
   nonce,
   metadataHash
 }) {
@@ -188,7 +188,7 @@ export function bridgeDepositId({
     ["address", token],
     ["uint256", amount],
     ["address", sender],
-    ["bytes32", flowchainRecipient],
+    ["bytes32", flowmemoryRecipient],
     ["uint256", nonce],
     ["bytes32", metadataHash]
   ]);
@@ -425,7 +425,7 @@ export function bridgeWithdrawalIntentId({
   destinationChainId,
   token,
   amount,
-  flowchainAccount,
+  flowmemoryAccount,
   baseRecipient,
   status,
   requestedAt,
@@ -441,7 +441,7 @@ export function bridgeWithdrawalIntentId({
     ["uint256", destinationChainId],
     ["address", token],
     ["uint256", amount],
-    ["bytes32", flowchainAccount],
+    ["bytes32", flowmemoryAccount],
     ["address", baseRecipient],
     ["bytes32", keccakUtf8(status)],
     ["bytes32", keccakUtf8(requestedAt)],
@@ -517,7 +517,7 @@ export function pilotWithdrawalIntentId({
   depositId,
   token,
   amount,
-  flowchainAccount,
+  flowmemoryAccount,
   baseRecipient,
   status,
   requestedAt,
@@ -535,7 +535,7 @@ export function pilotWithdrawalIntentId({
     ["bytes32", depositId],
     ["address", token],
     ["uint256", amount],
-    ["bytes32", flowchainAccount],
+    ["bytes32", flowmemoryAccount],
     ["address", baseRecipient],
     ["bytes32", keccakUtf8(status)],
     ["bytes32", keccakUtf8(requestedAt)],
@@ -697,7 +697,7 @@ export function localAlphaObjectTypeHash(objectSchema) {
 }
 
 export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
-  "flowchain.agent_account.v0": {
+  "flowmemory.agent_account.v0": {
     objectType: "agent_account",
     idField: "agentId",
     domainName: "agentAccountId",
@@ -723,7 +723,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: agentAccountId
   },
-  "flowchain.model_passport.v0": {
+  "flowmemory.model_passport.v0": {
     objectType: "model_passport",
     idField: "modelId",
     domainName: "modelPassportId",
@@ -751,7 +751,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: modelPassportId
   },
-  "flowchain.work_receipt.v0": {
+  "flowmemory.work_receipt.v0": {
     objectType: "work_receipt",
     idField: "workReceiptId",
     domainName: "workReceiptId",
@@ -766,7 +766,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: workReceiptId
   },
-  "flowchain.artifact_availability_proof.v0": {
+  "flowmemory.artifact_availability_proof.v0": {
     objectType: "artifact_availability_proof",
     idField: "proofId",
     domainName: "artifactAvailabilityProofId",
@@ -793,7 +793,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: artifactAvailabilityProofId
   },
-  "flowchain.verifier_module.v0": {
+  "flowmemory.verifier_module.v0": {
     objectType: "verifier_module",
     idField: "moduleId",
     domainName: "verifierModuleId",
@@ -819,7 +819,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: verifierModuleId
   },
-  "flowchain.verifier_report.v0": {
+  "flowmemory.verifier_report.v0": {
     objectType: "verifier_report",
     idField: "reportId",
     domainName: "verifierReportDigest",
@@ -848,7 +848,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: verifierReportHash
   },
-  "flowchain.memory_cell.v0": {
+  "flowmemory.memory_cell.v0": {
     objectType: "memory_cell",
     idField: "memoryCellId",
     domainName: "memoryCellId",
@@ -877,7 +877,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return document.currentMemoryRoot !== ZERO_BYTES32 && document.currentMemoryRoot !== document.previousMemoryRoot;
     }
   },
-  "flowchain.challenge.v0": {
+  "flowmemory.challenge.v0": {
     objectType: "challenge",
     idField: "challengeId",
     domainName: "challengeId",
@@ -895,7 +895,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     }),
     id: challengeId
   },
-  "flowchain.finality_receipt.v0": {
+  "flowmemory.finality_receipt.v0": {
     objectType: "finality_receipt",
     idField: "finalityReceiptId",
     domainName: "finalityReceiptId",
@@ -931,7 +931,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     nonzeroFields: [
       "depositId",
       "txHash",
-      "flowchainRecipient",
+      "flowmemoryRecipient",
       "metadataHash"
     ],
     input: (document) => ({
@@ -942,7 +942,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       token: document.token,
       amount: document.amount,
       sender: document.sender,
-      flowchainRecipient: document.flowchainRecipient,
+      flowmemoryRecipient: document.flowmemoryRecipient,
       nonce: document.nonce,
       metadataHash: document.metadataHash
     }),
@@ -956,7 +956,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.bridge_credit.v0": {
+  "flowmemory.bridge_credit.v0": {
     objectType: "bridge_credit",
     idField: "creditId",
     domainName: "bridgeCreditId",
@@ -977,7 +977,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return BigInt(document.amount) > 0n && document.statusCode === LOCAL_ALPHA_BRIDGE_STATUSES.credited;
     }
   },
-  "flowchain.bridge_withdrawal.v0": {
+  "flowmemory.bridge_withdrawal.v0": {
     objectType: "bridge_withdrawal",
     idField: "withdrawalId",
     domainName: "bridgeWithdrawalId",
@@ -1001,7 +1001,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return [8453, 84532].includes(document.destinationChainId) && BigInt(document.amount) > 0n;
     }
   },
-  "flowchain.local_balance_record.v0": {
+  "flowmemory.local_balance_record.v0": {
     objectType: "local_balance_record",
     idField: "balanceRecordId",
     domainName: "localBalanceRecordId",
@@ -1023,7 +1023,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return BigInt(document.availableAmount) >= 0n && BigInt(document.lockedAmount) >= 0n;
     }
   },
-  "flowchain.product_transfer.v0": {
+  "flowmemory.product_transfer.v0": {
     objectType: "product_transfer",
     idField: "transferId",
     domainName: "productTransferId",
@@ -1043,7 +1043,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return document.fromAccountId !== document.toAccountId && BigInt(document.amount) > 0n;
     }
   },
-  "flowchain.product_token_launch.v0": {
+  "flowmemory.product_token_launch.v0": {
     objectType: "product_token_launch",
     idField: "tokenLaunchId",
     domainName: "productTokenLaunchId",
@@ -1075,7 +1075,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return Number.isInteger(document.decimals) && document.decimals <= 18 && BigInt(document.initialSupply) > 0n;
     }
   },
-  "flowchain.product_pool_create.v0": {
+  "flowmemory.product_pool_create.v0": {
     objectType: "product_pool_create",
     idField: "poolCreateId",
     domainName: "productPoolCreateId",
@@ -1103,7 +1103,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.product_add_liquidity.v0": {
+  "flowmemory.product_add_liquidity.v0": {
     objectType: "product_add_liquidity",
     idField: "addLiquidityId",
     domainName: "productAddLiquidityId",
@@ -1123,7 +1123,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return BigInt(document.baseAmount) > 0n && BigInt(document.quoteAmount) > 0n;
     }
   },
-  "flowchain.product_remove_liquidity.v0": {
+  "flowmemory.product_remove_liquidity.v0": {
     objectType: "product_remove_liquidity",
     idField: "removeLiquidityId",
     domainName: "productRemoveLiquidityId",
@@ -1143,7 +1143,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return BigInt(document.liquidityTokens) > 0n;
     }
   },
-  "flowchain.product_swap.v0": {
+  "flowmemory.product_swap.v0": {
     objectType: "product_swap",
     idField: "swapId",
     domainName: "productSwapId",
@@ -1164,7 +1164,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return document.assetInId !== document.assetOutId && BigInt(document.amountIn) > 0n;
     }
   },
-  "flowchain.product_bridge_credit_ack.v0": {
+  "flowmemory.product_bridge_credit_ack.v0": {
     objectType: "product_bridge_credit_ack",
     idField: "bridgeCreditAckId",
     domainName: "productBridgeCreditAckId",
@@ -1189,7 +1189,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
     idField: "withdrawalIntentId",
     domainName: "bridgeWithdrawalIntentId",
     signerRoles: ["agent", "user"],
-    nonzeroFields: ["withdrawalIntentId", "creditId", "depositId", "flowchainAccount"],
+    nonzeroFields: ["withdrawalIntentId", "creditId", "depositId", "flowmemoryAccount"],
     input: (document) => ({
       creditId: document.creditId,
       depositId: document.depositId,
@@ -1197,7 +1197,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       destinationChainId: document.destinationChainId,
       token: document.token,
       amount: document.amount,
-      flowchainAccount: document.flowchainAccount,
+      flowmemoryAccount: document.flowmemoryAccount,
       baseRecipient: document.baseRecipient,
       status: document.status,
       requestedAt: document.requestedAt,
@@ -1218,7 +1218,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.pilot_bridge_credit_ack.v0": {
+  "flowmemory.pilot_bridge_credit_ack.v0": {
     objectType: "pilot_bridge_credit_ack",
     idField: "pilotBridgeCreditAckId",
     domainName: "pilotBridgeCreditAckId",
@@ -1255,7 +1255,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.pilot_withdrawal_intent.v0": {
+  "flowmemory.pilot_withdrawal_intent.v0": {
     objectType: "pilot_withdrawal_intent",
     idField: "pilotWithdrawalIntentId",
     domainName: "pilotWithdrawalIntentId",
@@ -1265,7 +1265,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       "operatorId",
       "creditId",
       "depositId",
-      "flowchainAccount"
+      "flowmemoryAccount"
     ],
     input: (document) => ({
       sourceChainId: document.sourceChainId,
@@ -1276,7 +1276,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       depositId: document.depositId,
       token: document.token,
       amount: document.amount,
-      flowchainAccount: document.flowchainAccount,
+      flowmemoryAccount: document.flowmemoryAccount,
       baseRecipient: document.baseRecipient,
       status: document.status,
       requestedAt: document.requestedAt,
@@ -1296,7 +1296,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.pilot_release_evidence.v0": {
+  "flowmemory.pilot_release_evidence.v0": {
     objectType: "pilot_release_evidence",
     idField: "pilotReleaseEvidenceId",
     domainName: "pilotReleaseEvidenceId",
@@ -1336,7 +1336,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.pilot_emergency_control.v0": {
+  "flowmemory.pilot_emergency_control.v0": {
     objectType: "pilot_emergency_control",
     idField: "pilotEmergencyControlId",
     domainName: "pilotEmergencyControlId",
@@ -1370,7 +1370,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       );
     }
   },
-  "flowchain.hardware_signal_envelope.v0": {
+  "flowmemory.hardware_signal_envelope.v0": {
     objectType: "hardware_signal_envelope",
     idField: "hardwareSignalEnvelopeId",
     domainName: "hardwareSignalEnvelopeId",
@@ -1391,7 +1391,7 @@ export const LOCAL_ALPHA_OBJECT_DESCRIPTORS = Object.freeze({
       return document.previousSignalEnvelopeId !== document.hardwareSignalEnvelopeId;
     }
   },
-  "flowchain.control_plane_provenance_response.v0": {
+  "flowmemory.control_plane_provenance_response.v0": {
     objectType: "control_plane_provenance_response",
     idField: "provenanceResponseId",
     domainName: "controlPlaneProvenanceResponseId",

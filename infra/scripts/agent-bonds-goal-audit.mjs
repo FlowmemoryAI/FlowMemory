@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const REPORT_PATH = resolve(REPO_ROOT, "devnet/local/agent-bonds-readiness/goal-audit-report.json");
+const REPORT_PATH = resolve(REPO_ROOT, "local-runtime/local/agent-bonds-readiness/goal-audit-report.json");
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -34,7 +34,7 @@ function main() {
   process.chdir(REPO_ROOT);
   const failures = [];
 
-  const readinessPath = "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
+  const readinessPath = "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
   const replayPath = "fixtures/agent-bonds/replay-report.json";
   const economicPath = "fixtures/agent-bonds/economic-sim-report.json";
   const blockerCheck = run("node", ["infra/scripts/agent-bonds-public-launch-blockers.mjs"]);

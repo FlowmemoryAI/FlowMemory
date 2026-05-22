@@ -1,0 +1,1173 @@
+{
+  "schema": "flowmemory.crypto.production-network-vectors.v0",
+  "chainId": "31337",
+  "networkProfile": "local-chain",
+  "issuedAtUnixMs": "1778702400000",
+  "expiresAtUnixMs": "1778706000000",
+  "boundary": "Deterministic local/private production-network-shaped crypto vectors. Fixtures contain public test metadata, documents, signatures, and expected validation failures only.",
+  "accounts": {
+    "user": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-user",
+      "role": "user",
+      "roleCode": 10,
+      "roleGated": false,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "publicKeyHash": "0xba8656c3163ca42241f6bb9bd2c5a2b924ec5bd04a468e21b43183fac0227aa9",
+      "address": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+      "accountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+      "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    },
+    "recipient": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-user",
+      "role": "user",
+      "roleCode": 10,
+      "roleGated": false,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+      "publicKeyHash": "0x3da70a7cc8ff5bc4f9a3a2142e4e14a7a0c112f66fdb32ca5e213ff496282e96",
+      "address": "0xdd2c4a4a29f14ff316d7e80154703402442d92a9",
+      "accountId": "0xd0af191d661fd50c0524a3ecbb2aefb9b10ff3840c3683a9d4f3ac86a076e837",
+      "signerKeyId": "0x46cdf2b1529d33e19cd41b83ec6bcbd7f2f5e57ed4fd16a7b42fb76939f99db9",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    },
+    "validator": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-validator",
+      "role": "validator",
+      "roleCode": 11,
+      "roleGated": true,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "publicKeyHash": "0xf80c374a270cfd6be1ec95aa393d5de115fd36c5db3ba401b239807770629e9e",
+      "address": "0xe32e7bff913bbf8e738795225c0e4c2c228d9458",
+      "accountId": "0xff04376c27c6ab075e4e2b85a0955d4a70ffdcf478832fcf3a73c288d6f3465d",
+      "signerKeyId": "0xeed1359e2150c00afc5f9e6d48a478f344698b854ce52f7deb80d532896a368e",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    },
+    "bridgeRelayer": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-bridgeRelayer",
+      "role": "bridgeRelayer",
+      "roleCode": 12,
+      "roleGated": true,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "publicKeyHash": "0x1a2413ac5d83539082a29152abd3f08e5f17d39b8b126491ad025fea6dd99c8e",
+      "address": "0xde88258cb6eb77b15c03676f9559fa55898cd71e",
+      "accountId": "0x90262f149534e3a83d126c6e8a678c6e2f8c43f4b33385017c323947495e27e5",
+      "signerKeyId": "0xf2496ef5c1cba9b68cc07a77bec96fd7805b9a5f9732b06adccdd49144cb8ea3",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    },
+    "bridgeReleaseAuthority": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-bridgeReleaseAuthority",
+      "role": "bridgeReleaseAuthority",
+      "roleCode": 13,
+      "roleGated": true,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+      "publicKeyHash": "0x0614f1f0aec056fc8dfe3d70ee63b10cc93e57af854d669d5a3b2c7c42129c5b",
+      "address": "0xb8834ff19a47293decaab0e2e366d2df87c24a38",
+      "accountId": "0x899b8aa582caefca787fe8c701df4de8de398bdc7b919bfcb5bc5e7cfaa30450",
+      "signerKeyId": "0x037cc918c0700a8964a973d20f606d8cc126075e814f8dd2054312877b54f1ae",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    },
+    "emergencyOperator": {
+      "schema": "flowmemory.public_account_metadata.v0",
+      "label": "production-network-emergencyOperator",
+      "role": "emergencyOperator",
+      "roleCode": 14,
+      "roleGated": true,
+      "publicKeyEncoding": "secp256k1-compressed-hex",
+      "publicKey": "0x03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+      "publicKeyHash": "0x7d7f65165a4122ddb3f8f218e01d40dc13a6f044ce5d404b86e480da3f717cdc",
+      "address": "0x4133cf2ccc34e6ab939b86a0a57df1500e3f3b11",
+      "accountId": "0x49698ed7f3b03be5722f8bb86c0b4490d2285c85c70b069b272a10d544b9e862",
+      "signerKeyId": "0x79e219791f0ec17c0e8ba70c7bc62ae0cb8b1699fc5cde51d318e356e3a2ca9c",
+      "createdAtUnixMs": "1778702400000",
+      "active": true
+    }
+  },
+  "bridgeSourceEvent": {
+    "sourceChainId": "8453",
+    "lockbox": "0x1111111111111111111111111111111111111111",
+    "token": "0x2222222222222222222222222222222222222222",
+    "depositor": "0x3333333333333333333333333333333333333333",
+    "recipient": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+    "amount": "25000000",
+    "txHash": "0xf5841799df5ea9c2b8dfcfcbbd5fb6915a68075d29b2ee91bc9bbf1d792143f9",
+    "logIndex": "7",
+    "blockNumber": "45955540",
+    "eventNonce": "1"
+  },
+  "hashHelpers": {
+    "transactionId": "0xce6ac99f35fd00fe50c587172f03220d3126149c5834bb79c281fea004f483d8",
+    "blockHash": "0xefea594baa26d81fc556637db0753a3b7896cbf89c3e8543e2f2975c3142fd37",
+    "txRoot": "0xf64be1557a0f64ac08347f859c4ac5712e1d4854ecf22b2c32a599708bf23b66",
+    "receiptRoot": "0xf55c17f0051b810ae3d32a90ac5a7a9bd0156b39032d99da35e01ca929ba3d3d",
+    "eventRoot": "0x37db8fb05603093f118623a8b2f32d10e92f75196e0f3b078e688a753704f910",
+    "accountStateRoot": "0x75af63ba7d0f48be0a8f07f135fa9cf43c54eb7431dd4279d630ec9d718b179f",
+    "tokenStateRoot": "0x8f64c3d565d7e3840fbe925d7858f985707234574b96db679def734b754cf7c3",
+    "dexStateRoot": "0xae81cd0d9301027f648694fdc21dd8df4d12a1b9d0c1a5442ca6ba7a4e7c0d24",
+    "bridgeObservationId": "0x6eb59d882f76408ef3faa1dc70cc335e3dc50437a6497a36fb23467315e275f2",
+    "bridgeCreditId": "0x7361a67523e697fa5c971d9e40454b6d18643b726388793ac155f21754b01ee0",
+    "bridgeEvidenceHash": "0x2eb86e5b224985aede234ed934001cac77915a3adddbb83bd665b74259774146",
+    "withdrawalIntentId": "0x93246b649c461e9c85d48d2dfe2ef2de9757b8c2ecc4173440d67febdecbf738",
+    "finalityReceiptId": "0xd40fd26072215c7a094e54eed9f73ce3e039b8034558d2d5c2ac80139b717792",
+    "replayKeys": {
+      "accountNonce": "0xbd99d37edfca34a36c7761cec00d1f73ce3ef79765cfbc99cb3d3bf033c52b3b",
+      "roleScopedNonce": "0xb6b5c203543aac24bd8e945794bd2c62a5b2008612b015985d99c66282096269",
+      "bridgeSourceEvent": "0x38a535831d8fc06943f4312d3df62c525cc4d6c991e795cd26464423b74425a5",
+      "withdrawalIntent": "0x93246b649c461e9c85d48d2dfe2ef2de9757b8c2ecc4173440d67febdecbf738",
+      "finalityVote": "0x36383f16c33087d715d94a68087e6dd32913f05b48d28e54e9ba257ef1072bd0"
+    }
+  },
+  "positive": [
+    {
+      "name": "wallet-transfer",
+      "document": {
+        "schema": "flowmemory.product_transfer.v0",
+        "transferId": "0x29b9d9d9bd441a89c64b14c2e183454795f576a9bfcf115ece0aa03f2c73ea89",
+        "fromAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "toAccountId": "0xd0af191d661fd50c0524a3ecbb2aefb9b10ff3840c3683a9d4f3ac86a076e837",
+        "assetId": "0x9075dfa2fc21a569d912d2fbc9d2492a708238a84c94bcfede89abf3af218eb6",
+        "amount": "1000000",
+        "accountNonce": "1",
+        "deadlineBlock": "120",
+        "memoHash": "0xbb58cac7e385eacd5944e7ce0a8d3d4666e024a021fc42380afd52b877f1f4de"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xccd1ca8d07d41ef3c01689a4faf81bb42a38cfb195dacc365dc891a38d049ec9",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "1",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_transfer.v0",
+        "objectType": "product_transfer",
+        "payloadType": "wallet_transfer",
+        "payloadTypeHash": "0x14480d5cbd3e854884a374919b17d1915f1951385d1da6ed95686bac3f1d5a64",
+        "objectTypeHash": "0x8e8a4f51cd6f5c2ca3d6a312a30b3b42835116776b07f5628af61470d9c25c2a",
+        "objectId": "0x29b9d9d9bd441a89c64b14c2e183454795f576a9bfcf115ece0aa03f2c73ea89",
+        "payloadHash": "0xc463f96575493ae315b3298b815bab4be881f87b58335a142293b3a1d6e39d9c",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x0e9ef926ddbd92dbbbe6d2ecf4b1d476afac1a88f0c0dc54f17e67a8270ba5c5",
+        "signature": "0x56aefd2959d96bf2c183f34e33e0ad3677884bebf52c9d8d0ca9d243f6bb64b9764c970e76535c303cf364682a4ad4028cefbe02159a8280c838050323901e22",
+        "transactionId": "0xce6ac99f35fd00fe50c587172f03220d3126149c5834bb79c281fea004f483d8"
+      },
+      "expected": {
+        "objectId": "0x29b9d9d9bd441a89c64b14c2e183454795f576a9bfcf115ece0aa03f2c73ea89",
+        "payloadHash": "0xc463f96575493ae315b3298b815bab4be881f87b58335a142293b3a1d6e39d9c",
+        "envelopeId": "0xccd1ca8d07d41ef3c01689a4faf81bb42a38cfb195dacc365dc891a38d049ec9",
+        "signingDigest": "0x0e9ef926ddbd92dbbbe6d2ecf4b1d476afac1a88f0c0dc54f17e67a8270ba5c5",
+        "transactionId": "0xce6ac99f35fd00fe50c587172f03220d3126149c5834bb79c281fea004f483d8"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0xc463f96575493ae315b3298b815bab4be881f87b58335a142293b3a1d6e39d9c",
+        "transactionId": "0xce6ac99f35fd00fe50c587172f03220d3126149c5834bb79c281fea004f483d8",
+        "nonce": "1",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "faucet-test-funding",
+      "document": {
+        "schema": "flowmemory.local_balance_record.v0",
+        "balanceRecordId": "0xe6159e777e180b1693ac2050ee18ed382b772c6c0d585279805b2bd9e980b9dd",
+        "accountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "assetId": "0x9075dfa2fc21a569d912d2fbc9d2492a708238a84c94bcfede89abf3af218eb6",
+        "availableAmount": "100000000",
+        "lockedAmount": "0",
+        "lastCreditId": "0x019fe6f7ca21dc8af017bc426bbdcc6dd281e76e81154219cb31955569866070",
+        "lastWithdrawalId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "stateRoot": "0x5d6166b6be00cfac6afa7c82eb8dd6d0ba9052b7e7cdfd2b934d38890085f52a",
+        "updatedAtBlockNumber": "1",
+        "nonce": "0x99eda03585f661caef8f2a64186eff8d72669a5c191a835810624de6964d72c1"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xabbdb1d888b7209cb88df8f9a2df11fd759c41d97626e4c5a6e3aab647b8eea1",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "2",
+        "signerId": "0x49698ed7f3b03be5722f8bb86c0b4490d2285c85c70b069b272a10d544b9e862",
+        "signerKeyId": "0x79e219791f0ec17c0e8ba70c7bc62ae0cb8b1699fc5cde51d318e356e3a2ca9c",
+        "signerRole": "emergencyOperator",
+        "signerRoleCode": 14,
+        "publicKey": "0x03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x4133cf2ccc34e6ab939b86a0a57df1500e3f3b11",
+        "objectSchema": "flowmemory.local_balance_record.v0",
+        "objectType": "local_balance_record",
+        "payloadType": "faucet_test_funding",
+        "payloadTypeHash": "0x50319e8f9d5d22e34fdc5cd02705f68ac04f0376268f30c35b445df65e5c4313",
+        "objectTypeHash": "0x721956365fbff8d18bf76b240810823f8d8a0ae03b4fddcce8cf36550d1340a3",
+        "objectId": "0xe6159e777e180b1693ac2050ee18ed382b772c6c0d585279805b2bd9e980b9dd",
+        "payloadHash": "0x068770ab536f2da4aaf419358fc4978b1341ca74440505e58ebcefe347e9767c",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0xe19d47a6b69a18246c328af2ff87cd4128b4ae780c1bc09600c4a0333190dc0a",
+        "signature": "0xcd93178facfbc5a5a54a9c85e2fa1ead39251fbae4d0981ec07d4e409fd3cca560dec6c90ac5df913270668a87033b0563f57d5c48258f1703df1567b83cbb6b",
+        "transactionId": "0xa7a869e89384b9ff1d5352c2627d36740fce1aa81e5d9524cff80ba22a89bfc4"
+      },
+      "expected": {
+        "objectId": "0xe6159e777e180b1693ac2050ee18ed382b772c6c0d585279805b2bd9e980b9dd",
+        "payloadHash": "0x068770ab536f2da4aaf419358fc4978b1341ca74440505e58ebcefe347e9767c",
+        "envelopeId": "0xabbdb1d888b7209cb88df8f9a2df11fd759c41d97626e4c5a6e3aab647b8eea1",
+        "signingDigest": "0xe19d47a6b69a18246c328af2ff87cd4128b4ae780c1bc09600c4a0333190dc0a",
+        "transactionId": "0xa7a869e89384b9ff1d5352c2627d36740fce1aa81e5d9524cff80ba22a89bfc4"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x4133cf2ccc34e6ab939b86a0a57df1500e3f3b11",
+        "signerAccountId": "0x49698ed7f3b03be5722f8bb86c0b4490d2285c85c70b069b272a10d544b9e862",
+        "payloadHash": "0x068770ab536f2da4aaf419358fc4978b1341ca74440505e58ebcefe347e9767c",
+        "transactionId": "0xa7a869e89384b9ff1d5352c2627d36740fce1aa81e5d9524cff80ba22a89bfc4",
+        "nonce": "2",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "token-launch",
+      "document": {
+        "schema": "flowmemory.product_token_launch.v0",
+        "tokenLaunchId": "0x87154a9de6ceeb21957e3d4347a58352c3f3e021649923680d5b7edc8003730d",
+        "issuerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "tokenId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+        "symbolHash": "0x08ef225fc646fe5e7560ce95c34f8210e5d852f8265fb6abd8f7ebecbf2995dc",
+        "nameHash": "0x70172362855f5236aa907b8bc60ddcd6c4a3c8cd0b68b1d86b4f831398c3fbaa",
+        "metadataHash": "0xc95a41ec87e224c5ff8b59bd092baa0229a65c98df633927d4dca391cdf489d8",
+        "decimals": 6,
+        "initialSupply": "1000000000",
+        "recipientAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "accountNonce": "2",
+        "launchPolicyHash": "0x363baf541f4bbcc92b7caba7b0729682d28c3cc6e1b80e31ef0764ed6e74da74"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0x51c6feeff7c448c53cad9beffe91f105546f80a9ac352f76e40021f1dd885725",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "3",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_token_launch.v0",
+        "objectType": "product_token_launch",
+        "payloadType": "token_launch",
+        "payloadTypeHash": "0x4359986e3dc22eaf286230ed5f18779979921ad6e648d481b72973fc6a95406e",
+        "objectTypeHash": "0x0b4cae629e1062bc0d34ce2df5b78212d439a8bf9dca4bcde75080a8eb16f982",
+        "objectId": "0x87154a9de6ceeb21957e3d4347a58352c3f3e021649923680d5b7edc8003730d",
+        "payloadHash": "0x9624eebbd64372bfe05c1a41d41c79aa11abdd5696c2558b89414db93523c239",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0xb0fe35247fdaec13c71ceec8485ea5596c847af66e0ee20909c48af1688e0b08",
+        "signature": "0x9a50c21f9ed477d33117d7991a6b7df0ce2570be42998c53338601dcdc42b6fd6f052a13b5745fca197c239ab0df393ea1dffa196b5d01452afe18e05b840bea",
+        "transactionId": "0x5c4cc54835121175bda351184bc9db3e9eee12583e6dc817925d7a92757c680f"
+      },
+      "expected": {
+        "objectId": "0x87154a9de6ceeb21957e3d4347a58352c3f3e021649923680d5b7edc8003730d",
+        "payloadHash": "0x9624eebbd64372bfe05c1a41d41c79aa11abdd5696c2558b89414db93523c239",
+        "envelopeId": "0x51c6feeff7c448c53cad9beffe91f105546f80a9ac352f76e40021f1dd885725",
+        "signingDigest": "0xb0fe35247fdaec13c71ceec8485ea5596c847af66e0ee20909c48af1688e0b08",
+        "transactionId": "0x5c4cc54835121175bda351184bc9db3e9eee12583e6dc817925d7a92757c680f"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0x9624eebbd64372bfe05c1a41d41c79aa11abdd5696c2558b89414db93523c239",
+        "transactionId": "0x5c4cc54835121175bda351184bc9db3e9eee12583e6dc817925d7a92757c680f",
+        "nonce": "3",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "token-transfer",
+      "document": {
+        "schema": "flowmemory.product_transfer.v0",
+        "transferId": "0x3c48a0c6564ff47311a7fe71876d90a6d28c299c71bb7745d9033e4338a9290d",
+        "fromAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "toAccountId": "0xd0af191d661fd50c0524a3ecbb2aefb9b10ff3840c3683a9d4f3ac86a076e837",
+        "assetId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+        "amount": "5000000",
+        "accountNonce": "3",
+        "deadlineBlock": "140",
+        "memoHash": "0x512017e178db49339ab23460cd81b735121256b0d5e5f3c4fd4a52e8ee7e0fec"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0x30e637660c7c56d85a097100014362174feae9d3517fa1c173a85be96d04cad6",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "4",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_transfer.v0",
+        "objectType": "product_transfer",
+        "payloadType": "token_transfer",
+        "payloadTypeHash": "0x85f15e1b7cd56792dde24eb24a8d705ce45aaae89a91f00b953d03371b6bc0ab",
+        "objectTypeHash": "0x8e8a4f51cd6f5c2ca3d6a312a30b3b42835116776b07f5628af61470d9c25c2a",
+        "objectId": "0x3c48a0c6564ff47311a7fe71876d90a6d28c299c71bb7745d9033e4338a9290d",
+        "payloadHash": "0x106a43391bd749413d907a2fa42c821d095babd418304158a14e318bd86b1247",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x6564f3cf1718830f9de95b57596101db8d8f3e6b532ce5de1ed578597e6b77c4",
+        "signature": "0x10f8d5c9fbe0d77ee3614e415dec503ecbb61b98b80cd788a896a18de7ef8c426fe6980f296e854c0aa5a95cd41aeb81f8a3b8de0db789ff12c169ac3631e839",
+        "transactionId": "0xe2b60b5b606ea7f3b3ba5e44d1991cbbac1ca57faeb65f9457acdfb22eaca3c3"
+      },
+      "expected": {
+        "objectId": "0x3c48a0c6564ff47311a7fe71876d90a6d28c299c71bb7745d9033e4338a9290d",
+        "payloadHash": "0x106a43391bd749413d907a2fa42c821d095babd418304158a14e318bd86b1247",
+        "envelopeId": "0x30e637660c7c56d85a097100014362174feae9d3517fa1c173a85be96d04cad6",
+        "signingDigest": "0x6564f3cf1718830f9de95b57596101db8d8f3e6b532ce5de1ed578597e6b77c4",
+        "transactionId": "0xe2b60b5b606ea7f3b3ba5e44d1991cbbac1ca57faeb65f9457acdfb22eaca3c3"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0x106a43391bd749413d907a2fa42c821d095babd418304158a14e318bd86b1247",
+        "transactionId": "0xe2b60b5b606ea7f3b3ba5e44d1991cbbac1ca57faeb65f9457acdfb22eaca3c3",
+        "nonce": "4",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "pool-create",
+      "document": {
+        "schema": "flowmemory.product_pool_create.v0",
+        "poolCreateId": "0x05daaf1e7c7ef33207a70f30bb46f436da9b6f951d135f5c9f8a60c06f9eb68d",
+        "creatorAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "poolId": "0xc94c8dbd8149dddbe35fee96d8c16be620c0dedb3472a467360810f6d1c72f77",
+        "baseAssetId": "0x9075dfa2fc21a569d912d2fbc9d2492a708238a84c94bcfede89abf3af218eb6",
+        "quoteAssetId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+        "feeBps": 30,
+        "tickSpacing": 1,
+        "metadataHash": "0x5653cb61bf0bcbfe2dc8afc65d8ff4cf6d840ea95ead1ca9d12b38c187f865f9",
+        "accountNonce": "4"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xc0aece9be583ca5c3e409e9c2e1a96ec469a2514fde135a5de23c8f06d1245e8",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "5",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_pool_create.v0",
+        "objectType": "product_pool_create",
+        "payloadType": "pool_create",
+        "payloadTypeHash": "0xa5759fd4e266c95d06a76b5435b106c4f2731656e2bf9f418384a461044b5985",
+        "objectTypeHash": "0xe3f5cc802734fc6dd206c1a53098e4d39e8c624111dabf8c431470baf42fa06b",
+        "objectId": "0x05daaf1e7c7ef33207a70f30bb46f436da9b6f951d135f5c9f8a60c06f9eb68d",
+        "payloadHash": "0x7611fbf9bb0694af103af60eff401d7d785d19218de0e27a0b4d270807d35262",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0xfffd8a6d16ae64c4fc648a69f7772b5ecf30a21b5bc56a28e781563f2bde6f18",
+        "signature": "0xc39fca710a0b50d8d0b979302b9df604777fe1021776448c41a4ed9de7cf160d757da52d4a33f449e4c904064da2cf27cff049fe0e390b5bb8c3781dd6fb47d9",
+        "transactionId": "0x4f8003c121ef75a63c95c64f04e2cc8c613da758af5713504901998d4cbda1f0"
+      },
+      "expected": {
+        "objectId": "0x05daaf1e7c7ef33207a70f30bb46f436da9b6f951d135f5c9f8a60c06f9eb68d",
+        "payloadHash": "0x7611fbf9bb0694af103af60eff401d7d785d19218de0e27a0b4d270807d35262",
+        "envelopeId": "0xc0aece9be583ca5c3e409e9c2e1a96ec469a2514fde135a5de23c8f06d1245e8",
+        "signingDigest": "0xfffd8a6d16ae64c4fc648a69f7772b5ecf30a21b5bc56a28e781563f2bde6f18",
+        "transactionId": "0x4f8003c121ef75a63c95c64f04e2cc8c613da758af5713504901998d4cbda1f0"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0x7611fbf9bb0694af103af60eff401d7d785d19218de0e27a0b4d270807d35262",
+        "transactionId": "0x4f8003c121ef75a63c95c64f04e2cc8c613da758af5713504901998d4cbda1f0",
+        "nonce": "5",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "add-liquidity",
+      "document": {
+        "schema": "flowmemory.product_add_liquidity.v0",
+        "addLiquidityId": "0x9c8b802470d3e951f88ca0d82fc2bfa7a86f26166700b74c494b3ddaa21c280b",
+        "providerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "poolId": "0xc94c8dbd8149dddbe35fee96d8c16be620c0dedb3472a467360810f6d1c72f77",
+        "baseAmount": "25000000",
+        "quoteAmount": "250000000",
+        "minLiquidityTokens": "1",
+        "deadlineBlock": "160",
+        "accountNonce": "5"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xdf8e1dc4c5ae5550ba2337d527652bb24606e56f680b7c1a6da67167315e31ce",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "6",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_add_liquidity.v0",
+        "objectType": "product_add_liquidity",
+        "payloadType": "add_liquidity",
+        "payloadTypeHash": "0x2acfb12ff9e08412ec5009c65ea06e727119ad948d25c8a8cc2c86fec4adee70",
+        "objectTypeHash": "0xbec8bc8ce595bc8456d6db6c15a4d0a48e52789a621f218768cef496607f7898",
+        "objectId": "0x9c8b802470d3e951f88ca0d82fc2bfa7a86f26166700b74c494b3ddaa21c280b",
+        "payloadHash": "0x6e5cf28f942533d0e4b99853eb5032b927ea72375aad040c2d69acfc8510cad5",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x4e5e9add7bf9ead9fe7a5598b8a0fca9c08e69925578b8a427da3df7e3778a5a",
+        "signature": "0xdcae196b7054196a6210a20473ed5d21cd8fc2561a63f3823b38d863a742988d7c37df8f9eb64c693cd8b07570f880e3e11dcecc932c24039c9d984209db0890",
+        "transactionId": "0x51e7be45724adcd8afffedf83b3a0bb621f0d7a9d82148eb404aa0aee5b34b86"
+      },
+      "expected": {
+        "objectId": "0x9c8b802470d3e951f88ca0d82fc2bfa7a86f26166700b74c494b3ddaa21c280b",
+        "payloadHash": "0x6e5cf28f942533d0e4b99853eb5032b927ea72375aad040c2d69acfc8510cad5",
+        "envelopeId": "0xdf8e1dc4c5ae5550ba2337d527652bb24606e56f680b7c1a6da67167315e31ce",
+        "signingDigest": "0x4e5e9add7bf9ead9fe7a5598b8a0fca9c08e69925578b8a427da3df7e3778a5a",
+        "transactionId": "0x51e7be45724adcd8afffedf83b3a0bb621f0d7a9d82148eb404aa0aee5b34b86"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0x6e5cf28f942533d0e4b99853eb5032b927ea72375aad040c2d69acfc8510cad5",
+        "transactionId": "0x51e7be45724adcd8afffedf83b3a0bb621f0d7a9d82148eb404aa0aee5b34b86",
+        "nonce": "6",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "remove-liquidity",
+      "document": {
+        "schema": "flowmemory.product_remove_liquidity.v0",
+        "removeLiquidityId": "0xac5c78002de1bb194f067a7b81c55cdc3a7069169a50eb8ef432d3e2b6114650",
+        "providerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "poolId": "0xc94c8dbd8149dddbe35fee96d8c16be620c0dedb3472a467360810f6d1c72f77",
+        "liquidityTokens": "1000",
+        "minBaseAmount": "1",
+        "minQuoteAmount": "1",
+        "deadlineBlock": "180",
+        "accountNonce": "6"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0x089ac31609be9841bf8147c44a118db72fe6d2c6d9b1ed763a5457a75b17cc4c",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "7",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_remove_liquidity.v0",
+        "objectType": "product_remove_liquidity",
+        "payloadType": "remove_liquidity",
+        "payloadTypeHash": "0x3ae875d1c86df033547c5c7839d8b6e3641de29ee1f708bbce99743b34272ada",
+        "objectTypeHash": "0x9557e7525511276a778e0a43a589509f32ffcd37af8673fee68f11f42795e14c",
+        "objectId": "0xac5c78002de1bb194f067a7b81c55cdc3a7069169a50eb8ef432d3e2b6114650",
+        "payloadHash": "0xb2e480c4489827e8c478b159158933d237fe2f4da299b663789db06e668d4dda",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0xad2507dceae8e1480bd3b8e480908394ee00254ada8b140b5c5e7c6b49450757",
+        "signature": "0x049c253939a5345e2a05b5c4eb0e7b3ca1bedbbb3af1c6b22ae60840cf6ef955669c8051345c895afc8cd8652cf27cfbad296083020278ea106562476b45fedb",
+        "transactionId": "0x942e05f381cb3efef056a2b7dd03a6d5b9e33d0674e5a36239e455b43e5a0d1e"
+      },
+      "expected": {
+        "objectId": "0xac5c78002de1bb194f067a7b81c55cdc3a7069169a50eb8ef432d3e2b6114650",
+        "payloadHash": "0xb2e480c4489827e8c478b159158933d237fe2f4da299b663789db06e668d4dda",
+        "envelopeId": "0x089ac31609be9841bf8147c44a118db72fe6d2c6d9b1ed763a5457a75b17cc4c",
+        "signingDigest": "0xad2507dceae8e1480bd3b8e480908394ee00254ada8b140b5c5e7c6b49450757",
+        "transactionId": "0x942e05f381cb3efef056a2b7dd03a6d5b9e33d0674e5a36239e455b43e5a0d1e"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0xb2e480c4489827e8c478b159158933d237fe2f4da299b663789db06e668d4dda",
+        "transactionId": "0x942e05f381cb3efef056a2b7dd03a6d5b9e33d0674e5a36239e455b43e5a0d1e",
+        "nonce": "7",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "swap",
+      "document": {
+        "schema": "flowmemory.product_swap.v0",
+        "swapId": "0x667a8929d6671bdd49db618e5e5aab1e5b15b554f866f5fea8c0b398160ba3f8",
+        "traderAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "poolId": "0xc94c8dbd8149dddbe35fee96d8c16be620c0dedb3472a467360810f6d1c72f77",
+        "assetInId": "0x9075dfa2fc21a569d912d2fbc9d2492a708238a84c94bcfede89abf3af218eb6",
+        "assetOutId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+        "amountIn": "100000",
+        "minAmountOut": "900000",
+        "deadlineBlock": "200",
+        "accountNonce": "7"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0x2473c06302e885211996d148c9f4ed7b2b7aa62b705e0a4a8a4e08ba32e1ed59",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "8",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.product_swap.v0",
+        "objectType": "product_swap",
+        "payloadType": "swap",
+        "payloadTypeHash": "0x695543c3708653cda9d418b4ccd3be11368e40636c10c44b18cfe756b6d88b29",
+        "objectTypeHash": "0x5de27ade276d26fcd22408b6455b7af971d18de8fbd31707377f94da625bdae1",
+        "objectId": "0x667a8929d6671bdd49db618e5e5aab1e5b15b554f866f5fea8c0b398160ba3f8",
+        "payloadHash": "0xb3743449da36cb63902173dd37a51e8ae6f6ca9e2ba95a4544364dbede266f95",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x8c67729d7d43ec9c9da341ef8a79e851122f34e7c0f361b867838561528d352c",
+        "signature": "0x6e54960e7d06776ebf354cc9578a34331b45222d54ddd1b2b7b06c724d63fe22554f8d4e89ad2933a446915dc481c054b9cb381b55aa3fe7d4569f2d43095f05",
+        "transactionId": "0x8e64650817a382b0e624654ce9541b3f80f2a03876556295c0790d3062faf426"
+      },
+      "expected": {
+        "objectId": "0x667a8929d6671bdd49db618e5e5aab1e5b15b554f866f5fea8c0b398160ba3f8",
+        "payloadHash": "0xb3743449da36cb63902173dd37a51e8ae6f6ca9e2ba95a4544364dbede266f95",
+        "envelopeId": "0x2473c06302e885211996d148c9f4ed7b2b7aa62b705e0a4a8a4e08ba32e1ed59",
+        "signingDigest": "0x8c67729d7d43ec9c9da341ef8a79e851122f34e7c0f361b867838561528d352c",
+        "transactionId": "0x8e64650817a382b0e624654ce9541b3f80f2a03876556295c0790d3062faf426"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0xb3743449da36cb63902173dd37a51e8ae6f6ca9e2ba95a4544364dbede266f95",
+        "transactionId": "0x8e64650817a382b0e624654ce9541b3f80f2a03876556295c0790d3062faf426",
+        "nonce": "8",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "bridge-credit-authority",
+      "document": {
+        "schema": "flowmemory.bridge_credit.v0",
+        "creditId": "0x595615412bacd1089d980f024f58601ef92ffc7959760327dc8b5325d157fe83",
+        "depositId": "0x22f32eabca7b5fe45048405f9e79634026f035eebaf70dd8603d1eae1154ec07",
+        "recipient": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "assetId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+        "amount": "25000000",
+        "creditedAtBlockNumber": "8",
+        "creditedAtUnixMs": "1778702400000",
+        "status": "credited",
+        "statusCode": 3,
+        "nonce": "0xcbf3e8d5823b4b44240a6af0e119e3a56991bade0739babadc1efcde7744071c"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xfc0d9ca0039f7a7c02f7e94231f227ec6e9b4994e68c5a1c8f11e3c8eeaf78d9",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "9",
+        "signerId": "0x899b8aa582caefca787fe8c701df4de8de398bdc7b919bfcb5bc5e7cfaa30450",
+        "signerKeyId": "0x037cc918c0700a8964a973d20f606d8cc126075e814f8dd2054312877b54f1ae",
+        "signerRole": "bridgeReleaseAuthority",
+        "signerRoleCode": 13,
+        "publicKey": "0x022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0xb8834ff19a47293decaab0e2e366d2df87c24a38",
+        "objectSchema": "flowmemory.bridge_credit.v0",
+        "objectType": "bridge_credit",
+        "payloadType": "bridge_credit",
+        "payloadTypeHash": "0x99c0a6dcd28db25cdab5deb9c9b59cca3e5aa98b434f03645a6b6d5e08bb13be",
+        "objectTypeHash": "0x785bf7428b0420299494cdd5acf1cb59df25482639a00f25b2521f8104703003",
+        "objectId": "0x595615412bacd1089d980f024f58601ef92ffc7959760327dc8b5325d157fe83",
+        "payloadHash": "0x656d78fa833405dce161bc3bc86389ff2d01ea82f1d21791aa426807e0f23129",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x96dc950e7683d000fad0f9af9e7d6743fe64af93ca7ae1b7db47b70de906e980",
+        "signature": "0x90b029d0c8168807e897039336efd00f40ce13fc1bf3ece53329a451ac6abbc64a5561a53cc084540fa7342823372e537c42ed630b8cc87f8e89d6255425ea4f",
+        "transactionId": "0xec6f554d6339563af52ac337367a491fe985d14e603cd0b4c765bf24262d58db"
+      },
+      "expected": {
+        "objectId": "0x595615412bacd1089d980f024f58601ef92ffc7959760327dc8b5325d157fe83",
+        "payloadHash": "0x656d78fa833405dce161bc3bc86389ff2d01ea82f1d21791aa426807e0f23129",
+        "envelopeId": "0xfc0d9ca0039f7a7c02f7e94231f227ec6e9b4994e68c5a1c8f11e3c8eeaf78d9",
+        "signingDigest": "0x96dc950e7683d000fad0f9af9e7d6743fe64af93ca7ae1b7db47b70de906e980",
+        "transactionId": "0xec6f554d6339563af52ac337367a491fe985d14e603cd0b4c765bf24262d58db"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0xb8834ff19a47293decaab0e2e366d2df87c24a38",
+        "signerAccountId": "0x899b8aa582caefca787fe8c701df4de8de398bdc7b919bfcb5bc5e7cfaa30450",
+        "payloadHash": "0x656d78fa833405dce161bc3bc86389ff2d01ea82f1d21791aa426807e0f23129",
+        "transactionId": "0xec6f554d6339563af52ac337367a491fe985d14e603cd0b4c765bf24262d58db",
+        "nonce": "9",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "withdrawal-intent",
+      "document": {
+        "schema": "flowmemory.bridge_withdrawal_intent.v0",
+        "withdrawalIntentId": "0xd50dd6d06b0bb8fe65579f19f71a76efae7086538508d269555991412834a9d0",
+        "creditId": "0x7361a67523e697fa5c971d9e40454b6d18643b726388793ac155f21754b01ee0",
+        "depositId": "0x22f32eabca7b5fe45048405f9e79634026f035eebaf70dd8603d1eae1154ec07",
+        "sourceChainId": 31337,
+        "destinationChainId": 8453,
+        "token": "0x2222222222222222222222222222222222222222",
+        "asset": {
+          "sourceChainId": 31337,
+          "sourceToken": "0x2222222222222222222222222222222222222222",
+          "destinationAssetId": "0x20c74e7461120deab4cef6c7a71ddf2e3584e426f50710a892ef85a75aeef0de",
+          "decimals": 18
+        },
+        "amount": "10000000",
+        "flowmemoryAccount": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "baseRecipient": "0x4444444444444444444444444444444444444444",
+        "status": "requested",
+        "requestedAt": "2026-05-13T23:00:00.000Z",
+        "testMode": true,
+        "broadcast": false,
+        "releasePolicy": "test_record_only",
+        "productionReady": false
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xd2545030d750b9f18e1b90dc99a745b851c72cfa390566f3e63212c0e64b6ba9",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "10",
+        "signerId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "signerKeyId": "0x0855455a8c6938355c597e09051986f6a52d2eb5d636b17fc8e9cca69e00fe39",
+        "signerRole": "user",
+        "signerRoleCode": 10,
+        "publicKey": "0x0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "objectSchema": "flowmemory.bridge_withdrawal_intent.v0",
+        "objectType": "bridge_withdrawal_intent",
+        "payloadType": "withdrawal_intent",
+        "payloadTypeHash": "0x99b4e331e591a8195b46b135b3fdfbcb90e7e7c95f7479d55c6ff4b29e6d0cc4",
+        "objectTypeHash": "0xf54d0a70abd4a36a0d64f6b0704100bc0e86970d2d72d79613d7a033d083a66a",
+        "objectId": "0xd50dd6d06b0bb8fe65579f19f71a76efae7086538508d269555991412834a9d0",
+        "payloadHash": "0x68cb6cc209f2237dd9b40cd0713f0215a4dc68d2e32cf42178c523c1ded4fbef",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0xbb259501c14825e1253dfaa5a26e2a9b7107b1d79f10924b55fac87adca324cf",
+        "signature": "0xce458a1f8fbeada3db7a4f0952051e20025f15ab4d77eb4dba3c211ed4cd33880e3f7fa89a8cbfef11a47ec000c5eee5f82fde99df63c084e4195f3a174d2244",
+        "transactionId": "0xe696d7cf001e85d83f8a9cf88ee136cad0beae5a4ca3bd8112bec604adcebb2e"
+      },
+      "expected": {
+        "objectId": "0xd50dd6d06b0bb8fe65579f19f71a76efae7086538508d269555991412834a9d0",
+        "payloadHash": "0x68cb6cc209f2237dd9b40cd0713f0215a4dc68d2e32cf42178c523c1ded4fbef",
+        "envelopeId": "0xd2545030d750b9f18e1b90dc99a745b851c72cfa390566f3e63212c0e64b6ba9",
+        "signingDigest": "0xbb259501c14825e1253dfaa5a26e2a9b7107b1d79f10924b55fac87adca324cf",
+        "transactionId": "0xe696d7cf001e85d83f8a9cf88ee136cad0beae5a4ca3bd8112bec604adcebb2e"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0x9aa880429370ebd473f20142cc1eeaad5b674692",
+        "signerAccountId": "0xf32fb5430b4360143ebd2432a40d61757a25c4e3ce33b72968b139f091c4ada8",
+        "payloadHash": "0x68cb6cc209f2237dd9b40cd0713f0215a4dc68d2e32cf42178c523c1ded4fbef",
+        "transactionId": "0xe696d7cf001e85d83f8a9cf88ee136cad0beae5a4ca3bd8112bec604adcebb2e",
+        "nonce": "10",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    },
+    {
+      "name": "validator-finality",
+      "document": {
+        "schema": "flowmemory.finality_receipt.v0",
+        "finalityReceiptId": "0x910298471b35be9029348026089a43091e608d6181dd5a5abdd03a29cbe9b1ef",
+        "receiptId": "0x70e23a370e24a7a194fb1b00fd90bdef23a0847c8711b6b14fea6fcd92673a2c",
+        "reportId": "0xee159907e6d778e434ba02306cf79d953ed6b1f20ede7bf4a20b234c4bf1ba96",
+        "challengeRoot": "0xda2c97d6b2dad4b7f04d5024b79921a5cfbb09936a81199a775cc9da13d570b7",
+        "finalityState": "finalized",
+        "finalityStateCode": 6,
+        "finalizedAtUnixMs": "1778702400000",
+        "finalizedBlockNumber": "9",
+        "finalizedBlockHash": "0x15e77563faf61d5b643c1cd563c8dc86fdb1d2a16b27e26868707041b996c7f6",
+        "policyHash": "0x48706bd548d6d1775a36b3bb9ec4e43e66aee9efc4ca610de66426f1208f3e95"
+      },
+      "envelope": {
+        "schema": "flowmemory.local_transaction_envelope.v0",
+        "schemaVersion": 1,
+        "networkProfile": "local-chain",
+        "networkProfileHash": "0xbd64b702ecdbcab44fabefc7e5836219cde02f5d6a3f0abc0026dcdb9b46a56a",
+        "envelopeId": "0xae8c4a22dd434799c42d8e2dfd2b7194ff073c258429257db619e348a80b57fd",
+        "domain": "flowmemory.production-network.v0.transaction-envelope:profile:local-chain:chain:31337",
+        "domainSeparator": "0x20f540fd6fe695c5a2b6d2332eb50794d0791d5dbc1ffb1824e53e7180c7835d",
+        "chainId": "31337",
+        "nonce": "11",
+        "signerId": "0xff04376c27c6ab075e4e2b85a0955d4a70ffdcf478832fcf3a73c288d6f3465d",
+        "signerKeyId": "0xeed1359e2150c00afc5f9e6d48a478f344698b854ce52f7deb80d532896a368e",
+        "signerRole": "validator",
+        "signerRoleCode": 11,
+        "publicKey": "0x02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+        "publicKeyEncoding": "secp256k1-compressed-hex",
+        "signerAddress": "0xe32e7bff913bbf8e738795225c0e4c2c228d9458",
+        "objectSchema": "flowmemory.finality_receipt.v0",
+        "objectType": "finality_receipt",
+        "payloadType": "validator_finality",
+        "payloadTypeHash": "0x5b50880335f071fa2b331aeea2e1cabff90461fafda06f5764afb839082479b8",
+        "objectTypeHash": "0xedf120ebf35c94ccb4fea2516319974cb345272949fadc7278d1c6e809650c7c",
+        "objectId": "0x910298471b35be9029348026089a43091e608d6181dd5a5abdd03a29cbe9b1ef",
+        "payloadHash": "0xbde0817bcdbda6883e40ec71e3cc7c9ecac96b23e95dbc6a995f44e5746a7739",
+        "issuedAtUnixMs": "1778702400000",
+        "expiresAtUnixMs": "1778706000000",
+        "localExecutionCost": {
+          "unit": "local-compute",
+          "amount": "0",
+          "metering": "not-metered-local-private-testnet"
+        },
+        "localExecutionCostHash": "0x6cad238c63ddf255495af76197783d3392f61da8bb61a7943bd4b79ed3745fb8",
+        "fee": {
+          "assetId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "amount": "0",
+          "policy": "no-value-local-private-testnet"
+        },
+        "feeHash": "0x84226d772ddfcad0ed9437e0dbccdf42f4b05660112b16fdd53b089b83781b93",
+        "signatureAlgorithm": "secp256k1-keccak256-eip712-local-v0",
+        "signatureAlgorithmHash": "0x1a6f483c4f6880a162cefa906f3dd9dc228115e89c04c539d63601752d3d57ae",
+        "signingDigest": "0x86fa0fb946481a38690eda4d63eef20d4b07f16f33b2125777313c5b8f70a65a",
+        "signature": "0xe0696990a6185b54b6c0981f79b875250f57f4a53583632a4ab0d85e60a97b6d32f61c33a009caddf67006c6d327c0b6e4f35a77a7b7854200bf74ce24a0461a",
+        "transactionId": "0x23d693d2afcb6ec42cc0f2862a7fc066f56a3e146624e6a4fc258bd34cdcdd59"
+      },
+      "expected": {
+        "objectId": "0x910298471b35be9029348026089a43091e608d6181dd5a5abdd03a29cbe9b1ef",
+        "payloadHash": "0xbde0817bcdbda6883e40ec71e3cc7c9ecac96b23e95dbc6a995f44e5746a7739",
+        "envelopeId": "0xae8c4a22dd434799c42d8e2dfd2b7194ff073c258429257db619e348a80b57fd",
+        "signingDigest": "0x86fa0fb946481a38690eda4d63eef20d4b07f16f33b2125777313c5b8f70a65a",
+        "transactionId": "0x23d693d2afcb6ec42cc0f2862a7fc066f56a3e146624e6a4fc258bd34cdcdd59"
+      },
+      "runtime": {
+        "ok": true,
+        "signerAddress": "0xe32e7bff913bbf8e738795225c0e4c2c228d9458",
+        "signerAccountId": "0xff04376c27c6ab075e4e2b85a0955d4a70ffdcf478832fcf3a73c288d6f3465d",
+        "payloadHash": "0xbde0817bcdbda6883e40ec71e3cc7c9ecac96b23e95dbc6a995f44e5746a7739",
+        "transactionId": "0x23d693d2afcb6ec42cc0f2862a7fc066f56a3e146624e6a4fc258bd34cdcdd59",
+        "nonce": "11",
+        "chainId": "31337",
+        "networkProfile": "local-chain"
+      }
+    }
+  ],
+  "negative": [
+    {
+      "name": "production-network.wrong-chain-id",
+      "base": "wallet-transfer",
+      "mutation": {
+        "context": {
+          "chainId": "31338"
+        }
+      },
+      "primaryFailureCode": "wrong-chain-id",
+      "expectFailureCodes": [
+        "wrong-chain-id"
+      ]
+    },
+    {
+      "name": "production-network.wrong-network-profile",
+      "base": "wallet-transfer",
+      "mutation": {
+        "context": {
+          "networkProfile": "private-lan"
+        }
+      },
+      "primaryFailureCode": "wrong-network-profile",
+      "expectFailureCodes": [
+        "wrong-network-profile"
+      ]
+    },
+    {
+      "name": "production-network.wrong-domain",
+      "base": "wallet-transfer",
+      "mutation": {
+        "envelope": {
+          "domain": "flowmemory.production-network.v0.transaction-envelope:profile:private-lan:chain:31337"
+        }
+      },
+      "primaryFailureCode": "wrong-domain",
+      "expectFailureCodes": [
+        "wrong-domain"
+      ]
+    },
+    {
+      "name": "production-network.wrong-signer",
+      "base": "wallet-transfer",
+      "mutation": {
+        "envelope": {
+          "signerId": "0xd0af191d661fd50c0524a3ecbb2aefb9b10ff3840c3683a9d4f3ac86a076e837"
+        }
+      },
+      "primaryFailureCode": "wrong-signer",
+      "expectFailureCodes": [
+        "bad-envelope-digest",
+        "bad-envelope-id",
+        "wrong-signer"
+      ]
+    },
+    {
+      "name": "production-network.wrong-signer-role",
+      "base": "bridge-credit-authority",
+      "mutation": {
+        "envelope": {
+          "signerRole": "user",
+          "signerRoleCode": 10
+        }
+      },
+      "primaryFailureCode": "wrong-signer",
+      "expectFailureCodes": [
+        "bad-envelope-digest",
+        "bad-envelope-id",
+        "wrong-signer"
+      ]
+    },
+    {
+      "name": "production-network.stale-nonce",
+      "base": "wallet-transfer",
+      "mutation": {
+        "context": {
+          "minimumNonce": "2"
+        }
+      },
+      "primaryFailureCode": "stale-nonce",
+      "expectFailureCodes": [
+        "stale-nonce"
+      ]
+    },
+    {
+      "name": "production-network.duplicate-nonce",
+      "base": "wallet-transfer",
+      "mutation": {
+        "contextKind": "duplicate-nonce"
+      },
+      "primaryFailureCode": "duplicate-nonce",
+      "expectFailureCodes": [
+        "duplicate-nonce",
+        "replay"
+      ]
+    },
+    {
+      "name": "production-network.duplicate-tx-id",
+      "base": "wallet-transfer",
+      "mutation": {
+        "contextKind": "duplicate-tx-id"
+      },
+      "primaryFailureCode": "duplicate-tx-id",
+      "expectFailureCodes": [
+        "duplicate-tx-id"
+      ]
+    },
+    {
+      "name": "production-network.expired-tx",
+      "base": "wallet-transfer",
+      "mutation": {
+        "context": {
+          "nowUnixMs": "1778709600000"
+        }
+      },
+      "primaryFailureCode": "expired-tx",
+      "expectFailureCodes": [
+        "expired-tx"
+      ]
+    },
+    {
+      "name": "production-network.mutated-payload",
+      "base": "swap",
+      "mutation": {
+        "document": {
+          "amountIn": "200000"
+        }
+      },
+      "primaryFailureCode": "bad-payload-hash",
+      "expectFailureCodes": [
+        "bad-object-id",
+        "bad-payload-hash"
+      ]
+    },
+    {
+      "name": "production-network.malformed-public-key",
+      "base": "wallet-transfer",
+      "mutation": {
+        "envelope": {
+          "publicKey": "0x1234"
+        }
+      },
+      "primaryFailureCode": "malformed-public-key",
+      "expectFailureCodes": [
+        "malformed-public-key"
+      ]
+    },
+    {
+      "name": "production-network.malformed-signature",
+      "base": "wallet-transfer",
+      "mutation": {
+        "envelope": {
+          "signature": "0x1234"
+        }
+      },
+      "primaryFailureCode": "malformed-signature",
+      "expectFailureCodes": [
+        "bad-transaction-id",
+        "malformed-id",
+        "malformed-signature"
+      ]
+    },
+    {
+      "name": "production-network.malformed-root",
+      "base": "validator-finality",
+      "mutation": {
+        "document": {
+          "challengeRoot": "0x1234"
+        }
+      },
+      "primaryFailureCode": "malformed-root",
+      "expectFailureCodes": [
+        "malformed-id",
+        "malformed-root"
+      ]
+    },
+    {
+      "name": "production-network.duplicate-bridge-source-event",
+      "base": "bridge-credit-authority",
+      "mutation": {
+        "contextKind": "duplicate-bridge-source-event"
+      },
+      "primaryFailureCode": "duplicate-bridge-source-event",
+      "expectFailureCodes": [
+        "duplicate-bridge-source-event"
+      ]
+    }
+  ]
+}

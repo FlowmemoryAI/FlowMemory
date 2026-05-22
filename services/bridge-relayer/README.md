@@ -1,9 +1,9 @@
-# FlowChain Bridge Relayer POC
+# FlowMemory Bridge Relayer POC
 
 Status: fixture-first bridge observer for local/Base Sepolia testing.
 
 This package converts explicit `BaseBridgeLockbox` deposit records into
-FlowChain bridge observation JSON. It does not custody funds, sign releases, run
+FlowMemory bridge observation JSON. It does not custody funds, sign releases, run
 a production relayer, or prove finality.
 
 Local mock:
@@ -15,7 +15,7 @@ npm run bridge:mock
 Deterministic fixture real-value pilot E2E, with no external RPC:
 
 ```powershell
-npm run flowchain:real-value-pilot:bridge
+npm run flowmemory:real-value-pilot:bridge
 ```
 
 The fixture pilot E2E writes deterministic observation, credit, pilot evidence,
@@ -26,27 +26,27 @@ exact-value/application-state files under
 Base public-network pilot observation:
 
 ```powershell
-$env:FLOWCHAIN_BASE8453_RPC_URL="<base-8453-rpc-url>"
-$env:FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS="<approved-lockbox>"
-$env:FLOWCHAIN_BASE8453_APPROVED_LOCKBOX_ADDRESS="<approved-lockbox>"
-$env:FLOWCHAIN_BASE8453_SUPPORTED_TOKEN="<zero-address-for-native-or-erc20-address>"
-$env:FLOWCHAIN_BASE8453_ASSET_DECIMALS="<asset-decimals>"
-$env:FLOWCHAIN_BASE8453_FROM_BLOCK="<from>"
-$env:FLOWCHAIN_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
-$env:FLOWCHAIN_PILOT_CONFIRMATIONS="2"
-$env:FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
-$env:FLOWCHAIN_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
-$env:FLOWCHAIN_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
-npm run flowchain:bridge:observe:base8453
-npm run flowchain:bridge:withdraw:intent
-npm run flowchain:bridge:release:evidence
+$env:FLOWMEMORY_BASE8453_RPC_URL="<base-8453-rpc-url>"
+$env:FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS="<approved-lockbox>"
+$env:FLOWMEMORY_BASE8453_APPROVED_LOCKBOX_ADDRESS="<approved-lockbox>"
+$env:FLOWMEMORY_BASE8453_SUPPORTED_TOKEN="<zero-address-for-native-or-erc20-address>"
+$env:FLOWMEMORY_BASE8453_ASSET_DECIMALS="<asset-decimals>"
+$env:FLOWMEMORY_BASE8453_FROM_BLOCK="<from>"
+$env:FLOWMEMORY_BASE8453_CURSOR_STATE="services/bridge-relayer/out/base8453-pilot-cursor-state.json"
+$env:FLOWMEMORY_PILOT_CONFIRMATIONS="2"
+$env:FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI="<tiny-cap>"
+$env:FLOWMEMORY_PILOT_TOTAL_CAP_WEI="<tiny-total-cap>"
+$env:FLOWMEMORY_PILOT_OPERATOR_ACK="I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
+npm run flowmemory:bridge:observe:base8453
+npm run flowmemory:bridge:withdraw:intent
+npm run flowmemory:bridge:release:evidence
 ```
 
 Optional guardrail:
 
 ```powershell
-$env:FLOWCHAIN_PILOT_MAX_USD="1"
-$env:FLOWCHAIN_BASE8453_TO_BLOCK="<optional-bounded-upper-block>"
+$env:FLOWMEMORY_PILOT_MAX_USD="1"
+$env:FLOWMEMORY_BASE8453_TO_BLOCK="<optional-bounded-upper-block>"
 ```
 
 The observer verifies `eth_chainId == 0x2105`, rejects unapproved lockboxes,
@@ -61,7 +61,7 @@ relayer processes cannot both apply the same replay key.
 When `--cursor-state` is configured, Base 8453 scans advance from the last
 confirmed successful `eth_getLogs` range. The cursor file is protected by the
 same exclusive sidecar lock and atomic state-file replacement pattern as
-runtime credit application state. `FLOWCHAIN_BASE8453_TO_BLOCK` is optional and
+runtime credit application state. `FLOWMEMORY_BASE8453_TO_BLOCK` is optional and
 acts only as an operator-supplied upper bound; normal relayer-loop operation
 uses the persisted cursor and the confirmed Base head.
 

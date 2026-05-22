@@ -7,8 +7,8 @@ import {
 import { keccakUtf8 } from "./hashes.js";
 import { assertPublicPilotMetadataContainsNoSecrets } from "./pilot-envelope-validation.js";
 
-export const PILOT_OPERATOR_CONFIG_SCHEMA = "flowchain.real_value_pilot.operator_config.v0";
-export const PILOT_PUBLIC_METADATA_SCHEMA = "flowchain.real_value_pilot.public_metadata.v0";
+export const PILOT_OPERATOR_CONFIG_SCHEMA = "flowmemory.real_value_pilot.operator_config.v0";
+export const PILOT_PUBLIC_METADATA_SCHEMA = "flowmemory.real_value_pilot.public_metadata.v0";
 const SUPPORTED_PILOT_CHAIN_IDS = new Set([31337, 84532, 8453]);
 const BASE_MAINNET_CHAIN_ID = 8453;
 const BASE_MAINNET_MAX_USDC6_CAP = 25_000_000n;
@@ -17,17 +17,17 @@ export function createPilotOperatorConfigFromEnv({
   env = process.env,
   createdAtUnixMs = Date.now().toString()
 } = {}) {
-  const chainId = parsePilotChainId(requiredEnv(env, "FLOWCHAIN_PILOT_CHAIN_ID"));
-  const contractAddress = normalizeAddress(requiredEnv(env, "FLOWCHAIN_PILOT_CONTRACT_ADDRESS"));
-  const operatorId = requiredEnv(env, "FLOWCHAIN_PILOT_OPERATOR_ID");
+  const chainId = parsePilotChainId(requiredEnv(env, "FLOWMEMORY_PILOT_CHAIN_ID"));
+  const contractAddress = normalizeAddress(requiredEnv(env, "FLOWMEMORY_PILOT_CONTRACT_ADDRESS"));
+  const operatorId = requiredEnv(env, "FLOWMEMORY_PILOT_OPERATOR_ID");
   const pilotCap = {
-    capId: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_ID"),
-    assetId: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_ASSET_ID"),
-    maxAmount: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_MAX_AMOUNT"),
-    usedAmount: env.FLOWCHAIN_PILOT_CAP_USED_AMOUNT ?? "0",
-    unit: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_UNIT"),
-    windowStartsAtUnixMs: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_WINDOW_START_UNIX_MS"),
-    windowEndsAtUnixMs: requiredEnv(env, "FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS"),
+    capId: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_ID"),
+    assetId: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_ASSET_ID"),
+    maxAmount: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_MAX_AMOUNT"),
+    usedAmount: env.FLOWMEMORY_PILOT_CAP_USED_AMOUNT ?? "0",
+    unit: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_UNIT"),
+    windowStartsAtUnixMs: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_WINDOW_START_UNIX_MS"),
+    windowEndsAtUnixMs: requiredEnv(env, "FLOWMEMORY_PILOT_CAP_WINDOW_END_UNIX_MS"),
     realValuePilot: true,
     productionReady: false
   };
@@ -35,7 +35,7 @@ export function createPilotOperatorConfigFromEnv({
   const config = {
     schema: PILOT_OPERATOR_CONFIG_SCHEMA,
     pilotId: keccakUtf8([
-      "flowchain.real-value-pilot.v0",
+      "flowmemory.real-value-pilot.v0",
       chainId,
       contractAddress,
       operatorId,
@@ -52,10 +52,10 @@ export function createPilotOperatorConfigFromEnv({
       bridgeRelayer: "explicit-chain-contract-block-range"
     },
     localPaths: {
-      configPath: env.FLOWCHAIN_PILOT_CONFIG_PATH ?? "devnet/local/pilot-wallet/operator-config.local.json",
-      vaultPath: env.FLOWCHAIN_PILOT_VAULT_PATH ?? "devnet/local/pilot-wallet/operator-vault.json",
+      configPath: env.FLOWMEMORY_PILOT_CONFIG_PATH ?? "local-runtime/local/pilot-wallet/operator-config.local.json",
+      vaultPath: env.FLOWMEMORY_PILOT_VAULT_PATH ?? "local-runtime/local/pilot-wallet/operator-vault.json",
       publicMetadataPath:
-        env.FLOWCHAIN_PILOT_PUBLIC_METADATA_PATH ?? "devnet/local/pilot-wallet/operator-public-metadata.json"
+        env.FLOWMEMORY_PILOT_PUBLIC_METADATA_PATH ?? "local-runtime/local/pilot-wallet/operator-public-metadata.json"
     },
     nextCommands: [],
     productionReady: false
@@ -70,7 +70,7 @@ export function createPilotOperatorConfigFromEnv({
 export function buildPilotNextCommands(config) {
   return [
     "npm run deploy:base-sepolia:plan",
-    `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowchain-wallet-pilot-observe.ps1 -ConfigPath ${config.localPaths.configPath} -FromBlock <from-block> -ToBlock <to-block>`,
+    `powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/flowmemory-wallet-pilot-observe.ps1 -ConfigPath ${config.localPaths.configPath} -FromBlock <from-block> -ToBlock <to-block>`,
     "npm run bridge:local-credit:smoke",
     `npm run wallet:pilot-sign --prefix crypto -- --config ${config.localPaths.configPath} --vault ${config.localPaths.vaultPath} --document <pilot-release-evidence.json> --chain-id ${config.chainId} --nonce <next-nonce> --out <pilot-release-envelope.json>`,
     `npm run wallet:pilot-verify --prefix crypto -- --config ${config.localPaths.configPath} --document <pilot-release-evidence.json> --envelope <pilot-release-envelope.json> --expected-nonce <next-nonce>`
@@ -111,7 +111,7 @@ function assertPilotOperatorSignerPresent({ config, publicAccounts }) {
 
 export function buildPilotBridgeCreditAckDocument(input) {
   const document = {
-    schema: "flowchain.pilot_bridge_credit_ack.v0",
+    schema: "flowmemory.pilot_bridge_credit_ack.v0",
     pilotBridgeCreditAckId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     chainId: input.chainId,
     contractAddress: normalizeAddress(input.contractAddress),
@@ -133,7 +133,7 @@ export function buildPilotBridgeCreditAckDocument(input) {
 
 export function buildPilotWithdrawalIntentDocument(input) {
   const document = {
-    schema: "flowchain.pilot_withdrawal_intent.v0",
+    schema: "flowmemory.pilot_withdrawal_intent.v0",
     pilotWithdrawalIntentId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     sourceChainId: input.sourceChainId,
     destinationChainId: input.destinationChainId,
@@ -143,7 +143,7 @@ export function buildPilotWithdrawalIntentDocument(input) {
     depositId: input.depositId,
     token: normalizeAddress(input.token),
     amount: input.amount,
-    flowchainAccount: input.flowchainAccount,
+    flowmemoryAccount: input.flowmemoryAccount,
     baseRecipient: normalizeAddress(input.baseRecipient),
     status: input.status ?? "requested",
     requestedAt: input.requestedAt,
@@ -158,7 +158,7 @@ export function buildPilotWithdrawalIntentDocument(input) {
 
 export function buildPilotReleaseEvidenceDocument(input) {
   const document = {
-    schema: "flowchain.pilot_release_evidence.v0",
+    schema: "flowmemory.pilot_release_evidence.v0",
     pilotReleaseEvidenceId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     chainId: input.chainId,
     contractAddress: normalizeAddress(input.contractAddress),
@@ -182,7 +182,7 @@ export function buildPilotReleaseEvidenceDocument(input) {
 
 export function buildPilotEmergencyControlDocument(input) {
   const document = {
-    schema: "flowchain.pilot_emergency_control.v0",
+    schema: "flowmemory.pilot_emergency_control.v0",
     pilotEmergencyControlId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     chainId: input.chainId,
     contractAddress: normalizeAddress(input.contractAddress),

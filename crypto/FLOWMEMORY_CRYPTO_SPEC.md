@@ -102,7 +102,7 @@ workerIdentity
 verifierIdentity
 merkleLeaf
 merkleInternalNode
-devnetBlockHash
+localRuntimeBlockHash
 agentAccountId
 modelPassportId
 memoryCellId
@@ -138,7 +138,7 @@ The current package implements:
 - deterministic verifier reports
 - verifier signature envelopes
 - reorg-aware status handling
-- FlowChain Local Alpha object identity for agent accounts, model passports, work receipts, artifact availability proofs, verifier modules, verifier reports, memory cells, challenges, finality receipts, bridge deposits, bridge credits, bridge withdrawals, local balance records, hardware signal envelopes, and control-plane provenance responses
+- FlowMemory Local Alpha object identity for agent accounts, model passports, work receipts, artifact availability proofs, verifier modules, verifier reports, memory cells, challenges, finality receipts, bridge deposits, bridge credits, bridge withdrawals, local balance records, hardware signal envelopes, and control-plane provenance responses
 - Local Alpha operator, agent, verifier, and hardware signature envelope payloads plus chain-bound local transaction envelopes and validators for replay, wrong chain id, wrong domain, wrong signer, missing signer, zero hash, malformed id, malformed dependency, malformed bridge deposit, bad parent/root, and wrong object type checks
 - test vectors and cross-language conformance tests
 
@@ -189,4 +189,4 @@ Searches for `Claw` and `claw` in repository issues and code returned no matchin
 - Define key registry and verifier set root governance.
 - Define challenge evidence and response envelopes.
 - Produce a decision record before CursorRegistry or proof-carrying receipts are implemented.
-- Decide when, if ever, the nearby Noesis/FlowChain RD crypto crates should receive a Keccak compatibility adapter for these V0 object IDs.
+- Decide when, if ever, external RD crypto sources should receive a Keccak compatibility adapter for these V0 object IDs.

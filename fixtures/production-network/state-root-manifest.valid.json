@@ -1,0 +1,508 @@
+{
+  "schema": "flowmemory.production_l1.state_root_manifest.v0",
+  "chainId": "7428453",
+  "networkProfile": "flowmemory-base8453-pilot",
+  "genesisHash": "0x0826d4c5093c967d57dd5239b8c24e089dc898942291b5f3050a129887041e7f",
+  "stateRoot": "0x716ccaf7e8946591973d4614d41ba39c047ef7e89bd67d62f1aa6d90b99133ef",
+  "stateRootAlgorithm": "keccak256(canonical-json-sorted-keys-v0)",
+  "components": [
+    {
+      "component": "accounts",
+      "root": "0xf4914d4bb9ced10596986f52eefbe15e6b775c8b0855d51f85addd175b61e046",
+      "count": 6,
+      "ownerAgent": "wallet",
+      "inputs": [
+        "accountId",
+        "publicKey",
+        "address",
+        "roleFlags",
+        "nonceDomain"
+      ]
+    },
+    {
+      "component": "balances",
+      "root": "0x8a4fbb966efb61bd6e8f78fb7b8b510086b2650504654cc82a61d3ed97ac4d1c",
+      "count": 7,
+      "ownerAgent": "runtime",
+      "inputs": [
+        "accountId",
+        "assetId",
+        "amount"
+      ]
+    },
+    {
+      "component": "tokens",
+      "root": "0x542972588a71cf20b19e18681adc3bfbdcf7ca2fed4d4e60858e7679c2cbe238",
+      "count": 1,
+      "ownerAgent": "runtime",
+      "inputs": [
+        "tokenId",
+        "symbol",
+        "decimals",
+        "totalSupply"
+      ]
+    },
+    {
+      "component": "pools",
+      "root": "0x66666b609cd2486e0b688b8967452a54b49e684f587c107c8392d58b62ae3897",
+      "count": 1,
+      "ownerAgent": "runtime",
+      "inputs": [
+        "poolId",
+        "baseAssetId",
+        "quoteAssetId",
+        "reserves"
+      ]
+    },
+    {
+      "component": "lp_positions",
+      "root": "0xac45ae606ad56a72fd38b75aad52ed9b46365dfcca5b7679e3f7397d88ef05d3",
+      "count": 1,
+      "ownerAgent": "runtime",
+      "inputs": [
+        "lpPositionId",
+        "poolId",
+        "ownerAccountId",
+        "lpUnits"
+      ]
+    },
+    {
+      "component": "bridge_credits",
+      "root": "0x0f91f6d8d6a014b6b9e5c271e8a746256c4ef3b00c2194e0b858e405b7044b9a",
+      "count": 1,
+      "ownerAgent": "bridge",
+      "inputs": [
+        "creditId",
+        "observationId",
+        "accountId",
+        "assetId",
+        "amount"
+      ]
+    },
+    {
+      "component": "withdrawals",
+      "root": "0x179cf78b41131caefd13d557b73e73258fcb027e103007115deeb98e7755959f",
+      "count": 1,
+      "ownerAgent": "bridge",
+      "inputs": [
+        "withdrawalIntentId",
+        "accountId",
+        "assetId",
+        "amount",
+        "releaseEvidenceId"
+      ]
+    },
+    {
+      "component": "object_store",
+      "root": "0x96cca38dd6e86995a2b3551676a5c5777c3d270762cab8769771f840a9ac23fd",
+      "count": 9,
+      "ownerAgent": "runtime",
+      "inputs": [
+        "objectType",
+        "objectId",
+        "objectHash",
+        "status"
+      ]
+    },
+    {
+      "component": "finality",
+      "root": "0xbc714da6fb6a0957172d578e52e611e35c2f5c7a5433435c31736e6da2abf6f6",
+      "count": 1,
+      "ownerAgent": "consensus",
+      "inputs": [
+        "height",
+        "status",
+        "certificateId"
+      ]
+    },
+    {
+      "component": "validator_state",
+      "root": "0x6ae2131489fb1d27c5a6786fe058ad7a4d70edc598c0d766028fc1f4d1532290",
+      "count": 1,
+      "ownerAgent": "consensus",
+      "inputs": [
+        "authorityId",
+        "accountId",
+        "votingPower",
+        "status"
+      ]
+    }
+  ],
+  "stateComponents": {
+    "accounts": [
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+        "label": "alice-user",
+        "publicKey": "0x02a332e6b5637c5584cf1b19a24410a74a86715d1d054f5bf1f1054ed789fae974",
+        "address": "0x160c4dcc0bb4bdc9bdbdd3b652dacdb0a95731d3",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x02a7170b32f06e676036e7f0df7a0c1b5aed6d97730abc30f29e6a6d22b610ac",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": true,
+          "validator": false,
+          "bridgeOperator": false,
+          "deployer": true,
+          "relayer": false,
+          "emergencyOperator": false
+        },
+        "metadataHash": "0x1c114222c149606293a4dac2c2b8bd53d64517a2cb4804b13c560e6f0e3e09de",
+        "status": "active",
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "label": "bob-user",
+        "publicKey": "0x02bd133d4df63458ed49a0d7acde36d546b80c735f04d9a37eb428f1d92505b6be",
+        "address": "0xc8d2f10666e1216121f6449f0fc5726f63590aa7",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x8a6124844f49d9390c78a1dfd812c43c1963edf9be78b4154bc50fabf0e12f9a",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": true,
+          "validator": false,
+          "bridgeOperator": false,
+          "deployer": false,
+          "relayer": false,
+          "emergencyOperator": false
+        },
+        "metadataHash": "0xd7456e440b78c346aa02b5fff11c181d45d40c691d836e571d464a595db02008",
+        "status": "active",
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+        "label": "validator-one",
+        "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+        "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x8aca75dd306f43261a9c58812a426a62ddf72e5a0823fe7ef6c4e0aff78b42d9",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": false,
+          "validator": true,
+          "bridgeOperator": false,
+          "deployer": false,
+          "relayer": false,
+          "emergencyOperator": false
+        },
+        "metadataHash": "0x18e55b4da0218551072142ab2f110626c3f47f0c6f2a8fc5dbb5efb2fa3b34eb",
+        "status": "active",
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+        "label": "bridge-relayer",
+        "publicKey": "0x02f90ad32b15b53c0e4abd4f2f0de6db96dbe0adee1dab1736b0cf596070f7ef05",
+        "address": "0x633621fec8e01f8346130d81c26be8e33d1dcea9",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x346974a0aa8346f9759dde1d56bb8962a36eb013ca5e7f8c1b8e673fcfebd08a",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": false,
+          "validator": false,
+          "bridgeOperator": true,
+          "deployer": false,
+          "relayer": true,
+          "emergencyOperator": false
+        },
+        "metadataHash": "0x09d6e50d1093be697a68f09a0a8c99c1c8b072dd71ea832305d5153ae585a3ff",
+        "status": "active",
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0x9f7090c47663019f3d7647a2d4b5895a529e9dbac911bb2fde2c359828cbb3b8",
+        "label": "bridge-release-authority",
+        "publicKey": "0x02be094d43f51fb0e267c4ed5767bf26ef1370dc3c7756d1399d8e152c3a59b602",
+        "address": "0xdb523727f85b4f6d0ff5f62fc4d6c25a337af90d",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x0df088a7e0abfe419a042ed6caf58dba22d3a4f7e8ca066c3585b859ae870e4f",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": false,
+          "validator": false,
+          "bridgeOperator": true,
+          "deployer": false,
+          "relayer": false,
+          "emergencyOperator": false
+        },
+        "metadataHash": "0x8f83b49dac9afecf998c810362df58ad3e05daa154a80f63cbf32acf3f435ed2",
+        "status": "active",
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.production_l1.account_public_metadata.v0",
+        "accountId": "0x458a01532bc3ec202c267dbd715ef239d54e3844cb37c57f504ab7e7f077ac8a",
+        "label": "emergency-operator",
+        "publicKey": "0x0202837e867307660b83033448b53dae9fbf18646041ac72fc3797272b59d65d79",
+        "address": "0x9386458c8c48d14bfebedc4fd00a528c15727b9e",
+        "addressDerivation": {
+          "algorithm": "keccak256(compressedSecp256k1PublicKey)[12:32]",
+          "preimageFields": [
+            "publicKey",
+            "chainId",
+            "networkProfile"
+          ],
+          "chainIdBinding": true
+        },
+        "nonceDomain": {
+          "domainId": "0x6c2e83ab478452519394a62c494432d5e6643b6fd28c95af2fb38e55644ab734",
+          "nextNonce": "1",
+          "replayScope": "chainId+networkProfile+genesisHash+accountId"
+        },
+        "roleFlags": {
+          "user": false,
+          "validator": false,
+          "bridgeOperator": false,
+          "deployer": false,
+          "relayer": false,
+          "emergencyOperator": true
+        },
+        "metadataHash": "0xc0602b4f0b0d0dd87908d4808189afb4e60c7d7100865cabaf215fdf1311996f",
+        "status": "active",
+        "productionReady": false
+      }
+    ],
+    "balances": [
+      {
+        "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "amount": "1000000",
+        "balanceType": "native_local_unit",
+        "noValue": true
+      },
+      {
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "amount": "100000",
+        "balanceType": "native_local_unit",
+        "noValue": true
+      },
+      {
+        "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "amount": "50000",
+        "balanceType": "native_local_unit",
+        "noValue": true
+      },
+      {
+        "accountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "amount": "25000",
+        "balanceType": "native_local_unit",
+        "noValue": true
+      },
+      {
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "amount": "2640000",
+        "balanceType": "native_local_unit",
+        "noValue": true
+      },
+      {
+        "accountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+        "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+        "amount": "995050000",
+        "balanceType": "test_token",
+        "noValue": true
+      },
+      {
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "assetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+        "amount": "349000",
+        "balanceType": "test_token",
+        "noValue": true
+      }
+    ],
+    "tokens": [
+      {
+        "tokenId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+        "symbol": "FLOWT",
+        "name": "FlowMemory Local Test Token",
+        "decimals": 6,
+        "totalSupply": "1000250000",
+        "noValue": true
+      }
+    ],
+    "pools": [
+      {
+        "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+        "baseAssetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "quoteAssetId": "0xab33f8fc8a0ac57cc3a49d06e53a5dde13b2daec76a3ba2b4f92253372913f4d",
+        "reserveBase": "99000",
+        "reserveQuote": "4951000",
+        "feeBps": 30,
+        "noValue": true
+      }
+    ],
+    "lp_positions": [
+      {
+        "lpPositionId": "0x027c83ae59eefcbea8ecb604e3a527e4392c82376866e2f1e6804bae5a1dbd7d",
+        "poolId": "0x81e13f7a36b9520e6094e4fa26c79fe6bc56421d964b7773ff3344fccc6f5f5a",
+        "ownerAccountId": "0xd6d0a8eb15ca2da58ecde78beb56830564ea3302b3af4215cdccb3a08ff34908",
+        "lpUnits": "99900",
+        "noValue": true
+      }
+    ],
+    "bridge_credits": [
+      {
+        "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+        "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "amount": "2500000",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024"
+      }
+    ],
+    "withdrawals": [
+      {
+        "withdrawalIntentId": "0xa3bd91f938d573c2e58bb34f4842a3f9acb85df7d2b4086a5949a65b95c55ee6",
+        "accountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+        "amount": "100000",
+        "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+        "releaseEvidenceId": "0x4b632f40672ceb7ab195def56d8bc86141f1878ec31ffc742ec3e5b5d0def15d"
+      }
+    ],
+    "object_store": [
+      {
+        "objectType": "AgentAccount",
+        "objectId": "0x79587bf5b81d6b566fe12453bc30803a773997e1f85371b4ba399d761758004d",
+        "objectHash": "0x24ad98a6c242b0b361aa0c48f6331202eb55002dd43e0db3bcbab52b30ac8018",
+        "status": "active"
+      },
+      {
+        "objectType": "ModelPassport",
+        "objectId": "0xa73adb911f58e33dcd820471675d7a3d2b242be0574e217b144f4873135a4085",
+        "objectHash": "0xd5de49d30e0ff04ff2de2141d119bbfb46f3b741ce529f0594936a1cfba296d3",
+        "status": "active"
+      },
+      {
+        "objectType": "WorkReceipt",
+        "objectId": "0xa96483b49a3d6005d748a512e00ab0bf1feb77d2bad4dec4f7842310bfe401f7",
+        "objectHash": "0xeb0475e34e1b2818d882210c44d3a3d8c6f30b1e551b827c48d9b0619ad238d9",
+        "status": "active"
+      },
+      {
+        "objectType": "ArtifactAvailabilityProof",
+        "objectId": "0x7458f4ac71bc9008bc012e2a8cec5b529772b58f6fc86ab44bcd339a7070e069",
+        "objectHash": "0x67aed44d292f94b1bd141ec1f355955f96283783e08152a7237e2d37810fd49a",
+        "status": "active"
+      },
+      {
+        "objectType": "VerifierModule",
+        "objectId": "0x5194f738c5e5d252e0ae82f28883d732b762b9944f20181b854841875c45c54b",
+        "objectHash": "0xfef87b4fe768283b6e0e741bde3c43e635ce3f89f769285e356027c813877895",
+        "status": "active"
+      },
+      {
+        "objectType": "VerifierReport",
+        "objectId": "0x5d0ad9b32f26abc0cd7be3b8869c51aefbc3cdd5d3f01735a8820fb7ff0910e1",
+        "objectHash": "0xa8d1865f5910ec6a9b615c48d7768e6a6ad3d3647495ffd5e5f6e9a8870a9489",
+        "status": "active"
+      },
+      {
+        "objectType": "MemoryCell",
+        "objectId": "0xbcd05714eabfa7babbe32888041eaca0f715073f92e8c8cbd1f81922eeab5b16",
+        "objectHash": "0x86eeee0b28fa6533fd4220fb4953e78c29e1d545d3cffea2d985053157923619",
+        "status": "active"
+      },
+      {
+        "objectType": "Challenge",
+        "objectId": "0x927bb5cb7a259e9ef7a3ca9ed94f4f536928f87ecec25ef8e04eb3dd16884ad9",
+        "objectHash": "0xa73c3472a504f9dd8d98b3851f88a1fbaf9914524c0a7879172268bcc3225acf",
+        "status": "resolved"
+      },
+      {
+        "objectType": "FinalityReceipt",
+        "objectId": "0xd0017f1d9ab4a827a296feed92d8427582bb2eeac7bc1d006ecb843d2a2022fa",
+        "objectHash": "0xe8331685281b5709bcff0d968bff6a796d9e78057156c9ad4662bcc6bb8ef1ac",
+        "status": "finalized"
+      }
+    ],
+    "finality": [
+      {
+        "height": "1",
+        "status": "accepted",
+        "certificateId": "0x4b525f224cd71929a613f6235ffb03a641916851c2fc90843feec3bbad90a3b3"
+      }
+    ],
+    "validator_state": [
+      {
+        "schema": "flowmemory.production_l1.validator_authority.v0",
+        "authorityId": "0x4e7ad43d8db36ddde419d64fac4768a38167efd7b9e7abc503036f2ba22c92ba",
+        "accountId": "0xef8fcf1e5560df82860c4de608453cc69a07478b1c7472b6fa7f5834d7d0c46d",
+        "publicKey": "0x021d45040882bbe0d3d1ff6ed7476a4b533e17b00633d81cff5cd15479c3c0bd22",
+        "address": "0xd0c3c122262ba1116de221d5fbf4505357b97e8a",
+        "authorityType": "validator",
+        "votingPower": "1",
+        "finalityWeight": "1",
+        "metadataHash": "0x708f6074acaf685798e4085ceb5d4c3053dfa72bc1ccf0078feb3dbcd39c5e15",
+        "status": "active",
+        "productionReady": false
+      }
+    ]
+  },
+  "deterministicReplay": {
+    "sameLogicalStateRoot": "0x716ccaf7e8946591973d4614d41ba39c047ef7e89bd67d62f1aa6d90b99133ef",
+    "replayCommand": "npm run validate:production-network-fixtures"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/bridge-runtime-credit-application.schema.json",
-  "title": "FlowChainBridgeRuntimeCreditApplication",
+  "title": "FlowMemoryBridgeRuntimeCreditApplication",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -10,7 +10,7 @@
     "creditId",
     "depositId",
     "replayKey",
-    "flowchainRecipient",
+    "flowmemoryRecipient",
     "asset",
     "amount",
     "status",
@@ -24,7 +24,7 @@
     "creditId": { "$ref": "#/$defs/hex32" },
     "depositId": { "$ref": "#/$defs/hex32" },
     "replayKey": { "$ref": "#/$defs/hex32" },
-    "flowchainRecipient": { "$ref": "#/$defs/hex32" },
+    "flowmemoryRecipient": { "$ref": "#/$defs/hex32" },
     "asset": { "$ref": "#/$defs/assetIdentity" },
     "amount": { "$ref": "#/$defs/uintString" },
     "status": { "type": "string", "enum": ["applied", "idempotent_replay", "rejected"] },

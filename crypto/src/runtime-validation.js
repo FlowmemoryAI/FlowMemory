@@ -5,17 +5,17 @@ import {
 } from "./transactions.js";
 import {
   bridgeSourceEventReplayKey,
-  flowchainTransactionId
-} from "./production-l1.js";
+  flowmemoryTransactionId
+} from "./production-network.js";
 import {
-  flowchainAccountId,
-  flowchainAddressFromPublicKey,
-  flowchainPublicKeyHash,
-  isFlowchainRole,
-  normalizeFlowchainPublicKey
+  flowmemoryAccountId,
+  flowmemoryAddressFromPublicKey,
+  flowmemoryPublicKeyHash,
+  isFlowMemoryRole,
+  normalizeFlowMemoryPublicKey
 } from "./identity.js";
 
-export function verifyFlowchainEnvelope({ document, envelope, context = {} }) {
+export function verifyFlowMemoryEnvelope({ document, envelope, context = {} }) {
   const base = validateLocalTransactionEnvelope({
     document,
     envelope,
@@ -43,7 +43,7 @@ export function verifyFlowchainEnvelope({ document, envelope, context = {} }) {
     failureCodes.add(error);
   }
 
-  const transactionId = envelope?.signature ? flowchainTransactionId(envelope) : envelope?.transactionId;
+  const transactionId = envelope?.signature ? flowmemoryTransactionId(envelope) : envelope?.transactionId;
   if (context.seenTransactionIds?.has?.(transactionId)) {
     failureCodes.add("duplicate-tx-id");
   }
@@ -51,7 +51,7 @@ export function verifyFlowchainEnvelope({ document, envelope, context = {} }) {
   const payload = safeEnvelopePayload(envelope);
 
   return {
-    schema: "flowchain.runtime_verify_result.v0",
+    schema: "flowmemory.runtime_verify_result.v0",
     ok: failureCodes.size === 0,
     failureCodes: [...failureCodes],
     signerAddress: signerIdentity.address,
@@ -77,19 +77,19 @@ function deriveSignerIdentity(envelope) {
     return { errors: ["missing-signer"] };
   }
   try {
-    const publicKey = normalizeFlowchainPublicKey(envelope.publicKey);
-    const address = flowchainAddressFromPublicKey(publicKey);
-    const accountId = isFlowchainRole(envelope.signerRole)
-      ? flowchainAccountId({ publicKey, role: envelope.signerRole })
+    const publicKey = normalizeFlowMemoryPublicKey(envelope.publicKey);
+    const address = flowmemoryAddressFromPublicKey(publicKey);
+    const accountId = isFlowMemoryRole(envelope.signerRole)
+      ? flowmemoryAccountId({ publicKey, role: envelope.signerRole })
       : envelope.signerId;
     return {
       errors,
       address,
       accountId,
       publicIdentity: {
-        schema: "flowchain.runtime_public_identity.v0",
+        schema: "flowmemory.runtime_public_identity.v0",
         publicKey,
-        publicKeyHash: flowchainPublicKeyHash(publicKey),
+        publicKeyHash: flowmemoryPublicKeyHash(publicKey),
         address,
         accountId,
         signerRole: envelope.signerRole,

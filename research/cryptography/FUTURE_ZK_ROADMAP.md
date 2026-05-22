@@ -73,7 +73,7 @@ The proof should not force private artifact bytes public unless the challenge or
 2. Prove a batch of receipts share an accepted schema and verifier policy.
 3. Prove a Rootflow checkpoint aggregates a batch.
 4. Attach the checkpoint to a Rootfield state commitment.
-5. Consider appchain/L1 settlement only after proof cost, data availability, and governance are understood.
+5. Consider local runtime/network settlement only after proof cost, data availability, and governance are understood.
 
 ## Go/No-Go Criteria
 

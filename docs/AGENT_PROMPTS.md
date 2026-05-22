@@ -21,7 +21,7 @@ Read first:
 
 Work only on the assigned GitHub issue. Copy the issue's objective, allowed folders, forbidden folders, acceptance criteria, risk level, and recommended worktree into your local plan before editing.
 
-Do not build outside scope. Do not add tokenomics, dynamic fees, production deployment, production Uniswap v4 hook deployment, production L1/appchain, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation unless the issue explicitly allows it.
+Do not build outside scope. Do not add tokenomics, dynamic fees, production deployment, production Uniswap v4 hook deployment, separate production network, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation unless the issue explicitly allows it.
 
 Before finishing, run git status --short --branch and git diff --check. Run area-specific tests or checks when they exist. End with changed files, checks run, risks, assumptions, and follow-up issues.
 ```
@@ -51,14 +51,14 @@ Flow Memory V0 must expose:
 - RootfieldBundle
 - AgentMemoryView
 
-Use deterministic local fixtures before live production integrations. Do not claim production L1, production mainnet readiness, full trustless verification, free storage, or AI running on-chain.
+Use deterministic local fixtures before live production integrations. Do not claim separate production network, production mainnet readiness, full trustless verification, free storage, or AI running on-chain.
 
 Before finishing, name exactly which launch acceptance rows your work satisfies and which rows remain incomplete.
 ```
 
 ## Contracts Agent
 
-Worktree: `E:\FlowMemory\flowmemory-contracts`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`
 
 Allowed by default:
 
@@ -91,7 +91,7 @@ If this issue is part of Rootflow V0, keep contract state compact and emit enoug
 
 ## Indexer/Verifier Agent
 
-Worktree: `E:\FlowMemory\flowmemory-indexer`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer`
 
 Allowed by default:
 
@@ -123,7 +123,7 @@ If this issue is part of Rootflow V0 or Flow Memory V0, produce or consume deter
 
 ## Crypto Agent
 
-Worktree: `E:\FlowMemory\flowmemory-crypto`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto`
 
 Allowed by default:
 
@@ -152,14 +152,14 @@ Define vocabulary, schemas, domain separation, and validation boundaries. Do not
 If this issue is part of Rootflow V0 or Flow Memory V0, define canonical ids, hash inputs, JSON schemas, and test vectors for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, and verifier reports.
 ```
 
-## Chain/Devnet Research Agent
+## Chain/Local test runtime Research Agent
 
-Worktree: `E:\FlowMemory\flowmemory-chain`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain`
 
 Allowed by default:
 
 - `research/`
-- Devnet/appchain docs when explicitly scoped
+- Local test runtime/dedicated network docs when explicitly scoped
 - Cross-links in `docs/ROADMAP.md` or `docs/ARCHITECTURE.md` only when needed
 
 Forbidden by default:
@@ -183,7 +183,7 @@ Keep this no-value and research-only. Do not design or deploy a production chain
 
 ## Dashboard Agent
 
-Worktree: `E:\FlowMemory\flowmemory-dashboard`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`
 
 Allowed by default:
 
@@ -212,7 +212,7 @@ Define operator and explorer data models before UI. Fixture-backed local display
 
 ## Hardware Agent
 
-Worktree: `E:\FlowMemory\flowmemory-hardware`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware`
 
 Allowed by default:
 
@@ -241,7 +241,7 @@ Treat FlowRouter as research hardware. Treat Meshtastic and LoRa as low-bandwidt
 
 ## Research Agent
 
-Worktree: `E:\FlowMemory\flowmemory-research`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research`
 
 Allowed by default:
 
@@ -270,7 +270,7 @@ Separate hypotheses, experiments, accepted decisions, and open questions. Keep h
 
 ## Review/HQ Agent
 
-Worktree: `E:\FlowMemory\flowmemory-review`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 Allowed by default:
 

@@ -6,20 +6,20 @@ import { assertNoSecrets } from "../../shared/src/index.ts";
 import { parseBridgeArgs, runBridgePipeline } from "./observe-base-lockbox.ts";
 
 const REQUIRED_ENV = [
-  "FLOWCHAIN_BASE8453_RPC_URL",
-  "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-  "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-  "FLOWCHAIN_PILOT_CONFIRMATIONS",
-  "FLOWCHAIN_BASE8453_ASSET_DECIMALS",
-  "FLOWCHAIN_PILOT_OPERATOR_ACK",
+  "FLOWMEMORY_BASE8453_RPC_URL",
+  "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS",
+  "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
+  "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+  "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
+  "FLOWMEMORY_PILOT_CONFIRMATIONS",
+  "FLOWMEMORY_BASE8453_ASSET_DECIMALS",
+  "FLOWMEMORY_PILOT_OPERATOR_ACK",
 ] as const;
 
 const OPTIONAL_LIVE_ENV = [
-  "FLOWCHAIN_BASE8453_FROM_BLOCK",
-  "FLOWCHAIN_BASE8453_TO_BLOCK",
-  "FLOWCHAIN_PILOT_MAX_USD",
+  "FLOWMEMORY_BASE8453_FROM_BLOCK",
+  "FLOWMEMORY_BASE8453_TO_BLOCK",
+  "FLOWMEMORY_PILOT_MAX_USD",
 ] as const;
 
 const REQUIRED_ACK = "I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT";
@@ -35,29 +35,29 @@ function baseLiveArgs(): string[] {
     "--mode",
     "base-mainnet-pilot",
     "--rpc-url",
-    env("FLOWCHAIN_BASE8453_RPC_URL") ?? "",
+    env("FLOWMEMORY_BASE8453_RPC_URL") ?? "",
     "--lockbox-address",
-    env("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS") ?? "",
+    env("FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS") ?? "",
     "--approved-lockbox",
-    env("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS") ?? "",
+    env("FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS") ?? "",
     "--supported-token",
-    env("FLOWCHAIN_BASE8453_SUPPORTED_TOKEN") ?? "",
+    env("FLOWMEMORY_BASE8453_SUPPORTED_TOKEN") ?? "",
     "--from-block",
-    env("FLOWCHAIN_BASE8453_FROM_BLOCK") ?? "",
+    env("FLOWMEMORY_BASE8453_FROM_BLOCK") ?? "",
     "--to-block",
-    env("FLOWCHAIN_BASE8453_TO_BLOCK") ?? "",
+    env("FLOWMEMORY_BASE8453_TO_BLOCK") ?? "",
     "--confirmations",
-    env("FLOWCHAIN_PILOT_CONFIRMATIONS") ?? env("FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH") ?? "",
+    env("FLOWMEMORY_PILOT_CONFIRMATIONS") ?? env("FLOWMEMORY_BASE8453_CONFIRMATION_DEPTH") ?? "",
     "--acknowledge-pilot",
     "--acknowledge-real-funds",
     "--max-usd",
-    env("FLOWCHAIN_PILOT_MAX_USD") ?? "1",
+    env("FLOWMEMORY_PILOT_MAX_USD") ?? "1",
     "--max-deposit-amount",
-    env("FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI") ?? "",
+    env("FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI") ?? "",
     "--total-cap-amount",
-    env("FLOWCHAIN_PILOT_TOTAL_CAP_WEI") ?? "",
+    env("FLOWMEMORY_PILOT_TOTAL_CAP_WEI") ?? "",
     "--asset-decimals",
-    env("FLOWCHAIN_BASE8453_ASSET_DECIMALS") ?? "",
+    env("FLOWMEMORY_BASE8453_ASSET_DECIMALS") ?? "",
   ];
 }
 
@@ -190,14 +190,14 @@ async function selfTest(): Promise<Record<string, unknown>> {
 async function liveCheck(): Promise<Record<string, unknown>> {
   const missing = [
     ...REQUIRED_ENV,
-    "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
+    "FLOWMEMORY_BASE8453_FROM_BLOCK",
+    "FLOWMEMORY_BASE8453_TO_BLOCK",
   ].filter((name) => env(name) === undefined);
   if (missing.length > 0) {
     throw new Error(`Live readiness missing required env names: ${missing.join(", ")}`);
   }
-  if (env("FLOWCHAIN_PILOT_OPERATOR_ACK") !== REQUIRED_ACK) {
-    throw new Error(`FLOWCHAIN_PILOT_OPERATOR_ACK must equal ${REQUIRED_ACK}`);
+  if (env("FLOWMEMORY_PILOT_OPERATOR_ACK") !== REQUIRED_ACK) {
+    throw new Error(`FLOWMEMORY_PILOT_OPERATOR_ACK must equal ${REQUIRED_ACK}`);
   }
 
   const result = await runBridgePipeline(parseBridgeArgs(baseLiveArgs()));

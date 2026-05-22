@@ -110,7 +110,7 @@ This proves the main claim: an agent can have chain-side memory and a replayable
 
 ### Later gated path: tiny fixed-shape kernel
 
-A Quill-like tiny int8 kernel can later classify memory importance or rank candidate actions. It must remain fixed-shape, deterministic, rule-gated, and limited to small action spaces.
+A A small deterministic model kernel can later classify memory importance or rank candidate actions. It must remain fixed-shape, deterministic, rule-gated, and limited to small action spaces.
 
 ## What is implemented now
 
@@ -144,8 +144,8 @@ The following are proposed by this documentation package and require implementat
 
 FlowMemory should win by being the smaller, replayable kernel:
 
-- Nookplot-style systems optimize broad coordination and onboarding.
-- Quill-style systems prove deterministic EVM model execution is possible for small fixed objects.
+- broad coordination systems-style systems optimize broad coordination and onboarding.
+- Small deterministic model-kernel demos prove deterministic EVM model execution is possible for small fixed objects.
 - FlowMemory combines the useful discipline from both: agent memory and actions become compact public state transitions with deterministic replay.
 
 ## Success statement

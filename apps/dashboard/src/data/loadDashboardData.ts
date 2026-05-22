@@ -63,7 +63,7 @@ export function validateDashboardData(payload: unknown): DashboardData {
   assertArray(candidate.agentBondRecourseDecisions, "agentBondRecourseDecisions");
   assertArray(candidate.agentBondFailureWaterfalls, "agentBondFailureWaterfalls");
   assertArray(candidate.baseAgentMemoryScouts, "baseAgentMemoryScouts");
-  assertArray(candidate.devnetBlocks, "devnetBlocks");
+  assertArray(candidate.localRuntimeBlocks, "localRuntimeBlocks");
   assertArray(candidate.hardwareNodes, "hardwareNodes");
   assertArray(candidate.alerts, "alerts");
 

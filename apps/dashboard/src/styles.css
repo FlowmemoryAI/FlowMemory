@@ -1468,7 +1468,7 @@ small {
   padding: 24px;
 }
 
-.flowchain-bridge-page {
+.flowmemory-bridge-page {
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
@@ -1479,7 +1479,7 @@ small {
   color: #1c1a17;
 }
 
-.flowchain-bridge-page::before {
+.flowmemory-bridge-page::before {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -1493,7 +1493,7 @@ small {
   mix-blend-mode: multiply;
 }
 
-.flowchain-bridge-page::after {
+.flowmemory-bridge-page::after {
   position: fixed;
   inset: auto -12vw 16dvh -12vw;
   z-index: 0;
@@ -1524,13 +1524,13 @@ small {
   transform: rotate(4deg) skewX(-18deg);
 }
 
-.flowchain-bridge-nav,
-.flowchain-bridge-main {
+.flowmemory-bridge-nav,
+.flowmemory-bridge-main {
   position: relative;
   z-index: 1;
 }
 
-.flowchain-bridge-nav {
+.flowmemory-bridge-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1540,38 +1540,38 @@ small {
   padding: 24px 34px 0;
 }
 
-.flowchain-brand,
-.flowchain-wallet-pill {
+.flowmemory-brand,
+.flowmemory-wallet-pill {
   display: inline-flex;
   align-items: center;
   text-decoration: none;
 }
 
-.flowchain-brand {
+.flowmemory-brand {
   gap: 10px;
   color: #17213a;
 }
 
-.flowchain-brand strong {
+.flowmemory-brand strong {
   font-family: ui-serif, Georgia, "Times New Roman", serif;
   font-size: clamp(1.45rem, 2.4vw, 2rem);
   font-weight: 600;
 }
 
-.flowchain-brand-mark {
+.flowmemory-brand-mark {
   position: relative;
   width: 52px;
   height: 30px;
 }
 
-.flowchain-brand-mark,
-.flowchain-brand-mark span {
+.flowmemory-brand-mark,
+.flowmemory-brand-mark span {
   display: block;
 }
 
-.flowchain-brand-mark::before,
-.flowchain-brand-mark::after,
-.flowchain-brand-mark span {
+.flowmemory-brand-mark::before,
+.flowmemory-brand-mark::after,
+.flowmemory-brand-mark span {
   position: absolute;
   left: 0;
   width: 48px;
@@ -1583,25 +1583,25 @@ small {
   transform-origin: left center;
 }
 
-.flowchain-brand-mark::before {
+.flowmemory-brand-mark::before {
   top: 4px;
   transform: rotate(15deg);
 }
 
-.flowchain-brand-mark span {
+.flowmemory-brand-mark span {
   top: 11px;
   border-color: #1d54b6;
   transform: rotate(-8deg);
 }
 
-.flowchain-brand-mark::after {
+.flowmemory-brand-mark::after {
   top: 18px;
   width: 36px;
   border-color: #5ba2ff;
   transform: rotate(20deg);
 }
 
-.flowchain-wallet-pill {
+.flowmemory-wallet-pill {
   gap: 9px;
   min-height: 44px;
   padding: 0 16px;
@@ -1615,7 +1615,7 @@ small {
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
-.flowchain-wallet-pill:hover {
+.flowmemory-wallet-pill:hover {
   border-color: rgba(37, 107, 218, 0.32);
   background: rgba(255, 250, 243, 0.92);
 }
@@ -1630,7 +1630,7 @@ small {
   box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.52), 0 7px 16px rgba(0, 91, 255, 0.28);
 }
 
-.flowchain-bridge-main {
+.flowmemory-bridge-main {
   display: grid;
   gap: 20px;
   width: min(100%, 1540px);
@@ -1673,7 +1673,7 @@ small {
   text-wrap: balance;
 }
 
-.flowchain-bridge-layout {
+.flowmemory-bridge-layout {
   display: grid;
   grid-template-columns: minmax(210px, 270px) minmax(520px, 650px) minmax(220px, 270px);
   gap: clamp(20px, 5vw, 92px);
@@ -2216,7 +2216,7 @@ small {
 }
 
 @media (max-width: 1280px) {
-  .flowchain-bridge-layout {
+  .flowmemory-bridge-layout {
     grid-template-columns: minmax(0, 650px);
   }
 
@@ -2228,7 +2228,7 @@ small {
 }
 
 @media (max-width: 720px) {
-  .flowchain-bridge-nav {
+  .flowmemory-bridge-nav {
     display: grid;
     grid-template-columns: 1fr;
     align-items: flex-start;
@@ -2236,17 +2236,17 @@ small {
     padding: 18px 16px 0;
   }
 
-  .flowchain-wallet-pill {
+  .flowmemory-wallet-pill {
     justify-self: start;
     min-height: 38px;
     padding: 0 10px;
   }
 
-  .flowchain-bridge-main {
+  .flowmemory-bridge-main {
     padding: 18px 16px 38px;
   }
 
-  .flowchain-bridge-layout {
+  .flowmemory-bridge-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
@@ -4870,8 +4870,8 @@ code {
   }
 }
 
-/* Flowchain bridge reference layout */
-.flowchain-bridge-page {
+/* FlowMemory bridge reference layout */
+.flowmemory-bridge-page {
   min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
@@ -4882,7 +4882,7 @@ code {
   color: #0d1b35;
 }
 
-.flowchain-bridge-page::before {
+.flowmemory-bridge-page::before {
   opacity: 0.36;
   background-image:
     linear-gradient(rgba(77, 56, 34, 0.035) 1px, transparent 1px),
@@ -4891,7 +4891,7 @@ code {
   background-size: 8px 8px, 10px 10px, auto;
 }
 
-.flowchain-bridge-page::after {
+.flowmemory-bridge-page::after {
   inset: auto -14vw -7dvh -14vw;
   height: 32dvh;
   opacity: 0.52;
@@ -4914,50 +4914,50 @@ code {
   transform: rotate(-8deg) skewX(-18deg);
 }
 
-.flowchain-bridge-nav {
+.flowmemory-bridge-nav {
   align-items: flex-start;
   width: min(100%, 1700px);
   padding: 24px 66px 0;
 }
 
-.flowchain-brand {
+.flowmemory-brand {
   gap: 14px;
   color: #071831;
 }
 
-.flowchain-brand strong {
+.flowmemory-brand strong {
   color: #071831;
   font-size: clamp(1.75rem, 2.3vw, 2.35rem);
   letter-spacing: 0;
 }
 
-.flowchain-brand-mark {
+.flowmemory-brand-mark {
   width: 48px;
   height: 38px;
 }
 
-.flowchain-brand-mark::before,
-.flowchain-brand-mark::after,
-.flowchain-brand-mark span {
+.flowmemory-brand-mark::before,
+.flowmemory-brand-mark::after,
+.flowmemory-brand-mark span {
   width: 44px;
   height: 15px;
   border-color: #1b6fff;
   border-width: 5px 0 0;
 }
 
-.flowchain-brand-mark::before {
+.flowmemory-brand-mark::before {
   top: 2px;
   transform: rotate(-10deg);
 }
 
-.flowchain-brand-mark span {
+.flowmemory-brand-mark span {
   top: 13px;
   width: 36px;
   border-color: #246de0;
   transform: rotate(-12deg);
 }
 
-.flowchain-brand-mark::after {
+.flowmemory-brand-mark::after {
   top: 24px;
   width: 28px;
   border-color: #73adff;
@@ -5052,7 +5052,7 @@ code {
   text-decoration: none;
 }
 
-.flowchain-bridge-main {
+.flowmemory-bridge-main {
   display: grid;
   grid-template-columns: minmax(420px, 660px) minmax(650px, 820px);
   gap: clamp(48px, 6vw, 96px);
@@ -5143,7 +5143,7 @@ code {
   line-height: 1.35;
 }
 
-.flowchain-bridge-layout {
+.flowmemory-bridge-layout {
   display: block;
   width: 100%;
 }
@@ -5513,7 +5513,7 @@ code {
 }
 
 @media (max-width: 1280px) {
-  .flowchain-bridge-nav {
+  .flowmemory-bridge-nav {
     display: grid;
     grid-template-columns: 1fr;
     gap: 18px;
@@ -5524,7 +5524,7 @@ code {
     width: 100%;
   }
 
-  .flowchain-bridge-main {
+  .flowmemory-bridge-main {
     grid-template-columns: 1fr;
     gap: 28px;
     padding: 28px;
@@ -5537,8 +5537,8 @@ code {
 }
 
 @media (max-width: 760px) {
-  .flowchain-bridge-nav,
-  .flowchain-bridge-main {
+  .flowmemory-bridge-nav,
+  .flowmemory-bridge-main {
     width: 100%;
     max-width: 100vw;
     padding-left: 16px;

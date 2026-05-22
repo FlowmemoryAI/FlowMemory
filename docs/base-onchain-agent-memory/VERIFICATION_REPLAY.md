@@ -275,7 +275,7 @@ The fixture should make it impossible to pass verification if:
 
 ## External review admission
 
-DeepSeek/GPT/Codex review can produce useful architecture critique, but a model transcript is not automatically verifier evidence.
+External model review can produce useful architecture critique, but a model transcript is not automatically verifier evidence.
 
 To admit review output:
 

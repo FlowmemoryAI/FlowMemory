@@ -16,7 +16,7 @@ Workflow:
 3. assemble a launch approval packet with:
 
 ```powershell
-npm run flowmemory:agent-bonds:public-launch:assemble -- fixtures/agent-bonds/launch-approval.generated.json fixtures/agent-bonds/pilot-config.template.json fixtures/agent-bonds/approvals/external-review.template.json fixtures/agent-bonds/approvals/operator-separation.template.json fixtures/agent-bonds/approvals/runtime-evidence.template.json fixtures/agent-bonds/approvals/go-no-go.template.json devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json out/agent-bonds-operator-bundle
+npm run flowmemory:agent-bonds:public-launch:assemble -- fixtures/agent-bonds/launch-approval.generated.json fixtures/agent-bonds/pilot-config.template.json fixtures/agent-bonds/approvals/external-review.template.json fixtures/agent-bonds/approvals/operator-separation.template.json fixtures/agent-bonds/approvals/runtime-evidence.template.json fixtures/agent-bonds/approvals/go-no-go.template.json local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json out/agent-bonds-operator-bundle
 ```
 
 4. validate with:

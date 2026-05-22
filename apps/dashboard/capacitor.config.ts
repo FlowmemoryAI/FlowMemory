@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "ai.flowmemory.flowchain.wallet",
+  appId: "ai.flowmemory.operator",
   appName: "FlowMemory",
   webDir: "dist",
   bundledWebRuntime: false,

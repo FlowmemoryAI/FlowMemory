@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/bridge-credit.schema.json",
-  "title": "FlowChainBridgeCredit",
+  "title": "FlowMemoryBridgeCredit",
   "oneOf": [
     {
       "type": "object",
@@ -20,7 +20,7 @@
         "nonce"
       ],
       "properties": {
-        "schema": { "const": "flowchain.bridge_credit.v0" },
+        "schema": { "const": "flowmemory.bridge_credit.v0" },
         "creditId": { "$ref": "#/$defs/hex32" },
         "depositId": { "$ref": "#/$defs/hex32" },
         "recipient": { "$ref": "#/$defs/hex32" },
@@ -46,7 +46,7 @@
         "token",
         "asset",
         "amount",
-        "flowchainRecipient",
+        "flowmemoryRecipient",
         "status",
         "localOnly",
         "productionReady"
@@ -71,7 +71,7 @@
         "token": { "$ref": "#/$defs/address" },
         "asset": { "$ref": "#/$defs/assetIdentity" },
         "amount": { "$ref": "#/$defs/uintString" },
-        "flowchainRecipient": { "$ref": "#/$defs/hex32" },
+        "flowmemoryRecipient": { "$ref": "#/$defs/hex32" },
         "status": { "type": "string", "enum": ["pending", "applied", "rejected"] },
         "pendingReason": { "type": "string" },
         "appliedAt": { "type": "string" },

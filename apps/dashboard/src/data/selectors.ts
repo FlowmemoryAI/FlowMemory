@@ -2,7 +2,7 @@ import type {
   AlertIncident,
   DashboardData,
   DashboardStatus,
-  DevnetBlock,
+  LocalRuntimeBlock,
   FlowPulseObservation,
   HardwareNode,
   ProvenancedRecord,
@@ -33,8 +33,8 @@ export function getLatestFlowPulses(data: DashboardData, limit = 6): FlowPulseOb
     .slice(0, limit);
 }
 
-export function getLatestBlocks(data: DashboardData, limit = 5): DevnetBlock[] {
-  return [...data.devnetBlocks]
+export function getLatestBlocks(data: DashboardData, limit = 5): LocalRuntimeBlock[] {
+  return [...data.localRuntimeBlocks]
     .sort((left, right) => right.blockNumber - left.blockNumber)
     .slice(0, limit);
 }
@@ -74,7 +74,7 @@ export function computeOverviewMetrics(data: DashboardData): OverviewMetric[] {
       status: verifiedReports === data.verifierReports.length ? "verified" : "unresolved",
     },
     {
-      label: "Devnet head",
+      label: "LocalRuntime head",
       value: latestBlock.toString(),
       detail: `finalized through ${data.chain.finalizedBlock} / chain ${data.chain.chainId}`,
       status: headStatus,

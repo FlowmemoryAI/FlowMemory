@@ -2,14 +2,14 @@
 
 Status: draft v0.
 
-This directory defines the cryptographic vocabulary, runnable utilities, fixtures, and tests that contracts, indexers, verifiers, workers, and future appchain research should share. The package is intentionally commitment-first and verifier-friendly. It does not claim that FlowMemory is fully trustless before proof systems, verifier enforcement, and challenge handling exist.
+This directory defines the cryptographic vocabulary, runnable utilities, fixtures, and tests that contracts, indexers, verifiers, workers, and future local runtime research should share. The package is intentionally commitment-first and verifier-friendly. It does not claim that FlowMemory is fully trustless before proof systems, verifier enforcement, and challenge handling exist.
 
 ## Package Commands
 
 Install dependencies from this directory:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto\crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 npm install
 ```
 
@@ -33,12 +33,12 @@ Validate all package-level vector fixtures:
 npm run validate:vectors
 ```
 
-Validate the production-L1-shaped crypto foundation, including canonical
+Validate the production-network-shaped crypto foundation, including canonical
 identity metadata, completed transaction envelopes, runtime-safe verification,
 hash helpers, positive vectors, and exact negative rejection vectors:
 
 ```powershell
-npm run validate:production-l1-crypto
+npm run validate:production-network-crypto
 ```
 
 Validate the Local Alpha object and signature-envelope fixtures against the
@@ -74,9 +74,9 @@ and ciphertext are not exported as public metadata.
 `wallet:sign` now writes the completed canonical local transaction envelope
 shape with `schemaVersion`, `networkProfile`, `payloadType`, expiration,
 local execution cost, fee policy, signature algorithm, signature, and
-`transactionId`. Legacy local-alpha envelopes without those production-L1
+`transactionId`. Legacy local-alpha envelopes without those production-network
 fields remain accepted as compatibility fixtures, but
-`validate:production-l1-crypto` requires the completed field set.
+`validate:production-network-crypto` requires the completed field set.
 
 Run the capped real-value pilot wallet/operator E2E:
 
@@ -87,11 +87,11 @@ npm run wallet:pilot-e2e
 Pilot helper commands:
 
 ```powershell
-npm run wallet:pilot-config -- --out ..\devnet\local\pilot-wallet\operator-config.local.json
-npm run wallet:pilot-metadata -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --vault ..\devnet\local\pilot-wallet\operator-vault.json
-npm run wallet:pilot-sign -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --vault ..\devnet\local\pilot-wallet\operator-vault.json --document .\fixtures\pilot-release-evidence.json --nonce 1
-npm run wallet:pilot-verify -- --config ..\devnet\local\pilot-wallet\operator-config.local.json --document .\fixtures\pilot-release-evidence.json --envelope .\out\pilot-release-envelope.json
-npm run wallet:pilot-next -- --config ..\devnet\local\pilot-wallet\operator-config.local.json
+npm run wallet:pilot-config -- --out ..\local-runtime\local\pilot-wallet\operator-config.local.json
+npm run wallet:pilot-metadata -- --config ..\local-runtime\local\pilot-wallet\operator-config.local.json --vault ..\local-runtime\local\pilot-wallet\operator-vault.json
+npm run wallet:pilot-sign -- --config ..\local-runtime\local\pilot-wallet\operator-config.local.json --vault ..\local-runtime\local\pilot-wallet\operator-vault.json --document .\fixtures\pilot-release-evidence.json --nonce 1
+npm run wallet:pilot-verify -- --config ..\local-runtime\local\pilot-wallet\operator-config.local.json --document .\fixtures\pilot-release-evidence.json --envelope .\out\pilot-release-envelope.json
+npm run wallet:pilot-next -- --config ..\local-runtime\local\pilot-wallet\operator-config.local.json
 ```
 
 The pilot commands stay command-line only. Runtime and control-plane consumers
@@ -106,10 +106,10 @@ encrypted vault creation, unlock, or signing helpers.
 3. `RECEIPT_HASHING.md`
 4. `MERKLE_AND_ROOTS.md`
 5. `ATTESTATIONS.md`
-6. `FLOWCHAIN_LOCAL_ALPHA_OBJECTS.md`
+6. `FLOWMEMORY_LOCAL_ALPHA_OBJECTS.md`
 7. `TEST_VECTORS.md`
 
-Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 46 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object, signed-envelope, and transaction-envelope fixtures. `fixtures/product-testnet-transactions.json` contains Product Testnet V1 wallet transaction documents, signed envelopes, and negative vectors for wrong chain, replay, wrong nonce/domain, payload mutation, malformed signer, missing signer, wrong object type, and invalid amounts. `fixtures/production-l1-vectors.json` contains the production-L1-shaped identity, hash-helper, positive transaction-family, and exact negative validation vectors. Supporting cross-language vectors live in `test-vectors/`.
+Runnable fixtures live in `fixtures/`. `fixtures/vectors.json` contains the current 46 package-level vectors. `fixtures/local-alpha-objects.json` contains positive and negative Local Alpha object, signed-envelope, and transaction-envelope fixtures. `fixtures/product-testnet-transactions.json` contains Product Testnet V1 wallet transaction documents, signed envelopes, and negative vectors for wrong chain, replay, wrong nonce/domain, payload mutation, malformed signer, missing signer, wrong object type, and invalid amounts. `fixtures/production-network-vectors.json` contains the production-network-shaped identity, hash-helper, positive transaction-family, and exact negative validation vectors. Supporting cross-language vectors live in `test-vectors/`.
 
 Validate the current vector set with:
 
@@ -130,7 +130,7 @@ The Python validator is a cross-check for the FlowPulse aggregate vector. The pr
 - Local Alpha object IDs: canonical IDs for `AgentAccount`, `ModelPassport`, `WorkReceipt`, `ArtifactAvailabilityProof`, `VerifierModule`, `VerifierReport`, `MemoryCell`, `Challenge`, `FinalityReceipt`, `BridgeDeposit`, `BridgeCredit`, `BridgeWithdrawal`, local balance records, hardware signal envelopes, and control-plane provenance responses.
 - Local Alpha signature envelopes: local operator, agent, verifier, and hardware secp256k1 test signatures over typed object IDs. These are no-value local/test keys and are not wallet custody or production key-management claims.
 - Local transaction envelopes: chain-bound signed envelopes over canonical JSON payload hashes, object IDs, signer IDs, signer key IDs, signer roles, nonces, and domain separators.
-- Production-L1 local transaction envelopes: the same canonical envelope extended with schema version, network profile, payload type, expiration, local execution cost, fee policy, signature algorithm, transaction ID, role metadata, and runtime-safe verification result fields.
+- Production network local transaction envelopes: the same canonical envelope extended with schema version, network profile, payload type, expiration, local execution cost, fee policy, signature algorithm, transaction ID, role metadata, and runtime-safe verification result fields.
 - Product Testnet V1 transaction documents: canonical transfer, token launch, DEX pool create, add liquidity, remove liquidity, swap, bridge credit acknowledgement, and bridge withdrawal intent documents that reuse the local transaction envelope and local test vault.
 
 ## Implemented Helpers
@@ -140,7 +140,7 @@ The package exports Keccak helpers, canonical JSON hashing, typed hash utilities
 Runtime/API-safe import path:
 
 ```js
-import { verifyFlowchainEnvelope } from "@flowmemory/crypto/runtime-validation";
+import { verifyFlowMemoryEnvelope } from "@flowmemory/crypto/runtime-validation";
 ```
 
 This subpath imports validation, identity, hashing, and signature verification
@@ -160,7 +160,7 @@ MVP crypto can provide tamper-evident facts, deterministic IDs, replay-resistant
 
 ## Future Boundary
 
-Future work may add proof-carrying receipts, zk circuits for receipt consistency, recursive report aggregation, and appchain/L1 verification tracks. Those remain research until public inputs, witnesses, circuits, and enforcement paths are specified.
+Future work may add proof-carrying receipts, zk circuits for receipt consistency, recursive report aggregation, and local runtime/network verification tracks. Those remain research until public inputs, witnesses, circuits, and enforcement paths are specified.
 
 ## Integration Notes
 
@@ -171,11 +171,11 @@ There is a fixture-first `services/shared/` package in this repository, but the 
 
 Indexer and verifier services must not hand-roll different hash formats. If a service cannot import this package, it should copy the type strings and vectors exactly and prove compatibility by passing the same fixture hashes.
 
-Nearby Noesis/FlowChain RD crates under `E:\FlowMemory\github-research-sources\noesis-l1\crates\` are research inputs only for this package. They should not replace these Keccak typed-hash vectors unless a compatibility adapter and matching cross-language vectors are accepted.
+Private RD crypto sources are research inputs only for this package. They should not replace these Keccak typed-hash vectors unless a compatibility adapter and matching cross-language vectors are accepted.
 
 ## Downstream Consumption
 
-- Chain/devnet agents should use the object ID helpers as transaction/object keys and reject zero roots, malformed IDs, wrong object types, replayed signer sequences, and bad parent/root relationships before state updates.
+- Chain/localRuntime agents should use the object ID helpers as transaction/object keys and reject zero roots, malformed IDs, wrong object types, replayed signer sequences, and bad parent/root relationships before state updates.
 - Services and verifiers should use `validateLocalAlphaEnvelope` before accepting object documents from local transactions, API calls, hardware packets, or fixture imports.
 - Dashboard/workbench agents should display IDs, domains, signer roles, status labels, and validation errors from these fixtures without implying production proof security.
 - Hardware agents should treat hardware signal envelopes as low-bandwidth authenticated control messages only; payloads remain off-chain and signal roots are commitments, not radio bandwidth or field-deployment claims.

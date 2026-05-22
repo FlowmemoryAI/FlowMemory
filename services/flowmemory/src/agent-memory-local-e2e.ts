@@ -27,7 +27,7 @@ function concatBytes(parts: Uint8Array[]): Uint8Array {
 }
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const OUT_DIR = resolve(REPO_ROOT, "devnet/local/base-agent-memory-e2e");
+const OUT_DIR = resolve(REPO_ROOT, "local-runtime/local/base-agent-memory-e2e");
 const BROADCAST_PATH = resolve(REPO_ROOT, "broadcast/RunBaseAgentMemoryLocalE2E.s.sol/31337/run-latest.json");
 const FLOWPULSE_TOPIC0 = keccak256Utf8("FlowPulse(bytes32,bytes32,address,uint8,bytes32,bytes32,bytes32,uint64,uint64,string)");
 const AGENT_MEMORY_SCHEMA_ID = keccak256Utf8("flowmemory.base_onchain_agent_memory.v1");

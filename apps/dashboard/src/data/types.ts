@@ -16,7 +16,7 @@ export type SourceSubsystem =
   | "contracts"
   | "indexer"
   | "verifier"
-  | "devnet"
+  | "localRuntime"
   | "worker"
   | "hardware"
   | "alerts"
@@ -105,7 +105,7 @@ export interface ProvenancedRecord {
 export interface DashboardChainContext {
   chainId: string;
   name: string;
-  environment: "local-devnet" | "testnet" | "mainnet" | "unknown";
+  environment: "local-runtime" | "testnet" | "mainnet" | "unknown";
   settlementContext: string;
   currentBlock: number;
   finalizedBlock: number;
@@ -150,7 +150,7 @@ export interface FixtureMetadata {
   futureGeneratedPaths: {
     indexer: string;
     verifier: string;
-    devnet: string;
+    localRuntime: string;
     hardware: string;
     agentBondFixture: string;
   };
@@ -467,7 +467,7 @@ export interface BaseAgentMemoryScoutRecord extends ProvenancedRecord {
 
 
 
-export interface DevnetBlock extends ProvenancedRecord {
+export interface LocalRuntimeBlock extends ProvenancedRecord {
   blockNumber: number;
   blockHash: string;
   parentHash: string;
@@ -533,7 +533,7 @@ export interface DashboardData {
   agentBondRecourseDecisions: AgentBondRecourseDecisionRecord[];
   agentBondFailureWaterfalls: AgentBondFailureWaterfallRecord[];
   baseAgentMemoryScouts: BaseAgentMemoryScoutRecord[];
-  devnetBlocks: DevnetBlock[];
+  localRuntimeBlocks: LocalRuntimeBlock[];
   hardwareNodes: HardwareNode[];
   alerts: AlertIncident[];
 }

@@ -9,7 +9,7 @@ export * from "./merkle.js";
 export * from "./objects.js";
 export * from "./pilot-envelope-validation.js";
 export * from "./pilot-operator.js";
-export * from "./production-l1.js";
+export * from "./production-network.js";
 export * from "./runtime-validation.js";
 export * from "./transactions.js";
 export * from "./wallet.js";

@@ -7,20 +7,20 @@ import {
   buildUnsignedLocalTransactionEnvelope,
   validateLocalTransactionEnvelope
 } from "./transactions.js";
-import { flowchainTransactionId } from "./production-l1.js";
+import { flowmemoryTransactionId } from "./production-network.js";
 import { LOCAL_ALPHA_SIGNER_ROLES } from "./constants.js";
 import {
-  flowchainAccountId,
-  flowchainAddressFromPublicKey,
-  flowchainPublicAccountMetadata,
-  flowchainSignerKeyId,
-  isFlowchainRole
+  flowmemoryAccountId,
+  flowmemoryAddressFromPublicKey,
+  flowmemoryPublicAccountMetadata,
+  flowmemorySignerKeyId,
+  isFlowMemoryRole
 } from "./identity.js";
 
 const VAULT_SCHEMA = "flowmemory.crypto.local-test-vault.v0";
 const VAULT_SECRETS_SCHEMA = "flowmemory.crypto.local-test-vault-secrets.v0";
 const PUBLIC_EXPORT_SCHEMA = "flowmemory.crypto.local-test-vault-public-metadata.v0";
-export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA = "flowchain.local_wallet_public_metadata.v0";
+export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA = "flowmemory.local_wallet_public_metadata.v0";
 export const LOCAL_WALLET_KEY_SCHEME = "secp256k1";
 export const DEFAULT_LOCAL_WALLET_CHAIN_ID = "31337";
 
@@ -233,7 +233,7 @@ export async function signLocalTransactionWithVault({
   };
   return {
     ...signed,
-    transactionId: flowchainTransactionId(signed)
+    transactionId: flowmemoryTransactionId(signed)
   };
 }
 
@@ -325,15 +325,15 @@ function createVaultAccount({
     throw new Error(`invalid wallet last known nonce: ${lastKnownNonce}`);
   }
   const publicKey = publicKeyFromPrivateKey(privateKey);
-  const productionRole = isFlowchainRole(signerRole) ? signerRole : "user";
-  const publicMetadata = flowchainPublicAccountMetadata({
+  const productionRole = isFlowMemoryRole(signerRole) ? signerRole : "user";
+  const publicMetadata = flowmemoryPublicAccountMetadata({
     publicKey,
     role: productionRole,
     label,
     createdAtUnixMs
   });
   const publicKeyHash = keccakUtf8(publicKey);
-  const derivedSignerId = keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`);
+  const derivedSignerId = keccakUtf8(`flowmemory.local-alpha.signer:${publicKey}`);
   const effectiveSignerId = signerId ?? derivedSignerId;
   if (!isHex32(effectiveSignerId)) {
     throw new Error(`invalid signer id: ${effectiveSignerId}`);
@@ -345,15 +345,15 @@ function createVaultAccount({
     signerRole,
     signerRoleCode: LOCAL_ALPHA_SIGNER_ROLES[signerRole],
     signerId: effectiveSignerId,
-    signerKeyId: keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
+    signerKeyId: keccakUtf8(`flowmemory.local-alpha.signer-key:${publicKey}`),
     publicKey,
     publicKeyHash,
-    flowchainPublicKey: publicMetadata.publicKey,
-    flowchainPublicKeyHash: publicMetadata.publicKeyHash,
+    flowmemoryPublicKey: publicMetadata.publicKey,
+    flowmemoryPublicKeyHash: publicMetadata.publicKeyHash,
     publicKeyEncoding: publicMetadata.publicKeyEncoding,
-    flowchainAddress: publicMetadata.address,
-    flowchainAccountId: publicMetadata.accountId,
-    flowchainSignerKeyId: publicMetadata.signerKeyId,
+    flowmemoryAddress: publicMetadata.address,
+    flowmemoryAccountId: publicMetadata.accountId,
+    flowmemorySignerKeyId: publicMetadata.signerKeyId,
     accountRole: publicMetadata.role,
     accountRoleCode: publicMetadata.roleCode,
     keyScheme: LOCAL_WALLET_KEY_SCHEME,
@@ -444,8 +444,8 @@ function validateLocalWalletPublicAccount(account, { expectedChainId } = {}) {
   if (!isPublicKey(account.publicKey)) {
     errors.push("malformed-public-key");
   } else {
-    const signerId = keccakUtf8(`flowchain.local-alpha.signer:${account.publicKey}`);
-    const signerKeyId = keccakUtf8(`flowchain.local-alpha.signer-key:${account.publicKey}`);
+    const signerId = keccakUtf8(`flowmemory.local-alpha.signer:${account.publicKey}`);
+    const signerKeyId = keccakUtf8(`flowmemory.local-alpha.signer-key:${account.publicKey}`);
     if (account.signerId !== signerId || account.signerKeyId !== signerKeyId) {
       errors.push("public-key-mismatch");
     }
@@ -462,7 +462,7 @@ function validateLocalWalletPublicAccount(account, { expectedChainId } = {}) {
 
 function verificationResult({ errors, metadata, chainIdMatch = errors.length === 0 }) {
   return {
-    schema: "flowchain.local_wallet_public_metadata_verification.v0",
+    schema: "flowmemory.local_wallet_public_metadata_verification.v0",
     valid: errors.length === 0,
     secretFree: !containsSecretMaterial(metadata),
     chainIdMatch,

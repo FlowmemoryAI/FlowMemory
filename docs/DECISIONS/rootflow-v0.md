@@ -6,7 +6,7 @@ Status: Accepted for V0 planning.
 
 ## Context
 
-FlowMemory needs a launch-critical core that connects Base or local contract events to AI-readable memory without claiming that the full future L1, proof network, or hardware network is complete.
+FlowMemory needs a launch-critical core that connects Base or local contract events to AI-readable memory without claiming that the full future dedicated network, proof network, or hardware network is complete.
 
 The merged contracts foundation already includes `FlowPulse` and a baseline `RootfieldRegistry`, but Rootflow and the Flow Memory layer need a shared definition before builders can safely implement contracts, crypto fixtures, indexer/verifier logic, and dashboard views.
 
@@ -57,7 +57,7 @@ The launch acceptance test is an end-to-end local V0 flow:
 
 This decision does not approve:
 
-- production L1 or appchain claims;
+- separate production network or dedicated-network claims;
 - production mainnet deployment;
 - production Uniswap v4 hook deployment;
 - tokenomics;

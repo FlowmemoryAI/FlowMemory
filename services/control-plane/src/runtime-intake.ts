@@ -75,7 +75,7 @@ export function submitTransactionsToRuntime(paths: ControlPlanePaths, txs: JsonO
   const args = [
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     runtimeStatePath,

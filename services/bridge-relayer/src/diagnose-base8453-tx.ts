@@ -14,7 +14,7 @@ import {
   BRIDGE_DEPOSIT_LEGACY_TOPIC0,
   BRIDGE_DEPOSIT_TOPIC0,
   parseBridgeDepositLog,
-  isPlaceholderFlowchainRecipient,
+  isPlaceholderFlowMemoryRecipient,
   ZERO_BYTES32,
   type BridgeDeposit,
 } from "./observe-base-lockbox.ts";
@@ -130,20 +130,20 @@ function parsePositiveFiniteNumber(value: string | undefined, name: string, fall
 }
 
 export function parseDiagnosticArgs(args: string[]): DiagnoseBase8453TxOptions | { missingEnvNames: string[]; outPath: string } {
-  let rpcUrl = env("FLOWCHAIN_BASE8453_RPC_URL");
-  let txHash = env("FLOWCHAIN_BASE8453_TX_HASH") ?? env("FLOWCHAIN_BASE8453_OPERATOR_TX_HASH");
-  let lockboxAddress = env("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS");
+  let rpcUrl = env("FLOWMEMORY_BASE8453_RPC_URL");
+  let txHash = env("FLOWMEMORY_BASE8453_TX_HASH") ?? env("FLOWMEMORY_BASE8453_OPERATOR_TX_HASH");
+  let lockboxAddress = env("FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS");
   const supportedTokenArgs: string[] = [];
-  if (env("FLOWCHAIN_BASE8453_SUPPORTED_TOKEN") !== undefined) {
-    supportedTokenArgs.push(env("FLOWCHAIN_BASE8453_SUPPORTED_TOKEN") ?? "");
+  if (env("FLOWMEMORY_BASE8453_SUPPORTED_TOKEN") !== undefined) {
+    supportedTokenArgs.push(env("FLOWMEMORY_BASE8453_SUPPORTED_TOKEN") ?? "");
   }
-  let maxDepositAmount = env("FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI");
-  let totalCapAmount = env("FLOWCHAIN_PILOT_TOTAL_CAP_WEI");
-  let confirmations = env("FLOWCHAIN_PILOT_CONFIRMATIONS") ?? env("FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH") ?? env("FLOWCHAIN_BASE8453_CONFIRMATIONS");
-  let targetSettlementSeconds = env("FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS");
-  let estimatedBaseBlockSeconds = env("FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS");
-  let pollSeconds = env("FLOWCHAIN_BRIDGE_POLL_SECONDS");
-  let outPath = "devnet/local/live-l1-bridge-e2e/base-tx-diagnostic.json";
+  let maxDepositAmount = env("FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI");
+  let totalCapAmount = env("FLOWMEMORY_PILOT_TOTAL_CAP_WEI");
+  let confirmations = env("FLOWMEMORY_PILOT_CONFIRMATIONS") ?? env("FLOWMEMORY_BASE8453_CONFIRMATION_DEPTH") ?? env("FLOWMEMORY_BASE8453_CONFIRMATIONS");
+  let targetSettlementSeconds = env("FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS");
+  let estimatedBaseBlockSeconds = env("FLOWMEMORY_BASE8453_ESTIMATED_BLOCK_SECONDS");
+  let pollSeconds = env("FLOWMEMORY_BRIDGE_POLL_SECONDS");
+  let outPath = "local-runtime/local/live-network-bridge-e2e/base-tx-diagnostic.json";
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -186,12 +186,12 @@ export function parseDiagnosticArgs(args: string[]): DiagnoseBase8453TxOptions |
   }
 
   const missingEnvNames = [
-    ["FLOWCHAIN_BASE8453_RPC_URL", rpcUrl],
-    ["FLOWCHAIN_BASE8453_TX_HASH", txHash],
-    ["FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS", lockboxAddress],
-    ["FLOWCHAIN_BASE8453_SUPPORTED_TOKEN", supportedTokenArgs.join(",")],
-    ["FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", maxDepositAmount],
-    ["FLOWCHAIN_PILOT_TOTAL_CAP_WEI", totalCapAmount],
+    ["FLOWMEMORY_BASE8453_RPC_URL", rpcUrl],
+    ["FLOWMEMORY_BASE8453_TX_HASH", txHash],
+    ["FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS", lockboxAddress],
+    ["FLOWMEMORY_BASE8453_SUPPORTED_TOKEN", supportedTokenArgs.join(",")],
+    ["FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI", maxDepositAmount],
+    ["FLOWMEMORY_PILOT_TOTAL_CAP_WEI", totalCapAmount],
   ].filter(([, value]) => value === undefined || String(value).trim().length === 0).map(([name]) => name);
 
   if (missingEnvNames.length > 0) {
@@ -203,12 +203,12 @@ export function parseDiagnosticArgs(args: string[]): DiagnoseBase8453TxOptions |
     txHash: normalizeTxHash(txHash ?? ""),
     lockboxAddress: normalizeAddress(lockboxAddress ?? "") as `0x${string}`,
     supportedTokens: normalizeAddressList(supportedTokenArgs),
-    maxDepositAmount: parsePositiveDecimal(maxDepositAmount ?? "", "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI"),
-    totalCapAmount: parsePositiveDecimal(totalCapAmount ?? "", "FLOWCHAIN_PILOT_TOTAL_CAP_WEI"),
+    maxDepositAmount: parsePositiveDecimal(maxDepositAmount ?? "", "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI"),
+    totalCapAmount: parsePositiveDecimal(totalCapAmount ?? "", "FLOWMEMORY_PILOT_TOTAL_CAP_WEI"),
     confirmations: parseConfirmations(confirmations),
-    targetSettlementSeconds: parsePositiveFiniteNumber(targetSettlementSeconds, "FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS", 30),
-    estimatedBaseBlockSeconds: parsePositiveFiniteNumber(estimatedBaseBlockSeconds, "FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS", 2),
-    pollSeconds: parsePositiveFiniteNumber(pollSeconds, "FLOWCHAIN_BRIDGE_POLL_SECONDS", 1),
+    targetSettlementSeconds: parsePositiveFiniteNumber(targetSettlementSeconds, "FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS", 30),
+    estimatedBaseBlockSeconds: parsePositiveFiniteNumber(estimatedBaseBlockSeconds, "FLOWMEMORY_BASE8453_ESTIMATED_BLOCK_SECONDS", 2),
+    pollSeconds: parsePositiveFiniteNumber(pollSeconds, "FLOWMEMORY_BRIDGE_POLL_SECONDS", 1),
     outPath,
   };
 }
@@ -242,8 +242,8 @@ function safeReason(checks: Record<string, boolean | string | number | null | un
   if (checks.correctSelector !== true) return "wrong-selector";
   if (checks.bridgeDepositLogExists !== true) return "bridge-deposit-log-missing";
   if (checks.bridgeDepositLogParsed !== true) return "bridge-deposit-log-invalid";
-  if (checks.flowchainRecipientPresent !== true) return "recipient-missing";
-  if (checks.flowchainRecipientNotPlaceholder !== true) return "recipient-placeholder";
+  if (checks.flowmemoryRecipientPresent !== true) return "recipient-missing";
+  if (checks.flowmemoryRecipientNotPlaceholder !== true) return "recipient-placeholder";
   if (checks.tokenMatches !== true) return "unsupported-token";
   if (checks.capMatches !== true) return "cap-mismatch";
   if (checks.confirmationsSatisfied !== true) return "insufficient-confirmations";
@@ -268,8 +268,8 @@ export async function diagnoseBase8453Tx(options: DiagnoseBase8453TxOptions): Pr
     correctSelector: false,
     bridgeDepositLogExists: false,
     bridgeDepositLogParsed: false,
-    flowchainRecipientPresent: false,
-    flowchainRecipientNotPlaceholder: false,
+    flowmemoryRecipientPresent: false,
+    flowmemoryRecipientNotPlaceholder: false,
     tokenMatches: false,
     capMatches: false,
     confirmationsSatisfied: false,
@@ -313,8 +313,8 @@ export async function diagnoseBase8453Tx(options: DiagnoseBase8453TxOptions): Pr
   }
 
   if (parsedDeposits.length > 0) {
-    checks.flowchainRecipientPresent = parsedDeposits.every((deposit) => deposit.flowchainRecipient !== ZERO_BYTES32);
-    checks.flowchainRecipientNotPlaceholder = parsedDeposits.every((deposit) => !isPlaceholderFlowchainRecipient(deposit.flowchainRecipient));
+    checks.flowmemoryRecipientPresent = parsedDeposits.every((deposit) => deposit.flowmemoryRecipient !== ZERO_BYTES32);
+    checks.flowmemoryRecipientNotPlaceholder = parsedDeposits.every((deposit) => !isPlaceholderFlowMemoryRecipient(deposit.flowmemoryRecipient));
     const supported = new Set(options.supportedTokens.map((token) => token.toLowerCase()));
     checks.tokenMatches = parsedDeposits.every((deposit) => supported.has(deposit.token.toLowerCase()));
     const maxDeposit = BigInt(options.maxDepositAmount);
@@ -342,7 +342,7 @@ export async function diagnoseBase8453Tx(options: DiagnoseBase8453TxOptions): Pr
   const reason = safeReason(checks);
   const status = reason === "valid" ? "valid" : "invalid";
   const report = {
-    schema: "flowchain.bridge_base8453_tx_diagnostic.v0",
+    schema: "flowmemory.bridge_base8453_tx_diagnostic.v0",
     generatedAt: new Date().toISOString(),
     status,
     safeReasonCode: reason,
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
   const parsed = parseDiagnosticArgs(process.argv.slice(2));
   if ("missingEnvNames" in parsed) {
     const report = {
-      schema: "flowchain.bridge_base8453_tx_diagnostic.v0",
+      schema: "flowmemory.bridge_base8453_tx_diagnostic.v0",
       generatedAt: new Date().toISOString(),
       status: "blocked",
       safeReasonCode: "missing-env",
@@ -387,7 +387,7 @@ async function main(): Promise<void> {
       noSecrets: true,
     };
     writeJson(parsed.outPath, report);
-    console.log("FlowChain bridge tx diagnostic status: blocked (missing-env)");
+    console.log("FlowMemory bridge tx diagnostic status: blocked (missing-env)");
     console.log(`Report: ${resolve(parsed.outPath)}`);
     process.exitCode = 1;
     return;
@@ -395,7 +395,7 @@ async function main(): Promise<void> {
 
   const report = await diagnoseBase8453Tx(parsed);
   writeJson(parsed.outPath, report);
-  console.log(`FlowChain bridge tx diagnostic status: ${report.status}${report.status === "valid" ? "" : ` (${report.safeReasonCode})`}`);
+  console.log(`FlowMemory bridge tx diagnostic status: ${report.status}${report.status === "valid" ? "" : ` (${report.safeReasonCode})`}`);
   console.log(`Report: ${resolve(parsed.outPath)}`);
   if (report.status !== "valid") {
     process.exitCode = 1;

@@ -177,7 +177,7 @@ export interface VerifierIdentityInput {
   verifierSetRoot: Bytes32;
 }
 
-export interface DevnetBlockInput {
+export interface LocalRuntimeBlockInput {
   chainId: number | bigint | string;
   blockNumber: number | bigint | string;
   parentHash: Bytes32;
@@ -271,7 +271,7 @@ export interface BridgeDepositInput {
   token: Address;
   amount: number | bigint | string;
   sender: Address;
-  flowchainRecipient: Bytes32;
+  flowmemoryRecipient: Bytes32;
   nonce: number | bigint | string;
   metadataHash: Bytes32;
 }
@@ -395,7 +395,7 @@ export interface BridgeWithdrawalIntentInput {
   destinationChainId: number | bigint | string;
   token: Address;
   amount: number | bigint | string;
-  flowchainAccount: Bytes32;
+  flowmemoryAccount: Bytes32;
   baseRecipient: Address;
   status: string;
   requestedAt: string;
@@ -442,7 +442,7 @@ export interface PilotWithdrawalIntentInput {
   depositId: Bytes32;
   token: Address;
   amount: number | bigint | string;
-  flowchainAccount: Bytes32;
+  flowmemoryAccount: Bytes32;
   baseRecipient: Address;
   status: string;
   requestedAt: string;
@@ -557,7 +557,7 @@ export interface LocalAlphaEnvelopeValidationResult {
 }
 
 export interface WalletEnvelopeVerificationResult {
-  schema: "flowchain.wallet_envelope_verification.v0";
+  schema: "flowmemory.wallet_envelope_verification.v0";
   valid: boolean;
   signatureValid: boolean;
   chainIdMatch: boolean;
@@ -583,10 +583,10 @@ export const LOCAL_ALPHA_FINALITY_STATES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_HARDWARE_TRANSPORTS: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_SIGNER_ROLES: Readonly<Record<string, number>>;
 export const LOCAL_ALPHA_BRIDGE_STATUSES: Readonly<Record<string, number>>;
-export const FLOWCHAIN_ACCOUNT_ROLES: Readonly<Record<string, { code: number; roleGated: boolean; description: string }>>;
-export const FLOWCHAIN_PUBLIC_KEY_ENCODING: string;
-export const FLOWCHAIN_NETWORK_PROFILES: Readonly<Record<string, string>>;
-export const FLOWCHAIN_DOMAIN_SEPARATORS: Readonly<Record<string, string>>;
+export const FLOWMEMORY_ACCOUNT_ROLES: Readonly<Record<string, { code: number; roleGated: boolean; description: string }>>;
+export const FLOWMEMORY_PUBLIC_KEY_ENCODING: string;
+export const FLOWMEMORY_NETWORK_PROFILES: Readonly<Record<string, string>>;
+export const FLOWMEMORY_DOMAIN_SEPARATORS: Readonly<Record<string, string>>;
 export const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA: string;
 export const LOCAL_WALLET_KEY_SCHEME: string;
 export const DEFAULT_LOCAL_WALLET_CHAIN_ID: string;
@@ -615,22 +615,22 @@ export function typeHash(typeString: string): Bytes32;
 export function typedHash(typeString: string, fields: Array<[string, unknown]>): Bytes32;
 export function domainSeparatedHash(domain: string, payloadBytes: Uint8Array): Bytes32;
 export function domainSeparator(domainName: string): Bytes32;
-export function normalizeFlowchainPublicKey(publicKey: Hex | string): Hex;
-export function flowchainPublicKeyHash(publicKey: Hex | string): Bytes32;
-export function flowchainAddressFromPublicKey(publicKey: Hex | string): Address;
-export function flowchainRoleMetadata(role: string): Record<string, unknown>;
-export function flowchainRoleRoot(role: string): Bytes32;
-export function flowchainAccountId(input: { publicKey: Hex | string; role?: string }): Bytes32;
-export function flowchainSignerKeyId(input: { publicKey: Hex | string }): Bytes32;
-export function flowchainPublicAccountMetadata(input: {
+export function normalizeFlowMemoryPublicKey(publicKey: Hex | string): Hex;
+export function flowmemoryPublicKeyHash(publicKey: Hex | string): Bytes32;
+export function flowmemoryAddressFromPublicKey(publicKey: Hex | string): Address;
+export function flowmemoryRoleMetadata(role: string): Record<string, unknown>;
+export function flowmemoryRoleRoot(role: string): Bytes32;
+export function flowmemoryAccountId(input: { publicKey: Hex | string; role?: string }): Bytes32;
+export function flowmemorySignerKeyId(input: { publicKey: Hex | string }): Bytes32;
+export function flowmemoryPublicAccountMetadata(input: {
   publicKey: Hex | string;
   role?: string;
   label?: string;
   createdAtUnixMs?: number | bigint | string;
   active?: boolean;
 }): Record<string, unknown>;
-export function assertFlowchainPublicMetadataContainsNoSecrets(value: unknown): void;
-export function isFlowchainRole(role: string): boolean;
+export function assertFlowMemoryPublicMetadataContainsNoSecrets(value: unknown): void;
+export function isFlowMemoryRole(role: string): boolean;
 
 export function flowPulseSchemaId(): Bytes32;
 export function flowPulseEventSignature(): Bytes32;
@@ -685,7 +685,7 @@ export function rootCommitment(input: RootCommitmentInput): Bytes32;
 export function workReceiptId(input: WorkReceiptInput): Bytes32;
 export function workerIdentity(input: WorkerIdentityInput): Bytes32;
 export function verifierIdentity(input: VerifierIdentityInput): Bytes32;
-export function devnetBlockHash(input: DevnetBlockInput): Bytes32;
+export function localRuntimeBlockHash(input: LocalRuntimeBlockInput): Bytes32;
 export function agentAccountId(input: AgentAccountInput): Bytes32;
 export function modelPassportId(input: ModelPassportInput): Bytes32;
 export function memoryCellId(input: MemoryCellInput): Bytes32;
@@ -705,23 +705,23 @@ export function productRemoveLiquidityId(input: ProductRemoveLiquidityInput): By
 export function productSwapId(input: ProductSwapInput): Bytes32;
 export function productBridgeCreditAckId(input: ProductBridgeCreditAckInput): Bytes32;
 export function bridgeWithdrawalIntentId(input: BridgeWithdrawalIntentInput): Bytes32;
-export function flowchainNetworkProfileHash(networkProfile: string): Bytes32;
-export function flowchainProductionDomain(input: { chainId: number | bigint | string; networkProfile: string }): string;
-export function flowchainProductionDomainSeparator(input: { chainId: number | bigint | string; networkProfile: string }): Bytes32;
-export function flowchainTransactionId(envelope: Record<string, unknown>): Bytes32;
-export function flowchainTxRoot(transactions: unknown[]): Bytes32;
-export function flowchainReceiptRoot(receipts: unknown[]): Bytes32;
-export function flowchainEventRoot(events: unknown[]): Bytes32;
-export function flowchainAccountStateRoot(accounts: unknown[]): Bytes32;
-export function flowchainTokenStateRoot(tokens: unknown[]): Bytes32;
-export function flowchainDexStateRoot(pools: unknown[]): Bytes32;
-export function flowchainBlockHash(input: Record<string, unknown>): Bytes32;
-export function flowchainBridgeObservationId(input: Record<string, unknown>): Bytes32;
-export function flowchainBridgeSourceEventReplayKey(input: Record<string, unknown>): Bytes32;
-export function flowchainBridgeEvidenceHash(input: Record<string, unknown>): Bytes32;
-export function flowchainBridgeCreditId(input: Record<string, unknown>): Bytes32;
-export function flowchainWithdrawalIntentId(input: Record<string, unknown>): Bytes32;
-export function flowchainFinalityReceiptId(input: Record<string, unknown>): Bytes32;
+export function flowmemoryNetworkProfileHash(networkProfile: string): Bytes32;
+export function flowmemoryProductionDomain(input: { chainId: number | bigint | string; networkProfile: string }): string;
+export function flowmemoryProductionDomainSeparator(input: { chainId: number | bigint | string; networkProfile: string }): Bytes32;
+export function flowmemoryTransactionId(envelope: Record<string, unknown>): Bytes32;
+export function flowmemoryTxRoot(transactions: unknown[]): Bytes32;
+export function flowmemoryReceiptRoot(receipts: unknown[]): Bytes32;
+export function flowmemoryEventRoot(events: unknown[]): Bytes32;
+export function flowmemoryAccountStateRoot(accounts: unknown[]): Bytes32;
+export function flowmemoryTokenStateRoot(tokens: unknown[]): Bytes32;
+export function flowmemoryDexStateRoot(pools: unknown[]): Bytes32;
+export function flowmemoryBlockHash(input: Record<string, unknown>): Bytes32;
+export function flowmemoryBridgeObservationId(input: Record<string, unknown>): Bytes32;
+export function flowmemoryBridgeSourceEventReplayKey(input: Record<string, unknown>): Bytes32;
+export function flowmemoryBridgeEvidenceHash(input: Record<string, unknown>): Bytes32;
+export function flowmemoryBridgeCreditId(input: Record<string, unknown>): Bytes32;
+export function flowmemoryWithdrawalIntentId(input: Record<string, unknown>): Bytes32;
+export function flowmemoryFinalityReceiptId(input: Record<string, unknown>): Bytes32;
 export function accountNonceReplayKey(input: Record<string, unknown>): Bytes32;
 export function roleScopedNonceReplayKey(input: Record<string, unknown>): Bytes32;
 export function bridgeSourceEventReplayKey(input: Record<string, unknown>): Bytes32;
@@ -840,7 +840,7 @@ export function verifyLocalTransactionSignature(input: {
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;
 }): LocalAlphaEnvelopeValidationResult;
-export function verifyFlowchainEnvelope(input: {
+export function verifyFlowMemoryEnvelope(input: {
   document: Record<string, unknown>;
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;

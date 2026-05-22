@@ -39,7 +39,7 @@ FlowPulse or swap-derived hook-adapter event
 
 ## Boundaries
 
-This decision does not approve Base mainnet deployment, a production L1,
+This decision does not approve Base mainnet deployment, a separate production network,
 tokenomics, production verifier economics, custody, dynamic fees, or a production
 Uniswap v4 hook.
 

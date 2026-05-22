@@ -15,26 +15,26 @@ const REQUIRED_OPERATOR_ACK = "I_UNDERSTAND_THIS_IS_CAPPED_BASE8453_OWNER_PILOT"
 const MIN_CONFIRMATION_DEPTH = 2;
 const MAX_CONFIRMATION_DEPTH = 256;
 const LIVE_REQUIRED_ENV_NAMES = [
-  "FLOWCHAIN_PILOT_OPERATOR_ACK",
-  "FLOWCHAIN_BASE8453_RPC_URL",
-  "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-  "FLOWCHAIN_BASE8453_FROM_BLOCK",
-  "FLOWCHAIN_BASE8453_TO_BLOCK",
-  "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-  "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
+  "FLOWMEMORY_PILOT_OPERATOR_ACK",
+  "FLOWMEMORY_BASE8453_RPC_URL",
+  "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS",
+  "FLOWMEMORY_BASE8453_FROM_BLOCK",
+  "FLOWMEMORY_BASE8453_TO_BLOCK",
+  "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+  "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
 ] as const;
 const CONFIRMATION_DEPTH_ENV_NAMES = [
-  "FLOWCHAIN_PILOT_CONFIRMATIONS",
-  "FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH",
+  "FLOWMEMORY_PILOT_CONFIRMATIONS",
+  "FLOWMEMORY_BASE8453_CONFIRMATION_DEPTH",
 ] as const;
 const LIVE_OPTIONAL_ENV_NAMES = [
-  "FLOWCHAIN_BASE8453_TOKEN_MODE",
-  "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
-  "FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS",
-  "FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS",
-  "FLOWCHAIN_BRIDGE_POLL_SECONDS",
-  "FLOWCHAIN_PILOT_WITHDRAWAL_RECIPIENT",
-  "FLOWCHAIN_PILOT_MAX_USD",
+  "FLOWMEMORY_BASE8453_TOKEN_MODE",
+  "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
+  "FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS",
+  "FLOWMEMORY_BASE8453_ESTIMATED_BLOCK_SECONDS",
+  "FLOWMEMORY_BRIDGE_POLL_SECONDS",
+  "FLOWMEMORY_PILOT_WITHDRAWAL_RECIPIENT",
+  "FLOWMEMORY_PILOT_MAX_USD",
 ] as const;
 
 type PilotState = "live" | "degraded" | "error";
@@ -57,7 +57,7 @@ type PilotStep = {
 type PilotLifecycle = {
   schema: "flowmemory.control_plane.real_value_pilot_status.v0";
   pilotId: string;
-  label: "FlowChain capped owner real-value pilot";
+  label: "FlowMemory capped owner real-value pilot";
   state: PilotState;
   stateReason: string;
   generatedAt: string;
@@ -212,16 +212,16 @@ function handoffRowsAny(state: LoadedControlPlaneState, keys: string[]): JsonObj
   return keys.flatMap((key) => handoffRows(state, key));
 }
 
-function devnetObjectRows(state: LoadedControlPlaneState, keys: string[]): JsonObject[] {
-  const controlPlaneObjects = asObject(state.devnetControlPlaneHandoff?.objects);
+function localRuntimeObjectRows(state: LoadedControlPlaneState, keys: string[]): JsonObject[] {
+  const controlPlaneObjects = asObject(state.localRuntimeControlPlaneHandoff?.objects);
   const rows = new Map<string, JsonObject>();
   for (const key of keys) {
     for (const source of [
-      state.devnet?.[key],
+      state.localRuntime?.[key],
       controlPlaneObjects?.[key],
-      state.devnetControlPlaneHandoff?.[key],
-      state.devnetVerifierHandoff?.[key],
-      state.devnetIndexerHandoff?.[key],
+      state.localRuntimeControlPlaneHandoff?.[key],
+      state.localRuntimeVerifierHandoff?.[key],
+      state.localRuntimeIndexerHandoff?.[key],
     ]) {
       for (const row of objectRows(source)) {
         const id = stringValue(row.id)
@@ -230,7 +230,7 @@ function devnetObjectRows(state: LoadedControlPlaneState, keys: string[]): JsonO
           ?? stringValue(row.withdrawalIntentId)
           ?? stringValue(row.withdrawalId)
           ?? stringValue(row.depositId)
-          ?? stableId("flowmemory.control_plane.pilot.devnet_row.v0", row);
+          ?? stableId("flowmemory.control_plane.pilot.localRuntime_row.v0", row);
         rows.set(`${key}:${id}`, row);
       }
     }
@@ -303,7 +303,7 @@ function normalizeDepositObservation(observation: JsonObject): JsonObject {
     token: stringValue(deposit.token) ?? stringValue(deposit.assetId) ?? null,
     amount: stringValue(deposit.amount) ?? stringValue(deposit.amountUnits) ?? "0",
     sender: stringValue(deposit.sender) ?? null,
-    flowchainRecipient: stringValue(deposit.flowchainRecipient) ?? stringValue(deposit.recipient) ?? null,
+    flowmemoryRecipient: stringValue(deposit.flowmemoryRecipient) ?? stringValue(deposit.recipient) ?? null,
     status: stringValue(deposit.status) ?? stringValue(observation.status) ?? "observed",
     observedAt: stringValue(observation.observedAt) ?? stringValue(deposit.observedAt) ?? null,
     capGuardrail: {
@@ -321,7 +321,7 @@ function pilotDepositRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows = [
     ...state.bridgeObservations,
     ...handoffRows(state, "observations"),
-    ...devnetObjectRows(state, ["bridgeObservations", "bridgeDeposits", "deposits"]),
+    ...localRuntimeObjectRows(state, ["bridgeObservations", "bridgeDeposits", "deposits"]),
   ].map(normalizeDepositObservation);
 
   const replaySeen = new Set<string>();
@@ -359,7 +359,7 @@ function normalizeCredit(credit: JsonObject, deposits: JsonObject[]): JsonObject
     sourceContract: stringValue(source?.contract) ?? stringValue(matchedDeposit?.sourceContract),
     txHash: stringValue(source?.txHash) ?? stringValue(credit.sourceTxId) ?? stringValue(matchedDeposit?.txHash),
     logIndex: numberValue(source?.logIndex) ?? numberValue(matchedDeposit?.logIndex),
-    accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowchainRecipient),
+    accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowmemoryRecipient),
     amount: stringValue(credit.amount) ?? stringValue(credit.amountUnits) ?? "0",
     token: stringValue(credit.token) ?? stringValue(credit.assetId) ?? stringValue(matchedDeposit?.token),
     status: stringValue(credit.status) ?? (stringValue(credit.bridgeCreditId) !== null ? "applied" : "pending"),
@@ -374,7 +374,7 @@ function pilotCreditRows(state: LoadedControlPlaneState): JsonObject[] {
   const deposits = pilotDepositRows(state);
   const rows = [
     ...handoffRows(state, "credits"),
-    ...devnetObjectRows(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"]),
+    ...localRuntimeObjectRows(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"]),
   ].map((credit) => normalizeCredit(credit, deposits));
 
   for (const deposit of deposits) {
@@ -393,7 +393,7 @@ function pilotCreditRows(state: LoadedControlPlaneState): JsonObject[] {
         },
         token: deposit.token,
         amount: deposit.amount,
-        flowchainRecipient: deposit.flowchainRecipient,
+        flowmemoryRecipient: deposit.flowmemoryRecipient,
         status: deposit.replayStatus === "duplicate_replay_rejected" ? "rejected" : "pending",
         rejectionReason: deposit.replayStatus === "duplicate_replay_rejected" ? "duplicate_replay_key" : undefined,
       }, deposits));
@@ -419,7 +419,7 @@ function normalizeWithdrawalIntent(intent: JsonObject, credits: JsonObject[]): J
     destinationChainId: numberValue(intent.destinationChainId) ?? numberValue(intent.destinationChain) ?? BASE_MAINNET_CHAIN_ID,
     token: stringValue(intent.token) ?? stringValue(matchedCredit?.token),
     amount: stringValue(intent.amount) ?? stringValue(matchedCredit?.amount) ?? "0",
-    flowchainAccount: stringValue(intent.flowchainAccount) ?? stringValue(matchedCredit?.accountId),
+    flowmemoryAccount: stringValue(intent.flowmemoryAccount) ?? stringValue(matchedCredit?.accountId),
     baseRecipient: stringValue(intent.baseRecipient) ?? stringValue(intent.recipient),
     status: stringValue(intent.status) ?? "requested",
     requestedAt: stringValue(intent.requestedAt) ?? null,
@@ -434,7 +434,7 @@ function pilotWithdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
   const credits = pilotCreditRows(state);
   return dedupeRows([
     ...handoffRows(state, "withdrawalIntents"),
-    ...devnetObjectRows(state, ["withdrawalIntents", "bridgeWithdrawalIntents", "withdrawals", "bridgeWithdrawals"]),
+    ...localRuntimeObjectRows(state, ["withdrawalIntents", "bridgeWithdrawalIntents", "withdrawals", "bridgeWithdrawals"]),
   ].map((intent) => normalizeWithdrawalIntent(intent, credits)), ["withdrawalIntentId", "creditId", "depositId"]);
 }
 
@@ -464,7 +464,7 @@ function normalizeReleaseEvidence(evidence: JsonObject): JsonObject {
 function pilotReleaseEvidenceRows(state: LoadedControlPlaneState): JsonObject[] {
   const native = [
     ...handoffRowsAny(state, ["releaseEvidence", "releaseEvidences"]),
-    ...devnetObjectRows(state, ["releaseEvidence", "bridgeReleaseEvidence", "releaseEvidenceRecords"]),
+    ...localRuntimeObjectRows(state, ["releaseEvidence", "bridgeReleaseEvidence", "releaseEvidenceRecords"]),
   ].map(normalizeReleaseEvidence);
 
   const withdrawals = pilotWithdrawalRows(state);
@@ -509,16 +509,16 @@ function statusIsApplied(value: JsonValue | undefined): boolean {
 
 function configuredEmergency(state: LoadedControlPlaneState): JsonObject {
   const object = asObject(state.bridgeRuntimeHandoff?.emergency)
-    ?? asObject(state.devnetControlPlaneHandoff?.emergency)
-    ?? asObject(state.devnet?.emergency)
+    ?? asObject(state.localRuntimeControlPlaneHandoff?.emergency)
+    ?? asObject(state.localRuntime?.emergency)
     ?? {};
   return object;
 }
 
 function configuredPause(state: LoadedControlPlaneState): JsonObject {
   const object = asObject(state.bridgeRuntimeHandoff?.pause)
-    ?? asObject(state.devnetControlPlaneHandoff?.pause)
-    ?? asObject(state.devnet?.pause)
+    ?? asObject(state.localRuntimeControlPlaneHandoff?.pause)
+    ?? asObject(state.localRuntime?.pause)
     ?? {};
   return object;
 }
@@ -607,7 +607,7 @@ function sourceArtifactClass(row: JsonObject | null | undefined): string {
 function runtimeApplicationRows(state: LoadedControlPlaneState): JsonObject[] {
   return [
     ...handoffRows(state, "runtimeApplications"),
-    ...devnetObjectRows(state, ["runtimeApplications", "bridgeRuntimeApplications", "bridgeCreditApplications"]),
+    ...localRuntimeObjectRows(state, ["runtimeApplications", "bridgeRuntimeApplications", "bridgeCreditApplications"]),
   ];
 }
 
@@ -638,7 +638,7 @@ function proofTransferRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function walletTransferRows(state: LoadedControlPlaneState): JsonObject[] {
-  const native = devnetObjectRows(state, ["balanceTransfers", "walletTransfers", "transfers", "tokenTransfers"]).map((transfer) => ({
+  const native = localRuntimeObjectRows(state, ["balanceTransfers", "walletTransfers", "transfers", "tokenTransfers"]).map((transfer) => ({
     schema: "flowmemory.control_plane.wallet_transfer.v0",
     transferId: stringValue(transfer.transferId)
       ?? stringValue(transfer.txId)
@@ -651,7 +651,7 @@ function walletTransferRows(state: LoadedControlPlaneState): JsonObject[] {
     amount: stringValue(transfer.amount) ?? stringValue(transfer.amountUnits) ?? "0",
     status: stringValue(transfer.status) ?? "applied",
     transfer,
-    source: "local-devnet",
+    source: "local-runtime",
     localOnly: true,
     productionReady: false,
   }));
@@ -660,7 +660,7 @@ function walletTransferRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function walletBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
-  for (const balance of devnetObjectRows(state, ["localTestUnitBalances", "localBalances"])) {
+  for (const balance of localRuntimeObjectRows(state, ["localTestUnitBalances", "localBalances"])) {
     const accountId = stringValue(balance.accountId) ?? stringValue(balance.owner);
     if (accountId === null) {
       continue;
@@ -748,24 +748,24 @@ function buildBridgeLiveReadiness(state: LoadedControlPlaneState): JsonObject {
   const confirmationEnvName = firstConfiguredEnv(CONFIRMATION_DEPTH_ENV_NAMES);
   const requiredMissing = [
     ...LIVE_REQUIRED_ENV_NAMES.filter((name) => !envConfigured(name)),
-    ...(confirmationEnvName === null ? ["FLOWCHAIN_PILOT_CONFIRMATIONS"] : []),
+    ...(confirmationEnvName === null ? ["FLOWMEMORY_PILOT_CONFIRMATIONS"] : []),
   ];
-  const tokenMode = envText("FLOWCHAIN_BASE8453_TOKEN_MODE")?.toLowerCase() ?? "native";
+  const tokenMode = envText("FLOWMEMORY_BASE8453_TOKEN_MODE")?.toLowerCase() ?? "native";
   const tokenRequired = ["erc20", "token", "supported-token"].includes(tokenMode);
-  const tokenMissing = tokenRequired && !envConfigured("FLOWCHAIN_BASE8453_SUPPORTED_TOKEN")
-    ? ["FLOWCHAIN_BASE8453_SUPPORTED_TOKEN"]
+  const tokenMissing = tokenRequired && !envConfigured("FLOWMEMORY_BASE8453_SUPPORTED_TOKEN")
+    ? ["FLOWMEMORY_BASE8453_SUPPORTED_TOKEN"]
     : [];
   const missingEnvNames = [...new Set([...requiredMissing, ...tokenMissing])].sort();
   const confirmation = envUintCheck(
-    confirmationEnvName ?? "FLOWCHAIN_PILOT_CONFIRMATIONS",
+    confirmationEnvName ?? "FLOWMEMORY_PILOT_CONFIRMATIONS",
     BigInt(MIN_CONFIRMATION_DEPTH),
     BigInt(MAX_CONFIRMATION_DEPTH),
   );
   const confirmationText = confirmationEnvName === null ? undefined : envText(confirmationEnvName);
   const confirmationValue = confirmationText !== undefined && /^\d+$/.test(confirmationText) ? Number(BigInt(confirmationText)) : null;
-  const targetSettlement = envPositiveNumber("FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS", 30);
-  const estimatedBaseBlock = envPositiveNumber("FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS", 2);
-  const bridgePoll = envPositiveNumber("FLOWCHAIN_BRIDGE_POLL_SECONDS", 30);
+  const targetSettlement = envPositiveNumber("FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS", 30);
+  const estimatedBaseBlock = envPositiveNumber("FLOWMEMORY_BASE8453_ESTIMATED_BLOCK_SECONDS", 2);
+  const bridgePoll = envPositiveNumber("FLOWMEMORY_BRIDGE_POLL_SECONDS", 30);
   const estimatedConfirmationSeconds = confirmationValue === null ? null : confirmationValue * estimatedBaseBlock.seconds;
   const estimatedDetectionSeconds = estimatedConfirmationSeconds === null ? null : estimatedConfirmationSeconds + bridgePoll.seconds;
   const settlementTargetFeasible = estimatedDetectionSeconds !== null
@@ -773,52 +773,52 @@ function buildBridgeLiveReadiness(state: LoadedControlPlaneState): JsonObject {
     && estimatedBaseBlock.valid
     && bridgePoll.valid
     && estimatedDetectionSeconds <= targetSettlement.seconds;
-  const maxDeposit = envUintCheck("FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI", 1n);
-  const totalCap = envUintCheck("FLOWCHAIN_PILOT_TOTAL_CAP_WEI", 1n);
-  const operatorAckAccepted = envText("FLOWCHAIN_PILOT_OPERATOR_ACK") === REQUIRED_OPERATOR_ACK;
-  const devnetSourceStatus = state.sources.devnet?.status ?? "missing";
-  const nodeAvailable = state.devnet !== null && devnetSourceStatus !== "missing" && devnetSourceStatus !== "degraded";
+  const maxDeposit = envUintCheck("FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI", 1n);
+  const totalCap = envUintCheck("FLOWMEMORY_PILOT_TOTAL_CAP_WEI", 1n);
+  const operatorAckAccepted = envText("FLOWMEMORY_PILOT_OPERATOR_ACK") === REQUIRED_OPERATOR_ACK;
+  const localRuntimeSourceStatus = state.sources.localRuntime?.status ?? "missing";
+  const nodeAvailable = state.localRuntime !== null && localRuntimeSourceStatus !== "missing" && localRuntimeSourceStatus !== "degraded";
   const baseDeposits = deposits.filter((deposit) => deposit.baseMainnet === true);
   const issues: JsonObject[] = [];
 
   if (!nodeAvailable) {
     issues.push(readinessIssue(
-      devnetSourceStatus === "degraded" ? "local_runtime_state_degraded" : "node_offline",
+      localRuntimeSourceStatus === "degraded" ? "local_runtime_state_degraded" : "node_offline",
       "blocked",
-      devnetSourceStatus === "degraded" ? "Local runtime state degraded" : "Node offline",
-      devnetSourceStatus === "degraded"
-        ? "The active local FlowChain runtime state could not be parsed; the control-plane failed closed to fallback data."
-        : "No local runtime/devnet state is available to prove credit application.",
+      localRuntimeSourceStatus === "degraded" ? "Local runtime state degraded" : "Node offline",
+      localRuntimeSourceStatus === "degraded"
+        ? "The active local FlowMemory runtime state could not be parsed; the control-plane failed closed to fallback data."
+        : "No local runtime state is available to prove credit application.",
     ));
   }
   if (missingEnvNames.length > 0) {
     issues.push(readinessIssue("missing_env", "blocked", "Missing live pilot env", "Live readiness is blocked until all required env names are present.", missingEnvNames));
   }
   if (!operatorAckAccepted) {
-    issues.push(readinessIssue("operator_ack_missing", "blocked", "Operator acknowledgement missing", "The exact capped-owner-pilot acknowledgement is not present.", ["FLOWCHAIN_PILOT_OPERATOR_ACK"]));
+    issues.push(readinessIssue("operator_ack_missing", "blocked", "Operator acknowledgement missing", "The exact capped-owner-pilot acknowledgement is not present.", ["FLOWMEMORY_PILOT_OPERATOR_ACK"]));
   }
   if (confirmation.configured === true && confirmation.withinPolicy !== true) {
     issues.push(readinessIssue("insufficient_confirmations", "failed", "Confirmation depth outside policy", "The configured confirmation depth is missing, non-decimal, below the minimum, or above the pilot maximum.", [...CONFIRMATION_DEPTH_ENV_NAMES]));
   }
   if (!targetSettlement.valid || !estimatedBaseBlock.valid || !bridgePoll.valid) {
     issues.push(readinessIssue("settlement_policy_invalid", "failed", "Settlement policy invalid", "Fast bridge timing env values must be positive numbers.", [
-      "FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS",
-      "FLOWCHAIN_BASE8453_ESTIMATED_BLOCK_SECONDS",
-      "FLOWCHAIN_BRIDGE_POLL_SECONDS",
+      "FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS",
+      "FLOWMEMORY_BASE8453_ESTIMATED_BLOCK_SECONDS",
+      "FLOWMEMORY_BRIDGE_POLL_SECONDS",
     ]));
   }
   if (confirmation.configured === true && settlementTargetFeasible === false) {
     issues.push(readinessIssue("settlement_target_missed", "failed", "Settlement target cannot be met", "The configured confirmation depth plus polling interval exceeds the fast bridge target.", [
       ...(CONFIRMATION_DEPTH_ENV_NAMES as readonly string[]),
-      "FLOWCHAIN_BRIDGE_TARGET_SETTLEMENT_SECONDS",
-      "FLOWCHAIN_BRIDGE_POLL_SECONDS",
+      "FLOWMEMORY_BRIDGE_TARGET_SETTLEMENT_SECONDS",
+      "FLOWMEMORY_BRIDGE_POLL_SECONDS",
     ]));
   }
   if (maxDeposit.configured === true && maxDeposit.withinPolicy !== true) {
-    issues.push(readinessIssue("cap_exceeded", "failed", "Per-deposit cap outside policy", "The per-deposit cap is missing, non-decimal, or zero.", ["FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI"]));
+    issues.push(readinessIssue("cap_exceeded", "failed", "Per-deposit cap outside policy", "The per-deposit cap is missing, non-decimal, or zero.", ["FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI"]));
   }
   if (totalCap.configured === true && totalCap.withinPolicy !== true) {
-    issues.push(readinessIssue("cap_exceeded", "failed", "Total cap outside policy", "The total pilot cap is missing, non-decimal, or zero.", ["FLOWCHAIN_PILOT_TOTAL_CAP_WEI"]));
+    issues.push(readinessIssue("cap_exceeded", "failed", "Total cap outside policy", "The total pilot cap is missing, non-decimal, or zero.", ["FLOWMEMORY_PILOT_TOTAL_CAP_WEI"]));
   }
   if (caps.withinCap === false) {
     issues.push(readinessIssue("cap_exceeded", "failed", "Observed cap exceeded", "Visible pilot evidence reports a cap breach."));
@@ -847,25 +847,25 @@ function buildBridgeLiveReadiness(state: LoadedControlPlaneState): JsonObject {
     readyForOperatorLivePilot: failClosedStatus === "READY_FOR_OPERATOR_LIVE_PILOT",
     node: {
       running: nodeAvailable,
-      sourceStatus: devnetSourceStatus,
-      chainId: stringValue(state.devnet?.chainId) ?? "missing",
+      sourceStatus: localRuntimeSourceStatus,
+      chainId: stringValue(state.localRuntime?.chainId) ?? "missing",
     },
     lockbox: {
-      configured: envConfigured("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"),
-      envName: "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
+      configured: envConfigured("FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS"),
+      envName: "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS",
       ownerVerified: false,
       ownerVerificationRequired: true,
     },
     baseReaderEndpoint: {
-      configured: envConfigured("FLOWCHAIN_BASE8453_RPC_URL"),
-      envName: "FLOWCHAIN_BASE8453_RPC_URL",
+      configured: envConfigured("FLOWMEMORY_BASE8453_RPC_URL"),
+      envName: "FLOWMEMORY_BASE8453_RPC_URL",
       valuePrinted: false,
     },
     blockRange: {
-      fromConfigured: envConfigured("FLOWCHAIN_BASE8453_FROM_BLOCK"),
-      toConfigured: envConfigured("FLOWCHAIN_BASE8453_TO_BLOCK"),
-      fromEnvName: "FLOWCHAIN_BASE8453_FROM_BLOCK",
-      toEnvName: "FLOWCHAIN_BASE8453_TO_BLOCK",
+      fromConfigured: envConfigured("FLOWMEMORY_BASE8453_FROM_BLOCK"),
+      toConfigured: envConfigured("FLOWMEMORY_BASE8453_TO_BLOCK"),
+      fromEnvName: "FLOWMEMORY_BASE8453_FROM_BLOCK",
+      toEnvName: "FLOWMEMORY_BASE8453_TO_BLOCK",
       valuesPrinted: false,
     },
     confirmationDepth: {
@@ -912,18 +912,18 @@ function buildBridgeLiveReadiness(state: LoadedControlPlaneState): JsonObject {
     },
     supportedAsset: {
       tokenMode,
-      supportedTokenConfigured: envConfigured("FLOWCHAIN_BASE8453_SUPPORTED_TOKEN"),
-      supportedTokenEnvName: "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+      supportedTokenConfigured: envConfigured("FLOWMEMORY_BASE8453_SUPPORTED_TOKEN"),
+      supportedTokenEnvName: "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
       valuePrinted: false,
     },
     operatorAck: {
-      configured: envConfigured("FLOWCHAIN_PILOT_OPERATOR_ACK"),
+      configured: envConfigured("FLOWMEMORY_PILOT_OPERATOR_ACK"),
       accepted: operatorAckAccepted,
       requiredValuePrinted: false,
-      envName: "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      envName: "FLOWMEMORY_PILOT_OPERATOR_ACK",
     },
     missingEnvNames,
-    requiredEnvNames: [...LIVE_REQUIRED_ENV_NAMES, "one of FLOWCHAIN_PILOT_CONFIRMATIONS or FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH"],
+    requiredEnvNames: [...LIVE_REQUIRED_ENV_NAMES, "one of FLOWMEMORY_PILOT_CONFIRMATIONS or FLOWMEMORY_BASE8453_CONFIRMATION_DEPTH"],
     optionalEnvNames: [...LIVE_OPTIONAL_ENV_NAMES],
     currentArtifacts: {
       base8453DepositCount: baseDeposits.length,
@@ -1019,7 +1019,7 @@ function buildLifecycleRecords(state: LoadedControlPlaneState): JsonObject[] {
       depositId: stringValue(deposit.depositId),
       replayKey: stringValue(deposit.replayKey) ?? stringValue(credit?.replayKey),
       replayStatus: stringValue(deposit.replayStatus),
-      recipientWallet: stringValue(credit?.accountId) ?? stringValue(deposit.flowchainRecipient),
+      recipientWallet: stringValue(credit?.accountId) ?? stringValue(deposit.flowmemoryRecipient),
       sourceWallet: stringValue(deposit.sender),
       withdrawalIntentId: stringValue(withdrawal?.withdrawalIntentId),
       withdrawalStatus: stringValue(withdrawal?.status),
@@ -1070,8 +1070,8 @@ function summarizeExactValueChecks(records: JsonObject[]): JsonObject {
 
 function capStatus(state: LoadedControlPlaneState, deposits: JsonObject[]): JsonObject {
   const capConfig = asObject(state.bridgeRuntimeHandoff?.capStatus)
-    ?? asObject(state.devnetControlPlaneHandoff?.capStatus)
-    ?? asObject(state.devnet?.capStatus)
+    ?? asObject(state.localRuntimeControlPlaneHandoff?.capStatus)
+    ?? asObject(state.localRuntime?.capStatus)
     ?? {};
   const observedTotal = deposits.reduce((sum, deposit) => sum + bigintAmount(deposit.amount), 0n);
   const maxGuardrailUsd = deposits
@@ -1093,7 +1093,7 @@ function capStatus(state: LoadedControlPlaneState, deposits: JsonObject[]): Json
     maxObservedGuardrailUsd: maxGuardrailUsd,
     withinCap: !breached,
     source: Object.keys(capConfig).length > 0 ? "handoff" : "default-capped-owner-testing-policy",
-    nextOperatorCommand: breached ? "npm run flowchain:stop" : "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
+    nextOperatorCommand: breached ? "npm run flowmemory:stop" : "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
     localOnly: true,
     productionReady: false,
   };
@@ -1108,7 +1108,7 @@ function pauseStatus(state: LoadedControlPlaneState): JsonObject {
     active,
     status: active ? "paused" : "unpaused",
     reason: stringValue(pause.reason) ?? null,
-    nextOperatorCommand: active ? "npm run flowchain:real-value-pilot:e2e -- --resume-after-pause" : "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
+    nextOperatorCommand: active ? "npm run flowmemory:real-value-pilot:e2e -- --resume-after-pause" : "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25",
     localOnly: true,
     productionReady: false,
   };
@@ -1134,7 +1134,7 @@ function retryStatus(state: LoadedControlPlaneState, deposits: JsonObject[], cre
     rejectedDuplicateCredits: rejectedDuplicates,
     failedRetries,
     retryableCredits: credits.filter((credit) => stringValue(credit.status) === "pending").map((credit) => credit.creditId),
-    nextOperatorCommand: failedRetries > 0 ? "npm run control-plane:smoke" : "npm run flowchain:real-value-pilot:e2e",
+    nextOperatorCommand: failedRetries > 0 ? "npm run control-plane:smoke" : "npm run flowmemory:real-value-pilot:e2e",
     localOnly: true,
     productionReady: false,
   };
@@ -1149,8 +1149,8 @@ function emergencyStatus(state: LoadedControlPlaneState): JsonObject {
     active,
     status: active ? "active" : "standby",
     reason: stringValue(emergency.reason) ?? null,
-    nextOperatorCommand: active ? "npm run flowchain:stop" : "npm run flowchain:real-value-pilot:e2e",
-    recoveryCommand: "npm run flowchain:export",
+    nextOperatorCommand: active ? "npm run flowmemory:stop" : "npm run flowmemory:real-value-pilot:e2e",
+    recoveryCommand: "npm run flowmemory:export",
     localOnly: true,
     productionReady: false,
   };
@@ -1172,7 +1172,7 @@ function nextStep(lifecycle: JsonObject[], emergency: JsonObject): PilotStep {
   if (emergency.state === "error") {
     return {
       label: "Stop pilot and export evidence",
-      command: "npm run flowchain:stop",
+      command: "npm run flowmemory:stop",
       reason: "Emergency state is active.",
     };
   }
@@ -1180,13 +1180,13 @@ function nextStep(lifecycle: JsonObject[], emergency: JsonObject): PilotStep {
   if (degraded !== undefined) {
     return {
       label: stringValue(degraded.title) ?? "Continue pilot",
-      command: stringValue(degraded.nextOperatorCommand) ?? "npm run flowchain:real-value-pilot:e2e",
+      command: stringValue(degraded.nextOperatorCommand) ?? "npm run flowmemory:real-value-pilot:e2e",
       reason: stringValue(degraded.summary) ?? "A pilot lifecycle phase is not live.",
     };
   }
   return {
     label: "Export pilot evidence",
-    command: "npm run flowchain:export",
+    command: "npm run flowmemory:export",
     reason: "All visible pilot lifecycle phases are live.",
   };
 }
@@ -1220,7 +1220,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
         : deposits.length > 0
           ? "Only mock/local/Base Sepolia bridge observations are visible; no Base 8453 pilot deposit has been loaded."
           : "No bridge observation is visible.",
-      "npm run bridge:observe -- --mode base-mainnet-canary --rpc-url <FLOWCHAIN_BASE8453_RPC_URL> --lockbox-address <FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS> --from-block <n> --to-block <n> --acknowledge-real-funds --max-usd 25",
+      "npm run bridge:observe -- --mode base-mainnet-canary --rpc-url <FLOWMEMORY_BASE8453_RPC_URL> --lockbox-address <FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS> --from-block <n> --to-block <n> --acknowledge-real-funds --max-usd 25",
       baseDeposits.map((deposit) => stringValue(deposit.observationId) ?? "").filter((id) => id.length > 0),
     ),
     lifecycleItem(
@@ -1230,7 +1230,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       appliedCredits.length > 0
         ? `${appliedCredits.length} local credit record(s) are applied or credited.`
         : "Bridge credit records are pending, rejected, or missing.",
-      "npm run flowchain:real-value-pilot:e2e",
+      "npm run flowmemory:real-value-pilot:e2e",
       appliedCredits.map((credit) => stringValue(credit.creditId) ?? "").filter((id) => id.length > 0),
     ),
     lifecycleItem(
@@ -1240,7 +1240,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       retry.state === "live"
         ? "Replay protection is visible and no failed retry is reported."
         : "At least one retry path is failed.",
-      stringValue(retry.nextOperatorCommand) ?? "npm run flowchain:real-value-pilot:e2e",
+      stringValue(retry.nextOperatorCommand) ?? "npm run flowmemory:real-value-pilot:e2e",
       asArray(retry.duplicateReplayKeys).map((value) => stringValue(value) ?? "").filter((value) => value.length > 0),
     ),
     lifecycleItem(
@@ -1250,7 +1250,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       withdrawalRequests.length > 0
         ? `${withdrawalRequests.length} withdrawal intent record(s) are visible.`
         : "No withdrawal intent is visible yet.",
-      "npm run flowchain:real-value-pilot:e2e -- --withdrawal-intent",
+      "npm run flowmemory:real-value-pilot:e2e -- --withdrawal-intent",
       withdrawalRequests.map((withdrawal) => stringValue(withdrawal.withdrawalIntentId) ?? "").filter((id) => id.length > 0),
     ),
     lifecycleItem(
@@ -1260,7 +1260,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       recordedReleaseEvidence.length > 0
         ? `${recordedReleaseEvidence.length} release evidence record(s) are visible.`
         : "Withdrawal/release evidence is pending or absent.",
-      "npm run flowchain:real-value-pilot:e2e -- --export-evidence",
+      "npm run flowmemory:real-value-pilot:e2e -- --export-evidence",
       releases.map((release) => stringValue(release.releaseEvidenceId) ?? "").filter((id) => id.length > 0),
     ),
     lifecycleItem(
@@ -1275,14 +1275,14 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       pause.state as PilotState,
       pause.state === "live" ? "Pause is clear" : "Pause is active",
       pause.state === "live" ? "New observations are not marked paused by the visible control-plane state." : "Pause status is active.",
-      stringValue(pause.nextOperatorCommand) ?? "npm run flowchain:real-value-pilot:e2e",
+      stringValue(pause.nextOperatorCommand) ?? "npm run flowmemory:real-value-pilot:e2e",
     ),
     lifecycleItem(
       "emergency_clear",
       emergency.state as PilotState,
       emergency.state === "live" ? "Emergency state clear" : "Emergency state active",
       emergency.state === "live" ? "Emergency status is standby." : "Emergency controls are active.",
-      stringValue(emergency.nextOperatorCommand) ?? "npm run flowchain:stop",
+      stringValue(emergency.nextOperatorCommand) ?? "npm run flowmemory:stop",
     ),
   ];
 
@@ -1301,7 +1301,7 @@ function buildPilotLifecycle(state: LoadedControlPlaneState): PilotLifecycle {
       withdrawals: withdrawals.map((withdrawal) => withdrawal.withdrawalIntentId),
       releases: releases.map((release) => release.releaseEvidenceId),
     }),
-    label: "FlowChain capped owner real-value pilot",
+    label: "FlowMemory capped owner real-value pilot",
     state: stateSeverity,
     stateReason: nextOperatorStep.reason,
     generatedAt: state.launchCore.generatedAt,

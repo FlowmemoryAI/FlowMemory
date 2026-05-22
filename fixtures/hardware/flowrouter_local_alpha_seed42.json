@@ -12,7 +12,7 @@
       "openedAt": "2026-05-13T17:01:30Z",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -35,7 +35,7 @@
       "openedAt": "2026-05-13T17:01:35Z",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -94,7 +94,7 @@
       "payloadBytesEstimate": 136,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -104,7 +104,7 @@
       "resolutionState": "operator-review-required",
       "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
       "severity": "warning",
-      "sourceChain": "flowchain-local-alpha",
+      "sourceChain": "flowmemory-local-alpha",
       "sourcePacketType": "bridge_alert",
       "status": "unresolved",
       "subjectId": "lockbox:dfce05f88cae",
@@ -147,7 +147,7 @@
       "finalityReceipts",
       "alerts"
     ],
-    "flowchainFullSmokeOptionalRow": {
+    "flowmemoryFullSmokeOptionalRow": {
       "command": "python hardware/simulator/flowrouter_sim.py --smoke",
       "hardwareRequired": false,
       "label": "Validate optional hardware operator signal fixtures",
@@ -168,7 +168,7 @@
       "provenance"
     ]
   },
-  "environment": "local-devnet-fixture",
+  "environment": "local-runtime-fixture",
   "finalityReceipts": [
     {
       "finalityReceiptId": "finality:hardware:e28633303a6b",
@@ -198,7 +198,7 @@
       "powerState": "mains",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -224,7 +224,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -244,7 +244,7 @@
         "payloadBytesEstimate": 0,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -276,7 +276,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -296,7 +296,7 @@
         "payloadBytesEstimate": 0,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -328,7 +328,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -348,7 +348,7 @@
         "payloadBytesEstimate": 96,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -380,7 +380,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -400,7 +400,7 @@
         "payloadBytesEstimate": 128,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -433,7 +433,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -457,7 +457,7 @@
         "payloadBytesEstimate": 0,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -490,7 +490,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -514,7 +514,7 @@
         "payloadBytesEstimate": 136,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -547,7 +547,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -571,7 +571,7 @@
         "payloadBytesEstimate": 0,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -603,7 +603,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -623,7 +623,7 @@
         "payloadBytesEstimate": 112,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -655,7 +655,7 @@
       "nodeId": "fr-e1e7878a2aa8",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -675,7 +675,7 @@
         "payloadBytesEstimate": 104,
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -729,7 +729,7 @@
       "payloadBytesEstimate": 112,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -755,7 +755,7 @@
       "operatorId": "operator:local:717ffb1268b0",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -776,7 +776,7 @@
   ],
   "packetMappings": [
     {
-      "flowchainSignal": "operator_metadata",
+      "flowmemorySignal": "operator_metadata",
       "localAlphaRole": "names the local optional hardware operator fixture issuer",
       "objectCollection": "operatorMetadata",
       "objectRef": "operator-metadata:hardware:874d3583a3b5",
@@ -784,7 +784,7 @@
       "trustBoundary": "local metadata only; no wallet, secret, or production operator claim"
     },
     {
-      "flowchainSignal": "hardware_node_status",
+      "flowmemorySignal": "hardware_node_status",
       "localAlphaRole": "shows FlowRouter reachability and coarse device state",
       "objectCollection": "hardwareNodes",
       "objectRef": "fr-e1e7878a2aa8",
@@ -792,7 +792,7 @@
       "trustBoundary": "local advisory status, not hardware attestation"
     },
     {
-      "flowchainSignal": "node_health",
+      "flowmemorySignal": "node_health",
       "localAlphaRole": "adds compact node health and queue-depth observability",
       "objectCollection": "nodeHealth",
       "objectRef": "node-health:hardware:97477baf624a",
@@ -800,7 +800,7 @@
       "trustBoundary": "observability only; it cannot block local chain startup"
     },
     {
-      "flowchainSignal": "peer_hint",
+      "flowmemorySignal": "peer_hint",
       "localAlphaRole": "surfaces a local topology hint for operator review",
       "objectCollection": "peerHints",
       "objectRef": "peer-hint:hardware:918e8c2b357a",
@@ -808,7 +808,7 @@
       "trustBoundary": "peer hint only; not authentication, sync proof, or LAN discovery authority"
     },
     {
-      "flowchainSignal": "work_receipt_reference",
+      "flowmemorySignal": "work_receipt_reference",
       "localAlphaRole": "points the workbench at a WorkReceipt candidate",
       "objectCollection": "workReceipts",
       "objectRef": "receipt:hardware:1e92f586a767",
@@ -816,7 +816,7 @@
       "trustBoundary": "digest and locator hints require normal receipt reconciliation"
     },
     {
-      "flowchainSignal": "verifier_report_reference",
+      "flowmemorySignal": "verifier_report_reference",
       "localAlphaRole": "points the workbench at a VerifierReport candidate",
       "objectCollection": "verifierReports",
       "objectRef": "report:hardware:bd367723d169",
@@ -824,7 +824,7 @@
       "trustBoundary": "digest relay is not the full verifier report"
     },
     {
-      "flowchainSignal": "alert_challenge_input",
+      "flowmemorySignal": "alert_challenge_input",
       "localAlphaRole": "creates an operator alert and optional challenge input",
       "objectCollection": "challenges",
       "objectRef": "challenge:hardware:5f54ef32073d",
@@ -832,7 +832,7 @@
       "trustBoundary": "local operator attention only; no public emergency-service claim"
     },
     {
-      "flowchainSignal": "bridge_observer_alert",
+      "flowmemorySignal": "bridge_observer_alert",
       "localAlphaRole": "surfaces bridge-observer lag without blocking the local chain",
       "objectCollection": "bridgeAlerts",
       "objectRef": "bridge-alert:hardware:8662b11ba0d4",
@@ -840,7 +840,7 @@
       "trustBoundary": "digest alert only; no production bridge readiness or settlement claim"
     },
     {
-      "flowchainSignal": "artifact_memory_reference",
+      "flowmemorySignal": "artifact_memory_reference",
       "localAlphaRole": "connects cartridge metadata to an artifact or memory reference",
       "objectCollection": "artifactCommitments",
       "objectRef": "artifact:hardware:dffc8c3e46ff",
@@ -866,7 +866,7 @@
       "peerRole": "observer",
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -894,7 +894,7 @@
       "payloadBytesEstimate": 0,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -921,7 +921,7 @@
       "payloadBytesEstimate": 0,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -948,7 +948,7 @@
       "payloadBytesEstimate": 96,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -975,7 +975,7 @@
       "payloadBytesEstimate": 128,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1006,7 +1006,7 @@
       "payloadBytesEstimate": 0,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1037,7 +1037,7 @@
       "payloadBytesEstimate": 136,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1068,7 +1068,7 @@
       "payloadBytesEstimate": 0,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1095,7 +1095,7 @@
       "payloadBytesEstimate": 112,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1122,7 +1122,7 @@
       "payloadBytesEstimate": 104,
       "provenance": {
         "capturedAt": "2026-05-13T17:01:55Z",
-        "chainContext": "flowchain-private-local-testnet",
+        "chainContext": "flowmemory-private-local-testnet",
         "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
         "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
         "origin": "fixture",
@@ -1140,11 +1140,11 @@
   "sourcePaths": {
     "handoffFixture": "fixtures/hardware/flowrouter_control_plane_handoff_seed42.json",
     "handoffSchema": "schemas/flowmemory/hardware-control-plane-handoff.schema.json",
-    "mappingDoc": "hardware/flowrouter/FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md",
+    "mappingDoc": "hardware/flowrouter/FLOWMEMORY_LOCAL_ALPHA_SIGNALS.md",
     "negativeReport": "fixtures/hardware/flowrouter_negative_validation_seed42.json",
     "negativeReportSchema": "hardware/simulator/schemas/negative_validation_report.schema.json",
     "operatorFixture": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
-    "operatorSchema": "hardware/simulator/schemas/flowchain_operator_signals.schema.json",
+    "operatorSchema": "hardware/simulator/schemas/flowmemory_operator_signals.schema.json",
     "packetFixture": "hardware/fixtures/flowrouter_sample_seed42.json"
   },
   "verifierReports": [
@@ -1216,7 +1216,7 @@
         "kind": "NFC cartridge artifact reference",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1251,7 +1251,7 @@
           },
           {
             "label": "source",
-            "value": "flowchain-local-alpha"
+            "value": "flowmemory-local-alpha"
           },
           {
             "label": "target",
@@ -1266,7 +1266,7 @@
         "kind": "Hardware bridge alert",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1284,7 +1284,7 @@
           "payloadBytesEstimate": 136,
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1294,7 +1294,7 @@
           "resolutionState": "operator-review-required",
           "rootfieldId": "rootfield:hardware:flowrouter-local-alpha",
           "severity": "warning",
-          "sourceChain": "flowchain-local-alpha",
+          "sourceChain": "flowmemory-local-alpha",
           "sourcePacketType": "bridge_alert",
           "status": "unresolved",
           "subjectId": "lockbox:dfce05f88cae",
@@ -1330,7 +1330,7 @@
         "kind": "Offline alert challenge candidate",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1381,7 +1381,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1398,7 +1398,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1418,7 +1418,7 @@
             "payloadBytesEstimate": 0,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1466,7 +1466,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1483,7 +1483,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1503,7 +1503,7 @@
             "payloadBytesEstimate": 0,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1551,7 +1551,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1568,7 +1568,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1588,7 +1588,7 @@
             "payloadBytesEstimate": 96,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1636,7 +1636,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1653,7 +1653,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1673,7 +1673,7 @@
             "payloadBytesEstimate": 128,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1721,7 +1721,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1739,7 +1739,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1763,7 +1763,7 @@
             "payloadBytesEstimate": 0,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1811,7 +1811,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1829,7 +1829,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1853,7 +1853,7 @@
             "payloadBytesEstimate": 136,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1901,7 +1901,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -1919,7 +1919,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -1943,7 +1943,7 @@
             "payloadBytesEstimate": 0,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -1991,7 +1991,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2008,7 +2008,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -2028,7 +2028,7 @@
             "payloadBytesEstimate": 112,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -2076,7 +2076,7 @@
         "kind": "Hardware operator signal",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2093,7 +2093,7 @@
           "nodeId": "fr-e1e7878a2aa8",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -2113,7 +2113,7 @@
             "payloadBytesEstimate": 104,
             "provenance": {
               "capturedAt": "2026-05-13T17:01:55Z",
-              "chainContext": "flowchain-private-local-testnet",
+              "chainContext": "flowmemory-private-local-testnet",
               "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
               "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
               "origin": "fixture",
@@ -2163,7 +2163,7 @@
         "kind": "Hardware memory cell candidate",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2212,7 +2212,7 @@
         "kind": "Hardware node health",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2233,7 +2233,7 @@
           "payloadBytesEstimate": 112,
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -2274,7 +2274,7 @@
         "kind": "Hardware operator metadata",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2292,7 +2292,7 @@
           "operatorId": "operator:local:717ffb1268b0",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -2339,7 +2339,7 @@
         "kind": "Hardware peer hint",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2362,7 +2362,7 @@
           "peerRole": "observer",
           "provenance": {
             "capturedAt": "2026-05-13T17:01:55Z",
-            "chainContext": "flowchain-private-local-testnet",
+            "chainContext": "flowmemory-private-local-testnet",
             "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
             "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
             "origin": "fixture",
@@ -2402,7 +2402,7 @@
         "kind": "Hardware operator signal fixture",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2444,7 +2444,7 @@
         "kind": "Hardware WorkReceipt relay",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",
@@ -2501,7 +2501,7 @@
         "kind": "Hardware VerifierReport relay",
         "provenance": {
           "capturedAt": "2026-05-13T17:01:55Z",
-          "chainContext": "flowchain-private-local-testnet",
+          "chainContext": "flowmemory-private-local-testnet",
           "fixturePath": "fixtures/hardware/flowrouter_local_alpha_seed42.json",
           "localPathHint": "hardware/fixtures/flowrouter_sample_seed42.json",
           "origin": "fixture",

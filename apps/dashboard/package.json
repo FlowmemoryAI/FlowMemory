@@ -17,7 +17,7 @@
     "mobile:sync": "npm run build && cap sync",
     "mobile:android:sync": "npm run build && cap sync android",
     "mobile:android:debug": "npm run mobile:android:sync && cd android && gradlew.bat assembleDebug",
-    "test": "vitest run",
+    "test": "npm run sync:fixtures && vitest run",
     "browser:e2e": "playwright test",
     "typecheck": "tsc -b",
     "sync:fixtures": "node scripts/sync-fixtures.mjs"

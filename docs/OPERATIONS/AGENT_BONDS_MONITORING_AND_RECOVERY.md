@@ -24,7 +24,7 @@ Run before a public pilot and after every operator-role change:
 1. `npm run flowmemory:agent-bonds:replay`
 2. `npm run flowmemory:agent-bonds:simulate`
 3. `npm run flowmemory:agent-bonds:readiness`
-4. verify the latest readiness report exists at `devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
+4. verify the latest readiness report exists at `local test runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
 5. verify the latest replay report exists at `fixtures/agent-bonds/replay-report.json`
 6. verify the latest economic simulation exists at `fixtures/agent-bonds/economic-sim-report.json`
 

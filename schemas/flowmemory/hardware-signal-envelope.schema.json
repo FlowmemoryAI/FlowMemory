@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "flowchain.hardware_signal_envelope.v0",
-  "title": "FlowChain Local Alpha HardwareSignalEnvelope V0",
+  "$id": "flowmemory.hardware_signal_envelope.v0",
+  "title": "FlowMemory Local Alpha HardwareSignalEnvelope V0",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -19,7 +19,7 @@
     "nonce"
   ],
   "properties": {
-    "schema": { "const": "flowchain.hardware_signal_envelope.v0" },
+    "schema": { "const": "flowmemory.hardware_signal_envelope.v0" },
     "hardwareSignalEnvelopeId": { "$ref": "#/$defs/hex32" },
     "deviceId": { "$ref": "#/$defs/hex32" },
     "signalRoot": { "$ref": "#/$defs/hex32" },

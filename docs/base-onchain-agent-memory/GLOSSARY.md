@@ -44,7 +44,7 @@ A field describing how memory content is stored: public short content, commitmen
 
 An append-only update that supersedes or fixes prior memory without deleting the original record.
 
-## DeepSeek/GPT review
+## External model review
 
 Off-chain model-assisted critique used to improve architecture, tests, and policy. It is not protocol evidence unless converted into a bounded, accepted, committed artifact.
 
@@ -72,9 +72,9 @@ An append-only transition from a parent memory root to a new memory root.
 
 A cryptographic commitment to current memory state under a named schema and domain.
 
-## Nookplot
+## Broad coordination systems
 
-A Base agent coordination network with identity, reputation, gateway, MCP, marketplace, bounties, knowledge bundles, and hosted memory features. It is a reference point, not the surface FlowMemory should clone.
+Agent coordination networks with identity, reputation, gateway, marketplace, tooling, and hosted-memory features. They are outside FlowMemory's first public scope.
 
 ## Observation
 

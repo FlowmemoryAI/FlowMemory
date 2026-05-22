@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {BaseBridgeLockbox} from "../contracts/bridge/BaseBridgeLockbox.sol";
-import {FlowChainSettlementSpine} from "../contracts/FlowChainSettlementSpine.sol";
+import {FlowMemorySettlementSpine} from "../contracts/FlowMemorySettlementSpine.sol";
 
 interface BridgeSpineVm {
     function startBroadcast(address signer) external;
@@ -57,7 +57,7 @@ contract DeployBridgeSpine {
     error Base8453PilotAckRequired();
     error PilotTotalCapRequired(address token);
 
-    event FlowChainBridgeSpineDeployed(
+    event FlowMemoryBridgeSpineDeployed(
         address indexed lockbox,
         address indexed settlementSpine,
         uint256 indexed chainId,
@@ -78,7 +78,7 @@ contract DeployBridgeSpine {
         VM.startBroadcast(config.owner);
 
         BaseBridgeLockbox lockbox = new BaseBridgeLockbox(config.owner, config.releaseAuthority);
-        FlowChainSettlementSpine settlementSpine = new FlowChainSettlementSpine(config.owner);
+        FlowMemorySettlementSpine settlementSpine = new FlowMemorySettlementSpine(config.owner);
 
         if (config.allowNative) {
             lockbox.configureToken(NATIVE_TOKEN, true, config.nativePerDepositCap, config.nativeTotalCap);
@@ -103,7 +103,7 @@ contract DeployBridgeSpine {
             base8453PilotAck: config.base8453PilotAck
         });
 
-        emit FlowChainBridgeSpineDeployed(
+        emit FlowMemoryBridgeSpineDeployed(
             address(lockbox),
             address(settlementSpine),
             chainId,
@@ -121,17 +121,17 @@ contract DeployBridgeSpine {
 
     function _readConfig() private returns (Config memory config) {
         config = Config({
-            owner: VM.envAddress("FLOWCHAIN_BRIDGE_OWNER"),
-            releaseAuthority: VM.envAddress("FLOWCHAIN_BRIDGE_RELEASE_AUTHORITY"),
-            settlementSubmitter: VM.envAddress("FLOWCHAIN_SETTLEMENT_SUBMITTER"),
-            erc20Token: VM.envAddress("FLOWCHAIN_BRIDGE_ERC20_TOKEN"),
-            allowNative: VM.envBool("FLOWCHAIN_BRIDGE_ALLOW_NATIVE"),
-            allowErc20: VM.envBool("FLOWCHAIN_BRIDGE_ALLOW_ERC20"),
-            nativePerDepositCap: VM.envUint("FLOWCHAIN_BRIDGE_NATIVE_PER_DEPOSIT_CAP"),
-            nativeTotalCap: VM.envUint("FLOWCHAIN_BRIDGE_NATIVE_TOTAL_CAP"),
-            erc20PerDepositCap: VM.envUint("FLOWCHAIN_BRIDGE_ERC20_PER_DEPOSIT_CAP"),
-            erc20TotalCap: VM.envUint("FLOWCHAIN_BRIDGE_ERC20_TOTAL_CAP"),
-            base8453PilotAck: VM.envOr("FLOWCHAIN_BASE8453_PILOT_ACK", false)
+            owner: VM.envAddress("FLOWMEMORY_BRIDGE_OWNER"),
+            releaseAuthority: VM.envAddress("FLOWMEMORY_BRIDGE_RELEASE_AUTHORITY"),
+            settlementSubmitter: VM.envAddress("FLOWMEMORY_SETTLEMENT_SUBMITTER"),
+            erc20Token: VM.envAddress("FLOWMEMORY_BRIDGE_ERC20_TOKEN"),
+            allowNative: VM.envBool("FLOWMEMORY_BRIDGE_ALLOW_NATIVE"),
+            allowErc20: VM.envBool("FLOWMEMORY_BRIDGE_ALLOW_ERC20"),
+            nativePerDepositCap: VM.envUint("FLOWMEMORY_BRIDGE_NATIVE_PER_DEPOSIT_CAP"),
+            nativeTotalCap: VM.envUint("FLOWMEMORY_BRIDGE_NATIVE_TOTAL_CAP"),
+            erc20PerDepositCap: VM.envUint("FLOWMEMORY_BRIDGE_ERC20_PER_DEPOSIT_CAP"),
+            erc20TotalCap: VM.envUint("FLOWMEMORY_BRIDGE_ERC20_TOTAL_CAP"),
+            base8453PilotAck: VM.envOr("FLOWMEMORY_BASE8453_PILOT_ACK", false)
         });
     }
 

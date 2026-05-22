@@ -1,10 +1,10 @@
 import { validateLocalTransactionEnvelope, localTransactionReplayKey } from "./transactions.js";
 
 export const PILOT_MESSAGE_SCHEMAS = Object.freeze([
-  "flowchain.pilot_bridge_credit_ack.v0",
-  "flowchain.pilot_withdrawal_intent.v0",
-  "flowchain.pilot_release_evidence.v0",
-  "flowchain.pilot_emergency_control.v0"
+  "flowmemory.pilot_bridge_credit_ack.v0",
+  "flowmemory.pilot_withdrawal_intent.v0",
+  "flowmemory.pilot_release_evidence.v0",
+  "flowmemory.pilot_emergency_control.v0"
 ]);
 
 export function validatePilotOperatorEnvelope({ document, envelope, context = {} }) {

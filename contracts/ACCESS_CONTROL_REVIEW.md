@@ -55,7 +55,7 @@ Launch risk to watch:
   response is limited to pause, cap changes, allowlist disablement, authority
   rotation, and explicit release/recovery calls.
 
-## FlowChainSettlementSpine
+## FlowMemorySettlementSpine
 
 Owner model: one constructor `initialOwner` controls submitter authorization.
 
@@ -240,7 +240,7 @@ Launch risk to watch:
 
 ## Required Review Before Expanding
 
-Before adding rewards, staking, slashing, custody, dynamic fees, production hook permissions, or appchain/L1 settlement:
+Before adding rewards, staking, slashing, custody, dynamic fees, production hook permissions, or local runtime/network settlement:
 
 - create a threat model issue
 - require a separate review worktree

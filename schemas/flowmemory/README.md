@@ -37,12 +37,12 @@ shape, which records the `IFlowPulse.FlowPulse` event signature, indexed fields,
 payload fields, and receipt-derived locator fields that the indexer added after
 reading logs and receipts.
 
-They describe local fixture objects only. They do not claim production L1 readiness, trustless verification, free storage, AI running on-chain, or production Uniswap v4 deployment.
+They describe local fixture objects only. They do not claim production network readiness, trustless verification, free storage, AI running on-chain, or production Uniswap v4 deployment.
 
-The `flowchain.*.v0` schemas describe Local Alpha object documents whose IDs
+The `flowmemory.*.v0` schemas describe Local Alpha object documents whose IDs
 are defined in `crypto/src/objects.js` and pinned by
 `crypto/fixtures/local-alpha-objects.json`. They map the research object names
-from the Noesis/FlowChain corpus into the current FlowMemory crypto package
+from the legacy AI-native state research corpus into the current FlowMemory crypto package
 without importing research-only SHA-256 or proof-system scaffolds.
 
 `local-signature-envelope.schema.json` describes the local/test operator,
@@ -51,9 +51,9 @@ The schema is paired with the validator in `crypto/src/objects.js`; consumers
 should validate both JSON shape and recomputed cryptographic fields.
 
 `local-transaction-envelope.schema.json` describes the one chain-bound
-local/private transaction envelope consumed by the private L1 package. Legacy
+local/private transaction envelope consumed by the private network package. Legacy
 V0 fixtures bind the chain id, domain separator, nonce, signer, payload hash,
-object ID, and signature. The production-L1-shaped envelope uses the same
+object ID, and signature. The production-network-shaped envelope uses the same
 schema and adds schema version, network profile, payload type, expiration,
 local execution cost, fee policy, signature algorithm, and transaction ID.
 Runtime/API agents should require those completed fields.
@@ -83,6 +83,6 @@ loading vault signing helpers.
 Run the canonical Local Alpha schema/fixture check from the crypto package:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto\crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 npm run validate:local-alpha
 ```

@@ -1,6 +1,6 @@
 param(
     [string]$EvidenceDir = "services/bridge-relayer/out",
-    [string]$BundlePath = "devnet/local/bridge-live-readiness/base8453-bridge-evidence.zip"
+    [string]$BundlePath = "local-runtime/local/bridge-live-readiness/base8453-bridge-evidence.zip"
 )
 
 $ErrorActionPreference = "Stop"

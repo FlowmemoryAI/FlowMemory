@@ -30,7 +30,7 @@ FlowRouter V0 is a local FlowMemory gateway POC. It can model or test:
 - NFC Memory Cartridge metadata.
 - FlowCore light-pipe status.
 - Enclosure measurement direction.
-- FlowChain local-alpha operator signals derived from hardware packets, including optional control-plane/workbench fixture collections.
+- FlowMemory local-alpha operator signals derived from hardware packets, including optional control-plane/workbench fixture collections.
 - Control-plane handoff JSON for optional hardware signals, including heartbeat, node health, peer hint, receipt relay, verifier digest relay, offline alert, bridge alert, NFC metadata, and operator metadata.
 
 ## V0 Non-Goals
@@ -43,7 +43,7 @@ FlowRouter V0 does not:
 - Move model weights, large artifacts, media, or raw memory payloads over LoRa.
 - Prove hardware trustlessness.
 - Mine tokens or promise passive income.
-- Run a production L1 or appchain.
+- Run a production network or local runtime.
 - Define production manufacturing, final CAD, or custom RF boards.
 
 ## Validation Entry Point

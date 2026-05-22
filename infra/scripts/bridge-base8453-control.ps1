@@ -5,7 +5,7 @@ param(
 
     [switch]$Execute,
 
-    [string]$ReportPath = "devnet/local/bridge-live-readiness/base8453-control-report.json"
+    [string]$ReportPath = "local-runtime/local/bridge-live-readiness/base8453-control-report.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,7 +41,7 @@ function Invoke-ChainCheck {
         $response = Invoke-RestMethod -Uri $RpcUrl -Method Post -ContentType "application/json" -Body $body -TimeoutSec 20
     }
     catch {
-        throw "Could not read eth_chainId from FLOWCHAIN_BASE8453_RPC_URL. The endpoint is not printed."
+        throw "Could not read eth_chainId from FLOWMEMORY_BASE8453_RPC_URL. The endpoint is not printed."
     }
     if ($response.result -ne "0x2105") {
         throw "Wrong chain id for bridge ${Action}: expected Base 8453."
@@ -49,12 +49,12 @@ function Invoke-ChainCheck {
 }
 
 $requiredEnv = @(
-    "FLOWCHAIN_PILOT_OPERATOR_ACK",
-    "FLOWCHAIN_BASE8453_RPC_URL",
-    "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+    "FLOWMEMORY_PILOT_OPERATOR_ACK",
+    "FLOWMEMORY_BASE8453_RPC_URL",
+    "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS"
 )
 if ($Execute) {
-    $requiredEnv += @("FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY", "FLOWCHAIN_BASE8453_BROADCAST_ACK")
+    $requiredEnv += @("FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY", "FLOWMEMORY_BASE8453_BROADCAST_ACK")
 }
 
 $missing = @()
@@ -76,17 +76,17 @@ if ($missing.Count -gt 0) {
     throw "Bridge $Action blocked by missing env names."
 }
 
-if ((Get-BridgeEnv -Name "FLOWCHAIN_PILOT_OPERATOR_ACK") -ne $requiredAck) {
-    throw "FLOWCHAIN_PILOT_OPERATOR_ACK must equal $requiredAck."
+if ((Get-BridgeEnv -Name "FLOWMEMORY_PILOT_OPERATOR_ACK") -ne $requiredAck) {
+    throw "FLOWMEMORY_PILOT_OPERATOR_ACK must equal $requiredAck."
 }
-if ($Execute -and (Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_BROADCAST_ACK") -ne $broadcastAck) {
-    throw "FLOWCHAIN_BASE8453_BROADCAST_ACK must equal $broadcastAck."
+if ($Execute -and (Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_BROADCAST_ACK") -ne $broadcastAck) {
+    throw "FLOWMEMORY_BASE8453_BROADCAST_ACK must equal $broadcastAck."
 }
 
-$rpcUrl = Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_RPC_URL"
-$lockbox = Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"
+$rpcUrl = Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_RPC_URL"
+$lockbox = Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS"
 if ($lockbox -notmatch '^0x[0-9a-fA-F]{40}$') {
-    throw "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS must be a 20-byte hex address."
+    throw "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS must be a 20-byte hex address."
 }
 Invoke-ChainCheck -RpcUrl $rpcUrl
 
@@ -95,9 +95,9 @@ $value = if ($Action -eq "Resume") { "false" } else { "true" }
 
 if (-not $Execute) {
     $scriptName = switch ($Action) {
-        "Pause" { "flowchain:bridge:pause" }
-        "Resume" { "flowchain:bridge:resume" }
-        "EmergencyStop" { "flowchain:bridge:emergency-stop" }
+        "Pause" { "flowmemory:bridge:pause" }
+        "Resume" { "flowmemory:bridge:resume" }
+        "EmergencyStop" { "flowmemory:bridge:emergency-stop" }
     }
     Write-JsonReport -Value ([ordered]@{
         schema = "flowmemory.bridge_base8453_control_report.v0"
@@ -120,7 +120,7 @@ if (-not (Get-Command cast -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host "Broadcasting bridge $Action. RPC URL and private key are not printed."
-$privateKey = Get-BridgeEnv -Name "FLOWCHAIN_BASE8453_DEPLOYER_PRIVATE_KEY"
+$privateKey = Get-BridgeEnv -Name "FLOWMEMORY_BASE8453_DEPLOYER_PRIVATE_KEY"
 & cast send $lockbox $method $value --rpc-url $rpcUrl --private-key $privateKey
 if ($LASTEXITCODE -ne 0) {
     throw "cast send failed for bridge $Action."

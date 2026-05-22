@@ -11,11 +11,11 @@
     "withdrawalIntentId",
     "creditId",
     "depositId",
-    "flowchainChainId",
+    "flowmemoryChainId",
     "destinationChainId",
     "token",
     "amount",
-    "flowchainAccount",
+    "flowmemoryAccount",
     "baseRecipient",
     "withdrawalNonce",
     "signedBy",
@@ -45,8 +45,8 @@
     "depositId": {
       "$ref": "#/$defs/hex32"
     },
-    "flowchainChainId": {
-      "const": "flowchain-local-pilot-v0"
+    "flowmemoryChainId": {
+      "const": "flowmemory-local-pilot-v0"
     },
     "destinationChainId": {
       "type": "integer",
@@ -60,7 +60,7 @@
     "amount": {
       "$ref": "#/$defs/uintString"
     },
-    "flowchainAccount": {
+    "flowmemoryAccount": {
       "$ref": "#/$defs/hex32"
     },
     "baseRecipient": {
@@ -73,7 +73,7 @@
       "$ref": "#/$defs/hex32"
     },
     "signatureScheme": {
-      "const": "flowchain-pilot-deterministic-test-signature-v0"
+      "const": "flowmemory-pilot-deterministic-test-signature-v0"
     },
     "signedPayloadHash": {
       "$ref": "#/$defs/hex32"

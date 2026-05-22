@@ -58,8 +58,8 @@ export function verifierIdentity({ operatorId, verifierKeyId, verifierSetRoot })
   ]);
 }
 
-export function devnetBlockHash({ chainId, blockNumber, parentHash, stateRoot, timestamp }) {
-  return typedHash(TYPE_STRINGS.devnetBlockHashV0, [
+export function localRuntimeBlockHash({ chainId, blockNumber, parentHash, stateRoot, timestamp }) {
+  return typedHash(TYPE_STRINGS.localRuntimeBlockHashV0, [
     ["uint256", chainId],
     ["uint64", blockNumber],
     ["bytes32", parentHash],

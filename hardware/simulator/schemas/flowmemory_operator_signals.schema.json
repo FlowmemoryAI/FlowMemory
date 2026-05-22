@@ -1,0 +1,621 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowMemory Hardware Operator Signals Local Alpha",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generatedAt",
+    "chainId",
+    "environment",
+    "source",
+    "sourcePaths",
+    "boundary",
+    "packetMappings",
+    "signalEnvelopes",
+    "hardwareSignals",
+    "operatorMetadata",
+    "hardwareNodes",
+    "nodeHealth",
+    "peerHints",
+    "workReceipts",
+    "verifierReports",
+    "bridgeAlerts",
+    "artifactCommitments",
+    "memoryCells",
+    "challenges",
+    "finalityReceipts",
+    "alerts",
+    "workbenchRecords",
+    "compatibility"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "enum": ["flowmemory.hardware_operator_signals.local_alpha.v0"]
+    },
+    "generatedAt": { "type": "string" },
+    "chainId": { "type": "string", "enum": ["flowmemory-local-alpha"] },
+    "environment": { "type": "string", "enum": ["local-runtime-fixture"] },
+    "source": { "type": "string", "enum": ["fixture"] },
+    "sourcePaths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packetFixture",
+        "operatorFixture",
+        "operatorSchema",
+        "handoffFixture",
+        "handoffSchema",
+        "negativeReport",
+        "negativeReportSchema",
+        "mappingDoc"
+      ],
+      "properties": {
+        "packetFixture": { "type": "string", "maxLength": 128 },
+        "operatorFixture": { "type": "string", "maxLength": 128 },
+        "operatorSchema": { "type": "string", "maxLength": 128 },
+        "handoffFixture": { "type": "string", "maxLength": 128 },
+        "handoffSchema": { "type": "string", "maxLength": 128 },
+        "negativeReport": { "type": "string", "maxLength": 128 },
+        "negativeReportSchema": { "type": "string", "maxLength": 128 },
+        "mappingDoc": { "type": "string", "maxLength": 128 }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localOnly",
+        "advisory",
+        "normalNetworkReconciliationRequired",
+        "hardwareRequiredForPrivateTestnet",
+        "claimLimitations"
+      ],
+      "properties": {
+        "localOnly": { "type": "boolean", "enum": [true] },
+        "advisory": { "type": "boolean", "enum": [true] },
+        "normalNetworkReconciliationRequired": { "type": "boolean", "enum": [true] },
+        "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
+        "claimLimitations": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 180 }
+        }
+      }
+    },
+    "packetMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourcePacketType",
+          "flowmemorySignal",
+          "objectCollection",
+          "objectRef",
+          "localAlphaRole",
+          "trustBoundary"
+        ],
+        "properties": {
+          "sourcePacketType": {
+            "type": "string",
+            "enum": [
+              "device_manifest",
+              "heartbeat",
+              "node_health",
+              "peer_hint",
+              "compact_receipt_relay",
+              "verifier_report_digest_relay",
+              "emergency_offline_signal",
+              "bridge_alert",
+              "nfc_memory_cartridge_metadata"
+            ]
+          },
+          "flowmemorySignal": {
+            "type": "string",
+            "enum": [
+              "operator_metadata",
+              "hardware_node_status",
+              "node_health",
+              "peer_hint",
+              "work_receipt_reference",
+              "verifier_report_reference",
+              "alert_challenge_input",
+              "bridge_observer_alert",
+              "artifact_memory_reference"
+            ]
+          },
+          "objectCollection": {
+            "type": "string",
+            "enum": [
+              "operatorMetadata",
+              "hardwareNodes",
+              "nodeHealth",
+              "peerHints",
+              "workReceipts",
+              "verifierReports",
+              "challenges",
+              "bridgeAlerts",
+              "artifactCommitments"
+            ]
+          },
+          "objectRef": { "type": "string", "maxLength": 96 },
+          "localAlphaRole": { "type": "string", "maxLength": 140 },
+          "trustBoundary": { "type": "string", "maxLength": 160 }
+        }
+      }
+    },
+    "signalEnvelopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema",
+          "envelopeId",
+          "signalId",
+          "signalType",
+          "sourcePacketType",
+          "sourcePacketId",
+          "observedAt",
+          "status",
+          "localOnly",
+          "payloadBytesEstimate",
+          "loraEligible",
+          "objectRefs",
+          "provenance"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string",
+            "enum": ["flowmemory.hardware_operator_signal_envelope.local_alpha.v0"]
+          },
+          "envelopeId": { "type": "string", "maxLength": 64 },
+          "signalId": { "type": "string", "maxLength": 64 },
+          "signalType": {
+            "type": "string",
+            "enum": [
+              "operator_metadata",
+              "heartbeat",
+              "node_health",
+              "peer_hint",
+              "receipt_relay",
+              "verifier_digest_relay",
+              "offline_alert_challenge_input",
+              "bridge_alert",
+              "nfc_memory_cartridge_metadata"
+            ]
+          },
+          "sourcePacketType": { "type": "string", "maxLength": 64 },
+          "sourcePacketId": { "type": "string", "maxLength": 96 },
+          "observedAt": { "type": "string" },
+          "status": { "type": "string", "enum": ["observed", "pending", "unresolved"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "objectRefs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["collection", "objectId"],
+              "properties": {
+                "collection": { "type": "string", "maxLength": 64 },
+                "objectId": { "type": "string", "maxLength": 96 }
+              }
+            }
+          },
+          "provenance": { "type": "object" }
+        }
+      }
+    },
+    "hardwareSignals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "signalId",
+          "envelopeId",
+          "nodeId",
+          "signalType",
+          "sourcePacketType",
+          "summary",
+          "status",
+          "transport",
+          "receivedAt",
+          "localOnly",
+          "loraEligible",
+          "linkedObjectIds",
+          "provenance",
+          "rawEnvelope"
+        ],
+        "properties": {
+          "id": { "type": "string", "maxLength": 64 },
+          "signalId": { "type": "string", "maxLength": 64 },
+          "envelopeId": { "type": "string", "maxLength": 64 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "signalType": {
+            "type": "string",
+            "enum": [
+              "operator_metadata",
+              "heartbeat",
+              "node_health",
+              "peer_hint",
+              "receipt_relay",
+              "verifier_digest_relay",
+              "offline_alert_challenge_input",
+              "bridge_alert",
+              "nfc_memory_cartridge_metadata"
+            ]
+          },
+          "sourcePacketType": { "type": "string", "maxLength": 64 },
+          "summary": { "type": "string", "maxLength": 160 },
+          "status": { "type": "string", "enum": ["observed", "pending", "unresolved"] },
+          "transport": { "type": "string", "enum": ["local-simulator", "meshtastic-control-sim"] },
+          "receivedAt": { "type": "string" },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "loraEligible": { "type": "boolean" },
+          "linkedObjectIds": { "type": "array", "items": { "type": "string", "maxLength": 96 } },
+          "provenance": { "type": "object" },
+          "rawEnvelope": { "type": "object" }
+        }
+      }
+    },
+    "operatorMetadata": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "metadataId",
+          "operatorId",
+          "nodeId",
+          "rootfieldId",
+          "displayName",
+          "roles",
+          "transportPreferences",
+          "hardwareRequiredForPrivateTestnet",
+          "noSecrets",
+          "radioPayloadBudgetBytes",
+          "metadataSource",
+          "observedAt",
+          "localOnly",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "metadataId": { "type": "string", "maxLength": 96 },
+          "operatorId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "displayName": { "type": "string", "maxLength": 96 },
+          "roles": { "type": "array", "items": { "type": "string", "maxLength": 48 } },
+          "transportPreferences": { "type": "array", "items": { "type": "string", "maxLength": 48 } },
+          "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
+          "noSecrets": { "type": "boolean", "enum": [true] },
+          "radioPayloadBudgetBytes": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "metadataSource": { "type": "string", "enum": ["device_manifest"] },
+          "observedAt": { "type": "string" },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["device_manifest"] }
+        }
+      }
+    },
+    "hardwareNodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "nodeId", "role", "transport", "lastHeartbeatAt", "status", "localOnly", "sourcePacketType"],
+        "properties": {
+          "id": { "type": "string", "maxLength": 64 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "role": { "type": "string", "enum": ["router", "gateway", "sidecar", "field-kit"] },
+          "transport": { "type": "string", "maxLength": 96 },
+          "lastHeartbeatAt": { "type": "string" },
+          "status": { "type": "string", "enum": ["verified", "stale", "offline", "observed"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["heartbeat"] }
+        }
+      }
+    },
+    "nodeHealth": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nodeHealthId", "nodeId", "rootfieldId", "health", "observedAt", "healthDigest", "status", "payloadBytesEstimate", "loraEligible", "chainStartupBlocking", "localOnly", "sourcePacketType"],
+        "properties": {
+          "nodeHealthId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "health": { "type": "string", "enum": ["healthy", "warning", "critical", "unknown"] },
+          "observedAt": { "type": "string" },
+          "healthDigest": { "type": "string", "maxLength": 66 },
+          "status": { "type": "string", "enum": ["observed", "stale", "offline"] },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "chainStartupBlocking": { "type": "boolean", "enum": [false] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["node_health"] }
+        }
+      }
+    },
+    "peerHints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["peerHintId", "nodeId", "peerId", "peerRole", "transport", "linkState", "lastSeenAt", "payloadBytesEstimate", "loraEligible", "normalNetworkRequiredForSync", "localOnly", "sourcePacketType"],
+        "properties": {
+          "peerHintId": { "type": "string", "maxLength": 96 },
+          "nodeId": { "type": "string", "maxLength": 64 },
+          "peerId": { "type": "string", "maxLength": 64 },
+          "peerRole": { "type": "string", "enum": ["observer", "relay", "gateway", "field-kit"] },
+          "transport": { "type": "string", "enum": ["local-simulator", "meshtastic-control-sim", "lora-control-sim"] },
+          "linkState": { "type": "string", "enum": ["heard", "stale", "lost", "unknown"] },
+          "lastSeenAt": { "type": "string" },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "normalNetworkRequiredForSync": { "type": "boolean", "enum": [true] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["peer_hint"] }
+        }
+      }
+    },
+    "workReceipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "receiptId",
+          "rootfieldId",
+          "workerId",
+          "inputRoot",
+          "outputRoot",
+          "artifactCommitment",
+          "ruleSet",
+          "status",
+          "receiptDigest",
+          "locatorHint",
+          "resolutionState",
+          "localOnly",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "receiptId": { "type": "string", "maxLength": 96 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "workerId": { "type": "string", "maxLength": 96 },
+          "inputRoot": { "type": "string", "maxLength": 66 },
+          "outputRoot": { "type": "string", "maxLength": 66 },
+          "artifactCommitment": { "type": "string", "maxLength": 66 },
+          "ruleSet": { "type": "string", "maxLength": 96 },
+          "status": { "type": "string", "enum": ["observed", "pending", "unresolved", "verified", "failed"] },
+          "receiptDigest": { "type": "string", "maxLength": 66 },
+          "locatorHint": { "type": "object" },
+          "resolutionState": { "type": "string", "enum": ["needs-normal-network-reconciliation"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["compact_receipt_relay"] }
+        }
+      }
+    },
+    "verifierReports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "reportId",
+          "rootfieldId",
+          "receiptId",
+          "verifierId",
+          "reportDigest",
+          "subjectDigest",
+          "status",
+          "reasonCodes",
+          "resolutionState",
+          "localOnly",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "reportId": { "type": "string", "maxLength": 96 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "receiptId": { "type": "string", "maxLength": 96 },
+          "verifierId": { "type": "string", "maxLength": 96 },
+          "reportDigest": { "type": "string", "maxLength": 66 },
+          "subjectDigest": { "type": "string", "maxLength": 66 },
+          "status": { "type": "string", "enum": ["valid", "invalid", "unresolved", "stale"] },
+          "reasonCodes": { "type": "array", "items": { "type": "string", "maxLength": 96 } },
+          "resolutionState": { "type": "string", "enum": ["needs-full-report"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["verifier_report_digest_relay"] }
+        }
+      }
+    },
+    "bridgeAlerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "bridgeAlertId",
+          "bridgeId",
+          "rootfieldId",
+          "severity",
+          "alertCode",
+          "sourceChain",
+          "targetChain",
+          "subjectId",
+          "eventDigest",
+          "blockHint",
+          "status",
+          "resolutionState",
+          "summary",
+          "recommendedAction",
+          "payloadBytesEstimate",
+          "loraEligible",
+          "localOnly",
+          "doesNotBlockLocalChain",
+          "sourcePacketType"
+        ],
+        "properties": {
+          "bridgeAlertId": { "type": "string", "maxLength": 96 },
+          "bridgeId": { "type": "string", "maxLength": 48 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+          "alertCode": { "type": "string", "maxLength": 64 },
+          "sourceChain": { "type": "string", "maxLength": 48 },
+          "targetChain": { "type": "string", "maxLength": 48 },
+          "subjectId": { "type": "string", "maxLength": 64 },
+          "eventDigest": { "type": "string", "maxLength": 66 },
+          "blockHint": { "type": "integer", "minimum": 0 },
+          "status": { "type": "string", "enum": ["unresolved", "pending", "verified", "failed"] },
+          "resolutionState": { "type": "string", "enum": ["operator-review-required"] },
+          "summary": { "type": "string", "maxLength": 180 },
+          "recommendedAction": { "type": "string", "maxLength": 96 },
+          "payloadBytesEstimate": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "loraEligible": { "type": "boolean" },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "doesNotBlockLocalChain": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["bridge_alert"] }
+        }
+      }
+    },
+    "artifactCommitments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifactId", "rootfieldId", "commitment", "uriHint", "status", "localOnly", "sourcePacketType"],
+        "properties": {
+          "artifactId": { "type": "string", "maxLength": 96 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "commitment": { "type": "string", "maxLength": 66 },
+          "uriHint": { "type": "string", "maxLength": 128 },
+          "status": { "type": "string", "enum": ["observed", "pending", "verified", "failed"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["nfc_memory_cartridge_metadata"] }
+        }
+      }
+    },
+    "memoryCells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["memoryCellId", "rootfieldId", "latestRoot", "receiptId", "artifactId", "status", "localOnly", "sourcePacketType"],
+        "properties": {
+          "memoryCellId": { "type": "string", "maxLength": 96 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "latestRoot": { "type": "string", "maxLength": 66 },
+          "receiptId": { "type": "string", "maxLength": 96 },
+          "artifactId": { "type": "string", "maxLength": 96 },
+          "status": { "type": "string", "enum": ["observed", "pending", "verified", "failed"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["nfc_memory_cartridge_metadata"] }
+        }
+      }
+    },
+    "challenges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["challengeId", "targetId", "receiptId", "reportId", "openedBy", "status", "summary", "doesNotExecuteRemoteAction", "localOnly", "sourcePacketType"],
+        "properties": {
+          "challengeId": { "type": "string", "maxLength": 96 },
+          "targetId": { "type": "string", "maxLength": 96 },
+          "receiptId": { "type": "string", "maxLength": 96 },
+          "reportId": { "type": "string", "maxLength": 96 },
+          "openedBy": { "type": "string", "maxLength": 96 },
+          "status": { "type": "string", "enum": ["pending"] },
+          "summary": { "type": "string", "maxLength": 180 },
+          "doesNotExecuteRemoteAction": { "type": "boolean", "enum": [true] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["emergency_offline_signal"] }
+        }
+      }
+    },
+    "finalityReceipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finalityReceiptId", "objectId", "receiptId", "rootfieldId", "finalityStatus", "settlement", "status", "localOnly", "sourcePacketType"],
+        "properties": {
+          "finalityReceiptId": { "type": "string", "maxLength": 96 },
+          "objectId": { "type": "string", "maxLength": 96 },
+          "receiptId": { "type": "string", "maxLength": 96 },
+          "rootfieldId": { "type": "string", "maxLength": 96 },
+          "finalityStatus": { "type": "string", "enum": ["local-pending"] },
+          "settlement": { "type": "string", "enum": ["local-fixture"] },
+          "status": { "type": "string", "enum": ["pending"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["compact_receipt_relay"] }
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "incidentId", "severity", "title", "summary", "openedAt", "linkedObjectIds", "recommendedAction", "status", "localOnly", "sourcePacketType"],
+        "properties": {
+          "id": { "type": "string", "maxLength": 96 },
+          "incidentId": { "type": "string", "maxLength": 96 },
+          "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+          "title": { "type": "string", "maxLength": 96 },
+          "summary": { "type": "string", "maxLength": 180 },
+          "openedAt": { "type": "string" },
+          "linkedObjectIds": { "type": "array", "items": { "type": "string", "maxLength": 96 } },
+          "recommendedAction": { "type": "string", "maxLength": 96 },
+          "status": { "type": "string", "enum": ["unresolved", "pending", "verified", "failed"] },
+          "localOnly": { "type": "boolean", "enum": [true] },
+          "sourcePacketType": { "type": "string", "enum": ["emergency_offline_signal", "bridge_alert"] }
+        }
+      }
+    },
+    "workbenchRecords": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operatorMetadata",
+        "nodeHealth",
+        "peerHints",
+        "receipts",
+        "verifierReports",
+        "bridgeAlerts",
+        "artifacts",
+        "memoryCells",
+        "challenges",
+        "hardwareSignals",
+        "provenance"
+      ],
+      "properties": {
+        "operatorMetadata": { "type": "array", "items": { "type": "object" } },
+        "nodeHealth": { "type": "array", "items": { "type": "object" } },
+        "peerHints": { "type": "array", "items": { "type": "object" } },
+        "receipts": { "type": "array", "items": { "type": "object" } },
+        "verifierReports": { "type": "array", "items": { "type": "object" } },
+        "bridgeAlerts": { "type": "array", "items": { "type": "object" } },
+        "artifacts": { "type": "array", "items": { "type": "object" } },
+        "memoryCells": { "type": "array", "items": { "type": "object" } },
+        "challenges": { "type": "array", "items": { "type": "object" } },
+        "hardwareSignals": { "type": "array", "items": { "type": "object" } },
+        "provenance": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["controlPlaneStateKeys", "workbenchSectionKeys", "jsonRpcBoundary", "flowmemoryFullSmokeOptionalRow"],
+      "properties": {
+        "controlPlaneStateKeys": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "workbenchSectionKeys": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "jsonRpcBoundary": { "type": "string", "maxLength": 160 },
+        "flowmemoryFullSmokeOptionalRow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label", "command", "requiredForChainProgress", "hardwareRequired"],
+          "properties": {
+            "label": { "type": "string", "maxLength": 96 },
+            "command": { "type": "string", "maxLength": 128 },
+            "requiredForChainProgress": { "type": "boolean", "enum": [false] },
+            "hardwareRequired": { "type": "boolean", "enum": [false] }
+          }
+        }
+      }
+    }
+  }
+}

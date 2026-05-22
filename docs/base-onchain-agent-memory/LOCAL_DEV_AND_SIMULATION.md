@@ -11,8 +11,8 @@ Do not break the current baseline:
 ```powershell
 npm run launch:v0
 npm run launch:candidate
-npm run flowchain:smoke
-npm run flowchain:full-smoke
+npm run public:test:quick
+npm run public:test:cli
 ```
 
 Use the existing launch-core fixtures, schemas, indexer/verifier packages, dashboard fixture generation, and Agent Bonds local/test surfaces wherever possible.
@@ -127,7 +127,7 @@ It:
 - executes real on-chain `registerAgent`, `setToolPolicy`, `step`, `setAgentPaused`, and `correctMemory` calls;
 - captures actual emitted FlowPulse receipts;
 - indexes and verifies the deployed step receipt path;
-- writes local e2e artifacts under `devnet/local/base-agent-memory-e2e/`.
+- writes local e2e artifacts under `local test runtime/local/base-agent-memory-e2e/`.
 Add or extend fixture-backed dashboard views only after the data model is stable.
 
 Minimum fields:
@@ -160,7 +160,7 @@ Required safety gates:
 
 ## External model review workflow
 
-If using GPT, DeepSeek, or another model for architecture review:
+If using an external model for architecture review:
 
 1. Do not paste secrets.
 2. Give it this documentation package and ask for adversarial review.
@@ -172,8 +172,7 @@ If using GPT, DeepSeek, or another model for architecture review:
 Suggested environment variable names if a local script is later added:
 
 ```text
-DEEPSEEK_API_KEY
-OPENAI_API_KEY
+MODEL_REVIEW_API_KEY
 ```
 
 These variables must remain local and uncommitted.

@@ -22,7 +22,7 @@ import {
 } from "../src/rpc.ts";
 
 function loadExplorerFallback(): unknown {
-  return JSON.parse(readFileSync(join(process.cwd(), "..", "..", "fixtures", "dashboard", "flowchain-l1-explorer-fallback.json"), "utf8"));
+  return JSON.parse(readFileSync(join(process.cwd(), "..", "..", "fixtures", "dashboard", "flowmemory-network-explorer-fallback.json"), "utf8"));
 }
 
 test("indexes FlowPulse fixture logs into canonical observations", () => {
@@ -82,11 +82,11 @@ test("indexes deterministic explorer fallback token, DEX, and bridge rows with p
   assert.equal(state.explorer.counts.tokens, 1);
   assert.equal(state.explorer.counts.bridgeEvents, 2);
   assert.equal(state.explorer.counts.duplicateOrReplayEvents, 2);
-  assert.equal(state.explorer.tokens[0].tokenId, "token:flowchain-pilot-ltu");
+  assert.equal(state.explorer.tokens[0].tokenId, "token:flowmemory-pilot-ltu");
   assert.deepEqual(state.explorer.tokens[0].transferHistory, ["0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa"]);
   assert.equal(state.explorer.pools.some((pool) => pool.poolId === "pool:fclt-local-unit"), true);
   assert.equal(state.explorer.bridgeEvents.some((event) => event.sourceChainId === "8453" && event.replayStatus === "duplicate"), true);
-  assert.ok(state.explorer.searchKeys.token.includes("token:flowchain-pilot-ltu"));
+  assert.ok(state.explorer.searchKeys.token.includes("token:flowmemory-pilot-ltu"));
   assert.ok(state.explorer.searchKeys.pool.includes("pool:fclt-local-unit"));
   assert.ok(state.explorer.searchKeys.bridgeObservation.includes("0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c"));
   assert.ok(state.explorer.searchKeys.bridgeCredit.includes("0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6"));

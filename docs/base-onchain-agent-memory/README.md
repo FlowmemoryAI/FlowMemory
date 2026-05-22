@@ -68,9 +68,9 @@ If off-chain data matters to replay or verification, it enters through a commitm
 
 Base is the first chain target because the surrounding agent ecosystem, low-cost EVM execution, ERC tooling, wallet/account infrastructure, Base Sepolia rehearsal path, and existing FlowMemory contract work make it the cleanest place to prove this memory kernel. The docs keep Base scope explicit so contract addresses, chain IDs, event readers, SDK clients, and deployment runbooks do not drift across networks.
 
-## How this is different from Nookplot
+## Scope discipline
 
-Nookplot is a broad agent coordination network: identity, reputation, messaging, publishing, bounties, marketplace surfaces, gateway APIs, MCP tooling, and hosted memory. FlowMemory should not clone that surface area.
+FlowMemory should not become a broad coordination network, social layer, marketplace, or hosted-memory product. The public surface should stay focused on verifiable memory and replay.
 
 FlowMemory should be better at the narrower kernel:
 
@@ -96,19 +96,12 @@ FlowMemory should be better at the narrower kernel:
 - [Examples](./EXAMPLES.md) — On-Chain Task Scout walkthroughs and SDK call shape.
 - [Glossary](./GLOSSARY.md) — exact vocabulary.
 - [FAQ](./FAQ.md) — common misconceptions and non-goals.
-- [Build Goal](./BUILD_GOAL.md) — copy-ready principal-agent goal.
 - [SDK Reference](./SDK_REFERENCE.md) — fixture-backed client API for the first task-scout proof.
 - [Acceptance Matrix](./ACCEPTANCE_MATRIX.md) — what must be true before claiming the workstream is complete.
 - [Public Repository Guide](../PUBLIC_REPO_GUIDE.md) — top-level public reader map, repo layout, trust boundary, verification commands, and gap links.
 - [Public Tester Guide](../PUBLIC_TESTER_GUIDE.md) — external tester lanes, expected results, CLI/control-plane trial, and report template.
 - [Public Agent Network Technical Guide](../PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md) — current implementation guide across contracts, helpers, control-plane, SDK, dashboard, tests, and issues.
 - [Public Agent Network Architecture](./PUBLIC_AGENT_NETWORK_ARCHITECTURE.md) — exact public-launch contract, factory, token, and swarm architecture.
-- [GPT Public Agent Network Draft](./GPT_PUBLIC_AGENT_NETWORK_DRAFT.md) — creative external architecture draft captured after prompting GPT with FlowMemory's public-launch context.
-- [Public Agent Network Goal Prompt](../agent-goals/PUBLIC_AGENT_NETWORK_GOAL_PROMPT.md) — copy-ready goal for building the public Base agent network.
-- [Public Agent Network Execution Pack](../agent-goals/PUBLIC_AGENT_NETWORK_EXECUTION_PACK.md) — decomposed implementation tracks for the public network.
-- [Public Agent Network Full Build Goal](../agent-goals/PUBLIC_AGENT_NETWORK_FULL_BUILD_GOAL.md) — comprehensive public-network objective with contract stack, launch flow, token rules, swarms, and phased roadmap.
-- [Public Agent Network Module Prompts](../agent-goals/PUBLIC_AGENT_NETWORK_MODULE_PROMPTS.md) — copy-ready prompts for each major contract and surface.
-- [Public Agent Network Complete Build Goal Prompt](../agent-goals/PUBLIC_AGENT_NETWORK_COMPLETE_BUILD_GOAL_PROMPT.md) — single master prompt for building the full public Base agent network.
 
 ## Non-goals for the first build
 

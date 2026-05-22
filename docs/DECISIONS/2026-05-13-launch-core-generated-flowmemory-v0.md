@@ -16,7 +16,7 @@ FlowMemory needed a single local acceptance path that connected previously separ
 - Rootflow transitions.
 - Flow Memory objects.
 - Dashboard-readable state.
-- Local no-value devnet handoff output.
+- Local no-value local test runtime handoff output.
 - FlowRouter hardware POC fixture output.
 
 Before this decision, each subsystem had useful local fixtures, but the project did not have one command that regenerated the launch-core state end to end.
@@ -29,7 +29,7 @@ The command:
 
 1. runs the indexer fixture command;
 2. runs the verifier fixture command;
-3. runs the no-value local devnet demo handoff;
+3. runs the no-value local test runtime demo handoff;
 4. validates the FlowRouter hardware POC fixture;
 5. generates Rootflow and Flow Memory V0 state;
 6. writes the dashboard fixture and runtime data.
@@ -40,7 +40,7 @@ Generated canonical outputs:
 - `fixtures/launch-core/rootflow-transitions.json`
 - `fixtures/dashboard/flowmemory-dashboard-v0.json`
 - `apps/dashboard/public/data/flowmemory-dashboard-v0.json`
-- `fixtures/launch-core/generated/devnet/`
+- `fixtures/launch-core/generated/local test runtime/`
 
 Canonical schema files:
 
@@ -60,7 +60,7 @@ Verifier report statuses remain internal verifier results. The explicit adapter 
 
 ## Boundaries
 
-This is local/test V0 only. It is not a production L1, production Uniswap v4 deployment, hosted verifier network, proof system, production hardware deployment, or claim that AI runs on-chain.
+This is local/test V0 only. It is not a separate production network, production Uniswap v4 deployment, hosted verifier network, proof system, production hardware deployment, or claim that AI runs on-chain.
 
 Heavy memory/model/artifact data remains off-chain. The generated files contain roots, receipts, observations, commitments, reports, status mappings, and fixture metadata only.
 
@@ -75,4 +75,4 @@ Heavy memory/model/artifact data remains off-chain. The generated files contain 
 
 - Add richer schema validation if the repo adopts a JSON Schema validator dependency.
 - Add live RPC indexing only after fixture behavior remains stable.
-- Keep production deployment, tokenomics, verifier economics, and L1/appchain planning gated behind separate decisions.
+- Keep production deployment, tokenomics, verifier economics, and dedicated-network planning gated behind separate decisions.

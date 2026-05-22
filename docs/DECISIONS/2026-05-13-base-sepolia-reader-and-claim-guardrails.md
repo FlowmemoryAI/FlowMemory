@@ -26,7 +26,7 @@ The project also needs stronger protection against unsafe launch language as doc
 - No Base mainnet reader by default.
 - No production indexer service.
 - No production verifier network.
-- No production L1 or mainnet readiness claim.
+- No separate production network or mainnet readiness claim.
 - No free-storage claim.
 - No claim that AI runs on-chain.
 

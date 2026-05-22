@@ -31,7 +31,7 @@ If you do not yet have the actual deployment and operator values handy, start wi
 You can assemble a launch approval packet from the pilot config plus the four structured approval artifacts with:
 
 ```powershell
-npm run flowmemory:agent-bonds:public-launch:assemble -- fixtures/agent-bonds/launch-approval.generated.json fixtures/agent-bonds/pilot-config.template.json fixtures/agent-bonds/approvals/external-review.template.json fixtures/agent-bonds/approvals/operator-separation.template.json fixtures/agent-bonds/approvals/runtime-evidence.template.json fixtures/agent-bonds/approvals/go-no-go.template.json devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json out/agent-bonds-operator-bundle
+npm run flowmemory:agent-bonds:public-launch:assemble -- fixtures/agent-bonds/launch-approval.generated.json fixtures/agent-bonds/pilot-config.template.json fixtures/agent-bonds/approvals/external-review.template.json fixtures/agent-bonds/approvals/operator-separation.template.json fixtures/agent-bonds/approvals/runtime-evidence.template.json fixtures/agent-bonds/approvals/go-no-go.template.json local test runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json out/agent-bonds-operator-bundle
 ```
 
 If you are starting from owner inputs instead of hand-editing every file, first run:

@@ -4,7 +4,7 @@ Date: 2026-05-13
 
 Status: live Base mainnet canary deployment for V0 testing only.
 
-This is not a production launch, production L1 deployment, token launch,
+This is not a production launch, separate production network deployment, token launch,
 production verifier network, or production Uniswap v4 hook deployment.
 
 ## Network

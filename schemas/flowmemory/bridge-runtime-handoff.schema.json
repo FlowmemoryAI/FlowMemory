@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/bridge-runtime-handoff.schema.json",
-  "title": "FlowChainBridgeRuntimeHandoff",
+  "title": "FlowMemoryBridgeRuntimeHandoff",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -75,7 +75,7 @@
       "required": ["status", "consumer", "expectedPath", "note"],
       "properties": {
         "status": { "const": "handoff_file" },
-        "consumer": { "const": "flowchain-runtime-agent" },
+        "consumer": { "const": "flowmemory-runtime-agent" },
         "expectedPath": { "type": "string" },
         "note": { "type": "string" }
       }

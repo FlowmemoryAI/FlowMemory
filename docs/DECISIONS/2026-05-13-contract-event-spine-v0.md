@@ -42,7 +42,7 @@ fixture-backed until a separate live indexing/API decision is accepted.
   or receipt status during execution.
 - Indexers derive receipt locator fields after reading receipts and logs.
 - This is not a production Uniswap v4 deployment.
-- This is not a production L1, production mainnet readiness, full trustless
+- This is not a separate production network, production mainnet readiness, full trustless
   verification, free storage, or AI running on-chain.
 
 ## Consequences

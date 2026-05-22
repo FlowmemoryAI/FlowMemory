@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/bridge-credit-set.schema.json",
-  "title": "FlowChainBridgeCreditSet",
+  "title": "FlowMemoryBridgeCreditSet",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "creditSetId", "generatedAt", "count", "credits", "productionReady"],

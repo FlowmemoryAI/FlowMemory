@@ -221,7 +221,7 @@ export interface LaunchCoreOutput {
   sourcePaths: {
     indexer: string;
     verifier: string;
-    devnet: string;
+    localRuntime: string;
     hardware: string;
     agentBondFixture: string;
     agentMemoryFixture: string;

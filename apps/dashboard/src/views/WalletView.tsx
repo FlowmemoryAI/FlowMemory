@@ -136,7 +136,7 @@ type BridgeStatus = {
   applied?: number;
   pending?: number;
   productionReadyCredits?: number;
-  publicProductionL1Ready?: boolean;
+  publicProductionNetworkReady?: boolean;
   liveRuntimeHandoffLoaded?: boolean;
 };
 
@@ -161,7 +161,7 @@ type WalletApiResult<T> = {
 type ActionPanel = "home" | "wallet" | "send" | "receive" | "swap" | "activity" | "security" | "settings" | "staking" | "tester";
 
 const ACTION_PANELS: ActionPanel[] = ["home", "wallet", "send", "receive", "swap", "activity", "security", "settings", "staking", "tester"];
-const TESTER_WRITE_ENV_NAMES = ["FLOWCHAIN_TESTER_WRITE_ENABLED", "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256", "FLOWCHAIN_TESTER_MAX_SEND_UNITS"];
+const TESTER_WRITE_ENV_NAMES = ["FLOWMEMORY_TESTER_WRITE_ENABLED", "FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256", "FLOWMEMORY_TESTER_MAX_SEND_UNITS"];
 
 function panelFromQuery(value: string | null): ActionPanel | null {
   if (value === null) return null;
@@ -373,7 +373,7 @@ export function WalletView({ workbench }: WalletViewProps) {
   const totalEth = balances.reduce((sum, balance) => sum + weiToEth(balance.amount ?? balance.creditedAmount), 0);
   const totalUsd = totalEth * (ethUsdRate ?? 0);
   const hasWallet = Boolean(activeAccountId || primaryWalletAddress);
-  const networkBadge = bridgeStatus?.publicProductionL1Ready ? "Live" : bridgeStatus?.liveRuntimeHandoffLoaded ? "Pilot" : "Local";
+  const networkBadge = bridgeStatus?.publicProductionNetworkReady ? "Live" : bridgeStatus?.liveRuntimeHandoffLoaded ? "Pilot" : "Local";
   const canCreate = passphrase.length >= 8 && !loading;
   const liveReadinessRecords = workbench.sections.liveReadiness;
   const testerGatewayGate = liveReadinessRecords.find((record) => record.id === "public-tester-write-gateway");
@@ -1268,13 +1268,13 @@ export function WalletView({ workbench }: WalletViewProps) {
               </div>
 
               <div className="wallet-tester-links" aria-label="Tester inspection views">
-                <Link to="/explorer">
+                <Link to="/raw">
                   <Search size={17} aria-hidden="true" />
-                  Inspect tester activity
+                  Inspect raw evidence
                 </Link>
-                <Link to="/ops">
+                <Link to="/alerts">
                   <Bell size={17} aria-hidden="true" />
-                  Open ops status
+                  Open alerts
                 </Link>
               </div>
             </div>

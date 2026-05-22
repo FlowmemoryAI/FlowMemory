@@ -3,13 +3,13 @@
     "schema": "flowmemory.dashboard.fixture.v0",
     "generatedAt": "2026-05-13T17:02:00.000Z",
     "mode": "fixture",
-    "description": "Generated local FlowMemory Dashboard V0 fixture from services, local devnet, and hardware POC outputs. It does not claim live production data.",
+    "description": "Generated local FlowMemory Dashboard V0 fixture from services, local runtime, and hardware POC outputs. It does not claim live production data.",
     "fixturePath": "fixtures/dashboard/flowmemory-dashboard-v0.json",
     "runtimeDataPath": "apps/dashboard/public/data/flowmemory-dashboard-v0.json",
     "futureGeneratedPaths": {
       "indexer": "services/indexer/out/indexer-state.json",
       "verifier": "services/verifier/out/reports.json",
-      "devnet": "fixtures/launch-core/generated/devnet/state.json",
+      "localRuntime": "fixtures/launch-core/generated/local-runtime/state.json",
       "hardware": "hardware/fixtures/flowrouter_sample_seed42.json",
       "agentBondFixture": "fixtures/agent-bonds/agent-bonds-v1.json",
       "agentMemoryFixture": "fixtures/base-agent-memory/task-scout-v0.json"
@@ -18,8 +18,8 @@
   "chain": {
     "chainId": "8453",
     "name": "FlowMemory local V0 fixture stack",
-    "environment": "local-devnet",
-    "settlementContext": "Base-native fixture observations plus no-value local devnet handoff; not Base mainnet production data.",
+    "environment": "local-runtime",
+    "settlementContext": "Base-native fixture observations plus no-value local runtime handoff; not Base mainnet production data.",
     "currentBlock": 17000001,
     "finalizedBlock": 123457,
     "source": "fixture",
@@ -2936,7 +2936,7 @@
       "chainContext": "flowmemory-local-v0",
       "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
       "capturedAt": "2026-05-13T17:02:00.000Z",
-      "localPathHint": "devnet/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"
+      "localPathHint": "local-runtime/local/agent-bonds-readiness/agent-bonds-phase2-gate.json"
     }
   },
   "agentBondA2A": {
@@ -3818,7 +3818,7 @@
       }
     }
   ],
-  "devnetBlocks": [
+  "localRuntimeBlocks": [
     {
       "id": "0xd890758bdeaa4ab7a658d7813b2b9bdd0850824aaef830b9f2f4ff455aaf3811",
       "blockNumber": 1,
@@ -3833,12 +3833,12 @@
       "status": "stale",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
-        "subsystem": "devnet",
+        "subsystem": "localRuntime",
         "origin": "fixture",
         "chainContext": "flowmemory-local-v0",
         "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
         "capturedAt": "2026-05-13T17:02:00.000Z",
-        "localPathHint": "fixtures/launch-core/generated/devnet/state.json"
+        "localPathHint": "fixtures/launch-core/generated/local-runtime/state.json"
       }
     },
     {
@@ -3855,12 +3855,12 @@
       "status": "finalized",
       "lastUpdated": "2026-05-13T17:02:00.000Z",
       "provenance": {
-        "subsystem": "devnet",
+        "subsystem": "localRuntime",
         "origin": "fixture",
         "chainContext": "flowmemory-local-v0",
         "fixturePath": "fixtures/launch-core/flowmemory-launch-v0.json",
         "capturedAt": "2026-05-13T17:02:00.000Z",
-        "localPathHint": "fixtures/launch-core/generated/devnet/state.json"
+        "localPathHint": "fixtures/launch-core/generated/local-runtime/state.json"
       }
     }
   ],

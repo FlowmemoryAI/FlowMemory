@@ -33,7 +33,7 @@
         "token": "0x3333333333333333333333333333333333333333",
         "amount": "20000000",
         "sender": "0x4444444444444444444444444444444444444444",
-        "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "flowmemoryRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         "nonce": "1",
         "metadataHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "status": "observed"
@@ -82,7 +82,7 @@
         "decimals": 18
       },
       "amount": "20000000",
-      "flowchainRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "flowmemoryRecipient": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "status": "applied",
       "appliedAt": "2026-05-13T00:00:00.000Z",
       "localOnly": false,
@@ -129,7 +129,7 @@
         "maxUsd": "1",
         "maxDepositAmount": "20000000",
         "totalCapAmount": "20000000",
-        "pilotModeTag": "0x8edc10ba20d09d2f920c2135ea53baaa72ec90df339d57248f096ca150771a6e",
+        "pilotModeTag": "0xefaa6123a077975f7e3f91a9408b025c8eaf4422c372add208d3d0c5d8ce8f92",
         "supportedTokens": [
           "0x3333333333333333333333333333333333333333"
         ],
@@ -146,8 +146,8 @@
         "duplicateReplayKeys": []
       },
       "nextOperatorCommands": [
-        "npm run flowchain:real-value-pilot:runtime",
-        "npm run flowchain:bridge:live:check"
+        "npm run flowmemory:real-value-pilot:runtime",
+        "npm run flowmemory:bridge:live:check"
       ]
     }
   ],
@@ -161,7 +161,7 @@
   },
   "runtimeIntake": {
     "status": "handoff_file",
-    "consumer": "flowchain-runtime-agent",
+    "consumer": "flowmemory-runtime-agent",
     "expectedPath": "fixtures/bridge/base8453-runtime-bridge-handoff.json",
     "note": "Runtime live pilot handoff fixture for exact-value credit application tests."
   },
@@ -178,7 +178,7 @@
       "status": "applied",
       "objectId": "0xc4f46eb30b6b1e47b682bbe2c892f40c4eb83149d662b22df6b8f72efad71468",
       "title": "Credit applied",
-      "summary": "20000000 smallest units applied to the FlowChain destination wallet."
+      "summary": "20000000 smallest units applied to the FlowMemory destination wallet."
     }
   ],
   "workbenchRecords": [],

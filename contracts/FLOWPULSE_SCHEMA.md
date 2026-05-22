@@ -1,8 +1,8 @@
 # FlowPulse Schema v0
 
-FlowPulse is the first shared event stream for FlowMemory protocol activity. It is intentionally small and commitment-oriented: contracts emit roots, commitments, and advisory URI strings while indexers and verifiers reconstruct full context from receipts, logs, and off-chain artifacts. Contract state is compact by design; it is not an artifact store, model store, bridge state machine, or production L1 state surface.
+FlowPulse is the first shared event stream for FlowMemory protocol activity. It is intentionally small and commitment-oriented: contracts emit roots, commitments, and advisory URI strings while indexers and verifiers reconstruct full context from receipts, logs, and off-chain artifacts. Contract state is compact by design; it is not an artifact store, model store, bridge state machine, or production network state surface.
 
-For the private/local FlowChain testnet, FlowPulse contracts are optional anchors and event mirrors. The private L1 runtime is the Rust/local devnet and local service stack, not Solidity.
+For the private/local FlowMemory testnet, FlowPulse contracts are optional anchors and event mirrors. The private network runtime is the Rust/local runtime and local service stack, not Solidity.
 
 ## Solidity Event
 
@@ -47,7 +47,7 @@ FlowPulse does not include `txHash` or `logIndex`. Those values are not availabl
 - `RootfieldRegistry` rejects zero `rootfieldId`, zero `schemaHash`, zero committed root, and zero `artifactCommitment` so local-alpha root transitions keep enough compact state for indexers and verifiers to reconstruct the object model.
 - Verifiers must validate any referenced off-chain content against the emitted `commitment`.
 - Pulse type expansion should happen by reserving new numeric values and documenting their subject and commitment semantics before contracts depend on them.
-- Base settlement-anchor use remains placeholder/research until a separate issue, threat model, and deployment review approve a concrete anchor design. The current event schema does not implement a bridge, appchain finality, or production settlement guarantees.
+- Base settlement-anchor use remains placeholder/research until a separate issue, threat model, and deployment review approve a concrete anchor design. The current event schema does not implement a bridge, local runtime finality, or production settlement guarantees.
 - `FlowMemoryHookAdapter` is a V0 scaffold. Its direct helper and dependency-light Uniswap v4-shaped `afterSwap` path emit the same `SWAP_MEMORY_SIGNAL` semantics, but neither path is a production hook deployment, dynamic-fee hook, or custody path.
 - Current Solidity contracts do not expose challenge resolution or finality state. Verifier statuses such as `REORGED` are compact report values for off-chain reconciliation.
 

@@ -22,7 +22,7 @@
     "schema": { "type": "string", "enum": ["flowmemory.hardware_control_plane_handoff.local_alpha.v0"] },
     "generatedAt": { "type": "string" },
     "chainId": { "type": "string", "enum": ["flowmemory-local-alpha"] },
-    "environment": { "type": "string", "enum": ["local-devnet-fixture"] },
+    "environment": { "type": "string", "enum": ["local-runtime-fixture"] },
     "sourceFixture": { "type": "string", "maxLength": 128 },
     "hardwareRequiredForPrivateTestnet": { "type": "boolean", "enum": [false] },
     "mode": { "type": "string", "enum": ["read-only-optional-merge"] },

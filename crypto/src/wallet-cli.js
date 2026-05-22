@@ -21,9 +21,9 @@ import {
   signWalletDocumentWithVault,
   unlockEncryptedTestVault,
   validateLocalTransactionEnvelope,
-  flowchainPublicAccountMetadata,
+  flowmemoryPublicAccountMetadata,
   validateLocalWalletPublicMetadata,
-  verifyFlowchainEnvelope,
+  verifyFlowMemoryEnvelope,
   verifyWalletSignedEnvelope
 } from "./index.js";
 
@@ -38,11 +38,11 @@ try {
       chainId: args["chain-id"] ?? "31337",
       createdAtUnixMs: args["created-at-unix-ms"]
     });
-    writeJson(requiredOrDefault("vault", "devnet/local/wallet/operator-vault.local.json"), vault);
+    writeJson(requiredOrDefault("vault", "local-runtime/local/wallet/operator-vault.local.json"), vault);
     maybeWriteMetadata(vault);
-    printAccountSummary("flowchain.wallet.account_created.v0", vault.publicAccounts[0], { includePublicKey: true });
+    printAccountSummary("flowmemory.wallet.account_created.v0", vault.publicAccounts[0], { includePublicKey: true });
   } else if (command === "import") {
-    const vaultPath = requiredOrDefault("vault", "devnet/local/wallet/imported-vault.local.json");
+    const vaultPath = requiredOrDefault("vault", "local-runtime/local/wallet/imported-vault.local.json");
     const privateKey = importedPrivateKey();
     const vault = existsSync(vaultPath)
       ? addEncryptedTestVaultAccount({
@@ -64,20 +64,20 @@ try {
     });
     writeJson(vaultPath, vault);
     maybeWriteMetadata(vault);
-    printAccountSummary("flowchain.wallet.account_imported.v0", vault.publicAccounts.at(-1), { includePublicKey: false });
+    printAccountSummary("flowmemory.wallet.account_imported.v0", vault.publicAccounts.at(-1), { includePublicKey: false });
   } else if (command === "unlock" || command === "check") {
     const vault = readJson(required("vault"));
     const session = unlockVaultSafely(vault);
     const markerPath = sessionPath();
     writeJson(markerPath, {
-      schema: "flowchain.wallet.unlock_marker.v0",
+      schema: "flowmemory.wallet.unlock_marker.v0",
       vaultId: session.vaultId,
       unlockedAtUnixMs: Date.now().toString(),
       accountCount: session.accounts.length,
       containsSecrets: false
     });
     console.log(JSON.stringify({
-      schema: "flowchain.wallet.unlock_result.v0",
+      schema: "flowmemory.wallet.unlock_result.v0",
       vaultId: session.vaultId,
       unlocked: true,
       accountCount: session.accounts.length,
@@ -90,7 +90,7 @@ try {
       rmSync(markerPath, { force: true });
     }
     console.log(JSON.stringify({
-      schema: "flowchain.wallet.lock_result.v0",
+      schema: "flowmemory.wallet.lock_result.v0",
       locked: true,
       sessionPath: markerPath
     }, null, 2));
@@ -100,7 +100,7 @@ try {
       unlockVaultSafely(vault);
     }
     console.log(JSON.stringify({
-      schema: "flowchain.wallet.account_list.v0",
+      schema: "flowmemory.wallet.account_list.v0",
       vaultId: vault.vaultId,
       locked: !existsSync(sessionPath()),
       chainIds: [...new Set((vault.publicAccounts ?? []).map((account) => String(account.chainId ?? "31337")))],
@@ -132,7 +132,7 @@ try {
     });
     writeJson(vaultPath, updatedVault);
     maybeWriteMetadata(updatedVault);
-    printAccountSummary("flowchain.wallet.account_added.v0", updatedVault.publicAccounts.at(-1), { includePublicKey: true });
+    printAccountSummary("flowmemory.wallet.account_added.v0", updatedVault.publicAccounts.at(-1), { includePublicKey: true });
   } else if (command === "rotate") {
     const vaultPath = required("vault");
     const vault = readJson(vaultPath);
@@ -146,7 +146,7 @@ try {
     });
     writeJson(vaultPath, updatedVault);
     maybeWriteMetadata(updatedVault);
-    printAccountSummary("flowchain.wallet.account_rotated.v0", updatedVault.publicAccounts.at(-1), { includePublicKey: true });
+    printAccountSummary("flowmemory.wallet.account_rotated.v0", updatedVault.publicAccounts.at(-1), { includePublicKey: true });
   } else if (command === "sign") {
     const document = readJson(required("document"));
     await signAndPrint(document);
@@ -237,7 +237,7 @@ try {
       destinationChainId: args["destination-chain-id"] ?? 8453,
       token: required("bridge-asset"),
       amount: required("amount"),
-      flowchainAccount: required("account"),
+      flowmemoryAccount: required("account"),
       baseRecipient: required("base-address"),
       requestedAt: args["requested-at"]
     }));
@@ -260,7 +260,7 @@ try {
       const document = args.document ? readJson(args.document) : undefined;
       const context = verificationContext(document);
       const result = args.runtime || args["require-canonical"]
-        ? verifyFlowchainEnvelope({
+        ? verifyFlowMemoryEnvelope({
           document,
           envelope,
           context: {
@@ -270,7 +270,7 @@ try {
             requireCanonical: Boolean(args["require-canonical"])
           }
         })
-        : envelope.schema === "flowchain.wallet_signed_envelope.v0"
+        : envelope.schema === "flowmemory.wallet_signed_envelope.v0"
           ? verifyWalletSignedEnvelope({ envelope, context })
           : validateLocalTransactionEnvelope({ document, envelope, context });
       console.log(JSON.stringify(result, null, 2));
@@ -287,7 +287,7 @@ try {
     console.log(JSON.stringify(response, null, 2));
     process.exitCode = response.error ? 1 : 0;
   } else if (command === "derive-metadata") {
-    const metadata = flowchainPublicAccountMetadata({
+    const metadata = flowmemoryPublicAccountMetadata({
       publicKey: required("public-key"),
       role: args.role ?? "user",
       label: args.label,
@@ -346,7 +346,7 @@ async function signAndPrint(document) {
   const outPath = args.out ?? defaultEnvelopePath(envelope.txId);
   writeJson(outPath, envelope);
   console.log(JSON.stringify({
-    schema: "flowchain.wallet.sign_result.v0",
+    schema: "flowmemory.wallet.sign_result.v0",
     txId: envelope.txId,
     chainId: envelope.chainId,
     payloadType: envelope.payloadType,
@@ -436,7 +436,7 @@ function unlockVaultSafely(vault) {
 }
 
 function sessionPath() {
-  return args["session-path"] ?? `${requiredOrDefault("vault", "devnet/local/wallet/operator-vault.local.json")}.session.local.json`;
+  return args["session-path"] ?? `${requiredOrDefault("vault", "local-runtime/local/wallet/operator-vault.local.json")}.session.local.json`;
 }
 
 function verificationContext(document) {
@@ -469,7 +469,7 @@ function runVerificationSmoke() {
     context: { chainId: fixture.chainId, expectedNonce: vector.envelope.nonce }
   });
   console.log(JSON.stringify({
-    schema: "flowchain.wallet.verify_smoke.v0",
+    schema: "flowmemory.wallet.verify_smoke.v0",
     vector: vector.name,
     txId: vector.envelope.envelopeId,
     result
@@ -480,7 +480,7 @@ function runVerificationSmoke() {
 async function submitEnvelope(envelope, document) {
   const { dispatchJsonRpc, loadControlPlaneState } = await import("../../services/control-plane/src/index.ts");
   const state = loadControlPlaneState({
-    txIntakePath: args["intake-path"] ?? "devnet/local/intake/transactions.ndjson"
+    txIntakePath: args["intake-path"] ?? "local-runtime/local/intake/transactions.ndjson"
   });
   const signedEnvelope = document === undefined ? envelope : { document, envelope };
   return dispatchJsonRpc({
@@ -489,7 +489,7 @@ async function submitEnvelope(envelope, document) {
     method: "transaction_submit",
     params: {
       signedEnvelope,
-      submittedBy: args["submitted-by"] ?? "flowchain-wallet-cli"
+      submittedBy: args["submitted-by"] ?? "flowmemory-wallet-cli"
     }
   }, { state });
 }
@@ -497,7 +497,7 @@ async function submitEnvelope(envelope, document) {
 async function queryControlPlane(method, params) {
   const { dispatchJsonRpc, loadControlPlaneState } = await import("../../services/control-plane/src/index.ts");
   const state = loadControlPlaneState({
-    txIntakePath: args["intake-path"] ?? "devnet/local/intake/transactions.ndjson"
+    txIntakePath: args["intake-path"] ?? "local-runtime/local/intake/transactions.ndjson"
   });
   return dispatchJsonRpc({
     jsonrpc: "2.0",
@@ -543,7 +543,7 @@ function writeJson(path, value) {
 }
 
 function defaultEnvelopePath(txId) {
-  return `devnet/local/wallet/envelopes/${txId}.json`;
+  return `local-runtime/local/wallet/envelopes/${txId}.json`;
 }
 
 function usage() {

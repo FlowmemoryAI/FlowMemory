@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const REPORT_PATH = resolve(REPO_ROOT, "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json");
+const REPORT_PATH = resolve(REPO_ROOT, "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json");
 
 function runStep(name, command, args, env = {}) {
   const executable = process.platform === "win32" ? "cmd.exe" : command;

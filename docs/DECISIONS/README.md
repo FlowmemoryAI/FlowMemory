@@ -88,6 +88,6 @@ What should happen next?
 ## Review Checklist
 
 - Does the decision preserve core technical boundaries?
-- Does it avoid tokenomics, production deployment, production L1/appchain, production hooks, hardware manufacturing, and full dashboard implementation unless explicitly scoped?
+- Does it avoid tokenomics, production deployment, separate production network, production hooks, hardware manufacturing, and full dashboard implementation unless explicitly scoped?
 - Does it name implementation follow-ups as issues rather than silently authorizing work?
 - Does it clarify whether the status is Proposed, Accepted, or Superseded?

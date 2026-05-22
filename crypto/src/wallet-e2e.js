@@ -1,3 +1,4 @@
+// All private keys in this file are deterministic test-only values. Never use them for production.
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -24,7 +25,7 @@ import { dispatchJsonRpc, loadControlPlaneState } from "../../services/control-p
 
 const transferOnly = process.argv.includes("--transfer-only");
 const repoRoot = resolve(import.meta.dirname, "..", "..");
-const outDir = resolve(repoRoot, "devnet", "local", "production-l1-wallet", transferOnly ? "transfer-e2e" : "wallet-e2e");
+const outDir = resolve(repoRoot, "localRuntime", "local", "production-network-wallet", transferOnly ? "transfer-e2e" : "wallet-e2e");
 const chainId = "31337";
 const password = "wallet-e2e-password";
 const issuedAtUnixMs = "1778702400000";
@@ -102,7 +103,7 @@ const mempool = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "mempool_list" 
 assert.ok(mempool.result.count >= (transferOnly ? 1 : 2));
 
 const proof = {
-  schema: "flowchain.wallet_e2e_proof.v0",
+  schema: "flowmemory.wallet_e2e_proof.v0",
   transferOnly,
   chainId,
   wallets: {
@@ -133,14 +134,14 @@ const proof = {
   noSecretScan: assertNoPrivateMaterialInPublicOutputs(),
   boundaries: [
     "deterministic local test keys only",
-    "vault files are written under ignored devnet/local paths",
+    "vault files are written under ignored local-runtime/local paths",
     "public proofs contain public keys, addresses, signatures, tx ids, receipts, and balances only"
   ]
 };
 writeJson("wallet-e2e-proof.json", proof);
 
 console.log(
-  `FLOWCHAIN_WALLET_E2E_OK transferTxId=${transferEnvelope.txId} walletA=${accountA.address} walletB=${accountB.address} apiMempool=${mempool.result.count}`
+  `FLOWMEMORY_WALLET_E2E_OK transferTxId=${transferEnvelope.txId} walletA=${accountA.address} walletB=${accountB.address} apiMempool=${mempool.result.count}`
 );
 
 async function signProductAndDexActions({ controlPlaneState }) {
@@ -204,7 +205,7 @@ async function signProductAndDexActions({ controlPlaneState }) {
     destinationChainId: 8453,
     token: "0x3333333333333333333333333333333333333333",
     amount: "500000",
-    flowchainAccount: accountA.address,
+    flowmemoryAccount: accountA.address,
     baseRecipient: "0x4444444444444444444444444444444444444444",
     requestedAt: "2026-05-14T00:00:00.000Z"
   });
@@ -284,7 +285,7 @@ function applyTransfer({ envelope, from, to, assetId, amount }) {
   debit(from, assetId, amount);
   credit(to, assetId, amount);
   return {
-    schema: "flowchain.wallet_local_transfer_receipt.v0",
+    schema: "flowmemory.wallet_local_transfer_receipt.v0",
     txId: envelope.txId,
     status: "applied",
     assetId,

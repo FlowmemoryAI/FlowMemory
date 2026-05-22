@@ -1,11 +1,11 @@
-export interface FlowchainRuntimeVerifyInput {
+export interface FlowMemoryRuntimeVerifyInput {
   document: Record<string, unknown>;
   envelope: Record<string, unknown>;
   context?: Record<string, unknown>;
 }
 
-export interface FlowchainRuntimeVerifyResult {
-  schema: "flowchain.runtime_verify_result.v0";
+export interface FlowMemoryRuntimeVerifyResult {
+  schema: "flowmemory.runtime_verify_result.v0";
   ok: boolean;
   failureCodes: string[];
   signerAddress?: string;
@@ -24,4 +24,4 @@ export interface FlowchainRuntimeVerifyResult {
   envelopePayload?: Record<string, unknown> | null;
 }
 
-export function verifyFlowchainEnvelope(input: FlowchainRuntimeVerifyInput): FlowchainRuntimeVerifyResult;
+export function verifyFlowMemoryEnvelope(input: FlowMemoryRuntimeVerifyInput): FlowMemoryRuntimeVerifyResult;

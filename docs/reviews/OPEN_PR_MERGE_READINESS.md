@@ -22,7 +22,7 @@ This file preserves the merge-readiness evidence used during the integration pas
 | #60 crypto V0 foundation | Crypto | `npm test` -> 13 passing; `npm run validate:vectors` -> 21 vectors; Python vector recompute passed; diff check passed | Ready after #59 if docs do not conflict. Provides canonical crypto helpers, ids, receipts, report digests, fixtures, attestations, and docs. |
 | #61 indexer/verifier fixture package | Services | `npm test` -> 24 passing; `npm run e2e` -> 7 observations and 7 reports; diff check passed after cleanup commit `125f84f` | Ready after #59/#60, with one integration note: external status mapping must remain explicit. |
 | #62 dashboard V0 | Dashboard | `npm test` -> 4 passing; `npm run build` passed; diff check passed after cleanup commit `4577968` | Ready after #61 if fixture shape remains compatible. |
-| #58 local devnet prototype | Chain/devnet | `cargo test --manifest-path crates\flowmemory-devnet\Cargo.toml` -> 7 passing; diff check passed | Ready after source docs, but not required for first Rootflow/Flow Memory launch core. |
+| #58 local test runtime prototype | Chain/local test runtime | `cargo test --manifest-path crates\flowmemory-local test runtime\Cargo.toml` -> 7 passing; diff check passed | Ready after source docs, but not required for first Rootflow/Flow Memory launch core. |
 | #56 FlowRouter hardware POC | Hardware | simulator fixture validation passed; diff check passed | Ready as bounded hardware POC. Not blocking Rootflow/Flow Memory core. |
 
 ## Recommended Merge Order
@@ -34,7 +34,7 @@ Completed on 2026-05-13.
 3. #57 contracts V0 foundation.
 4. #61 indexer/verifier fixture package.
 5. #62 dashboard V0.
-6. #58 local devnet prototype.
+6. #58 local test runtime prototype.
 7. #56 FlowRouter hardware POC.
 
 Reasoning:
@@ -62,14 +62,14 @@ Launch-core missing work:
   - crypto `npm test` and vector validation
   - services `npm test` and `npm run e2e`
   - dashboard `npm test` and `npm run build`
-  - devnet `cargo test`
+  - local test runtime `cargo test`
   - hardware simulator validation
 - A clear external status adapter between verifier `valid`/`invalid` and Flow Memory/dashboard `verified`/`failed` or a decision to standardize the names.
 - Updated `docs/CURRENT_STATE.md` after each PR merge.
 
 Not launch blockers:
 
-- Production L1.
+- Separate production network.
 - Tokenomics.
 - Production Uniswap v4 hook deployment.
 - Full trustless verifier network.

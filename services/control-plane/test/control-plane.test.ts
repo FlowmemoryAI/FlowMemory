@@ -9,8 +9,8 @@ import test from "node:test";
 import { canonicalJson } from "../../shared/src/index.ts";
 import {
   bridgeSourceEventReplayKey,
-  flowchainBridgeObservationId,
-} from "../../../crypto/src/production-l1.js";
+  flowmemoryBridgeObservationId,
+} from "../../../crypto/src/production-network.js";
 import {
   dispatchJsonRpc,
   loadControlPlaneState,
@@ -64,18 +64,18 @@ const EXPECTED_CHAIN_CAPABILITIES = [
   "base_agent_memory_runtime_reads",
   "public_agent_network_launch_reads",
   "public_swarm_network_reads",
-  "devnet_handoff_reads",
+  "localRuntime_handoff_reads",
   "no_secret_response_checks",
   "raw_json_reads",
   "explorer_search",
 ] as const;
-const productionL1Vectors = JSON.parse(
-  readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
+const productionNetworkVectors = JSON.parse(
+  readFileSync(new URL("../../../crypto/fixtures/production-network-vectors.json", import.meta.url), "utf8"),
 ) as JsonObject;
 
 function productionSignedEnvelope(name = "wallet-transfer"): JsonObject {
-  const positive = (productionL1Vectors.positive as JsonObject[]).find((entry) => entry.name === name);
-  assert.ok(positive, `missing production-L1 vector: ${name}`);
+  const positive = (productionNetworkVectors.positive as JsonObject[]).find((entry) => entry.name === name);
+  assert.ok(positive, `missing production-network vector: ${name}`);
   return {
     document: positive.document,
     envelope: positive.envelope,
@@ -85,12 +85,12 @@ function productionSignedEnvelope(name = "wallet-transfer"): JsonObject {
 function bridgeObservationFromDeposit(deposit: JsonObject, mode = "base-mainnet-pilot"): JsonObject {
   return {
     schema: "flowmemory.bridge_deposit_observation.v0",
-    observationId: flowchainBridgeObservationId({
+    observationId: flowmemoryBridgeObservationId({
       sourceChainId: deposit.sourceChainId,
       lockbox: deposit.sourceContract,
       token: deposit.token,
       depositor: deposit.sender,
-      recipient: deposit.flowchainRecipient,
+      recipient: deposit.flowmemoryRecipient,
       amount: deposit.amount,
       txHash: deposit.txHash,
       logIndex: deposit.logIndex,
@@ -178,7 +178,7 @@ test("returns standard unknown method errors", () => {
 test("validates malformed requests and bad params with stable codes", () => {
   const invalidRequest = dispatchJsonRpc({ jsonrpc: "2.0", id: 1 }) as RpcErrorResponse;
   const badLimit = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "receipt_list", params: { limit: 0 } }) as RpcErrorResponse;
-  const badRawSource = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "raw_json_get", params: { source: "E:/secrets" } }) as RpcErrorResponse;
+  const badRawSource = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "raw_json_get", params: { source: "notAllowedSource" } }) as RpcErrorResponse;
 
   assert.equal(invalidRequest.error.code, -32600);
   assert.equal(invalidRequest.error.data.reasonCode, "request.invalid");
@@ -191,8 +191,8 @@ test("validates malformed requests and bad params with stable codes", () => {
 test("keeps deterministic chain status response snapshots", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-snapshot-"));
   const state = loadControlPlaneState({
-    localDevnetPath: join(dir, "missing-local-state.json"),
-    localDevnetLaunchPath: join(dir, "missing-local-launch-state.json"),
+    localRuntimePath: join(dir, "missing-local-state.json"),
+    localRuntimeLaunchPath: join(dir, "missing-local-launch-state.json"),
     txIntakePath: join(dir, "transactions.ndjson"),
     bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
   });
@@ -219,13 +219,13 @@ test("keeps deterministic chain status response snapshots", () => {
 test("reports the active local runtime block before fixture/indexer blocks", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-runtime-block-"));
   try {
-    const localDevnetPath = join(dir, "state.json");
-    writeFileSync(localDevnetPath, JSON.stringify({
-      schema: "flowmemory.local_devnet.state.v0",
-      chainId: "flowmemory-local-devnet-v0",
+    const localRuntimePath = join(dir, "state.json");
+    writeFileSync(localRuntimePath, JSON.stringify({
+      schema: "flowmemory.local_runtime.state.v0",
+      chainId: "flowmemory-local-runtime-v0",
       blocks: [
         {
-          schema: "flowmemory.local_devnet.block.v0",
+          schema: "flowmemory.local_runtime.block.v0",
           blockNumber: 1,
           blockHash: `0x${"1".repeat(64)}`,
           stateRoot: `0x${"a".repeat(64)}`,
@@ -233,7 +233,7 @@ test("reports the active local runtime block before fixture/indexer blocks", () 
           receipts: [],
         },
         {
-          schema: "flowmemory.local_devnet.block.v0",
+          schema: "flowmemory.local_runtime.block.v0",
           blockNumber: 42,
           blockHash: `0x${"2".repeat(64)}`,
           stateRoot: `0x${"b".repeat(64)}`,
@@ -244,8 +244,8 @@ test("reports the active local runtime block before fixture/indexer blocks", () 
       pendingTxs: [],
     }));
     const state = loadControlPlaneState({
-      localDevnetPath,
-      localDevnetLaunchPath: join(dir, "missing-launch-state.json"),
+      localRuntimePath,
+      localRuntimeLaunchPath: join(dir, "missing-launch-state.json"),
       txIntakePath: join(dir, "transactions.ndjson"),
       bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
     });
@@ -268,7 +268,7 @@ test("reports the active local runtime block before fixture/indexer blocks", () 
     assert.equal(((chain.result.counts as JsonObject).runtimeBlocks), 2);
     assert.equal(node.result.latestBlockNumber, "42");
     assert.equal((block.result.block as JsonObject).source, "active-local-runtime");
-    assert.equal((((block.result.provenance as JsonObject).sources as JsonObject[])[0]).path, localDevnetPath);
+    assert.equal((((block.result.provenance as JsonObject).sources as JsonObject[])[0]).path, localRuntimePath);
     assert.equal(blocks.result.count, 2);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -277,11 +277,11 @@ test("reports the active local runtime block before fixture/indexer blocks", () 
 
 test("exposes RPC discovery and readiness without leaking env values", () => {
   const envNames = [
-    "FLOWCHAIN_RPC_PUBLIC_URL",
-    "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
-    "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-    "FLOWCHAIN_RPC_TLS_TERMINATED",
-    "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+    "FLOWMEMORY_RPC_PUBLIC_URL",
+    "FLOWMEMORY_RPC_ALLOWED_ORIGINS",
+    "FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE",
+    "FLOWMEMORY_RPC_TLS_TERMINATED",
+    "FLOWMEMORY_RPC_STATE_BACKUP_PATH",
   ] as const;
   const originalEnv = new Map(envNames.map((name) => [name, process.env[name]]));
   try {
@@ -294,9 +294,9 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     const methodNames = methods.map((entry) => entry.method);
     const rpcReadinessMethod = methods.find((entry) => entry.method === "rpc_readiness") as JsonObject;
     const transactionSubmitMethod = methods.find((entry) => entry.method === "transaction_submit") as JsonObject;
-    const devnetStateMethod = methods.find((entry) => entry.method === "devnet_state") as JsonObject;
+    const localRuntimeStateMethod = methods.find((entry) => entry.method === "localRuntime_state") as JsonObject;
 
-    assert.equal(response.result.schema, "flowchain.rpc.discovery.v0");
+    assert.equal(response.result.schema, "flowmemory.rpc.discovery.v0");
     assert.equal(response.result.protocol, "JSON-RPC 2.0");
     assert.ok(methodNames.includes("transaction_submit"));
     assert.ok(methodNames.includes("bridge_credit_status"));
@@ -311,7 +311,7 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     assert.equal(rpcReadinessMethod.productionReady, false);
     assert.equal(transactionSubmitMethod.publicRpcEligible, false);
     assert.equal(transactionSubmitMethod.localOnly, true);
-    assert.equal(devnetStateMethod.publicRpcEligible, false);
+    assert.equal(localRuntimeStateMethod.publicRpcEligible, false);
     assert.deepEqual(response.result.publicHttpMirrors, [
       "/health",
       "/chain/status",
@@ -322,7 +322,7 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
       "/wallets/transfers",
     ]);
 
-    assert.equal(readiness.result.schema, "flowchain.rpc.readiness.v0");
+    assert.equal(readiness.result.schema, "flowmemory.rpc.readiness.v0");
     assert.equal(readiness.result.status, "BLOCKED");
     assert.equal(readiness.result.deploymentMode, "local-only");
     assert.equal(readiness.result.publicRpcReady, false);
@@ -331,23 +331,23 @@ test("exposes RPC discovery and readiness without leaking env values", () => {
     assert.equal(readiness.result.noSecrets, true);
     assert.equal(readiness.result.productionReady, false);
     assert.equal(readiness.result.publicReadyMethodCount, 0);
-    assert.ok((readiness.result.missingProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
+    assert.ok((readiness.result.missingProductionEnvNames as string[]).includes("FLOWMEMORY_RPC_PUBLIC_URL"));
 
-    process.env.FLOWCHAIN_RPC_PUBLIC_URL = "http://rpc.example.test";
-    process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = "*";
-    process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = "0";
-    process.env.FLOWCHAIN_RPC_TLS_TERMINATED = "false";
-    process.env.FLOWCHAIN_RPC_STATE_BACKUP_PATH = "configured-but-not-printed";
+    process.env.FLOWMEMORY_RPC_PUBLIC_URL = "http://rpc.example.test";
+    process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS = "*";
+    process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE = "0";
+    process.env.FLOWMEMORY_RPC_TLS_TERMINATED = "false";
+    process.env.FLOWMEMORY_RPC_STATE_BACKUP_PATH = "configured-but-not-printed";
     const invalidReadiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "rpc_readiness" }) as RpcSuccessResponse;
     assert.equal(invalidReadiness.result.status, "FAILED");
     assert.equal(invalidReadiness.result.deploymentMode, "public-owner-edge-blocked");
     assert.equal(invalidReadiness.result.publicRpcReady, false);
     assert.equal(invalidReadiness.result.localOnly, true);
     assert.equal(invalidReadiness.result.productionReady, false);
-    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_PUBLIC_URL"));
-    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_ALLOWED_ORIGINS"));
-    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"));
-    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWCHAIN_RPC_TLS_TERMINATED"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWMEMORY_RPC_PUBLIC_URL"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWMEMORY_RPC_ALLOWED_ORIGINS"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE"));
+    assert.ok((invalidReadiness.result.invalidProductionEnvNames as string[]).includes("FLOWMEMORY_RPC_TLS_TERMINATED"));
     assert.equal((invalidReadiness.result.publicRpcControls as JsonObject).envValuesPrinted, false);
     assert.equal(JSON.stringify(invalidReadiness.result).includes("rpc.example.test"), false);
     assert.equal(JSON.stringify(invalidReadiness.result).includes("configured-but-not-printed"), false);
@@ -584,7 +584,7 @@ test("supports receipt and report object lookup by provenance-linked ids", () =>
   assert.equal(reportResponse.result.report.reportId, receipt.reportId);
 });
 
-test("exposes artifact, devnet, challenge, and finality read methods", () => {
+test("exposes artifact, localRuntime, challenge, and finality read methods", () => {
   const state = loadControlPlaneState();
   const receipt = state.launchCore.memoryReceipts[0];
   const artifactUri = receipt.evidenceRefs[0]?.uri;
@@ -594,8 +594,8 @@ test("exposes artifact, devnet, challenge, and finality read methods", () => {
     { jsonrpc: "2.0", id: 1, method: "artifact_get", params: { uri: artifactUri } },
     { state },
   ) as RpcSuccessResponse;
-  const devnet = dispatchJsonRpc(
-    { jsonrpc: "2.0", id: 2, method: "devnet_state" },
+  const localRuntime = dispatchJsonRpc(
+    { jsonrpc: "2.0", id: 2, method: "localRuntime_state" },
     { state },
   ) as RpcSuccessResponse;
   const challenge = dispatchJsonRpc(
@@ -608,40 +608,40 @@ test("exposes artifact, devnet, challenge, and finality read methods", () => {
   ) as RpcSuccessResponse;
 
   assert.equal(artifact.result.resolverPolicyId, "flowmemory.resolver.policy.v0.fixture");
-  assert.equal(devnet.result.schema, "flowmemory.control_plane.devnet_state.v0");
+  assert.equal(localRuntime.result.schema, "flowmemory.control_plane.localRuntime_state.v0");
   assert.equal(challenge.result.status, "not_opened");
   assert.equal(finality.result.status, "local-finalized");
 });
 
-test("prefers devnet/local runtime state over committed devnet fixtures", () => {
+test("prefers local-runtime state over committed localRuntime fixtures", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-local-runtime-"));
   const localRuntimePath = join(dir, "launch-v0-state.json");
   try {
     writeFileSync(localRuntimePath, JSON.stringify({
-      schema: "flowmemory.local_devnet.state.v0",
-      chainId: "flowmemory-local-devnet-v0",
+      schema: "flowmemory.local_runtime.state.v0",
+      chainId: "flowmemory-local-runtime-v0",
       blocks: [],
     }));
     const state = loadControlPlaneState({
-      localDevnetPath: join(dir, "missing-state.json"),
-      localDevnetLaunchPath: localRuntimePath,
+      localRuntimePath: join(dir, "missing-state.json"),
+      localRuntimeLaunchPath: localRuntimePath,
     });
 
-    assert.equal(state.sources.devnet.path, localRuntimePath);
-    assert.equal(state.sources.devnet.status, "recovered");
+    assert.equal(state.sources.localRuntime.path, localRuntimePath);
+    assert.equal(state.sources.localRuntime.status, "recovered");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test("degrades instead of crashing when active local devnet JSON is malformed", () => {
-  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-malformed-devnet-"));
-  const malformedDevnetPath = join(dir, "state.json");
+test("degrades instead of crashing when active local runtime JSON is malformed", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-malformed-localRuntime-"));
+  const malformedLocalRuntimePath = join(dir, "state.json");
   try {
-    writeFileSync(malformedDevnetPath, "{\"schema\":\"flowmemory.local_devnet.state.v0\",");
+    writeFileSync(malformedLocalRuntimePath, "{\"schema\":\"flowmemory.local_runtime.state.v0\",");
     const state = loadControlPlaneState({
-      localDevnetPath: malformedDevnetPath,
-      localDevnetLaunchPath: join(dir, "missing-launch-state.json"),
+      localRuntimePath: malformedLocalRuntimePath,
+      localRuntimeLaunchPath: join(dir, "missing-launch-state.json"),
       txIntakePath: join(dir, "transactions.ndjson"),
       bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
     });
@@ -649,10 +649,10 @@ test("degrades instead of crashing when active local devnet JSON is malformed", 
     const readiness = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "bridge_live_readiness" }, { state }) as RpcSuccessResponse;
     const readinessNode = (readiness.result as JsonObject).node as JsonObject;
 
-    assert.equal(state.sources.devnet.status, "degraded");
-    assert.match(state.sources.devnet.recovery ?? "", /malformed JSON/);
+    assert.equal(state.sources.localRuntime.status, "degraded");
+    assert.match(state.sources.localRuntime.recovery ?? "", /malformed JSON/);
     assert.equal((health.result as JsonObject).status, "degraded");
-    assert.ok(((health.result as JsonObject).degradedSources as string[]).includes("devnet"));
+    assert.ok(((health.result as JsonObject).degradedSources as string[]).includes("localRuntime"));
     assert.equal((readiness.result as JsonObject).schema, "flowmemory.control_plane.bridge_live_readiness.v0");
     assert.equal(readinessNode.sourceStatus, "degraded");
     assert.equal(readinessNode.running, false);
@@ -684,7 +684,7 @@ test("submits local transactions to the file-backed runtime intake path", () => 
     assert.equal((response.result.crypto as JsonObject).ok, true);
     assert.equal(mempool.result.count, 1);
     assert.equal(mempool.result.transactions[0].source, "local-file-intake");
-    assert.equal(mempool.result.transactions[0].transaction.schema, "flowchain.product_transfer.v0");
+    assert.equal(mempool.result.transactions[0].transaction.schema, "flowmemory.product_transfer.v0");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -712,7 +712,7 @@ test("rejects replayed crypto transaction envelopes before runtime intake", () =
   }
 });
 
-test("rejects invalid live-L1 crypto transaction envelopes before runtime intake", () => {
+test("rejects invalid live-network crypto transaction envelopes before runtime intake", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-crypto-negative-"));
   try {
     const state = loadControlPlaneState({ txIntakePath: join(dir, "transactions.ndjson") });
@@ -746,7 +746,7 @@ test("rejects invalid live-L1 crypto transaction envelopes before runtime intake
           ...productionSignedEnvelope("wallet-transfer"),
           envelope: {
             ...(productionSignedEnvelope("wallet-transfer").envelope as JsonObject),
-            domain: "flowchain.production-l1.v0.transaction-envelope:profile:private-lan:chain:31337",
+            domain: "flowmemory.production-network.v0.transaction-envelope:profile:private-lan:chain:31337",
           },
         },
         failureCode: "wrong-domain",
@@ -800,7 +800,7 @@ test("can forward runtime submissions to the live node inbox", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-node-inbox-"));
   try {
     const state = loadControlPlaneState({
-      localDevnetPath: join(dir, "state.json"),
+      localRuntimePath: join(dir, "state.json"),
       txIntakePath: join(dir, "transactions.ndjson"),
     });
     const response = dispatchJsonRpc(
@@ -891,7 +891,7 @@ test("loads standalone wallet public metadata as account metadata", () => {
     const walletPath = join(dir, "wallet-public-metadata.json");
     const walletId = `0x${"ab".repeat(32)}`;
     writeFileSync(walletPath, JSON.stringify({
-      schema: "flowchain.local_wallet_public_metadata.v0",
+      schema: "flowmemory.local_wallet_public_metadata.v0",
       vaultId: `0x${"cd".repeat(32)}`,
       accounts: [{
         accountId: walletId,
@@ -926,9 +926,9 @@ test("loads standalone wallet public metadata as account metadata", () => {
     const health = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "health" }, { state }) as RpcSuccessResponse;
     assert.equal(health.result.checks.walletPublicMetadata, "loaded");
 
-    const devnetState = dispatchJsonRpc({ jsonrpc: "2.0", id: 4, method: "devnet_state" }, { state }) as RpcSuccessResponse;
-    assert.ok((devnetState.result.accounts as JsonObject[]).some((entry) => entry.accountId === walletId));
-    assert.ok((devnetState.result.walletMetadata as JsonObject[]).some((entry) => entry.accountId === walletId));
+    const localRuntimeState = dispatchJsonRpc({ jsonrpc: "2.0", id: 4, method: "localRuntime_state" }, { state }) as RpcSuccessResponse;
+    assert.ok((localRuntimeState.result.accounts as JsonObject[]).some((entry) => entry.accountId === walletId));
+    assert.ok((localRuntimeState.result.walletMetadata as JsonObject[]).some((entry) => entry.accountId === walletId));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -937,15 +937,15 @@ test("loads standalone wallet public metadata as account metadata", () => {
 test("exposes product token, DEX, bridge credit, and product-flow reads from handoff maps", () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-product-"));
   try {
-    const localDevnetPath = join(dir, "state.json");
+    const localRuntimePath = join(dir, "state.json");
     const handoffPath = join(dir, "control-plane-handoff.json");
-    writeFileSync(localDevnetPath, JSON.stringify({
-      schema: "flowmemory.local_devnet.state.v0",
-      chainId: "flowmemory-local-devnet-v0",
+    writeFileSync(localRuntimePath, JSON.stringify({
+      schema: "flowmemory.local_runtime.state.v0",
+      chainId: "flowmemory-local-runtime-v0",
       blocks: [],
     }));
     writeFileSync(handoffPath, JSON.stringify({
-      schema: "flowmemory.control_plane_handoff.local_devnet.v0",
+      schema: "flowmemory.control_plane_handoff.local_runtime.v0",
       stateRoot: "0xproduct",
       objects: {
         tokens: {
@@ -1009,9 +1009,9 @@ test("exposes product token, DEX, bridge credit, and product-flow reads from han
     }));
 
     const state = loadControlPlaneState({
-      localDevnetPath,
-      localDevnetLaunchPath: join(dir, "missing-launch-state.json"),
-      devnetControlPlaneHandoffPath: handoffPath,
+      localRuntimePath,
+      localRuntimeLaunchPath: join(dir, "missing-launch-state.json"),
+      localRuntimeControlPlaneHandoffPath: handoffPath,
       txIntakePath: join(dir, "transactions.ndjson"),
       bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
     });
@@ -1116,7 +1116,7 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
           token: `0x${"3".repeat(40)}`,
           amount: "1000000",
           sender: `0x${"4".repeat(40)}`,
-          flowchainRecipient: `0x${"5".repeat(64)}`,
+          flowmemoryRecipient: `0x${"5".repeat(64)}`,
           nonce: "1",
           status: "observed",
         },
@@ -1142,7 +1142,7 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
         },
         token: `0x${"3".repeat(40)}`,
         amount: "1000000",
-        flowchainRecipient: `0x${"5".repeat(64)}`,
+        flowmemoryRecipient: `0x${"5".repeat(64)}`,
         status: "applied",
         appliedAt: "2026-05-14T00:00:01.000Z",
         localOnly: true,
@@ -1157,7 +1157,7 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
         destinationChainId: 8453,
         token: `0x${"3".repeat(40)}`,
         amount: "1000000",
-        flowchainAccount: `0x${"5".repeat(64)}`,
+        flowmemoryAccount: `0x${"5".repeat(64)}`,
         baseRecipient: `0x${"4".repeat(40)}`,
         status: "requested",
         requestedAt: "2026-05-14T00:00:02.000Z",
@@ -1182,7 +1182,7 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
       },
       runtimeIntake: {
         status: "handoff_file",
-        consumer: "flowchain-runtime-agent",
+        consumer: "flowmemory-runtime-agent",
         expectedPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
         note: "test",
       },
@@ -1200,7 +1200,7 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
     assert.equal(status.result.state, "live");
     assert.equal(status.result.counts.baseMainnetDeposits, 1);
     assert.equal(status.result.capStatus.withinCap, true);
-    assert.equal(status.result.nextOperatorStep.command, "npm run flowchain:export");
+    assert.equal(status.result.nextOperatorStep.command, "npm run flowmemory:export");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1208,16 +1208,16 @@ test("pilot lifecycle can represent a live Base 8453 evidence bundle", () => {
 
 test("bridge live readiness fails closed for missing env and returns env names only", () => {
   const envNames = [
-    "FLOWCHAIN_PILOT_OPERATOR_ACK",
-    "FLOWCHAIN_BASE8453_RPC_URL",
-    "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-    "FLOWCHAIN_BASE8453_FROM_BLOCK",
-    "FLOWCHAIN_BASE8453_TO_BLOCK",
-    "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-    "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-    "FLOWCHAIN_BASE8453_CONFIRMATION_DEPTH",
-    "FLOWCHAIN_BASE8453_TOKEN_MODE",
-    "FLOWCHAIN_BASE8453_SUPPORTED_TOKEN",
+    "FLOWMEMORY_PILOT_OPERATOR_ACK",
+    "FLOWMEMORY_BASE8453_RPC_URL",
+    "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS",
+    "FLOWMEMORY_BASE8453_FROM_BLOCK",
+    "FLOWMEMORY_BASE8453_TO_BLOCK",
+    "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+    "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
+    "FLOWMEMORY_BASE8453_CONFIRMATION_DEPTH",
+    "FLOWMEMORY_BASE8453_TOKEN_MODE",
+    "FLOWMEMORY_BASE8453_SUPPORTED_TOKEN",
   ] as const;
   const originalEnv = new Map(envNames.map((name) => [name, process.env[name]]));
   const configuredButHidden = "https://example.invalid/rpc-redacted";
@@ -1226,7 +1226,7 @@ test("bridge live readiness fails closed for missing env and returns env names o
     for (const name of envNames) {
       delete process.env[name];
     }
-    process.env.FLOWCHAIN_BASE8453_RPC_URL = configuredButHidden;
+    process.env.FLOWMEMORY_BASE8453_RPC_URL = configuredButHidden;
     const state = loadControlPlaneState();
     const response = dispatchJsonRpc(
       { jsonrpc: "2.0", id: 1, method: "bridge_live_readiness" },
@@ -1238,9 +1238,9 @@ test("bridge live readiness fails closed for missing env and returns env names o
     assert.equal(response.result.baseChainId, 8453);
     assert.equal(response.result.envValuesPrinted, false);
     assert.equal(response.result.readyForOperatorLivePilot, false);
-    assert.ok((response.result.missingEnvNames as string[]).includes("FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS"));
-    assert.ok((response.result.missingEnvNames as string[]).includes("FLOWCHAIN_PILOT_OPERATOR_ACK"));
-    assert.equal((response.result.missingEnvNames as string[]).includes("FLOWCHAIN_BASE8453_RPC_URL"), false);
+    assert.ok((response.result.missingEnvNames as string[]).includes("FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS"));
+    assert.ok((response.result.missingEnvNames as string[]).includes("FLOWMEMORY_PILOT_OPERATOR_ACK"));
+    assert.equal((response.result.missingEnvNames as string[]).includes("FLOWMEMORY_BASE8453_RPC_URL"), false);
     assert.equal(JSON.stringify(response.result).includes(configuredButHidden), false);
   } finally {
     for (const [name, value] of originalEnv) {
@@ -1292,7 +1292,7 @@ test("exact-value fixture reports equality across bridge lifecycle and wallet tr
           token,
           amount,
           sender: `0x${"4".repeat(40)}`,
-          flowchainRecipient: creditedWallet,
+          flowmemoryRecipient: creditedWallet,
           nonce: "1",
           status: "observed",
         },
@@ -1318,7 +1318,7 @@ test("exact-value fixture reports equality across bridge lifecycle and wallet tr
         },
         token,
         amount,
-        flowchainRecipient: creditedWallet,
+        flowmemoryRecipient: creditedWallet,
         status: "applied",
         appliedAt: "2026-05-14T00:00:01.000Z",
         localOnly: true,
@@ -1343,7 +1343,7 @@ test("exact-value fixture reports equality across bridge lifecycle and wallet tr
         destinationChainId: 8453,
         token,
         amount,
-        flowchainAccount: creditedWallet,
+        flowmemoryAccount: creditedWallet,
         baseRecipient: `0x${"8".repeat(40)}`,
         status: "requested",
         requestedAt: "2026-05-14T00:00:02.000Z",
@@ -1555,8 +1555,8 @@ test("smoke client queries the complete local lifecycle surface", () => {
   const responseSchemas = smoke.responseSchemas as string[];
   assert.equal(smoke.methodCount, responseSchemas.length);
   for (const expectedSchema of [
-    "flowchain.rpc.discovery.v0",
-    "flowchain.rpc.readiness.v0",
+    "flowmemory.rpc.discovery.v0",
+    "flowmemory.rpc.readiness.v0",
     "flowmemory.control_plane.real_value_pilot_status.v0",
     "flowmemory.control_plane.real_value_pilot_deposit_observation_list.v0",
     "flowmemory.control_plane.real_value_pilot_credit_list.v0",
@@ -1596,14 +1596,14 @@ test("smoke client queries the complete local lifecycle surface", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("smoke client ignores stale local devnet blocks without transactions", () => {
-  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-stale-devnet-"));
+test("smoke client ignores stale local runtime blocks without transactions", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-stale-localRuntime-"));
   try {
-    const staleDevnetPath = join(dir, "state.json");
-    writeFileSync(staleDevnetPath, JSON.stringify({
-      schema: "flowmemory.local_devnet.state.v0",
+    const staleLocalRuntimePath = join(dir, "state.json");
+    writeFileSync(staleLocalRuntimePath, JSON.stringify({
+      schema: "flowmemory.local_runtime.state.v0",
       blocks: [{
-        schema: "flowmemory.local_devnet.block.v0",
+        schema: "flowmemory.local_runtime.block.v0",
         blockNumber: "1",
         blockHash: "0x1909a47bfaaabbfe51d371173d550fcdaff1abaedeea1045bfb77a496bdb8695",
         txIds: [],
@@ -1618,7 +1618,7 @@ test("smoke client ignores stale local devnet blocks without transactions", () =
     }));
 
     const smoke = runControlPlaneSmoke({
-      localDevnetPath: staleDevnetPath,
+      localRuntimePath: staleLocalRuntimePath,
       txIntakePath: join(dir, "transactions.ndjson"),
       bridgeObservationIntakePath: join(dir, "bridge-observations.ndjson"),
     });
@@ -1654,21 +1654,21 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
     });
     assert.equal(rpcDiscover.status, 200);
     assert.equal(rpcDiscover.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await rpcDiscover.json()).schema, "flowchain.rpc.discovery.v0");
+    assert.equal((await rpcDiscover.json()).schema, "flowmemory.rpc.discovery.v0");
 
     const rpcReadiness = await fetch(`http://127.0.0.1:${port}/rpc/readiness`, {
       headers: { Origin: "http://127.0.0.1:5173" },
     });
     assert.equal(rpcReadiness.status, 200);
     assert.equal(rpcReadiness.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await rpcReadiness.json()).schema, "flowchain.rpc.readiness.v0");
+    assert.equal((await rpcReadiness.json()).schema, "flowmemory.rpc.readiness.v0");
 
     const state = await fetch(`http://127.0.0.1:${port}/state`, {
       headers: { Origin: "http://127.0.0.1:5173" },
     });
     assert.equal(state.status, 200);
     assert.equal(state.headers.get("access-control-allow-origin"), "*");
-    assert.equal((await state.json()).schema, "flowmemory.control_plane.devnet_state.v0");
+    assert.equal((await state.json()).schema, "flowmemory.control_plane.localRuntime_state.v0");
 
     const explorer = await fetch(`http://127.0.0.1:${port}/explorer/summary`, {
       headers: { Origin: "http://127.0.0.1:5173" },
@@ -1757,8 +1757,8 @@ test("HTTP server exposes browser-safe health and state endpoints", async () => 
 });
 
 test("HTTP server honors configured CORS origins", async () => {
-  const previousOrigins = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS;
-  process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = "http://allowed.example";
+  const previousOrigins = process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS;
+  process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS = "http://allowed.example";
   const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
 
   try {
@@ -1791,16 +1791,16 @@ test("HTTP server honors configured CORS origins", async () => {
       });
     });
     if (previousOrigins === undefined) {
-      delete process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS;
+      delete process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS;
     } else {
-      process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS = previousOrigins;
+      process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS = previousOrigins;
     }
   }
 });
 
 test("HTTP server enforces configured per-client rate limits without trusting spoofed forwarded clients", async () => {
-  const previousRateLimit = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
-  process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = "1";
+  const previousRateLimit = process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE;
+  process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE = "1";
   const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
 
   try {
@@ -1822,7 +1822,7 @@ test("HTTP server enforces configured per-client rate limits without trusting sp
     const body = await second.json() as JsonObject;
     assert.equal(body.schema, "flowmemory.control_plane.rate_limited.v0");
     assert.equal(body.envValuesPrinted, false);
-    assert.equal(JSON.stringify(body).includes("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE"), false);
+    assert.equal(JSON.stringify(body).includes("FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE"), false);
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {
@@ -1834,9 +1834,9 @@ test("HTTP server enforces configured per-client rate limits without trusting sp
       });
     });
     if (previousRateLimit === undefined) {
-      delete process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
+      delete process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE;
     } else {
-      process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE = previousRateLimit;
+      process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE = previousRateLimit;
     }
   }
 });
@@ -1879,7 +1879,7 @@ test("HTTP server rejects abusive public RPC POST shapes before dispatch", async
     assert.equal(malformedData.reasonCode, "parse.error");
     assert.equal(malformedData.noSecrets, true);
 
-    for (const method of ["transaction_submit", "bridge_observation_submit", "raw_json_get", "devnet_state", "flow_sendRawTransaction"]) {
+    for (const method of ["transaction_submit", "bridge_observation_submit", "raw_json_get", "localRuntime_state", "flow_sendRawTransaction"]) {
       const blocked = await fetch(`${baseUrl}/rpc`, {
         method: "POST",
         headers: { "content-type": "application/json", Origin: origin },
@@ -1965,27 +1965,27 @@ test("HTTP server rejects abusive public RPC POST shapes before dispatch", async
 });
 
 test("control-plane cargo target override must stay inside the repository", () => {
-  const previousTarget = process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
-  process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = tmpdir();
+  const previousTarget = process.env.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR;
+  process.env.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR = tmpdir();
 
   try {
     assert.throws(
       () => spawnCargoSync(["--version"], { cwd: process.cwd(), encoding: "utf8", windowsHide: true }),
-      /FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR must stay inside the repository/,
+      /FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR must stay inside the repository/,
     );
   } finally {
     if (previousTarget === undefined) {
-      delete process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR;
+      delete process.env.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR;
     } else {
-      process.env.FLOWCHAIN_CONTROL_PLANE_CARGO_TARGET_DIR = previousTarget;
+      process.env.FLOWMEMORY_CONTROL_PLANE_CARGO_TARGET_DIR = previousTarget;
     }
   }
 });
 
 test("HTTP server creates local encrypted wallet metadata without returning secret material", async () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-wallet-http-"));
-  const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
-  process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowchain-operator-public-metadata.json");
+  const previousMetadataPath = process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+  process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowmemory-operator-public-metadata.json");
   const server = startControlPlaneServer({ host: "127.0.0.1", port: 0 });
 
   try {
@@ -2070,9 +2070,9 @@ test("HTTP server creates local encrypted wallet metadata without returning secr
       });
     });
     if (previousMetadataPath === undefined) {
-      delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+      delete process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
     } else {
-      process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+      process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
     }
     rmSync(dir, { recursive: true, force: true });
   }
@@ -2080,26 +2080,26 @@ test("HTTP server creates local encrypted wallet metadata without returning secr
 
 test("HTTP tester write gateway requires bearer auth, caps sends, and returns public-only wallet data", async () => {
   const dir = mkdtempSync(join(tmpdir(), "flowmemory-control-plane-tester-gateway-"));
-  const previousMetadataPath = process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
-  const previousLocalDevnetPath = process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH;
-  const previousTesterWriteEnabled = process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;
-  const previousTesterTokenHash = process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256;
-  const previousTesterMaxSendUnits = process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS;
+  const previousMetadataPath = process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+  const previousLocalRuntimePath = process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_PATH;
+  const previousTesterWriteEnabled = process.env.FLOWMEMORY_TESTER_WRITE_ENABLED;
+  const previousTesterTokenHash = process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256;
+  const previousTesterMaxSendUnits = process.env.FLOWMEMORY_TESTER_MAX_SEND_UNITS;
   const testerToken = "local-tester-write-token";
-  const localDevnetPath = join(dir, "state.json");
+  const localRuntimePath = join(dir, "state.json");
   const localNodeDir = join(dir, "node");
-  process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowchain-operator-public-metadata.json");
-  process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH = localDevnetPath;
-  process.env.FLOWCHAIN_TESTER_WRITE_ENABLED = "true";
-  process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = createHash("sha256").update(testerToken, "utf8").digest("hex");
-  process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS = "2";
+  process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = join(dir, "flowmemory-operator-public-metadata.json");
+  process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_PATH = localRuntimePath;
+  process.env.FLOWMEMORY_TESTER_WRITE_ENABLED = "true";
+  process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256 = createHash("sha256").update(testerToken, "utf8").digest("hex");
+  process.env.FLOWMEMORY_TESTER_MAX_SEND_UNITS = "2";
   const init = spawnCargoSync([
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
-    localDevnetPath,
+    localRuntimePath,
     "--node-dir",
     localNodeDir,
     "init",
@@ -2122,7 +2122,7 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
     assert.equal(statusBody.tokenHashConfigured, true);
     assert.equal(statusBody.maxSendUnits, "2");
     assert.equal(JSON.stringify(statusBody).includes(testerToken), false);
-    assert.equal(JSON.stringify(statusBody).includes(process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256), false);
+    assert.equal(JSON.stringify(statusBody).includes(process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256), false);
 
     const unauthenticated = await fetch(`${baseUrl}/tester/wallets/create`, {
       method: "POST",
@@ -2214,7 +2214,7 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
     assert.equal(overCapBody.schema, "flowmemory.control_plane.tester_wallet_send_error.v0");
     assert.equal(overCapBody.accepted, false);
     assert.equal(overCapBody.noSecrets, true);
-    assert.equal(String(overCapBody.message).includes("FLOWCHAIN_TESTER_MAX_SEND_UNITS"), true);
+    assert.equal(String(overCapBody.message).includes("FLOWMEMORY_TESTER_MAX_SEND_UNITS"), true);
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {
@@ -2226,29 +2226,29 @@ test("HTTP tester write gateway requires bearer auth, caps sends, and returns pu
       });
     });
     if (previousMetadataPath === undefined) {
-      delete process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
+      delete process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH;
     } else {
-      process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
+      process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH = previousMetadataPath;
     }
-    if (previousLocalDevnetPath === undefined) {
-      delete process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH;
+    if (previousLocalRuntimePath === undefined) {
+      delete process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_PATH;
     } else {
-      process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH = previousLocalDevnetPath;
+      process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_PATH = previousLocalRuntimePath;
     }
     if (previousTesterWriteEnabled === undefined) {
-      delete process.env.FLOWCHAIN_TESTER_WRITE_ENABLED;
+      delete process.env.FLOWMEMORY_TESTER_WRITE_ENABLED;
     } else {
-      process.env.FLOWCHAIN_TESTER_WRITE_ENABLED = previousTesterWriteEnabled;
+      process.env.FLOWMEMORY_TESTER_WRITE_ENABLED = previousTesterWriteEnabled;
     }
     if (previousTesterTokenHash === undefined) {
-      delete process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256;
+      delete process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256;
     } else {
-      process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 = previousTesterTokenHash;
+      process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256 = previousTesterTokenHash;
     }
     if (previousTesterMaxSendUnits === undefined) {
-      delete process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS;
+      delete process.env.FLOWMEMORY_TESTER_MAX_SEND_UNITS;
     } else {
-      process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS = previousTesterMaxSendUnits;
+      process.env.FLOWMEMORY_TESTER_MAX_SEND_UNITS = previousTesterMaxSendUnits;
     }
     rmSync(dir, { recursive: true, force: true });
   }

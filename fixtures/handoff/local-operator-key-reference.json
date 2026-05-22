@@ -1,14 +1,14 @@
 {
-  "schema": "flowmemory.local_devnet.operator_key_reference.v0",
+  "schema": "flowmemory.local_runtime.operator_key_reference.v0",
   "description": "Deterministic local operator key reference boundary. This file contains no signing secret material or production key.",
-  "keyReferenceId": "operator-key:local-devnet:alpha",
+  "keyReferenceId": "operator-key:local-runtime:alpha",
   "operatorId": "0x06739c78255ec573518e97ffa9d2c5e11f49d49e0c65217c77d710a558a57f21",
   "workerKeyId": "0xc4cc0a4e778d201e59a442e969596ef8758fa62eb72c7ae4cb468c5493fc924d",
   "verifierKeyId": "0xeaead587bf631e8926cf1a88ea5404f2211a339b77be7b9ffc08be420ce85551",
   "verifierSetRoot": "0xbecddfb2cac22961206303e4f1255f58786e62503fbd54d875be915b68cc9635",
   "signatureScheme": "eip712-secp256k1-fixture-digest-only",
   "publicKeyHint": "local fixture boundary; no public key registry is implemented",
-  "secretMaterialBoundary": "no signing secret material is stored in devnet state or handoff output",
+  "secretMaterialBoundary": "no signing secret material is stored in localRuntime state or handoff output",
   "cryptoSchemaRefs": [
     "crypto/FLOWMEMORY_CRYPTO_SPEC.md#domain-separation",
     "crypto/ATTESTATIONS.md#local-signature-helpers"

@@ -67,7 +67,7 @@ This keeps the skeleton easy to audit but means a lost owner key can strand an a
 - Tokenomics
 - Dynamic fees
 - Uniswap v4 hooks
-- L1 or appchain mechanics
+- dedicated network or dedicated-network mechanics
 - Production deployment logic
 - Lost-key recovery
 - Governance or upgrade policy

@@ -22,7 +22,7 @@ function main() {
   const operatorSeparationPath = process.argv[5] ?? "fixtures/agent-bonds/approvals/operator-separation.template.json";
   const runtimeEvidencePath = process.argv[6] ?? "fixtures/agent-bonds/approvals/runtime-evidence.template.json";
   const goNoGoPath = process.argv[7] ?? "fixtures/agent-bonds/approvals/go-no-go.template.json";
-  const readinessReportPath = process.argv[8] ?? "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
+  const readinessReportPath = process.argv[8] ?? "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
   const operatorBundlePath = process.argv[9] ?? "out/agent-bonds-operator-bundle";
 
   const pilotConfig = readJson(pilotConfigPath);

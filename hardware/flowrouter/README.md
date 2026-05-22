@@ -38,7 +38,7 @@ V0 uses certified router/radio hardware and off-the-shelf compute. It does not i
 ## Directory Map
 
 - `FLOWROUTER_V0_SCOPE.md`: scope, non-goals, hardware assumptions, and tier definitions.
-- `FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md`: FlowRouter packet mapping into local-alpha FlowChain operator-signal objects.
+- `FLOWMEMORY_LOCAL_ALPHA_SIGNALS.md`: FlowRouter packet mapping into local-alpha FlowMemory operator-signal objects.
 - `BOM.md`: research BOM candidates and tier summaries.
 - `ASSEMBLY.md`: safe prototype assembly sequence.
 - `PRINTING_GUIDE.md`: enclosure and material constraints before CAD.

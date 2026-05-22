@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { getAgentBondsFoundationReadiness, getAgentBondsPhase2Gate } from "../../services/flowmemory/src/agent-bonds-phase2-gate.ts";
-const outPath = resolve("devnet/local/agent-bonds-readiness/agent-bonds-phase2-gate.json");
+const outPath = resolve("local-runtime/local/agent-bonds-readiness/agent-bonds-phase2-gate.json");
 const output = { schema: "flowmemory.agent_bonds.phase2_gate_report.v1", foundation: getAgentBondsFoundationReadiness(), gate: getAgentBondsPhase2Gate() };
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, `${JSON.stringify(output, null, 2)}

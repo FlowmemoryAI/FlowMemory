@@ -33,7 +33,7 @@ export type ControlPlaneMethod =
   | "pilot_lifecycle_record_list"
   | "wallet_balance_list"
   | "wallet_transfer_history"
-  | "devnet_state"
+  | "localRuntime_state"
   | "block_get"
   | "block_list"
   | "mempool_list"
@@ -160,12 +160,12 @@ export interface ControlPlanePaths {
   indexerPath: string;
   verifierPath: string;
   artifactsPath: string;
-  localDevnetPath: string;
-  localDevnetLaunchPath: string;
-  devnetPath: string;
-  devnetIndexerHandoffPath: string;
-  devnetVerifierHandoffPath: string;
-  devnetControlPlaneHandoffPath: string;
+  localRuntimePath: string;
+  localRuntimeLaunchPath: string;
+  localRuntimePath: string;
+  localRuntimeIndexerHandoffPath: string;
+  localRuntimeVerifierHandoffPath: string;
+  localRuntimeControlPlaneHandoffPath: string;
   explorerFallbackPath: string;
   txFixturesPath: string;
   txIntakePath: string;
@@ -202,10 +202,10 @@ export interface LoadedControlPlaneState {
   indexer: PersistedIndexerState;
   verifier: PersistedVerifierReports;
   artifacts: ArtifactResolverFixture;
-  devnet: JsonObject | null;
-  devnetIndexerHandoff: JsonObject | null;
-  devnetVerifierHandoff: JsonObject | null;
-  devnetControlPlaneHandoff: JsonObject | null;
+  localRuntime: JsonObject | null;
+  localRuntimeIndexerHandoff: JsonObject | null;
+  localRuntimeVerifierHandoff: JsonObject | null;
+  localRuntimeControlPlaneHandoff: JsonObject | null;
   explorerFallback: JsonObject | null;
   txFixtures: JsonObject | null;
   txIntake: JsonObject[];

@@ -1,3 +1,4 @@
+// All private keys in this file are deterministic test-only values. Never use them for production.
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -46,22 +47,22 @@ const vault = createEncryptedTestVault({
 const operatorAccount = vault.publicAccounts[0];
 
 const env = {
-  FLOWCHAIN_PILOT_CHAIN_ID: "84532",
-  FLOWCHAIN_PILOT_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
-  FLOWCHAIN_PILOT_OPERATOR_ID: operatorAccount.signerId,
-  FLOWCHAIN_PILOT_CAP_ID: keccakUtf8("pilot-cap:real-value-capped:2026-05-13"),
-  FLOWCHAIN_PILOT_CAP_ASSET_ID: keccakUtf8("asset:usdc:base-sepolia"),
-  FLOWCHAIN_PILOT_CAP_MAX_AMOUNT: "25000000",
-  FLOWCHAIN_PILOT_CAP_USED_AMOUNT: "5000000",
-  FLOWCHAIN_PILOT_CAP_UNIT: "USDC-6",
-  FLOWCHAIN_PILOT_CAP_WINDOW_START_UNIX_MS: "1778702400000",
-  FLOWCHAIN_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
-  FLOWCHAIN_PILOT_CONFIG_PATH: "devnet/local/pilot-wallet/operator-config.local.json",
-  FLOWCHAIN_PILOT_VAULT_PATH: "devnet/local/pilot-wallet/operator-vault.json",
-  FLOWCHAIN_PILOT_PUBLIC_METADATA_PATH: "devnet/local/pilot-wallet/operator-public-metadata.json",
-  FLOWCHAIN_PILOT_RPC_URL: "https://example.invalid/secret-token",
-  FLOWCHAIN_PILOT_API_KEY: "not-written",
-  FLOWCHAIN_PILOT_WEBHOOK_URL: "https://discord.com/api/webhooks/not-written"
+  FLOWMEMORY_PILOT_CHAIN_ID: "84532",
+  FLOWMEMORY_PILOT_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
+  FLOWMEMORY_PILOT_OPERATOR_ID: operatorAccount.signerId,
+  FLOWMEMORY_PILOT_CAP_ID: keccakUtf8("pilot-cap:real-value-capped:2026-05-13"),
+  FLOWMEMORY_PILOT_CAP_ASSET_ID: keccakUtf8("asset:usdc:base-sepolia"),
+  FLOWMEMORY_PILOT_CAP_MAX_AMOUNT: "25000000",
+  FLOWMEMORY_PILOT_CAP_USED_AMOUNT: "5000000",
+  FLOWMEMORY_PILOT_CAP_UNIT: "USDC-6",
+  FLOWMEMORY_PILOT_CAP_WINDOW_START_UNIX_MS: "1778702400000",
+  FLOWMEMORY_PILOT_CAP_WINDOW_END_UNIX_MS: "1778788800000",
+  FLOWMEMORY_PILOT_CONFIG_PATH: "local-runtime/local/pilot-wallet/operator-config.local.json",
+  FLOWMEMORY_PILOT_VAULT_PATH: "local-runtime/local/pilot-wallet/operator-vault.json",
+  FLOWMEMORY_PILOT_PUBLIC_METADATA_PATH: "local-runtime/local/pilot-wallet/operator-public-metadata.json",
+  FLOWMEMORY_PILOT_RPC_URL: "https://example.invalid/secret-token",
+  FLOWMEMORY_PILOT_API_KEY: "not-written",
+  FLOWMEMORY_PILOT_WEBHOOK_URL: "https://discord.com/api/webhooks/not-written"
 };
 
 const config = createPilotOperatorConfigFromEnv({ env, createdAtUnixMs: issuedAtUnixMs });
@@ -91,7 +92,7 @@ const common = {
 };
 const creditId = keccakUtf8("pilot-credit");
 const depositId = keccakUtf8("pilot-deposit");
-const flowchainAccount = operatorAccount.signerId;
+const flowmemoryAccount = operatorAccount.signerId;
 const token = "0x3333333333333333333333333333333333333333";
 const recipient = "0x4444444444444444444444444444444444444444";
 
@@ -100,7 +101,7 @@ const bridgeCreditAck = buildPilotBridgeCreditAckDocument({
   chainId: config.chainId,
   creditId,
   depositId,
-  accountId: flowchainAccount,
+  accountId: flowmemoryAccount,
   assetId: config.pilotCap.assetId,
   amount: "5000000",
   acknowledgedAtBlockNumber: "10",
@@ -114,7 +115,7 @@ const withdrawalIntent = buildPilotWithdrawalIntentDocument({
   depositId,
   token,
   amount: "3000000",
-  flowchainAccount,
+  flowmemoryAccount,
   baseRecipient: recipient,
   requestedAt: "2026-05-13T23:00:00.000Z",
   accountNonce: "2"
@@ -270,7 +271,7 @@ const nextCommandsOutput = execFileSync(
   { encoding: "utf8" }
 );
 assert.match(nextCommandsOutput, /deploy:base-sepolia:plan/);
-assert.match(nextCommandsOutput, /flowchain-wallet-pilot-observe\.ps1/);
+assert.match(nextCommandsOutput, /flowmemory-wallet-pilot-observe\.ps1/);
 assert.match(nextCommandsOutput, /bridge:local-credit:smoke/);
 assert.match(nextCommandsOutput, /wallet:pilot-sign/);
 assert.match(nextCommandsOutput, /wallet:pilot-verify/);
@@ -280,7 +281,7 @@ writeJson(resolve(outDir, "release-evidence.json"), releaseEvidence);
 writeJson(resolve(outDir, "release-envelope.json"), envelope);
 
 console.log(
-  `FLOWCHAIN_PILOT_WALLET_E2E_OK documents=${documents.length} envelopes=${documents.length} negativeCases=${negativeCases.length}`
+  `FLOWMEMORY_PILOT_WALLET_E2E_OK documents=${documents.length} envelopes=${documents.length} negativeCases=${negativeCases.length}`
 );
 
 function validateSchema(name, document, label) {
@@ -295,7 +296,7 @@ function validateSchema(name, document, label) {
 
 function assertNoLeakedEnvValues(value, envValues) {
   const serialized = JSON.stringify(value);
-  for (const envName of ["FLOWCHAIN_PILOT_RPC_URL", "FLOWCHAIN_PILOT_API_KEY", "FLOWCHAIN_PILOT_WEBHOOK_URL"]) {
+  for (const envName of ["FLOWMEMORY_PILOT_RPC_URL", "FLOWMEMORY_PILOT_API_KEY", "FLOWMEMORY_PILOT_WEBHOOK_URL"]) {
     assert.doesNotMatch(serialized, new RegExp(escapeRegExp(envValues[envName]), "i"), envName);
   }
 }

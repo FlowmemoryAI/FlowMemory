@@ -26,7 +26,7 @@ export function OverviewView({ data }: { data: DashboardData }) {
       <SectionHeader
         eyebrow="overview"
         title="Local FlowMemory state"
-        detail="Fixture-backed operator view across FlowPulse observations, verifier reports, work lanes, devnet roots, and hardware heartbeats."
+        detail="Fixture-backed operator view across FlowPulse observations, verifier reports, work lanes, localRuntime roots, and hardware heartbeats."
       />
 
       <section className="metric-grid" aria-label="Dashboard metrics">
@@ -143,7 +143,7 @@ export function OverviewView({ data }: { data: DashboardData }) {
           <div className="panel-heading">
             <div>
               <Cpu size={18} aria-hidden="true" />
-              <h2>Devnet block window</h2>
+              <h2>LocalRuntime block window</h2>
             </div>
             <span>{data.chain.finalizedBlock} finalized</span>
           </div>

@@ -10,19 +10,19 @@ import { runControlPlaneSmoke } from "./smoke.ts";
 import type { JsonObject, JsonValue, RpcSuccessResponse } from "./types.ts";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const outDir = resolve(repoRoot, "devnet/local/rpc-e2e");
+const outDir = resolve(repoRoot, "local-runtime/local/rpc-e2e");
 const runtimeDir = resolve(outDir, "runtime");
 const runtimeStatePath = resolve(runtimeDir, "state.json");
 const txIntakePath = resolve(runtimeDir, "intake", "transactions.ndjson");
 const bridgeObservationIntakePath = resolve(runtimeDir, "intake", "bridge-observations.ndjson");
-const localDevnetLaunchPath = resolve(runtimeDir, "launch-v0-state.json");
+const localRuntimeLaunchPath = resolve(runtimeDir, "launch-v0-state.json");
 mkdirSync(outDir, { recursive: true });
 rmSync(runtimeDir, { recursive: true, force: true });
 mkdirSync(runtimeDir, { recursive: true });
 
 const runtimePaths = {
-  localDevnetPath: runtimeStatePath,
-  localDevnetLaunchPath,
+  localRuntimePath: runtimeStatePath,
+  localRuntimeLaunchPath,
   txIntakePath,
   bridgeObservationIntakePath,
 };
@@ -68,7 +68,7 @@ function rpc(method: string, params: JsonObject = {}): JsonObject {
 
 function signedEnvelope(tx: JsonObject, signer: string): JsonObject {
   return {
-    schema: "flowchain.rpc_e2e.signed_envelope.v0",
+    schema: "flowmemory.rpc_e2e.signed_envelope.v0",
     tx,
     signature: {
       scheme: "local-e2e-placeholder",
@@ -86,8 +86,8 @@ const smoke = runControlPlaneSmoke({
 const discovery = dispatchJsonRpc({ jsonrpc: "2.0", id: "discover", method: "rpc_discover" }) as RpcSuccessResponse;
 const readiness = dispatchJsonRpc({ jsonrpc: "2.0", id: "readiness", method: "rpc_readiness" }) as RpcSuccessResponse;
 
-assert.equal((discovery.result as JsonObject).schema, "flowchain.rpc.discovery.v0");
-assert.equal((readiness.result as JsonObject).schema, "flowchain.rpc.readiness.v0");
+assert.equal((discovery.result as JsonObject).schema, "flowmemory.rpc.discovery.v0");
+assert.equal((readiness.result as JsonObject).schema, "flowmemory.rpc.readiness.v0");
 assert.equal((readiness.result as JsonObject).envValuesPrinted, false);
 
 const methods = ((discovery.result as JsonObject).methods as JsonObject[]).map((entry) => String(entry.method));
@@ -113,7 +113,7 @@ for (const requiredMethod of [
 runCargoJson([
   "run",
   "--manifest-path",
-  "crates/flowmemory-devnet/Cargo.toml",
+  "crates/flowmemory-local-runtime/Cargo.toml",
   "--",
   "--state",
   runtimeStatePath,
@@ -156,7 +156,7 @@ assert.ok(Number(mempoolBeforeBlock.count) >= 2, "runtime-submitted txs should b
 const firstBlockRun = runCargoJson([
   "run",
   "--manifest-path",
-  "crates/flowmemory-devnet/Cargo.toml",
+  "crates/flowmemory-local-runtime/Cargo.toml",
   "--",
   "--state",
   runtimeStatePath,
@@ -166,7 +166,7 @@ const firstBlockRun = runCargoJson([
 ], "produce block");
 assert.equal(firstBlockRun.blocksProduced, 1);
 
-const localBlocks = (rpc("block_list", { source: "local-devnet", includeTransactions: true, limit: 10 }).blocks as JsonObject[]);
+const localBlocks = (rpc("block_list", { source: "local-runtime", includeTransactions: true, limit: 10 }).blocks as JsonObject[]);
 const producedBlock = localBlocks.find((block) => {
   const txIds = Array.isArray(block.txIds) ? block.txIds.map(String) : [];
   return faucetQueued.every((txId) => txIds.includes(txId));
@@ -200,7 +200,7 @@ assert.equal(provenance.objectId, faucetQueued[0]);
 runCargoJson([
   "run",
   "--manifest-path",
-  "crates/flowmemory-devnet/Cargo.toml",
+  "crates/flowmemory-local-runtime/Cargo.toml",
   "--",
   "--state",
   runtimeStatePath,
@@ -222,7 +222,7 @@ const restartedStatus = rpc("node_status");
 assert.ok(Number(restartedStatus.latestBlockNumber ?? 0) >= Number(block.blockNumber ?? 0));
 
 const report = {
-  schema: "flowchain.rpc_e2e_report.v0",
+  schema: "flowmemory.rpc_e2e_report.v0",
   status: "passed",
   generatedAt: new Date().toISOString(),
   smokeMethodCount: smoke.methodCount,
@@ -250,7 +250,7 @@ const report = {
   },
   localOnly: true,
   productionReady: false,
-  reportPath: resolve(outDir, "flowchain-rpc-e2e-report.json"),
+  reportPath: resolve(outDir, "flowmemory-rpc-e2e-report.json"),
 };
 
 const secretFinding = findSecret(report);

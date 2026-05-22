@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/product-transaction.schema.json",
-  "title": "FlowChain Product Testnet V1 Transaction Documents",
+  "title": "FlowMemory Product Testnet V1 Transaction Documents",
   "oneOf": [
     {
       "type": "object",
       "additionalProperties": false,
       "required": ["schema", "transferId", "fromAccountId", "toAccountId", "assetId", "amount", "accountNonce", "deadlineBlock", "memoHash"],
       "properties": {
-        "schema": { "const": "flowchain.product_transfer.v0" },
+        "schema": { "const": "flowmemory.product_transfer.v0" },
         "transferId": { "$ref": "#/$defs/hex32" },
         "fromAccountId": { "$ref": "#/$defs/hex32" },
         "toAccountId": { "$ref": "#/$defs/hex32" },
@@ -24,7 +24,7 @@
       "additionalProperties": false,
       "required": ["schema", "tokenLaunchId", "issuerAccountId", "tokenId", "symbolHash", "nameHash", "metadataHash", "decimals", "initialSupply", "recipientAccountId", "accountNonce", "launchPolicyHash"],
       "properties": {
-        "schema": { "const": "flowchain.product_token_launch.v0" },
+        "schema": { "const": "flowmemory.product_token_launch.v0" },
         "tokenLaunchId": { "$ref": "#/$defs/hex32" },
         "issuerAccountId": { "$ref": "#/$defs/hex32" },
         "tokenId": { "$ref": "#/$defs/hex32" },
@@ -43,7 +43,7 @@
       "additionalProperties": false,
       "required": ["schema", "poolCreateId", "creatorAccountId", "poolId", "baseAssetId", "quoteAssetId", "feeBps", "tickSpacing", "metadataHash", "accountNonce"],
       "properties": {
-        "schema": { "const": "flowchain.product_pool_create.v0" },
+        "schema": { "const": "flowmemory.product_pool_create.v0" },
         "poolCreateId": { "$ref": "#/$defs/hex32" },
         "creatorAccountId": { "$ref": "#/$defs/hex32" },
         "poolId": { "$ref": "#/$defs/hex32" },
@@ -60,7 +60,7 @@
       "additionalProperties": false,
       "required": ["schema", "addLiquidityId", "providerAccountId", "poolId", "baseAmount", "quoteAmount", "minLiquidityTokens", "deadlineBlock", "accountNonce"],
       "properties": {
-        "schema": { "const": "flowchain.product_add_liquidity.v0" },
+        "schema": { "const": "flowmemory.product_add_liquidity.v0" },
         "addLiquidityId": { "$ref": "#/$defs/hex32" },
         "providerAccountId": { "$ref": "#/$defs/hex32" },
         "poolId": { "$ref": "#/$defs/hex32" },
@@ -76,7 +76,7 @@
       "additionalProperties": false,
       "required": ["schema", "removeLiquidityId", "providerAccountId", "poolId", "liquidityTokens", "minBaseAmount", "minQuoteAmount", "deadlineBlock", "accountNonce"],
       "properties": {
-        "schema": { "const": "flowchain.product_remove_liquidity.v0" },
+        "schema": { "const": "flowmemory.product_remove_liquidity.v0" },
         "removeLiquidityId": { "$ref": "#/$defs/hex32" },
         "providerAccountId": { "$ref": "#/$defs/hex32" },
         "poolId": { "$ref": "#/$defs/hex32" },
@@ -92,7 +92,7 @@
       "additionalProperties": false,
       "required": ["schema", "swapId", "traderAccountId", "poolId", "assetInId", "assetOutId", "amountIn", "minAmountOut", "deadlineBlock", "accountNonce"],
       "properties": {
-        "schema": { "const": "flowchain.product_swap.v0" },
+        "schema": { "const": "flowmemory.product_swap.v0" },
         "swapId": { "$ref": "#/$defs/hex32" },
         "traderAccountId": { "$ref": "#/$defs/hex32" },
         "poolId": { "$ref": "#/$defs/hex32" },
@@ -109,7 +109,7 @@
       "additionalProperties": false,
       "required": ["schema", "bridgeCreditAckId", "creditId", "depositId", "accountId", "assetId", "amount", "acknowledgedAtBlockNumber", "accountNonce"],
       "properties": {
-        "schema": { "const": "flowchain.product_bridge_credit_ack.v0" },
+        "schema": { "const": "flowmemory.product_bridge_credit_ack.v0" },
         "bridgeCreditAckId": { "$ref": "#/$defs/hex32" },
         "creditId": { "$ref": "#/$defs/hex32" },
         "depositId": { "$ref": "#/$defs/hex32" },

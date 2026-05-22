@@ -26,7 +26,7 @@ The local/testnet-ready V0 system must support:
 - Dashboard display path.
 - Source-of-truth docs.
 
-It must not claim production L1, production mainnet readiness, full trustless verification, free storage, or AI running on-chain.
+It must not claim separate production network, production mainnet readiness, full trustless verification, free storage, or AI running on-chain.
 
 ## Artifact Checklist
 
@@ -70,7 +70,7 @@ The final acceptance evidence should include:
 - stricter gate: `npm run launch:candidate`;
 - fixture paths: `fixtures/launch-core/`, `fixtures/dashboard/flowmemory-dashboard-v0.json`;
 - output paths: `fixtures/launch-core/flowmemory-launch-v0.json`, `fixtures/launch-core/rootflow-transitions.json`, `apps/dashboard/public/data/flowmemory-dashboard-v0.json`;
-- test results: services, dashboard, contracts, crypto, devnet, and hardware checks;
+- test results: services, dashboard, contracts, crypto, local test runtime, and hardware checks;
 - GitHub CI area jobs.
 
 ## Required Agent Handoffs
@@ -113,7 +113,7 @@ The local/test V0 milestone is complete when all of these remain true:
 - Indexer fixture parser/verifier checks pass.
 - Dashboard can render fixture-backed Rootflow/Flow Memory state.
 - Docs name what is implemented and what remains conceptual.
-- Review agent confirms no PR claims production L1, mainnet readiness, full trustless verification, free storage, or AI running on-chain.
+- Review agent confirms no PR claims separate production network, mainnet readiness, full trustless verification, free storage, or AI running on-chain.
 
 ## Non-Goal Guardrails
 
@@ -122,7 +122,7 @@ Do not use this milestone to add:
 - tokenomics;
 - dynamic fee hooks;
 - production deployment config;
-- production L1 or appchain claims;
+- separate production network or dedicated-network claims;
 - production Uniswap v4 hook deployment;
 - GPU proof systems;
 - verifier economics;

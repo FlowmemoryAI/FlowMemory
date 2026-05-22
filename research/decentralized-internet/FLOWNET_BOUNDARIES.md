@@ -51,13 +51,13 @@ Meshtastic and LoRa are low-bandwidth side channels for compact control messages
 - Physical devices are tamperable.
 - Operator dashboards can mislead if they blur local, advisory, and verified state.
 
-## Appchain Hardware Observer Boundary
+## Local runtime Hardware Observer Boundary
 
-For issue #37, FlowRouter-class devices may later observe appchain or L1-like activity as cache, diagnostic, and operator-visibility nodes. They are not validators, data availability providers, consensus participants, or mandatory protocol infrastructure in V0.
+For issue #37, FlowRouter-class devices may later observe local runtime or network-like activity as cache, diagnostic, and operator-visibility nodes. They are not validators, data availability providers, consensus participants, or mandatory protocol infrastructure in V0.
 
 Allowed observer roles:
 
-- Cache compact appchain or protocol digests.
+- Cache compact local runtime or protocol digests.
 - Relay short receipt or verifier-report references over low-bandwidth side channels.
 - Show local/advisory/verified state to operators.
 - Record field diagnostics that help reconcile state after normal network paths return.
@@ -68,7 +68,7 @@ Not allowed in V0:
 - Validator rewards or hardware economics.
 - Data availability duties.
 - Consensus duties.
-- Production L1 or appchain operation.
+- Production network or local runtime operation.
 
 ## Claims Allowed In V0
 

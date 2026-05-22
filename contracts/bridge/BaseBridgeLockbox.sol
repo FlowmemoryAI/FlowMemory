@@ -7,9 +7,9 @@ interface IERC20Minimal {
 }
 
 /// @title BaseBridgeLockbox
-/// @notice Test-only Base-side lockbox for the FlowChain bridge POC.
+/// @notice Test-only Base-side lockbox for the FlowMemory bridge POC.
 /// @dev This contract is intentionally small and non-upgradeable. It is not a
-/// production bridge, not audited, and does not prove FlowChain finality.
+/// production bridge, not audited, and does not prove FlowMemory finality.
 contract BaseBridgeLockbox {
     struct TokenConfig {
         bool allowed;
@@ -24,7 +24,7 @@ contract BaseBridgeLockbox {
         address token;
         uint256 amount;
         uint256 released;
-        bytes32 flowchainRecipient;
+        bytes32 flowmemoryRecipient;
         uint256 nonce;
         bytes32 metadataHash;
         bool exists;
@@ -33,7 +33,7 @@ contract BaseBridgeLockbox {
     address public constant NATIVE_TOKEN = address(0);
     bytes32 public constant BRIDGE_DEPOSIT_SCHEMA_ID = keccak256("flowmemory.bridge.deposit.v0");
     bytes32 public constant BRIDGE_RELEASE_SCHEMA_ID = keccak256("flowmemory.bridge.release.v0");
-    bytes32 public constant PILOT_MODE_TAG = keccak256("flowchain.base8453.owner-pilot.v0");
+    bytes32 public constant PILOT_MODE_TAG = keccak256("flowmemory.base8453.owner-pilot.v0");
     bytes32 private constant PLACEHOLDER_RECIPIENT =
         0x5555555555555555555555555555555555555555555555555555555555555555;
 
@@ -84,7 +84,7 @@ contract BaseBridgeLockbox {
         address lockbox,
         address token,
         uint256 amount,
-        bytes32 flowchainRecipient,
+        bytes32 flowmemoryRecipient,
         uint256 nonce,
         bytes32 metadataHash,
         bytes32 pilotModeTag
@@ -195,7 +195,7 @@ contract BaseBridgeLockbox {
         emit TokenConfigured(token, allowed, perDepositCap, totalCap);
     }
 
-    function lockNative(bytes32 flowchainRecipient, bytes32 metadataHash)
+    function lockNative(bytes32 flowmemoryRecipient, bytes32 metadataHash)
         external
         payable
         whenNotPaused
@@ -203,10 +203,10 @@ contract BaseBridgeLockbox {
         nonReentrant
         returns (bytes32 depositId)
     {
-        depositId = _lock(NATIVE_TOKEN, msg.value, msg.sender, flowchainRecipient, metadataHash);
+        depositId = _lock(NATIVE_TOKEN, msg.value, msg.sender, flowmemoryRecipient, metadataHash);
     }
 
-    function lockERC20(address token, uint256 amount, bytes32 flowchainRecipient, bytes32 metadataHash)
+    function lockERC20(address token, uint256 amount, bytes32 flowmemoryRecipient, bytes32 metadataHash)
         external
         whenNotPaused
         whenNotEmergencyStopped
@@ -216,7 +216,7 @@ contract BaseBridgeLockbox {
         if (token == NATIVE_TOKEN) {
             revert ZeroToken();
         }
-        depositId = _lock(token, amount, msg.sender, flowchainRecipient, metadataHash);
+        depositId = _lock(token, amount, msg.sender, flowmemoryRecipient, metadataHash);
         if (!IERC20Minimal(token).transferFrom(msg.sender, address(this), amount)) {
             revert TransferFailed();
         }
@@ -264,17 +264,17 @@ contract BaseBridgeLockbox {
         return depositRecords[depositId];
     }
 
-    function _lock(address token, uint256 amount, address sender, bytes32 flowchainRecipient, bytes32 metadataHash)
+    function _lock(address token, uint256 amount, address sender, bytes32 flowmemoryRecipient, bytes32 metadataHash)
         private
         returns (bytes32 depositId)
     {
         if (amount == 0) {
             revert ZeroAmount();
         }
-        if (flowchainRecipient == bytes32(0)) {
+        if (flowmemoryRecipient == bytes32(0)) {
             revert ZeroRecipient();
         }
-        if (flowchainRecipient == PLACEHOLDER_RECIPIENT) {
+        if (flowmemoryRecipient == PLACEHOLDER_RECIPIENT) {
             revert PlaceholderRecipient();
         }
 
@@ -301,7 +301,7 @@ contract BaseBridgeLockbox {
                 sender,
                 token,
                 amount,
-                flowchainRecipient,
+                flowmemoryRecipient,
                 nonce,
                 metadataHash,
                 PILOT_MODE_TAG
@@ -317,7 +317,7 @@ contract BaseBridgeLockbox {
             token: token,
             amount: amount,
             released: 0,
-            flowchainRecipient: flowchainRecipient,
+            flowmemoryRecipient: flowmemoryRecipient,
             nonce: nonce,
             metadataHash: metadataHash,
             exists: true
@@ -332,7 +332,7 @@ contract BaseBridgeLockbox {
             lockbox: address(this),
             token: token,
             amount: amount,
-            flowchainRecipient: flowchainRecipient,
+            flowmemoryRecipient: flowmemoryRecipient,
             nonce: nonce,
             metadataHash: metadataHash,
             pilotModeTag: PILOT_MODE_TAG

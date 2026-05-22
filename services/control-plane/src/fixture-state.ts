@@ -33,24 +33,24 @@ export const DEFAULT_CONTROL_PLANE_PATHS: ControlPlanePaths = {
   indexerPath: "services/indexer/out/indexer-state.json",
   verifierPath: "services/verifier/out/reports.json",
   artifactsPath: "services/verifier/fixtures/artifacts.json",
-  localDevnetPath: "devnet/local/state.json",
-  localDevnetLaunchPath: "devnet/local/launch-v0-state.json",
-  devnetPath: "fixtures/launch-core/generated/devnet/state.json",
-  devnetIndexerHandoffPath: "fixtures/launch-core/generated/devnet/indexer-handoff.json",
-  devnetVerifierHandoffPath: "fixtures/launch-core/generated/devnet/verifier-handoff.json",
-  devnetControlPlaneHandoffPath: "fixtures/launch-core/generated/devnet/control-plane-handoff.json",
-  explorerFallbackPath: "fixtures/dashboard/flowchain-l1-explorer-fallback.json",
+  localRuntimePath: "local-runtime/local/state.json",
+  localRuntimeLaunchPath: "local-runtime/local/launch-v0-state.json",
+  localRuntimePath: "fixtures/launch-core/generated/local-runtime/state.json",
+  localRuntimeIndexerHandoffPath: "fixtures/launch-core/generated/local-runtime/indexer-handoff.json",
+  localRuntimeVerifierHandoffPath: "fixtures/launch-core/generated/local-runtime/verifier-handoff.json",
+  localRuntimeControlPlaneHandoffPath: "fixtures/launch-core/generated/local-runtime/control-plane-handoff.json",
+  explorerFallbackPath: "fixtures/dashboard/flowmemory-network-explorer-fallback.json",
   txFixturesPath: "fixtures/handoff/sample-txs.json",
-  txIntakePath: "devnet/local/intake/transactions.ndjson",
+  txIntakePath: "local-runtime/local/intake/transactions.ndjson",
   bridgeObservationPath: "services/bridge-relayer/out/bridge-observation.json",
   bridgeRuntimeHandoffPath: "fixtures/bridge/local-runtime-bridge-handoff.json",
-  bridgeObservationIntakePath: "devnet/local/intake/bridge-observations.ndjson",
-  walletTransferProofPath: "devnet/local/production-l1-wallet/wallet-e2e/wallet-e2e-proof.json",
-  walletPublicMetadataPath: "devnet/local/wallet/flowchain-operator/flowchain-operator-public-metadata.json",
+  bridgeObservationIntakePath: "local-runtime/local/intake/bridge-observations.ndjson",
+  walletTransferProofPath: "local-runtime/local/production-network-wallet/wallet-e2e/wallet-e2e-proof.json",
+  walletPublicMetadataPath: "local-runtime/local/wallet/flowmemory-operator/flowmemory-operator-public-metadata.json",
   agentBondFixturePath: "fixtures/agent-bonds/agent-bonds-v1.json",
   agentBondReplayReportPath: "fixtures/agent-bonds/replay-report.json",
   agentBondEconomicReportPath: "fixtures/agent-bonds/economic-sim-report.json",
-  agentBondReadinessReportPath: "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json",
+  agentBondReadinessReportPath: "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json",
   agentBondLaunchApprovalPath: "fixtures/agent-bonds/launch-approval.template.json",
   agentBondPassportDir: "fixtures/agent-bonds/passports",
   agentBondEnvelopeDir: "fixtures/agent-bonds/envelopes",
@@ -226,7 +226,7 @@ function launchPaths(paths: ControlPlanePaths): LaunchCorePaths {
   return {
     indexerPath: paths.indexerPath,
     verifierPath: paths.verifierPath,
-    devnetPath: paths.devnetPath,
+    localRuntimePath: paths.localRuntimePath,
     hardwarePath: "hardware/fixtures/flowrouter_sample_seed42.json",
     launchOutPath: paths.launchCorePath,
     transitionsOutPath: "fixtures/launch-core/rootflow-transitions.json",
@@ -292,29 +292,29 @@ function loadOptionalSource(
   return null;
 }
 
-function loadDevnetSource(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject | null {
+function loadLocalRuntimeSource(paths: ControlPlanePaths, sources: Record<string, DataSourceRecord>): JsonObject | null {
   const skipped: string[] = [];
   for (const [path, recovery] of [
-    [paths.localDevnetPath, undefined],
-    [paths.localDevnetLaunchPath, "loaded from devnet/local launch runtime state"],
-    [paths.devnetPath, "loaded committed devnet fixture fallback"],
+    [paths.localRuntimePath, undefined],
+    [paths.localRuntimeLaunchPath, "loaded from local-runtime/local launch runtime state"],
+    [paths.localRuntimePath, "loaded committed localRuntime fixture fallback"],
   ] as const) {
     const result = readJsonFile<JsonObject>(path);
     if (result.status === "loaded") {
-      const status = skipped.length > 0 ? "degraded" : path === paths.localDevnetPath ? "loaded" : "recovered";
+      const status = skipped.length > 0 ? "degraded" : path === paths.localRuntimePath ? "loaded" : "recovered";
       const combinedRecovery = skipped.length > 0
-        ? `${skipped.join("; ")}; ${recovery ?? "loaded usable devnet runtime state"}`
+        ? `${skipped.join("; ")}; ${recovery ?? "loaded usable localRuntime runtime state"}`
         : recovery;
-      sources.devnet = sourceRecord("devnet", path, status, combinedRecovery);
+      sources.localRuntime = sourceRecord("localRuntime", path, status, combinedRecovery);
       return result.value;
     }
     if (result.status === "degraded") {
       skipped.push(result.recovery);
     }
   }
-  sources.devnet = skipped.length > 0
-    ? sourceRecord("devnet", paths.localDevnetPath, "degraded", `no usable devnet JSON source loaded; ${skipped.join("; ")}`)
-    : sourceRecord("devnet", paths.localDevnetPath, "missing");
+  sources.localRuntime = skipped.length > 0
+    ? sourceRecord("localRuntime", paths.localRuntimePath, "degraded", `no usable localRuntime JSON source loaded; ${skipped.join("; ")}`)
+    : sourceRecord("localRuntime", paths.localRuntimePath, "missing");
   return null;
 }
 
@@ -369,15 +369,15 @@ function loadBridgeObservations(
 export function controlPlanePaths(overrides: Partial<ControlPlanePaths> = {}): ControlPlanePaths {
   return {
     ...DEFAULT_CONTROL_PLANE_PATHS,
-    localDevnetPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_PATH
-      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetPath,
-    localDevnetLaunchPath: process.env.FLOWCHAIN_CONTROL_PLANE_LOCAL_DEVNET_LAUNCH_PATH
-      ?? DEFAULT_CONTROL_PLANE_PATHS.localDevnetLaunchPath,
-    bridgeRuntimeHandoffPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_RUNTIME_HANDOFF_PATH
+    localRuntimePath: process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localRuntimePath,
+    localRuntimeLaunchPath: process.env.FLOWMEMORY_CONTROL_PLANE_LOCAL_RUNTIME_LAUNCH_PATH
+      ?? DEFAULT_CONTROL_PLANE_PATHS.localRuntimeLaunchPath,
+    bridgeRuntimeHandoffPath: process.env.FLOWMEMORY_CONTROL_PLANE_BRIDGE_RUNTIME_HANDOFF_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeRuntimeHandoffPath,
-    bridgeObservationPath: process.env.FLOWCHAIN_CONTROL_PLANE_BRIDGE_OBSERVATION_PATH
+    bridgeObservationPath: process.env.FLOWMEMORY_CONTROL_PLANE_BRIDGE_OBSERVATION_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.bridgeObservationPath,
-    walletPublicMetadataPath: process.env.FLOWCHAIN_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH
+    walletPublicMetadataPath: process.env.FLOWMEMORY_CONTROL_PLANE_WALLET_PUBLIC_METADATA_PATH
       ?? DEFAULT_CONTROL_PLANE_PATHS.walletPublicMetadataPath,
     ...overrides,
   };
@@ -390,10 +390,10 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
   const indexer = loadOrBuildIndexer(paths.indexerPath, sources);
   const verifier = loadOrBuildVerifier(paths.verifierPath, indexer, artifacts, sources);
   const launchCore = loadOrBuildLaunchCore(paths, indexer, verifier, sources);
-  const devnet = loadDevnetSource(paths, sources);
-  const devnetIndexerHandoff = loadOptionalSource("devnetIndexerHandoff", paths.devnetIndexerHandoffPath, sources);
-  const devnetVerifierHandoff = loadOptionalSource("devnetVerifierHandoff", paths.devnetVerifierHandoffPath, sources);
-  const devnetControlPlaneHandoff = loadOptionalSource("devnetControlPlaneHandoff", paths.devnetControlPlaneHandoffPath, sources);
+  const localRuntime = loadLocalRuntimeSource(paths, sources);
+  const localRuntimeIndexerHandoff = loadOptionalSource("localRuntimeIndexerHandoff", paths.localRuntimeIndexerHandoffPath, sources);
+  const localRuntimeVerifierHandoff = loadOptionalSource("localRuntimeVerifierHandoff", paths.localRuntimeVerifierHandoffPath, sources);
+  const localRuntimeControlPlaneHandoff = loadOptionalSource("localRuntimeControlPlaneHandoff", paths.localRuntimeControlPlaneHandoffPath, sources);
   const explorerFallback = loadOptionalSource("explorerFallback", paths.explorerFallbackPath, sources);
   const txFixtures = loadOptionalSource("txFixtures", paths.txFixturesPath, sources);
   const txIntake = loadTxIntake(paths.txIntakePath, sources);
@@ -417,10 +417,10 @@ export function loadControlPlaneState(overrides: Partial<ControlPlanePaths> = {}
     indexer,
     verifier,
     artifacts,
-    devnet,
-    devnetIndexerHandoff,
-    devnetVerifierHandoff,
-    devnetControlPlaneHandoff,
+    localRuntime,
+    localRuntimeIndexerHandoff,
+    localRuntimeVerifierHandoff,
+    localRuntimeControlPlaneHandoff,
     explorerFallback,
     txFixtures,
     txIntake,

@@ -9,8 +9,8 @@ The test vectors are synthetic and contain no production secrets or signatures.
 - `fixtures/sample-flowpulse.json`: FlowPulse event args and expected `pulseId` / `eventArgsHash`.
 - `fixtures/sample-observation.json`: observation metadata, artifact/storage inputs, and expected `observationId` / `receiptHash`.
 - `fixtures/sample-report.json`: verifier report, worker signature payload, verifier signature payload, and attestation envelope expectations.
-- `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowChain Local Alpha object identity, signed-envelope validation, transaction-envelope validation, and schema validation.
-- `fixtures/vectors.json`: 46 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, devnet block hashes, Local Alpha object ids, bridge/balance ids, Product Testnet V1 transaction ids, hardware signal envelopes, local signature envelopes, and local transaction envelopes.
+- `fixtures/local-alpha-objects.json`: positive and negative fixtures for FlowMemory Local Alpha object identity, signed-envelope validation, transaction-envelope validation, and schema validation.
+- `fixtures/vectors.json`: 46 package-level vectors for domains, canonical JSON, observation ids, receipts, artifacts, Merkle roots, reports, attestations, cursors, identities, root commitments, work receipts, localRuntime block hashes, Local Alpha object ids, bridge/balance ids, Product Testnet V1 transaction ids, hardware signal envelopes, local signature envelopes, and local transaction envelopes.
 - `fixtures/product-testnet-transactions.json`: canonical Product Testnet V1 wallet transaction documents and signed local transaction envelopes for transfer, token launch, pool create, add liquidity, remove liquidity, swap, bridge credit acknowledgement, and bridge withdrawal intent.
 - `test-vectors/flowpulse-observation-v0.json`: FlowPulse-specific observation, receipt, artifact, report, worker signature digest, and verifier signature digest.
 
@@ -59,7 +59,7 @@ An implementation should reproduce:
 Run the package test suite:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto\crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 npm test
 ```
 
@@ -85,7 +85,7 @@ npm run validate:local-alpha
 Expected output:
 
 ```text
-FLOWCHAIN_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=15 transactions=1 schemas=17
+FLOWMEMORY_LOCAL_ALPHA_FIXTURES_OK documents=15 envelopes=15 transactions=1 schemas=17
 ```
 
 Print the sample vector summary:

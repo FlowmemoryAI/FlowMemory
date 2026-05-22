@@ -69,6 +69,21 @@ const requiredFiles = [
   ".gitignore",
 ];
 for (const path of requiredFiles) readText(path);
+const legacyBrand = ["FLOW", "CHAIN"].join("");
+const legacyScriptPrefix = ["flow", "chain"].join("");
+const legacyLocalWord = ["dev", "net"].join("");
+const forbiddenPublicFiles = [
+  "INSTALL_" + legacyBrand + "_WINDOWS.ps1",
+  "START_" + legacyBrand + "_LOCAL.ps1",
+  "docs/" + legacyBrand + "_FULL_PRIVATE_TESTNET.md",
+  "docs/" + legacyBrand + "_SECOND_COMPUTER_SETUP.md",
+  "docs/" + legacyBrand + "_TESTNET_ACCEPTANCE.md",
+  "docs/L" + "1_RESEARCH_INVENTORY.md",
+];
+for (const path of forbiddenPublicFiles) {
+  assert(!existsSync(resolve(root, path)), `non-public launch artifact must not remain in the public repo: ${path}`);
+}
+
 
 const readme = readText("README.md");
 const publicGuide = readText("docs/PUBLIC_REPO_GUIDE.md");
@@ -100,9 +115,6 @@ const publicSurfaceDocs = [
   ["docs/MOBILE_APPS.md", mobileDocs],
   ["apps/dashboard/WALLET_DISTRIBUTION.md", walletDistribution],
 ];
-const legacyBrand = ["FLOW", "CHAIN"].join("");
-const legacyScriptPrefix = ["flow", "chain"].join("");
-const legacyLocalWord = ["dev", "net"].join("");
 const bannedPublicEntrypoints = [
   `INSTALL_${legacyBrand}_WINDOWS.ps1`,
   `INSTALL_${legacyBrand}`,

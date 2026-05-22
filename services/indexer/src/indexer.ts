@@ -898,7 +898,7 @@ function buildExplorerIndex(input: {
       logIndex: firstString(deposit, ["logIndex"]) ?? firstString(creditSource, ["logIndex"]),
       lockboxAddress: firstString(deposit, ["lockboxAddress", "sourceContract"]) ?? firstString(creditSource, ["contract"]),
       depositor: firstString(deposit, ["sender", "depositor"]),
-      localRecipient: firstString(deposit, ["flowchainRecipient", "localRecipient"]) ?? firstString(credit, ["flowchainRecipient", "accountId"]),
+      localRecipient: firstString(deposit, ["flowmemoryRecipient", "localRecipient"]) ?? firstString(credit, ["flowmemoryRecipient", "accountId"]),
       asset: firstString(deposit, ["token", "asset"]) ?? firstString(credit, ["token", "asset"]),
       amount: firstString(deposit, ["amount"]) ?? firstString(credit, ["amount"]),
       creditId,

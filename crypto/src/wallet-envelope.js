@@ -3,8 +3,8 @@ import { canonicalJsonHash, keccakUtf8 } from "./hashes.js";
 import { localTransactionReplayKey, validateLocalTransactionEnvelope } from "./transactions.js";
 import { signLocalTransactionWithVault } from "./wallet.js";
 
-export const WALLET_SIGNED_ENVELOPE_SCHEMA = "flowchain.wallet_signed_envelope.v0";
-export const WALLET_ENVELOPE_VERIFICATION_SCHEMA = "flowchain.wallet_envelope_verification.v0";
+export const WALLET_SIGNED_ENVELOPE_SCHEMA = "flowmemory.wallet_signed_envelope.v0";
+export const WALLET_ENVELOPE_VERIFICATION_SCHEMA = "flowmemory.wallet_envelope_verification.v0";
 
 export async function signWalletDocumentWithVault({
   vault,
@@ -69,7 +69,7 @@ export function verifyWalletSignedEnvelope({ envelope, context = {} }) {
     return verificationOutput({ errors: ["missing-envelope"] });
   }
 
-  if (envelope.schema === "flowchain.local_transaction_envelope.v0") {
+  if (envelope.schema === "flowmemory.local_transaction_envelope.v0") {
     return verifyLocalOnlyEnvelope({ envelope, context });
   }
 
@@ -203,7 +203,7 @@ function signerAddressFromPublicKey(publicKey) {
   if (!isPublicKey(publicKey)) {
     return null;
   }
-  return keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`);
+  return keccakUtf8(`flowmemory.local-alpha.signer:${publicKey}`);
 }
 
 function isPublicKey(value) {

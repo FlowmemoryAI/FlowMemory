@@ -2,7 +2,7 @@
   "schema": "flowmemory.crypto.local-transaction-vectors.v0",
   "chainId": "31337",
   "publicWalletMetadata": {
-    "schema": "flowchain.local_wallet_public_metadata.v0",
+    "schema": "flowmemory.local_wallet_public_metadata.v0",
     "vaultId": "0x999558b9e2477f6420ab4b9ad3008c4dbd276aaac611ec5575def8c9a98fc384",
     "createdAtUnixMs": "1778702400000",
     "updatedAtUnixMs": "1778702400000",
@@ -25,10 +25,10 @@
     {
       "name": "transaction.register-agent.operator-signature",
       "payload": {
-        "schema": "flowmemory.local_devnet.tx_payload.v0",
+        "schema": "flowmemory.local_runtime.tx_payload.v0",
         "objectType": "agent_account",
         "object": {
-          "schema": "flowchain.agent_account.v0",
+          "schema": "flowmemory.agent_account.v0",
           "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
           "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
           "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
@@ -65,18 +65,18 @@
         "signingDigest": "0x9ff2d8b2153b38d76ecd81334ab06bd16f31f004be03d5b9e29042dd09cd296f"
       },
       "envelope": {
-        "schema": "flowchain.local_transaction_envelope.v0",
+        "schema": "flowmemory.local_transaction_envelope.v0",
         "envelopeId": "0xfba94617ac6fbae608393c67570280d7123b27dabb0c1f31427808ad955a7c46",
-        "domain": "flowchain.local.v0.transaction-envelope",
+        "domain": "flowmemory.local.v0.transaction-envelope",
         "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677",
         "chainId": "31337",
         "nonce": "1",
         "payloadHash": "0x3659032f06fcb8573d47c109237dbba39fce5809c041123327767d3af17bb2b2",
         "payload": {
-          "schema": "flowmemory.local_devnet.tx_payload.v0",
+          "schema": "flowmemory.local_runtime.tx_payload.v0",
           "objectType": "agent_account",
           "object": {
-            "schema": "flowchain.agent_account.v0",
+            "schema": "flowmemory.agent_account.v0",
             "agentId": "0xe4982e2682c9dd11caf102d2e0c9567ffad56850f1c69086b3996b77495fbb61",
             "namespaceId": "0x4c2eae268c3f97a510b66597873c6c08ae9e427a7c03cd383df6acfeda9bbf37",
             "owner": "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",
@@ -113,7 +113,7 @@
     {
       "name": "transaction.bridge-deposit.operator-signature",
       "payload": {
-        "schema": "flowmemory.local_devnet.tx_payload.v0",
+        "schema": "flowmemory.local_runtime.tx_payload.v0",
         "objectType": "bridge_deposit",
         "object": {
           "schema": "flowmemory.bridge_deposit.v0",
@@ -125,7 +125,7 @@
           "token": "0x3333333333333333333333333333333333333333",
           "amount": "20000000",
           "sender": "0x4444444444444444444444444444444444444444",
-          "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+          "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
           "nonce": "1",
           "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
           "status": "observed"
@@ -135,7 +135,7 @@
           "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
           "sourceChainId": 84532,
           "amount": "20000000",
-          "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
+          "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
         }
       },
       "input": {
@@ -155,15 +155,15 @@
         "signingDigest": "0xd6379c1be2d89c5f17e6c6a3a033fc717aab692e39197a29ab5a64e4a132a839"
       },
       "envelope": {
-        "schema": "flowchain.local_transaction_envelope.v0",
+        "schema": "flowmemory.local_transaction_envelope.v0",
         "envelopeId": "0xd6195c2f24da099f9c0fe8e40d80e4824ed045f40b18c4b6b0c42c67eb9de856",
-        "domain": "flowchain.local.v0.transaction-envelope",
+        "domain": "flowmemory.local.v0.transaction-envelope",
         "domainSeparator": "0x12aff8820bbfec739f09eeac1e8a497ef87a9930ef07b5a09ff8e3a67a2b5677",
         "chainId": "31337",
         "nonce": "2",
         "payloadHash": "0x2d2a18d5508b23b17d25a2f7522a0b5fc57eb762e25ebb2b9d7a2faa947158a4",
         "payload": {
-          "schema": "flowmemory.local_devnet.tx_payload.v0",
+          "schema": "flowmemory.local_runtime.tx_payload.v0",
           "objectType": "bridge_deposit",
           "object": {
             "schema": "flowmemory.bridge_deposit.v0",
@@ -175,7 +175,7 @@
             "token": "0x3333333333333333333333333333333333333333",
             "amount": "20000000",
             "sender": "0x4444444444444444444444444444444444444444",
-            "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+            "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
             "nonce": "1",
             "metadataHash": "0x6666666666666666666666666666666666666666666666666666666666666666",
             "status": "observed"
@@ -185,7 +185,7 @@
             "depositId": "0x11d4fc9a23a8181abe8435ec29697a97daf7644b686f4ca6267f6dcfd8ff5ffe",
             "sourceChainId": 84532,
             "amount": "20000000",
-            "flowchainRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
+            "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555"
           }
         },
         "signer": {
@@ -221,7 +221,7 @@
       "baseEnvelope": "transaction.register-agent.operator-signature",
       "mutation": {
         "envelope": {
-          "domain": "flowchain.local.v0.wrong-transaction-envelope",
+          "domain": "flowmemory.local.v0.wrong-transaction-envelope",
           "domainSeparator": "0xff84e3bb0214d3812d1bf8521ab9d5b836c7746794e226af2a56a2efd0b65ee6"
         }
       },

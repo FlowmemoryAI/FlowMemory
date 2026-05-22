@@ -25,9 +25,9 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const MAX_REQUEST_BODY_BYTES = 256 * 1024;
 const MAX_JSON_RPC_BATCH_REQUESTS = 50;
 const TESTER_WRITE_ENV_NAMES = [
-  "FLOWCHAIN_TESTER_WRITE_ENABLED",
-  "FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256",
-  "FLOWCHAIN_TESTER_MAX_SEND_UNITS",
+  "FLOWMEMORY_TESTER_WRITE_ENABLED",
+  "FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256",
+  "FLOWMEMORY_TESTER_MAX_SEND_UNITS",
 ] as const;
 const rateLimitBuckets = new Map<string, { windowStartedAtMs: number; count: number }>();
 
@@ -169,7 +169,7 @@ function requireJsonContentType(req: IncomingMessage, res: ServerResponse): bool
 }
 
 function configuredAllowedOrigins(): string[] {
-  return (process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS ?? "")
+  return (process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS ?? "")
     .split(",")
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
@@ -191,7 +191,7 @@ function applyCorsHeaders(req: IncomingMessage, res: ServerResponse): boolean {
 }
 
 function configuredRateLimitPerMinute(): number | null {
-  const raw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE;
+  const raw = process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE;
   if (raw === undefined || raw.trim().length === 0 || !/^[1-9][0-9]*$/.test(raw.trim())) {
     return null;
   }
@@ -203,19 +203,19 @@ function sha256Hex(value: string): string {
 }
 
 function testerWriteConfig() {
-  const enabledRaw = process.env.FLOWCHAIN_TESTER_WRITE_ENABLED ?? "";
-  const tokenHash = process.env.FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256 ?? "";
-  const maxSendUnitsRaw = process.env.FLOWCHAIN_TESTER_MAX_SEND_UNITS ?? "1";
+  const enabledRaw = process.env.FLOWMEMORY_TESTER_WRITE_ENABLED ?? "";
+  const tokenHash = process.env.FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256 ?? "";
+  const maxSendUnitsRaw = process.env.FLOWMEMORY_TESTER_MAX_SEND_UNITS ?? "1";
   const missingEnvNames: string[] = [];
   const invalidEnvNames: string[] = [];
   const enabled = enabledRaw.toLowerCase() === "true";
-  if (!enabled) missingEnvNames.push("FLOWCHAIN_TESTER_WRITE_ENABLED");
+  if (!enabled) missingEnvNames.push("FLOWMEMORY_TESTER_WRITE_ENABLED");
   if (!/^[0-9a-fA-F]{64}$/.test(tokenHash)) {
-    if (tokenHash.trim().length === 0) missingEnvNames.push("FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256");
-    else invalidEnvNames.push("FLOWCHAIN_TESTER_WRITE_TOKEN_SHA256");
+    if (tokenHash.trim().length === 0) missingEnvNames.push("FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256");
+    else invalidEnvNames.push("FLOWMEMORY_TESTER_WRITE_TOKEN_SHA256");
   }
   if (!/^[1-9][0-9]*$/.test(maxSendUnitsRaw)) {
-    invalidEnvNames.push("FLOWCHAIN_TESTER_MAX_SEND_UNITS");
+    invalidEnvNames.push("FLOWMEMORY_TESTER_MAX_SEND_UNITS");
   }
   return {
     enabled,
@@ -306,7 +306,7 @@ function enforceTesterSendCap(payload: unknown): unknown {
     throw new Error("tester wallet send amountUnits must be a positive integer string");
   }
   if (BigInt(amountText) > config.maxSendUnits) {
-    throw new Error(`tester wallet send amount exceeds FLOWCHAIN_TESTER_MAX_SEND_UNITS`);
+    throw new Error(`tester wallet send amount exceeds FLOWMEMORY_TESTER_MAX_SEND_UNITS`);
   }
   return {
     ...payload,
@@ -330,7 +330,7 @@ function enforceTesterFaucetCap(payload: unknown): unknown {
     accountId: accountId.trim(),
     reason: typeof capped.reason === "string" && capped.reason.trim().length > 0
       ? capped.reason.trim()
-      : `flowchain-tester-faucet-${Date.now()}`,
+      : `flowmemory-tester-faucet-${Date.now()}`,
   };
 }
 
@@ -512,9 +512,9 @@ function publicWalletResult(state: ReturnType<typeof loadControlPlaneState>): Js
 }
 
 function labelSlug(value: unknown): string {
-  const label = typeof value === "string" && value.trim().length > 0 ? value.trim() : "flowchain-operator";
+  const label = typeof value === "string" && value.trim().length > 0 ? value.trim() : "flowmemory-operator";
   const slug = label.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
-  return slug.length > 0 ? slug.slice(0, 64) : "flowchain-operator";
+  return slug.length > 0 ? slug.slice(0, 64) : "flowmemory-operator";
 }
 
 function parseWalletCreatePayload(payload: unknown): { label: string; password: string; chainId: string; replace: boolean; isolated: boolean } {
@@ -702,7 +702,7 @@ export function startControlPlaneServer(options: ServerOptions): ReturnType<type
     }
 
     if (req.method === "GET" && req.url === "/state") {
-      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "state", method: "devnet_state" }, { state });
+      const response = dispatchJsonRpc({ jsonrpc: "2.0", id: "state", method: "localRuntime_state" }, { state });
       writeJson(res, 200, jsonResult(response));
       return;
     }

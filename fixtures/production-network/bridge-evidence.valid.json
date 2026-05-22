@@ -1,0 +1,62 @@
+{
+  "schema": "flowmemory.production_l1.bridge_evidence_fixture_set.v0",
+  "bridgeEvidence": [
+    {
+      "schema": "flowmemory.production_l1.bridge_evidence.v0",
+      "evidenceId": "0x013b5052df9be23c0816f77258d50bddfad0d73eb62af5fdd96a0b45d16fee21",
+      "evidenceType": "deposit_observation",
+      "sourceChainId": 8453,
+      "sourceNetwork": "base-mainnet-source-for-local-private-pilot",
+      "lockboxAddress": "0xb9524481c154c195b4236846fe9d8fcffd6ce407",
+      "sourceTxHash": "0x4487b7f7bffffe4903117c8190d64e58c40ecf96c43a4d30e0483a2b9ece0ee0",
+      "sourceBlockNumber": "45960000",
+      "sourceLogIndex": 7,
+      "tokenAddress": "0xe257180eba8c3194bd24ead035549e8beffbab16",
+      "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+      "depositorAddress": "0x6c6f65541dd5c673e0e3c23ba09f5e8735eaffcc",
+      "localRecipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+      "amount": "2500000",
+      "observedByRelayerAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+      "finalityStatus": "source_finalized",
+      "observationId": "0x070736a82e7dad444266af15ec8b521beba7c08502be2aeecb32c0f7f41b68d3",
+      "creditId": "0xd52d44dc757c0ecd7853bd269902848a3dd04af44db8dc704b347da47ed1b238",
+      "release": null,
+      "duplicateKey": "0x55575733fb056aaedf2d14985fc891da67a4093c6bc7d6719e4fcb83023fb467",
+      "evidenceHash": "0x7b96b892961fdd0534f8966c5b01bc85a5fb68ec6e88167c0d4397563197505b",
+      "localOnly": true,
+      "productionReady": false
+    },
+    {
+      "schema": "flowmemory.production_l1.bridge_evidence.v0",
+      "evidenceId": "0x4b632f40672ceb7ab195def56d8bc86141f1878ec31ffc742ec3e5b5d0def15d",
+      "evidenceType": "withdrawal_release",
+      "sourceChainId": 8453,
+      "sourceNetwork": "base-mainnet-source-for-local-private-pilot",
+      "lockboxAddress": "0xb9524481c154c195b4236846fe9d8fcffd6ce407",
+      "sourceTxHash": "0x4c19bdd150cfea9c1ca0d2235056607b40982e689306f7719c28888411dddcc0",
+      "sourceBlockNumber": "45960120",
+      "sourceLogIndex": 11,
+      "tokenAddress": "0xe257180eba8c3194bd24ead035549e8beffbab16",
+      "assetId": "0xa70acd8537f968b85bbfcff11f26a46376af5de590645cfd4976f1382794c024",
+      "depositorAddress": "0x22b3e55090c43674cd92d303dffa95081ba06103",
+      "localRecipientAccountId": "0xc687acd2a8f82c43e7b5e5fc8c3df132aa69becb29a71abcdfe6461a2e6e774a",
+      "amount": "100000",
+      "observedByRelayerAccountId": "0xb456f55c243edcb1372f27f199f9e68b25d0909f5d2d90ec4e20fbe6de7098b4",
+      "finalityStatus": "source_finalized",
+      "release": {
+        "withdrawalIntentId": "0xa3bd91f938d573c2e58bb34f4842a3f9acb85df7d2b4086a5949a65b95c55ee6",
+        "releaseTxHash": "0x3eebf0e7466340c2ea56088c6c1c31bf7d6d0fe9a3c9944492861a51b387ecbb",
+        "releaseBlockNumber": "45960120",
+        "releaseLogIndex": 11,
+        "releasedToAddress": "0xb8eed8a8ec1ba09a1b46e79042399df3984f36df",
+        "releaseAuthorityAccountId": "0x9f7090c47663019f3d7647a2d4b5895a529e9dbac911bb2fde2c359828cbb3b8"
+      },
+      "observationId": "0x2164a4e48209dee7e559ef33c22c098a880b2c61e866a5693eee877ac15cf4a7",
+      "creditId": "0x4de0d9d0ab3b86cfbd88cdd3bdbd1b0679646c18e56b63ec39898915b331fd1b",
+      "duplicateKey": "0x9f34308d4d924b7b5661ebcfa85f009c510730d6fca1f4aa14d2aa6fa2a7dd26",
+      "evidenceHash": "0x59d1fe84cc182b0b4cdaf891dad808bc7cbd25d6282ac3e8c91ae3b59ad30c78",
+      "localOnly": true,
+      "productionReady": false
+    }
+  ]
+}

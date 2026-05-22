@@ -4,7 +4,7 @@ Status: launch-critical V0 specification.
 
 Rootflow is the FlowMemory state-transition layer. It explains how a FlowPulse event, receipt, verifier report, and committed root become a new memory state.
 
-Rootflow V0 is not a production L1, proof network, storage layer, governance system, or token system. It is the local and testnet-ready transition model that lets contracts, crypto, indexers, verifiers, and dashboard agents agree on one memory-state shape.
+Rootflow V0 is not a separate production network, proof network, storage layer, governance system, or token system. It is the local and testnet-ready transition model that lets contracts, crypto, indexers, verifiers, and dashboard agents agree on one memory-state shape.
 
 ## Purpose
 
@@ -165,7 +165,7 @@ fixtures/launch-core/rootflow-transitions.json
 
 ## Explicit Non-Goals
 
-- No production L1 claim.
+- No separate production network claim.
 - No production mainnet readiness claim.
 - No full trustless verifier network claim.
 - No free-storage claim.

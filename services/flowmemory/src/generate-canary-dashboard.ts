@@ -171,7 +171,7 @@ export interface CanaryDashboardData {
   agentBondRecoursePolicies: JsonObject[];
   agentBondRecourseDecisions: JsonObject[];
   agentBondFailureWaterfalls: JsonObject[];
-  devnetBlocks: JsonObject[];
+  localRuntimeBlocks: JsonObject[];
   hardwareNodes: JsonObject[];
   alerts: JsonObject[];
 }
@@ -500,7 +500,7 @@ function buildCanaryDashboardData(
       futureGeneratedPaths: {
         indexer: paths.indexerPath,
         verifier: "not-applicable-for-canary-v0",
-        devnet: "not-applicable-for-canary-v0",
+        localRuntime: "not-applicable-for-canary-v0",
         hardware: "not-applicable-for-canary-v0",
         agentBondFixture: "not-applicable-for-canary-v0",
       },
@@ -608,7 +608,7 @@ function buildCanaryDashboardData(
     agentBondRecourseDecisions: [],
     agentBondFailureWaterfalls: [],
     baseAgentMemoryScouts: [],
-    devnetBlocks: [],
+    localRuntimeBlocks: [],
     hardwareNodes: [],
     alerts: [{
       id: stableId("flowmemory.canary.alert.v0", deployment.name),

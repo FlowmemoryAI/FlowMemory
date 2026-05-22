@@ -33,7 +33,7 @@ surfaces for unsafe production claims:
 
 ## Claims That Remain Blocked
 
-- FlowMemory is a production L1 or mainnet-ready chain.
+- FlowMemory is a separate production network or mainnet-ready chain.
 - FlowMemory has production Uniswap v4 hook deployment.
 - FlowMemory provides full trustless verification.
 - FlowMemory provides free on-chain storage.
@@ -44,7 +44,7 @@ surfaces for unsafe production claims:
 
 ## Result
 
-No launch-facing source-of-truth doc reviewed here claims production L1,
+No launch-facing source-of-truth doc reviewed here claims separate production network,
 production mainnet readiness, full trustless verification, free storage, or AI
 running on-chain.
 

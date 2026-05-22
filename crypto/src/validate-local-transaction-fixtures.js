@@ -99,5 +99,5 @@ function readJson(path) {
 
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = validateLocalTransactionFixtures(process.argv[2]);
-  console.log(`FLOWCHAIN_LOCAL_TRANSACTION_VECTORS_OK positive=${result.positive} negative=${result.negative}`);
+  console.log(`FLOWMEMORY_LOCAL_TRANSACTION_VECTORS_OK positive=${result.positive} negative=${result.negative}`);
 }

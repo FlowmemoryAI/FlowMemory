@@ -24,7 +24,7 @@ import {
 } from "../src/status.ts";
 
 function loadExplorerFallback(): unknown {
-  return JSON.parse(readFileSync("fixtures/dashboard/flowchain-l1-explorer-fallback.json", "utf8")) as unknown;
+  return JSON.parse(readFileSync("fixtures/dashboard/flowmemory-network-explorer-fallback.json", "utf8")) as unknown;
 }
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -277,7 +277,7 @@ function assertDashboardCoversStatuses(dashboard: DashboardData): void {
     ...dashboard.bondedTaskEnvelopes,
     ...dashboard.bondedExecutionReceipts,
     dashboard.agentBondPhase2Gate,
-    ...dashboard.devnetBlocks,
+    ...dashboard.localRuntimeBlocks,
     ...dashboard.hardwareNodes,
     ...dashboard.alerts,
   ] as Array<{ status?: string }>;

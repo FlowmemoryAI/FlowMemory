@@ -19,29 +19,29 @@ const fixtureCopies = [
   },
   {
     label: "operator state fixture",
-    source: resolve(repoRoot, "fixtures/launch-core/generated/devnet/state.json"),
-    destination: resolve(destinationDir, "flowchain-local-devnet-state.json"),
+    source: resolve(repoRoot, "fixtures/launch-core/generated/local-runtime/state.json"),
+    destination: resolve(destinationDir, "flowmemory-local-runtime-state.json"),
   },
   {
     label: "operator dashboard state fixture",
-    source: resolve(repoRoot, "fixtures/launch-core/generated/devnet/dashboard-state.json"),
-    destination: resolve(destinationDir, "flowchain-local-devnet-dashboard-state.json"),
+    source: resolve(repoRoot, "fixtures/launch-core/generated/local-runtime/dashboard-state.json"),
+    destination: resolve(destinationDir, "flowmemory-local-runtime-dashboard-state.json"),
   },
   {
     label: "bridge test deposit fixture",
     source: resolve(repoRoot, "fixtures/bridge/base-sepolia-mock-deposit.json"),
-    destination: resolve(destinationDir, "flowchain-bridge-test-deposit.json"),
+    destination: resolve(destinationDir, "flowmemory-bridge-test-deposit.json"),
   },
   {
     label: "explorer fallback fixture",
-    source: resolve(repoRoot, "fixtures/dashboard/flowchain-l1-explorer-fallback.json"),
-    destination: resolve(destinationDir, "flowchain-l1-explorer-fallback.json"),
+    source: resolve(repoRoot, "fixtures/dashboard/flowmemory-network-explorer-fallback.json"),
+    destination: resolve(destinationDir, "flowmemory-network-explorer-fallback.json"),
   },
 ];
 
 const liveReadinessReportCopies = [
   "public-deployment-contract-report.json",
-  "flowchain-live-infra-check-report.json",
+  "flowmemory-live-infra-check-report.json",
   "service-status-report.json",
   "service-monitor-report.json",
   "public-rpc-deployment-bundle-report.json",
@@ -66,7 +66,7 @@ const liveReadinessReportCopies = [
 ];
 
 const liveReadinessGateLabels = new Map([
-  ["private-service-origin", "Private L1 origin"],
+  ["private-service-origin", "Private network origin"],
   ["pre-share-monitoring", "Block production monitor"],
   ["service-autorecovery", "Service autorecovery"],
   ["service-install-automation", "Windows service install"],
@@ -160,16 +160,16 @@ function gateFromContractItem(contract, id) {
 }
 
 function ownerInputGroup(name) {
-  if (name.startsWith("FLOWCHAIN_TESTER_")) {
+  if (name.startsWith("FLOWMEMORY_TESTER_")) {
     return "tester write gateway";
   }
-  if (name === "FLOWCHAIN_RPC_STATE_BACKUP_PATH") {
+  if (name === "FLOWMEMORY_RPC_STATE_BACKUP_PATH") {
     return "backup storage";
   }
-  if (name.startsWith("FLOWCHAIN_RPC_")) {
+  if (name.startsWith("FLOWMEMORY_RPC_")) {
     return "public RPC edge";
   }
-  if (name.startsWith("FLOWCHAIN_BASE8453_") || name.startsWith("FLOWCHAIN_PILOT_")) {
+  if (name.startsWith("FLOWMEMORY_BASE8453_") || name.startsWith("FLOWMEMORY_PILOT_")) {
     return "Base 8453 bridge";
   }
 
@@ -240,14 +240,14 @@ function writeLiveReadinessSummary() {
     : "Public launch is still blocked by owner-provided RPC edge, backup, Base 8453 bridge, or tester packet inputs.";
   const generatedAt = asText(
     contract?.generatedAt ??
-      reports["flowchain-live-infra-check-report.json"]?.generatedAt ??
+      reports["flowmemory-live-infra-check-report.json"]?.generatedAt ??
       serviceStatus?.generatedAt,
     "not recorded",
   );
   const liveReadiness = {
-    schema: "flowchain.live_readiness_dashboard_report.v0",
+    schema: "flowmemory.live_readiness_dashboard_report.v0",
     generatedAt,
-    status: asText(contract?.status ?? reports["flowchain-live-infra-check-report.json"]?.status, "unresolved"),
+    status: asText(contract?.status ?? reports["flowmemory-live-infra-check-report.json"]?.status, "unresolved"),
     deploymentReady: contract?.deploymentReady === true,
     packetShareable: contract?.packetShareable === true || externalTesterPacket?.packetShareable === true,
     blockedOnlyOnKnownExternalOwnerInputs: contract?.blockedOnlyOnKnownExternalOwnerInputs === true,
@@ -367,12 +367,12 @@ function writeLiveReadinessSummary() {
       ),
       commands: {
         readiness: [
-          "npm run flowchain:tester:readiness -- -AllowBlocked",
-          "npm run flowchain:external-tester:packet -- -AllowBlocked",
+          "npm run flowmemory:tester:readiness -- -AllowBlocked",
+          "npm run flowmemory:external-tester:packet -- -AllowBlocked",
         ],
-        gateway: ["npm run flowchain:tester:gateway:e2e"],
-        wallet: ["npm run flowchain:wallet:live-tester:e2e"],
-        explorer: ["npm run flowchain:public-deployment:contract -- -AllowBlocked"],
+        gateway: ["npm run flowmemory:tester:gateway:e2e"],
+        wallet: ["npm run flowmemory:wallet:live-tester:e2e"],
+        explorer: ["npm run flowmemory:public-deployment:contract -- -AllowBlocked"],
       },
       envValuesPrinted: false,
       noSecrets: publicTesterGateway?.noSecrets === true,
@@ -388,7 +388,7 @@ function writeLiveReadinessSummary() {
     noSecrets: true,
   };
 
-  writeFileSync(resolve(destinationDir, "flowchain-live-readiness-report.json"), `${JSON.stringify(liveReadiness, null, 2)}\n`);
+  writeFileSync(resolve(destinationDir, "flowmemory-live-readiness-report.json"), `${JSON.stringify(liveReadiness, null, 2)}\n`);
   console.log("Synced operator readiness dashboard report.");
 }
 

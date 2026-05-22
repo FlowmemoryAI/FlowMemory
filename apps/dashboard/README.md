@@ -1,194 +1,91 @@
-# FlowMemory Dashboard / FlowChain Workbench V0
+# FlowMemory Dashboard And Operator App
 
-Local operator/explorer app for inspecting FlowMemory V0 fixture output and the FlowChain private/local testnet workbench surface. It is intentionally local-first and does not claim value-bearing wallet support, token pricing, or hosted deployment.
+Fixture-backed operator app for inspecting FlowMemory V0 launch data, Agent Bonds, public-agent activity, receipts, verifier reports, hardware signals, and mobile/desktop packaging.
 
 ## Run Locally
 
-From this directory:
+From the repository root:
 
 ```powershell
 npm install
-npm run dev
+npm install --prefix apps/dashboard
+npm run flowmemory:generate
+npm run dev --prefix apps/dashboard
 ```
 
-Default Vite URL:
+The app starts from committed/generated FlowMemory fixtures. It does not claim hosted production data, value-bearing wallet support, token pricing, or production deployment.
 
-```text
-http://127.0.0.1:5173/
-```
-
-Useful checks:
-
-```powershell
-npm run typecheck
-npm test
-npm run build
-```
-
-From the repo root, the same checks are:
+## Test And Build
 
 ```powershell
 npm test --prefix apps/dashboard
 npm run build --prefix apps/dashboard
 ```
 
-The first route is the FlowChain workbench. It tries the local control-plane API at:
-
-```text
-http://127.0.0.1:8787
-```
-
-Override that endpoint when needed:
+The public launch gate also runs the dashboard lane through:
 
 ```powershell
-$env:VITE_FLOWCHAIN_CONTROL_PLANE_URL="http://127.0.0.1:8787"
-npm run dev
+npm run public:test:dashboard
 ```
 
-If the API is not running, the workbench marks the control-plane as offline, shows stale fixture fallback where appropriate, and keeps rendering deterministic local data. This app is for private/local validation and canary review only; it does not initiate value-bearing wallet flows.
+## Desktop App
 
-## Beginner Demo Path
-
-The full launch-demo script lives in:
-
-```text
-docs/LAUNCH_DEMO_RUNBOOK.md
-```
-
-From the repo root, the normal browser-demo setup is:
+Electron packages the same dashboard surface as the FlowMemory desktop operator app:
 
 ```powershell
-npm run flowchain:init
-npm run flowchain:start
-npm run flowchain:demo
-npm run flowchain:export
+npm run desktop:pack --prefix apps/dashboard
 ```
 
-Then start the local API and workbench in separate PowerShell windows:
+Release workflows publish desktop artifacts under FlowMemory branding.
+
+## Android App
+
+The committed Android Capacitor shell lives under `apps/dashboard/android` and uses the shared dashboard build:
 
 ```powershell
-npm run control-plane:serve
+npm run mobile:android:sync --prefix apps/dashboard
 ```
+
+Debug APK builds require a local Java/Android toolchain:
 
 ```powershell
-npm run workbench:dev
+npm run mobile:android:debug --prefix apps/dashboard
 ```
 
-Open the Vite URL, usually:
+Android release signing secrets use `FLOWMEMORY_ANDROID_*` names and must never be committed.
 
-```text
-http://127.0.0.1:5173/
-```
+## iOS Track
 
-Click path for a short demo:
+iOS is part of the FlowMemory operator-app product direction, but no Xcode project or iOS CI lane is committed yet. Keep iOS claims in docs framed as planned until a reproducible macOS build lane exists.
 
-1. **Workbench** (`/`) for local API status, setup path, object switcher, provenance, and raw private/local object views.
-2. **Overview** (`/overview`) for local fixture metrics, recent FlowPulse observations, verifier attention, hardware risk, and devnet block window.
-3. **Flow Memory** (`/flowmemory`) for MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition state.
-4. **Base canary** (`/canary`) for the isolated guarded canary review. This is not a production-readiness claim.
-5. **Raw JSON** (`/raw`) only when a reviewer asks for the payload behind the UI.
+## Public Views
 
-Workbench panel meanings:
+The public app navigation focuses on:
 
-| Panel | Meaning |
-| --- | --- |
-| Node and API status | Local chain/API health, block height, state root, pending transaction count, and API URL. |
-| Local setup path | Beginner command sequence for installing, refreshing launch fixtures, starting, smoking, and opening the workbench. |
-| Control-plane endpoints and local actions | Local API endpoints and optional browser-safe actions when the API advertises them. |
-| Workbench coverage metrics | Counts for data source, node views, chain objects, smoke objects, and challenges. |
-| Object switcher | Clickable local object views such as blocks, transactions, agents, models, receipts, reports, memory cells, challenges, finality, bridge-shaped local test objects, provenance, hardware signals, and raw JSON. |
+1. **Overview** for launch fixture metrics, recent FlowPulse observations, verifier attention, hardware risk, and public-agent state.
+2. **Flow Memory** for MemorySignal, MemoryReceipt, RootfieldBundle, AgentMemoryView, and RootflowTransition state.
+3. **FlowPulse** for event observations and receipt linkage.
+4. **Rootfields** for namespaces and committed roots.
+5. **Work receipts** and **verifier reports** for objective work evidence.
+6. **Agent Bonds** for task accountability, challenge, recourse, and settlement views.
+7. **Public agents** for agent/swarm launch state.
+8. **Hardware** for FlowRouter POC heartbeats and alerts.
+9. **Raw JSON** only when a reviewer asks for the payload behind the UI.
 
-Canary panel meanings:
+## Fixture Sync
 
-| Panel | Meaning |
-| --- | --- |
-| Canary boundary hero | Reminder that the current Base canary is visible on Base but still gated for production. |
-| Reader command / review fixture / hard boundary strip | The reader shape, runtime fixture path, and no broad scan/no production/no real-funds boundary. |
-| Canary metrics | Counts from the committed canary fixture, including rejected logs and duplicates. |
-| Canary FlowPulse stream | Observed canary logs with block, pulse type, transaction hash, and log index. |
-| FlowPulse contracts | Canary contracts that emitted FlowPulse logs in the review fixture. |
-| Launch gates | Remaining boundaries before any production claim. |
-| Canary Rootflow state | Rootflow transitions reconstructed from the canary observations. |
-| Canary JSON | Full loaded canary dashboard payload for reviewer inspection. |
+The `dev` and `build` scripts run `npm run sync:fixtures`, which copies the canonical dashboard fixture and bounded local generated launch data into the Vite public data folder before the app starts or builds.
 
-## Data Boundary
-
-The canonical dashboard fixture is generated by the launch-core command and lives at:
+Canonical source fixture:
 
 ```text
 fixtures/dashboard/flowmemory-dashboard-v0.json
 ```
 
-The guarded Base canary review fixture is separate:
-
-```text
-fixtures/dashboard/flowmemory-dashboard-base-canary-v0.json
-```
-
-The app loads its runtime copy from:
+Runtime app copy:
 
 ```text
 apps/dashboard/public/data/flowmemory-dashboard-v0.json
-apps/dashboard/public/data/flowmemory-dashboard-base-canary-v0.json
 ```
 
-The `dev` and `build` scripts run `npm run sync:fixtures`, which copies the canonical dashboard fixture and the existing launch-core devnet state into the Vite public data folder before the app starts or builds.
-
-Workbench fixture fallback paths:
-
-```text
-apps/dashboard/public/data/flowchain-local-devnet-state.json
-apps/dashboard/public/data/flowchain-local-devnet-dashboard-state.json
-```
-
-Generated local source outputs land under the fixture boundary first:
-
-```text
-fixtures/dashboard/generated/indexer-state.json
-fixtures/dashboard/generated/verifier-reports.json
-fixtures/dashboard/generated/devnet-state.json
-fixtures/dashboard/generated/hardware-heartbeats.json
-```
-
-`npm run launch:v0` from the repo root regenerates `flowmemory-dashboard-v0.json` from services, devnet, and hardware fixture outputs.
-
-## Current Views
-
-- FlowChain workbench
-- Overview
-- Base canary review
-- Flow Memory / Rootflow
-- FlowPulse stream
-- Rootfields
-- Work lanes and receipts
-- Verifier reports
-- Devnet blocks
-- Hardware nodes
-- Alerts
-- Raw JSON inspector
-
-Every displayed record carries source subsystem, fixture/local origin, chain context, ID/hash, status, and last-updated metadata when available.
-
-The workbench adds local setup/API status plus object views for node status, peers, blocks, transactions, mempool, accounts, balances, faucet events, wallet public metadata, agents, models, receipts, memory cells, artifacts, verifier modules/reports, challenges, finality, private/local bridge deposits/credits/withdrawals, hardware signals, provenance, and raw JSON. When a current fixture does not yet contain a private-testnet object type, the view stays empty and names the expected control-plane endpoint plus the local command/service that should provide it.
-
-Browser actions are hidden unless the local control-plane advertises the matching POST endpoint through `/health` or `/state`. The dashboard never asks for private keys in the browser.
-
-Workbench object coverage:
-
-```text
-node/chain status, peers, blocks, transactions, mempool, accounts, balances,
-faucet events, wallet public metadata, rootfields, agents, models, work receipts,
-memory cells, artifacts, verifier modules, verifier reports, challenges, finality,
-bridge deposits, bridge credits, bridge withdrawals, provenance/source,
-hardware signals, raw JSON
-```
-
-## Status Vocabulary
-
-Dashboard V0 visually distinguishes:
-
-```text
-observed, pending, finalized, verified, unresolved, failed, unsupported, reorged, offline, stale
-```
-
-These are app-facing display states for local fixture inspection. They should stay aligned with indexer and verifier terminology as those packages mature.
+Do not edit generated runtime copies by hand; regenerate from the service packages instead.

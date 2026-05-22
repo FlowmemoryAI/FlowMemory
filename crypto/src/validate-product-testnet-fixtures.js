@@ -131,6 +131,6 @@ function readJson(path) {
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = validateProductTestnetFixtures(process.argv[2]);
   console.log(
-    `FLOWCHAIN_PRODUCT_TESTNET_TRANSACTIONS_OK documents=${result.documents} transactions=${result.transactions} negativeTransactions=${result.negativeTransactions} schemas=${result.schemas}`
+    `FLOWMEMORY_PRODUCT_TESTNET_TRANSACTIONS_OK documents=${result.documents} transactions=${result.transactions} negativeTransactions=${result.negativeTransactions} schemas=${result.schemas}`
   );
 }

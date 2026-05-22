@@ -19,7 +19,7 @@ const DATASET_LABELS = [
   "workLanes",
   "workReceipts",
   "verifierReports",
-  "devnetBlocks",
+  "localRuntimeBlocks",
   "hardwareNodes",
   "alerts",
 ] as const;

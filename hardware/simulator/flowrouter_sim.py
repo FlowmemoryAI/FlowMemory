@@ -30,11 +30,11 @@ SCHEMA_FILES = {
     "dashboard_feed": "dashboard_feed.schema.json",
 }
 
-OPERATOR_SIGNALS_SCHEMA_FILE = "flowchain_operator_signals.schema.json"
+OPERATOR_SIGNALS_SCHEMA_FILE = "flowmemory_operator_signals.schema.json"
 NEGATIVE_REPORT_SCHEMA_FILE = "negative_validation_report.schema.json"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 HARDWARE_ROOTFIELD_ID = "rootfield:hardware:flowrouter-local-alpha"
-HARDWARE_CHAIN_CONTEXT = "flowchain-private-local-testnet"
+HARDWARE_CHAIN_CONTEXT = "flowmemory-local-fixture"
 FIXTURE_TIME_PREFIX = "2026-05-13T17:"
 SECRET_SHAPED_PATTERNS = [
     "BEGIN PRIVATE " + "KEY",
@@ -290,7 +290,7 @@ def build_packets(seed: int) -> dict[str, Any]:
         "sequence": 1008 + seed,
         "emitted_at": iso_tick(95),
         "bridge_id": f"bridge-{short_id(seed, 'bridge')}",
-        "source_chain": "flowchain-local-alpha",
+        "source_chain": "flowmemory-local-alpha",
         "target_chain": "base-sepolia-sim",
         "alert_code": "LOCKBOX_OBSERVER_LAG",
         "severity": "warning",
@@ -831,17 +831,17 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
         "schema": "flowmemory.hardware_operator_signals.local_alpha.v0",
         "generatedAt": generated_at,
         "chainId": "flowmemory-local-alpha",
-        "environment": "local-devnet-fixture",
+        "environment": "local-runtime-fixture",
         "source": "fixture",
         "sourcePaths": {
             "packetFixture": packet_fixture_path,
             "operatorFixture": operator_fixture_path,
-            "operatorSchema": "hardware/simulator/schemas/flowchain_operator_signals.schema.json",
+            "operatorSchema": "hardware/simulator/schemas/flowmemory_operator_signals.schema.json",
             "handoffFixture": handoff_fixture_path,
             "handoffSchema": "schemas/flowmemory/hardware-control-plane-handoff.schema.json",
             "negativeReport": negative_report_path,
             "negativeReportSchema": "hardware/simulator/schemas/negative_validation_report.schema.json",
-            "mappingDoc": "hardware/flowrouter/FLOWCHAIN_LOCAL_ALPHA_SIGNALS.md",
+            "mappingDoc": "hardware/flowrouter/FLOWMEMORY_LOCAL_ALPHA_SIGNALS.md",
         },
         "boundary": {
             "localOnly": True,
@@ -861,7 +861,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
         "packetMappings": [
             {
                 "sourcePacketType": "device_manifest",
-                "flowchainSignal": "operator_metadata",
+                "flowmemorySignal": "operator_metadata",
                 "objectCollection": "operatorMetadata",
                 "objectRef": operator_metadata_id,
                 "localAlphaRole": "names the local optional hardware operator fixture issuer",
@@ -869,7 +869,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "heartbeat",
-                "flowchainSignal": "hardware_node_status",
+                "flowmemorySignal": "hardware_node_status",
                 "objectCollection": "hardwareNodes",
                 "objectRef": device_id,
                 "localAlphaRole": "shows FlowRouter reachability and coarse device state",
@@ -877,7 +877,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "node_health",
-                "flowchainSignal": "node_health",
+                "flowmemorySignal": "node_health",
                 "objectCollection": "nodeHealth",
                 "objectRef": node_health_id,
                 "localAlphaRole": "adds compact node health and queue-depth observability",
@@ -885,7 +885,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "peer_hint",
-                "flowchainSignal": "peer_hint",
+                "flowmemorySignal": "peer_hint",
                 "objectCollection": "peerHints",
                 "objectRef": peer_hint_id,
                 "localAlphaRole": "surfaces a local topology hint for operator review",
@@ -893,7 +893,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "compact_receipt_relay",
-                "flowchainSignal": "work_receipt_reference",
+                "flowmemorySignal": "work_receipt_reference",
                 "objectCollection": "workReceipts",
                 "objectRef": receipt_id,
                 "localAlphaRole": "points the workbench at a WorkReceipt candidate",
@@ -901,7 +901,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "verifier_report_digest_relay",
-                "flowchainSignal": "verifier_report_reference",
+                "flowmemorySignal": "verifier_report_reference",
                 "objectCollection": "verifierReports",
                 "objectRef": verifier_report_id,
                 "localAlphaRole": "points the workbench at a VerifierReport candidate",
@@ -909,7 +909,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "emergency_offline_signal",
-                "flowchainSignal": "alert_challenge_input",
+                "flowmemorySignal": "alert_challenge_input",
                 "objectCollection": "challenges",
                 "objectRef": challenge_id,
                 "localAlphaRole": "creates an operator alert and optional challenge input",
@@ -917,7 +917,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "bridge_alert",
-                "flowchainSignal": "bridge_observer_alert",
+                "flowmemorySignal": "bridge_observer_alert",
                 "objectCollection": "bridgeAlerts",
                 "objectRef": bridge_alert_id,
                 "localAlphaRole": "surfaces bridge-observer lag without blocking the local chain",
@@ -925,7 +925,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
             },
             {
                 "sourcePacketType": "nfc_memory_cartridge_metadata",
-                "flowchainSignal": "artifact_memory_reference",
+                "flowmemorySignal": "artifact_memory_reference",
                 "objectCollection": "artifactCommitments",
                 "objectRef": artifact_id,
                 "localAlphaRole": "connects cartridge metadata to an artifact or memory reference",
@@ -1161,7 +1161,7 @@ def build_operator_signals(seed: int, packets: dict[str, Any] | None = None) -> 
                 "provenance",
             ],
             "jsonRpcBoundary": "Read-only fixture data; no submit, wallet, live indexing, or production settlement method is implied.",
-            "flowchainFullSmokeOptionalRow": {
+            "flowmemoryFullSmokeOptionalRow": {
                 "label": "Validate optional hardware operator signal fixtures",
                 "command": "python hardware/simulator/flowrouter_sim.py --smoke",
                 "requiredForChainProgress": False,
@@ -1206,7 +1206,7 @@ def build_control_plane_handoff(seed: int, operator_signals: dict[str, Any] | No
         },
         "collections": {key: signal_doc[key] for key in state_keys},
         "workbenchRecords": signal_doc["workbenchRecords"],
-        "optionalSmokeRows": [signal_doc["compatibility"]["flowchainFullSmokeOptionalRow"]],
+        "optionalSmokeRows": [signal_doc["compatibility"]["flowmemoryFullSmokeOptionalRow"]],
     }
 
 
@@ -1573,11 +1573,11 @@ def main() -> int:
     parser.add_argument("--smoke", action="store_true", help="validate canonical fixtures, check deterministic drift, and run negative cases")
     parser.add_argument("--run-negative-cases", action="store_true", help="run in-memory negative validation cases")
     parser.add_argument("--out", type=Path, help="write generated JSON to this path")
-    parser.add_argument("--operator-out", type=Path, help="write FlowChain local-alpha operator signal JSON to this path")
+    parser.add_argument("--operator-out", type=Path, help="write FlowMemory local-alpha operator signal JSON to this path")
     parser.add_argument("--handoff-out", type=Path, help="write control-plane handoff JSON to this path")
     parser.add_argument("--negative-report-out", type=Path, help="write negative validation report JSON to this path")
     parser.add_argument("--validate-file", type=Path, help="validate an existing simulator JSON file")
-    parser.add_argument("--validate-operator-file", type=Path, help="validate an existing FlowChain local-alpha operator signal JSON file")
+    parser.add_argument("--validate-operator-file", type=Path, help="validate an existing FlowMemory local-alpha operator signal JSON file")
     parser.add_argument("--validate-handoff-file", type=Path, help="validate an existing hardware control-plane handoff JSON file")
     parser.add_argument("--validate-negative-report-file", type=Path, help="validate an existing negative validation report JSON file")
     args = parser.parse_args()

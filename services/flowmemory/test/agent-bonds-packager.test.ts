@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,12 +8,13 @@ import test from "node:test";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 process.chdir(REPO_ROOT);
-const READINESS_REPORT_PATH = resolve(REPO_ROOT, "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json");
+const READINESS_REPORT_PATH = resolve(REPO_ROOT, "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json");
 
 const maybeMetaTest = process.env.FLOWMEMORY_SKIP_AGENT_BONDS_META === "1" ? test.skip : test;
 
 
 function seedGreenReadinessReport(): void {
+  mkdirSync(dirname(READINESS_REPORT_PATH), { recursive: true });
   writeFileSync(READINESS_REPORT_PATH, JSON.stringify({ schema: "flowmemory.agent_bonds.readiness_report.v1", ok: true, steps: [] }, null, 2));
 }
 

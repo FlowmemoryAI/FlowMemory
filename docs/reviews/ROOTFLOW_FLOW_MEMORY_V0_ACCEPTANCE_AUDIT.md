@@ -4,7 +4,7 @@ Date: 2026-05-13
 
 Status: local/test V0 launch-core integration complete.
 
-This audit tracks the launch-critical goal: build Rootflow V0 and Flow Memory V0 as a coherent local/testnet-ready V0 system. The local fixture acceptance path now exists and is verified. This does not mean production L1, production Uniswap v4 deployment, production verifier network, free storage, or AI running on-chain.
+This audit tracks the launch-critical goal: build Rootflow V0 and Flow Memory V0 as a coherent local/testnet-ready V0 system. The local fixture acceptance path now exists and is verified. This does not mean separate production network, production Uniswap v4 deployment, production verifier network, free storage, or AI running on-chain.
 
 ## Current Merged State
 
@@ -14,7 +14,7 @@ All previously open launch-foundation PRs have merged into `main`:
 | --- | --- | --- |
 | #56 | FlowRouter hardware POC | Hardware docs, schemas, simulator, and sample fixture. |
 | #57 | Contracts V0 foundation | FlowPulse, Rootfield, hook-adapter scaffold, receipt/report/work/identity registries, scheduler skeleton, and 33 Foundry tests. |
-| #58 | Local devnet prototype | Rust no-value local devnet crate, handoff fixtures, chain research docs, and 7 Rust tests. |
+| #58 | Local test runtime prototype | Rust no-value local test runtime crate, handoff fixtures, chain research docs, and 7 Rust tests. |
 | #59 | FlowMemory HQ OS | Source-of-truth docs, agent roles, runbook, backlog, launch-core goals, and review process. |
 | #60 | Crypto V0 foundation | Keccak-based helper package, typed domains, receipts, roots, report hashes, attestations, fixtures, and vectors. |
 | #61 | Indexer/verifier V0 fixtures | Shared services package, fixture indexer, fixture verifier, report schema, e2e command, and 24 service tests. |
@@ -32,7 +32,7 @@ It runs:
 
 1. FlowPulse fixture indexing.
 2. Verifier report generation.
-3. No-value local devnet handoff generation.
+3. No-value local test runtime handoff generation.
 4. FlowRouter hardware fixture validation.
 5. Rootflow and Flow Memory V0 generation.
 6. Dashboard fixture/runtime generation.
@@ -43,7 +43,7 @@ Generated outputs:
 - `fixtures/launch-core/rootflow-transitions.json`
 - `fixtures/dashboard/flowmemory-dashboard-v0.json`
 - `apps/dashboard/public/data/flowmemory-dashboard-v0.json`
-- `fixtures/launch-core/generated/devnet/`
+- `fixtures/launch-core/generated/local test runtime/`
 
 Launch-hardening evidence:
 
@@ -79,7 +79,7 @@ These commands were run from merged `main` on 2026-05-13.
 | Dashboard | `npm test`; `npm run build` in `apps/dashboard` | 4 tests passed; production build passed. |
 | Contracts | `forge test` | 33 tests passed. |
 | Crypto | `npm ci`; `npm test`; `npm run validate:vectors`; `python validate_test_vectors.py` | 13 tests passed; 21 vectors validated; Python FlowPulse recompute passed. |
-| Devnet | `cargo test --manifest-path crates\flowmemory-devnet\Cargo.toml` | 7 tests passed. |
+| Local test runtime | `cargo test --manifest-path crates\flowmemory-local test runtime\Cargo.toml` | 7 tests passed. |
 | Hardware | `python hardware\simulator\flowrouter_sim.py --validate-file hardware\fixtures\flowrouter_sample_seed42.json` | Fixture validation passed. |
 
 ## Acceptance Matrix
@@ -94,13 +94,13 @@ These commands were run from merged `main` on 2026-05-13.
 | Receipt linkage | Generated MemoryReceipts link verifier reports to observations/rootfields. | Implemented for local/test V0. |
 | Verifier status | `services/flowmemory/src/status.ts` maps `valid`/`invalid` to `verified`/`failed`. | Implemented. |
 | Pending/verified/failed/reorged states | Generated dashboard fixture includes observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale. | Implemented for local/test V0. |
-| Deterministic fixtures | Launch-core, dashboard, crypto, services, devnet, and hardware fixtures exist. | Implemented. |
-| Dashboard-readable state | Dashboard fixture is generated from services/devnet/hardware outputs. | Implemented. |
+| Deterministic fixtures | Launch-core, dashboard, crypto, services, local test runtime, and hardware fixtures exist. | Implemented. |
+| Dashboard-readable state | Dashboard fixture is generated from services/local test runtime/hardware outputs. | Implemented. |
 | Flow Memory schemas | Canonical JSON schema files exist under `schemas/flowmemory/`. | Implemented for local/test V0. |
 | Verifier reports | Schema, local reports, tests, and e2e output exist. | Implemented for local fixtures. |
 | Dashboard display path | Dashboard includes Flow Memory / Rootflow view and renders generated fixture data. | Implemented for local fixtures. |
 | Single acceptance command | `npm run launch:v0`. | Implemented. |
-| Area-specific CI | CI includes contracts, services/launch-core, crypto, dashboard, devnet, and hardware jobs. | Implemented. |
+| Area-specific CI | CI includes contracts, services/launch-core, crypto, dashboard, local test runtime, and hardware jobs. | Implemented. |
 
 ## Remaining Gated Work
 
@@ -108,7 +108,7 @@ Not part of local/test V0 completion:
 
 - Live RPC indexing and durable production persistence.
 - Production Uniswap v4 hook deployment.
-- Production appchain/L1, sequencer, validator, bridge, or token design.
+- Separate production network, sequencer, validator, bridge, or token design.
 - Hardware firmware, real Meshtastic devices, manufacturing, certification, and field deployment.
 - Trustless proof systems, verifier economics, slashing, GPU proofs, and production verifier network.
 - Runtime JSON Schema validation with a dedicated validator dependency.
@@ -116,15 +116,15 @@ Not part of local/test V0 completion:
 ## Next Three Issues
 
 1. `[launch-core/validation] Add runtime schema validation and fixture diff guardrails`
-   - Agent/worktree: Review/Integration Agent in `E:\FlowMemory\flowmemory-review`.
+   - Agent/worktree: Review/Integration Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`.
    - Owns: schema validator choice, fixture validation command, CI diff policy.
 
 2. `[contracts/security] Add static-analysis setup and V0 contract hardening notes`
-   - Agent/worktree: Contracts Agent in `E:\FlowMemory\flowmemory-contracts`.
+   - Agent/worktree: Contracts Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`.
    - Owns: Slither setup issue, owner/status boundary review, test gaps.
 
 3. `[dashboard/polish] Add deeper generated object inspection`
-   - Agent/worktree: Dashboard Agent in `E:\FlowMemory\flowmemory-dashboard`.
+   - Agent/worktree: Dashboard Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`.
    - Owns: drilldown views, generated object inspection, no live API claims.
 
 ## Current Recommendation

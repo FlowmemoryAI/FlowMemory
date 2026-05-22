@@ -33,7 +33,7 @@ GitHub/source check: local `HEAD` and `origin/HEAD` both resolved to
 | Access control | Pass for V0, fail for production | Per-record owners, owner allowlists, self-registration, and open submission surfaces are documented. Direct deployer ownership, no multisig, no recovery, no timelock, and no decentralized verifier governance remain production blockers. |
 | Unsafe claims | Pass after guardrail expansion | Claim scanning now covers README, docs, contract docs, and marketing, and blocks more production/mainnet launch wording unless explicitly framed as blocked, not implemented, or out of scope. |
 | Secret handling | Pass for committed V0 surfaces, fail for production signing | `.gitignore`, CI secret checks, control-plane no-secret scanning, and canary reader outputs avoid committed credentials. The Base Sepolia deploy wrapper still passes a private key to `forge --private-key`, which is acceptable only as a local/test operator caveat. |
-| Local wallet boundary | Pass for local no-value tests | The encrypted local test vault excludes private keys from public exports and is exercised in ignored `devnet/local/` output. It is not production custody, wallet connect, or value-bearing key management. |
+| Local wallet boundary | Pass for local no-value tests | The encrypted local test vault excludes private keys from public exports and is exercised in ignored `local test runtime/local/` output. It is not production custody, wallet connect, or value-bearing key management. |
 | Deployment scripts | Pass for dry-run/testnet/canary boundaries | Base Sepolia deploy requires explicit env inputs. Base canary reading requires explicit acknowledgement, addresses, and small block ranges. Source verification redacts API key material. |
 | Base mainnet canary | Pass as canary-only | The documented canary is real Base mainnet activity, but artifacts and dashboard state mark `productionReady: false` and separate canary data from local fixture acceptance. |
 | Uniswap hook assumptions | Pass for V0, fail for production hook readiness | `FlowMemoryHookAdapter` is open/canary scaffold. `FlowMemoryAfterSwapHook` is PoolManager-gated and afterSwap-only, but there is no recorded mined hook address, deployment, PoolManager integration, source-verification plan, or go/no-go approval for production. |
@@ -109,7 +109,7 @@ The following are acceptable only with explicit local/test/canary framing:
 No production or mainnet-launch claim is approved.
 
 FlowMemory can proceed with V0 launch-candidate demos only if copy continues to
-say local/test, Base Sepolia, guarded Base mainnet canary, no-value devnet,
+say local/test, Base Sepolia, guarded Base mainnet canary, no-value local test runtime,
 fixture-backed dashboard, canary-only, and `productionReady: false` where
 applicable.
 

@@ -214,7 +214,7 @@ async function main() {
     windowsHide: true,
   });
   const cliBlocks = JSON.parse(cliBlocksText) as JsonValue;
-  const nodeExamplePath = resolve(root, "examples", "flowchain-node-quickstart.mjs");
+  const nodeExamplePath = resolve(root, "examples", "flowmemory-node-quickstart.mjs");
   const nodeExampleText = execFileSync(process.execPath, [nodeExamplePath, "--send"], {
     cwd: root,
     encoding: "utf8",
@@ -222,19 +222,19 @@ async function main() {
     env: { ...process.env, FLOWMEMORY_RPC_URL: rpcUrl },
   });
   const nodeExample = JSON.parse(nodeExampleText) as JsonValue;
-  const browserExamplePath = resolve(root, "examples", "flowchain-browser-readiness", "index.html");
+  const browserExamplePath = resolve(root, "examples", "flowmemory-browser-readiness", "index.html");
   const browserExampleText = existsSync(browserExamplePath) ? readFileSync(browserExamplePath, "utf8") : "";
   const requiredDocs = [
-    "docs/developer/FLOWCHAIN_QUICKSTART.md",
-    "docs/developer/FLOWCHAIN_WALLET_INTEGRATION.md",
-    "docs/developer/FLOWCHAIN_BRIDGE_INTEGRATION.md",
-    "docs/developer/FLOWCHAIN_NODE_OPERATOR.md",
-    "docs/developer/FLOWCHAIN_APP_BUILDER.md",
-    "docs/developer/FLOWCHAIN_EXPLORER_INDEXER.md",
-    "docs/developer/FLOWCHAIN_FAUCET_TESTER_FUNDS.md",
-    "docs/developer/FLOWCHAIN_RELEASE_COMPATIBILITY.md",
-    "docs/developer/FLOWCHAIN_TROUBLESHOOTING.md",
-    "docs/sdk/FLOWCHAIN_SDK.md",
+    "docs/developer/FLOWMEMORY_QUICKSTART.md",
+    "docs/developer/FLOWMEMORY_WALLET_INTEGRATION.md",
+    "docs/developer/FLOWMEMORY_BRIDGE_INTEGRATION.md",
+    "docs/developer/FLOWMEMORY_NODE_OPERATOR.md",
+    "docs/developer/FLOWMEMORY_APP_BUILDER.md",
+    "docs/developer/FLOWMEMORY_EXPLORER_INDEXER.md",
+    "docs/developer/FLOWMEMORY_FAUCET_TESTER_FUNDS.md",
+    "docs/developer/FLOWMEMORY_RELEASE_COMPATIBILITY.md",
+    "docs/developer/FLOWMEMORY_TROUBLESHOOTING.md",
+    "docs/sdk/FLOWMEMORY_SDK.md",
     "docs/sdk/RPC_REFERENCE.generated.md",
   ];
   const missingDocs = requiredDocs.filter((docPath) => !existsSync(resolve(root, docPath)));
@@ -243,7 +243,7 @@ async function main() {
   const secondHeight = stringValue(secondStatus.currentBlock ?? secondStatus.blockHeight ?? secondStatus.latestHeight ?? secondStatus.height ?? null);
   const missingEnvNames = collectMissingEnvNames(readiness);
   const transactionSubmit = methodEntry(discovery, "transaction_submit");
-  const devnetState = methodEntry(discovery, "devnet_state");
+  const localRuntimeState = methodEntry(discovery, "localRuntime_state");
   const walletTransferHistory = methodEntry(discovery, "wallet_transfer_history");
 
   const referencePath = resolve(sdkDocsDir, "RPC_REFERENCE.generated.md");
@@ -253,8 +253,8 @@ async function main() {
   writeGeneratedReference(discovery, referencePath);
 
   const checks = {
-    discoveryLoaded: String(discovery.schema ?? "") === "flowchain.rpc.discovery.v0",
-    readinessLoaded: String(readiness.schema ?? "") === "flowchain.rpc.readiness.v0",
+    discoveryLoaded: String(discovery.schema ?? "") === "flowmemory.rpc.discovery.v0",
+    readinessLoaded: String(readiness.schema ?? "") === "flowmemory.rpc.readiness.v0",
     healthReadable: String(health.schema ?? "") === "flowmemory.control_plane.health.v0",
     nodeStatusReadable: String(nodeStatus.schema ?? "") === "flowmemory.control_plane.node_status.v0",
     blockListReadable: String(blocks.schema ?? "") === "flowmemory.control_plane.block_list.v0",
@@ -275,13 +275,13 @@ async function main() {
     walletSendRuntimeBacked: String(walletSend.schema ?? "") === "flowmemory.control_plane.wallet_send_result.v0",
     cliJsonStatus: String(asRecord(cliStatus).schema ?? "") === "flowmemory.control_plane.chain_status.v0",
     cliJsonBlocks: String(asRecord(cliBlocks).schema ?? "") === "flowmemory.control_plane.block_list.v0",
-    nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowchain.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
+    nodeExamplePassed: String(asRecord(nodeExample).schema ?? "") === "flowmemory.example.node_quickstart.v0" && asRecord(nodeExample).status === "passed",
     browserExamplePresent: browserExampleText.includes("/rpc/discover") && browserExampleText.includes("/rpc/readiness"),
     developerGuidesPresent: missingDocs.length === 0,
     heightAdvanced: firstHeight !== null && secondHeight !== null && BigInt(secondHeight) > BigInt(firstHeight),
     publicReadinessFailClosed: readiness.publicRpcReady === false && readiness.productionReady === false,
     publicWriteMethodsBlockedFromPublicList: transactionSubmit?.publicRpcEligible === false && walletTransferHistory?.publicRpcEligible === true,
-    broadLocalStateBlockedFromPublicList: devnetState?.publicRpcEligible === false,
+    broadLocalStateBlockedFromPublicList: localRuntimeState?.publicRpcEligible === false,
   };
   const status = Object.values(checks).every(Boolean) ? "passed" : "failed";
   const report: DevPackReport = {
@@ -311,17 +311,17 @@ async function main() {
   writeFileSync(
     handoffPath,
     [
-      "# FlowChain Developer Pack Handoff",
+      "# FlowMemory Developer Pack Handoff",
       "",
       `Status: \`${report.status}\``,
       "",
       "Implemented in this slice:",
       "",
-      "- Private FlowChain SDK/devkit package under `services/flowmemory-sdk`.",
-      "- Typed JSON-RPC client over the real FlowChain `/rpc` surface.",
+      "- Private FlowMemory SDK/devkit package under `services/flowmemory-sdk`.",
+      "- Typed JSON-RPC client over the real FlowMemory `/rpc` surface.",
       "- CLI commands for discovery, readiness, status, wallet balances, wallet transfers, bridge readiness, bridge status, and diagnostics.",
       "- CLI commands for blocks, transactions, mempool, accounts, balances, wallet metadata, faucet events, finality, bridge deposits, bridge credits, and withdrawals.",
-      "- Node.js SDK example under `examples/flowchain-node-quickstart.mjs` and browser readiness example under `examples/flowchain-browser-readiness/`.",
+      "- Node.js SDK example under `examples/flowmemory-node-quickstart.mjs` and browser readiness example under `examples/flowmemory-browser-readiness/`.",
       "- Developer guides for wallet integration, bridge integration, node operations, app building, explorer/indexer use, faucet/tester funds, release compatibility, and troubleshooting.",
       "- Generated RPC reference from live `rpc_discover`.",
       "- Dev-pack E2E report proving local RPC attachment, height reads, explorer reads, wallet reads, bridge lifecycle reads, runtime-backed local wallet sends, CLI JSON output, sample example execution, and public readiness fail-closed behavior.",
@@ -338,7 +338,7 @@ async function main() {
     "utf8",
   );
 
-  console.log(`FlowChain dev-pack E2E status: ${report.status}`);
+  console.log(`FlowMemory dev-pack E2E status: ${report.status}`);
   console.log(`Report: ${reportPath}`);
   if (report.status !== "passed") process.exitCode = 1;
 }

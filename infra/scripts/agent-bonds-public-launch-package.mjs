@@ -33,7 +33,7 @@ function main() {
   const runtimeEvidencePath = `${outputPrefix}/approvals/runtime-evidence.json`;
   const goNoGoPath = `${outputPrefix}/approvals/go-no-go.json`;
   const launchApprovalPath = `${outputPrefix}/launch-approval.json`;
-  const readinessReportPath = "devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
+  const readinessReportPath = "local-runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json";
   const operatorBundlePath = "out/agent-bonds-operator-bundle";
 
   const validateOwnerInputs = run("node", [

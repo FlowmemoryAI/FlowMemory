@@ -8,7 +8,7 @@ Accepted for V0 research package.
 
 ## Context
 
-FlowRouter needs to be concrete enough for hardware, dashboard, services, and field-test agents to share packet shapes and operational assumptions. It also needs strict boundaries so the project does not overclaim internet replacement, production manufacturing, hardware trustlessness, appchain operation, or LoRa bandwidth.
+FlowRouter needs to be concrete enough for hardware, dashboard, services, and field-test agents to share packet shapes and operational assumptions. It also needs strict boundaries so the project does not overclaim internet replacement, production manufacturing, hardware trustlessness, dedicated-network operation, or LoRa bandwidth.
 
 ## Decision
 
@@ -24,7 +24,7 @@ V0 packet schemas and simulator outputs are advisory interfaces for later consum
 - No production manufacturing commitment.
 - No passive income promise.
 - No full trustlessness claim.
-- No production L1/appchain operation.
+- No separate production network operation.
 - No validator or data availability role for hardware nodes.
 - No final CAD until physical measurements are sufficient.
 

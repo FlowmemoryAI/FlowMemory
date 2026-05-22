@@ -49,7 +49,7 @@ Latest local required-Slither pass on 2026-05-13 analyzed 22 contracts with
 
 ## Current Boundary
 
-The contracts are V0 launch foundations for FlowPulse, Rootfield, receipts, workers, verifiers, cursors, and hook-adapter events. They are not a production L1, production verifier network, token system, custody system, fee system, or production Uniswap v4 hook deployment.
+The contracts are V0 launch foundations for FlowPulse, Rootfield, receipts, workers, verifiers, cursors, and hook-adapter events. They are not a production network, production verifier network, token system, custody system, fee system, or production Uniswap v4 hook deployment.
 
 Static-analysis findings should be triaged into:
 

@@ -9,7 +9,7 @@ import { writeIndexerState } from "./persistence.ts";
 const outArgIndex = process.argv.indexOf("--out");
 const outputPath = outArgIndex >= 0 ? process.argv[outArgIndex + 1] : "out/indexer-state.json";
 const sourceDir = dirname(fileURLToPath(import.meta.url));
-const explorerFallbackPath = resolve(sourceDir, "..", "..", "..", "fixtures", "dashboard", "flowchain-l1-explorer-fallback.json");
+const explorerFallbackPath = resolve(sourceDir, "..", "..", "..", "fixtures", "dashboard", "flowmemory-network-explorer-fallback.json");
 const explorerFallback = existsSync(explorerFallbackPath)
   ? JSON.parse(readFileSync(explorerFallbackPath, "utf8")) as unknown
   : undefined;

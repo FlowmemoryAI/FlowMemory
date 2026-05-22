@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/real-value-pilot-public-metadata.schema.json",
-  "title": "FlowChain Capped Real-Value Pilot Public Metadata",
+  "title": "FlowMemory Capped Real-Value Pilot Public Metadata",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,7 +18,7 @@
     "boundary"
   ],
   "properties": {
-    "schema": { "const": "flowchain.real_value_pilot.public_metadata.v0" },
+    "schema": { "const": "flowmemory.real_value_pilot.public_metadata.v0" },
     "pilotId": { "$ref": "#/$defs/hex32" },
     "createdAtUnixMs": { "$ref": "#/$defs/uintString" },
     "chainId": { "type": "integer", "enum": [31337, 84532, 8453] },

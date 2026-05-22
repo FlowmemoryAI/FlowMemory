@@ -107,7 +107,7 @@ function parseWalletSendPayload(payload: unknown): ParsedWalletSend {
   const record = payload as Record<string, unknown>;
   const memo = typeof record.memo === "string" && record.memo.trim().length > 0
     ? record.memo.trim().slice(0, 160)
-    : "flowchain-wallet-send";
+    : "flowmemory-wallet-send";
   return {
     fromAccountId: requiredText(record, ["fromAccountId", "from", "sender"], "fromAccountId"),
     toAccountId: requiredText(record, ["toAccountId", "to", "recipient"], "toAccountId"),
@@ -129,7 +129,7 @@ function parseLocalFaucetPayload(payload: unknown): ParsedLocalFaucet {
   const record = payload as Record<string, unknown>;
   const reason = typeof record.reason === "string" && record.reason.trim().length > 0
     ? record.reason.trim().slice(0, 160)
-    : "flowchain-local-tester-faucet";
+    : "flowmemory-local-tester-faucet";
   return {
     accountId: requiredText(record, ["accountId", "toAccountId", "walletAddress", "recipient"], "accountId"),
     amountUnits: amountUnitsFromPayload(record),
@@ -139,9 +139,9 @@ function parseLocalFaucetPayload(payload: unknown): ParsedLocalFaucet {
 }
 
 function readRuntimeState(state: LoadedControlPlaneState): JsonObject {
-  const path = resolveControlPlanePath(state.paths.localDevnetPath);
+  const path = resolveControlPlanePath(state.paths.localRuntimePath);
   if (!existsSync(path)) {
-    throw new Error(`local FlowChain runtime state is missing: ${state.paths.localDevnetPath}`);
+    throw new Error(`local FlowMemory runtime state is missing: ${state.paths.localRuntimePath}`);
   }
   return JSON.parse(readFileSync(path, "utf8")) as JsonObject;
 }
@@ -173,7 +173,7 @@ function resolveRuntimeAccount(runtimeState: JsonObject, accountId: string): Acc
   }
 
   const mapping = bridgeMappingRows(runtimeState).find((row) => {
-    return stringValue(row.flowchainRecipient) === accountId || stringValue(row.accountId) === accountId;
+    return stringValue(row.flowmemoryRecipient) === accountId || stringValue(row.accountId) === accountId;
   });
   const mappedAccountId = stringValue(mapping?.accountId);
   if (mappedAccountId !== null) {
@@ -205,7 +205,7 @@ function writeTransferFixture(path: string, txs: JsonObject[], amountUnits: stri
     schema: "flowmemory.control_plane.wallet_send_runtime_fixture.v0",
     txs,
   };
-  const encoded = JSON.stringify(fixture, null, 2).replace(/"__FLOWCHAIN_AMOUNT_UNITS__"/g, amountUnits);
+  const encoded = JSON.stringify(fixture, null, 2).replace(/"__FLOWMEMORY_AMOUNT_UNITS__"/g, amountUnits);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${encoded}\n`);
 }
@@ -265,13 +265,13 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
     transferId,
     fromAccountId: from.runtimeAccountId,
     toAccountId: to.runtimeAccountId,
-    amountUnits: "__FLOWCHAIN_AMOUNT_UNITS__",
+    amountUnits: "__FLOWMEMORY_AMOUNT_UNITS__",
     memo: request.memo,
   });
 
-  const intakeDir = resolve(repoRoot(), "devnet", "local", "wallet-runtime-intake");
+  const intakeDir = resolve(repoRoot(), "localRuntime", "local", "wallet-runtime-intake");
   const fixturePath = resolve(intakeDir, `${Date.now()}-${process.pid}-${transferId.slice(2, 12)}.json`);
-  const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
+  const statePath = resolveControlPlanePath(state.paths.localRuntimePath);
   const nodeDir = request.applyBlock
     ? resolve(dirname(statePath), "wallet-runtime-node")
     : resolve(dirname(statePath), "node");
@@ -280,7 +280,7 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
   const submitArgs = [
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     statePath,
@@ -300,7 +300,7 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
     ? runCargoJson([
         "run",
         "--manifest-path",
-        "crates/flowmemory-devnet/Cargo.toml",
+        "crates/flowmemory-local-runtime/Cargo.toml",
         "--",
         "--state",
         statePath,
@@ -312,7 +312,7 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
   const summary = runCargoJson([
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     statePath,
@@ -353,7 +353,7 @@ export function executeWalletSend(state: LoadedControlPlaneState, payload: unkno
 
 export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unknown): JsonObject {
   const request = parseLocalFaucetPayload(payload);
-  const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
+  const statePath = resolveControlPlanePath(state.paths.localRuntimePath);
   const nodeDir = request.applyBlock
     ? resolve(dirname(statePath), "wallet-runtime-node")
     : resolve(dirname(statePath), "node");
@@ -362,7 +362,7 @@ export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unkn
   const submitArgs = [
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     statePath,
@@ -387,7 +387,7 @@ export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unkn
     ? runCargoJson([
         "run",
         "--manifest-path",
-        "crates/flowmemory-devnet/Cargo.toml",
+        "crates/flowmemory-local-runtime/Cargo.toml",
         "--",
         "--state",
         statePath,
@@ -399,7 +399,7 @@ export function executeLocalFaucet(state: LoadedControlPlaneState, payload: unkn
   const summary = runCargoJson([
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     statePath,

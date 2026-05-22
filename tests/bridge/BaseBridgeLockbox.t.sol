@@ -116,10 +116,10 @@ contract BaseBridgeLockboxTest {
         keccak256("BridgeDeposit(bytes32,uint256,address,address,address,uint256,bytes32,uint256,bytes32,bytes32)");
     bytes32 private constant BRIDGE_RELEASE_SIGNATURE =
         keccak256("BridgeRelease(bytes32,bytes32,address,address,uint256,bytes32)");
-    bytes32 private constant RECIPIENT = keccak256("flowchain.recipient.alice");
+    bytes32 private constant RECIPIENT = keccak256("flowmemory.recipient.alice");
     bytes32 private constant PLACEHOLDER_RECIPIENT =
         0x5555555555555555555555555555555555555555555555555555555555555555;
-    bytes32 private constant EVIDENCE_HASH = keccak256("flowchain.local.acceptance");
+    bytes32 private constant EVIDENCE_HASH = keccak256("flowmemory.local.acceptance");
 
     BaseBridgeLockbox private lockbox;
     MockToken private token;
@@ -201,7 +201,7 @@ contract BaseBridgeLockboxTest {
         _assertTrue(record.token == address(token));
         _assertTrue(record.amount == 10 ether);
         _assertTrue(record.released == 0);
-        _assertTrue(record.flowchainRecipient == RECIPIENT);
+        _assertTrue(record.flowmemoryRecipient == RECIPIENT);
         _assertTrue(record.nonce == 1);
         _assertTrue(record.metadataHash == keccak256("metadata"));
         _assertTrue(record.exists);
@@ -359,8 +359,8 @@ contract BaseBridgeLockboxTest {
 
     function testReleaseERC20CanReleaseInPartsWithDistinctEvidenceUntilExhausted() public {
         bytes32 depositId = caller.lockERC20(lockbox, address(token), 10 ether, RECIPIENT);
-        bytes32 firstEvidenceHash = keccak256("flowchain.local.release.1");
-        bytes32 secondEvidenceHash = keccak256("flowchain.local.release.2");
+        bytes32 firstEvidenceHash = keccak256("flowmemory.local.release.1");
+        bytes32 secondEvidenceHash = keccak256("flowmemory.local.release.2");
 
         bytes32 firstRelease =
             lockbox.releaseERC20(depositId, address(caller), address(token), 4 ether, firstEvidenceHash);
@@ -380,7 +380,7 @@ contract BaseBridgeLockboxTest {
         vm.expectRevert(
             abi.encodeWithSelector(BaseBridgeLockbox.ReleaseAmountExceeded.selector, depositId, 1 wei, 0)
         );
-        lockbox.releaseERC20(depositId, address(caller), address(token), 1 wei, keccak256("flowchain.local.release.3"));
+        lockbox.releaseERC20(depositId, address(caller), address(token), 1 wei, keccak256("flowmemory.local.release.3"));
     }
 
     function testReleaseRejectsZeroRecipientAndZeroAmount() public {

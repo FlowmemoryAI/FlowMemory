@@ -44,7 +44,7 @@ npm run flowmemory:agent-bonds:pilot-config:validate -- fixtures/agent-bonds/pil
 
 ## Current Artifacts
 
-- readiness report: `devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
+- readiness report: `local test runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
 - replay report: `fixtures/agent-bonds/replay-report.json`
 - economic simulation: `fixtures/agent-bonds/economic-sim-report.json`
 - pilot config template: `fixtures/agent-bonds/pilot-config.template.json`

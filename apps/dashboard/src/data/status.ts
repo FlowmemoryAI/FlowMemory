@@ -29,7 +29,7 @@ export const STATUS_LABELS: Record<DashboardStatus, string> = {
 export const STATUS_DESCRIPTIONS: Record<DashboardStatus, string> = {
   observed: "Indexed or received locally without a stronger finality or verifier claim.",
   pending: "Queued, in-flight, or below the configured local finality threshold.",
-  finalized: "Past the local devnet finality threshold in this fixture.",
+  finalized: "Past the local runtime finality threshold in this fixture.",
   verified: "Fixture report says supported deterministic checks passed.",
   unresolved: "Required evidence is absent or not resolvable from fixture inputs.",
   failed: "Supported checks ran and a deterministic mismatch was recorded.",

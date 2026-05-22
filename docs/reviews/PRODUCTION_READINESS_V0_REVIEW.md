@@ -25,7 +25,7 @@ The current repo is suitable for local/test V0 development, launch-core demos, f
 - no production indexer or API service
 - no production Uniswap v4 hook deployment
 - no token, reward, fee, staking, or slashing mechanics
-- no production L1 or appchain implementation
+- no separate production network or dedicated network implementation
 - no manufactured or field-deployed hardware
 
 ## Review Rule

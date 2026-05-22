@@ -7,7 +7,7 @@ import { dispatchJsonRpc } from "./json-rpc.ts";
 import { loadControlPlaneState } from "./fixture-state.ts";
 import type { ControlPlanePaths, JsonObject, RpcErrorResponse, RpcSuccessResponse } from "./types.ts";
 
-function firstDevnetBlock(state: ReturnType<typeof loadControlPlaneState>): JsonObject {
+function firstLocalRuntimeBlock(state: ReturnType<typeof loadControlPlaneState>): JsonObject {
   const blocksResponse = dispatchJsonRpc(
     { jsonrpc: "2.0", id: "blocks-prefetch", method: "block_list", params: { limit: 10 } },
     { state },
@@ -21,7 +21,7 @@ function firstDevnetBlock(state: ReturnType<typeof loadControlPlaneState>): Json
     return Array.isArray((entry as JsonObject).txIds) && ((entry as JsonObject).txIds as unknown[]).length > 0;
   }) ?? blockRows[0];
   if (block === null || typeof block !== "object" || Array.isArray(block)) {
-    throw new Error("control-plane smoke requires at least one local devnet block");
+    throw new Error("control-plane smoke requires at least one local runtime block");
   }
   return block as JsonObject;
 }
@@ -40,11 +40,11 @@ function asObject(value: unknown): JsonObject | null {
 
 function smokeSignedEnvelope(): JsonObject {
   const vectors = JSON.parse(
-    readFileSync(new URL("../../../crypto/fixtures/production-l1-vectors.json", import.meta.url), "utf8"),
+    readFileSync(new URL("../../../crypto/fixtures/production-network-vectors.json", import.meta.url), "utf8"),
   ) as JsonObject;
   const walletTransfer = (vectors.positive as JsonObject[]).find((entry) => entry.name === "wallet-transfer");
   if (walletTransfer === undefined) {
-    throw new Error("control-plane smoke missing production-L1 wallet-transfer vector");
+    throw new Error("control-plane smoke missing production-network wallet-transfer vector");
   }
   return {
     document: walletTransfer.document,
@@ -60,9 +60,9 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
   const artifactUri = receipt?.evidenceRefs[0]?.uri;
   const agentBondTask = state.launchCore.agentBondFixture?.task as { taskId?: string } | undefined;
   const taskScoutFixture = (state.taskScoutFixture ?? state.launchCore.taskScoutFixture ?? null) as JsonObject | null;
-  const block = firstDevnetBlock(state);
+  const block = firstLocalRuntimeBlock(state);
   const txIds = Array.isArray(block.txIds) ? block.txIds : [];
-  const txId = stringField(txIds[0], "devnet txId");
+  const txId = stringField(txIds[0], "localRuntime txId");
   const accounts = dispatchJsonRpc({ jsonrpc: "2.0", id: "accounts-prefetch", method: "account_list" }, { state }) as RpcSuccessResponse;
   const account = ((accounts.result as JsonObject).accounts as JsonObject[])[0];
   const accountId = stringField(account.accountId, "accountId");
@@ -151,7 +151,7 @@ export function runControlPlaneSmoke(pathOverrides: Partial<ControlPlanePaths> =
     { jsonrpc: "2.0", id: "agentBondRecoursePolicy", method: "agent_bond_recourse_policy_get" },
     { jsonrpc: "2.0", id: "agentBondRecourseDecision", method: "agent_bond_recourse_decision_quote", params: { agentId: "agent_data_001" } },
     { jsonrpc: "2.0", id: "agentBondFailureWaterfall", method: "agent_bond_failure_waterfall_get" },
-    { jsonrpc: "2.0", id: "devnet", method: "devnet_state", params: { includeBlocks: true } },
+    { jsonrpc: "2.0", id: "localRuntime", method: "localRuntime_state", params: { includeBlocks: true } },
     { jsonrpc: "2.0", id: "blocks", method: "block_list", params: { limit: 10 } },
     { jsonrpc: "2.0", id: "block", method: "block_get", params: { blockNumber: stringField(block.blockNumber, "blockNumber"), includeTransactions: true } },
     { jsonrpc: "2.0", id: "transactions", method: "transaction_list", params: { limit: 10 } },

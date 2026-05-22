@@ -1,12 +1,12 @@
 import * as secp from "@noble/secp256k1";
 
-import { FLOWCHAIN_ACCOUNT_ROLES, TYPE_STRINGS } from "./constants.js";
+import { FLOWMEMORY_ACCOUNT_ROLES, TYPE_STRINGS } from "./constants.js";
 import { hexToBytes, strip0x } from "./encoding.js";
 import { canonicalJsonHash, keccak256Hex, typedHash } from "./hashes.js";
 
-export const FLOWCHAIN_PUBLIC_KEY_ENCODING = "secp256k1-compressed-hex";
+export const FLOWMEMORY_PUBLIC_KEY_ENCODING = "secp256k1-compressed-hex";
 
-export function normalizeFlowchainPublicKey(publicKey) {
+export function normalizeFlowMemoryPublicKey(publicKey) {
   const raw = hexToBytes(publicKey);
   if (![33, 65].includes(raw.length)) {
     throw new Error("malformed public key");
@@ -16,27 +16,27 @@ export function normalizeFlowchainPublicKey(publicKey) {
   return `0x${point.toHex(true)}`;
 }
 
-export function flowchainPublicKeyHash(publicKey) {
+export function flowmemoryPublicKeyHash(publicKey) {
   return canonicalJsonHash({
-    schema: "flowchain.public_key.v0",
-    encoding: FLOWCHAIN_PUBLIC_KEY_ENCODING,
-    publicKey: normalizeFlowchainPublicKey(publicKey)
+    schema: "flowmemory.public_key.v0",
+    encoding: FLOWMEMORY_PUBLIC_KEY_ENCODING,
+    publicKey: normalizeFlowMemoryPublicKey(publicKey)
   });
 }
 
-export function flowchainAddressFromPublicKey(publicKey) {
-  const publicKeyHash = flowchainPublicKeyHash(publicKey);
+export function flowmemoryAddressFromPublicKey(publicKey) {
+  const publicKeyHash = flowmemoryPublicKeyHash(publicKey);
   const digest = keccak256Hex(hexToBytes(publicKeyHash, 32));
   return `0x${strip0x(digest).slice(-40)}`;
 }
 
-export function flowchainRoleMetadata(role) {
-  const metadata = FLOWCHAIN_ACCOUNT_ROLES[role];
+export function flowmemoryRoleMetadata(role) {
+  const metadata = FLOWMEMORY_ACCOUNT_ROLES[role];
   if (!metadata) {
-    throw new Error(`unsupported FlowChain account role: ${role}`);
+    throw new Error(`unsupported FlowMemory account role: ${role}`);
   }
   return {
-    schema: "flowchain.account_role_metadata.v0",
+    schema: "flowmemory.account_role_metadata.v0",
     role,
     roleCode: metadata.code,
     roleGated: metadata.roleGated,
@@ -44,57 +44,57 @@ export function flowchainRoleMetadata(role) {
   };
 }
 
-export function flowchainRoleRoot(role) {
-  return canonicalJsonHash(flowchainRoleMetadata(role));
+export function flowmemoryRoleRoot(role) {
+  return canonicalJsonHash(flowmemoryRoleMetadata(role));
 }
 
-export function flowchainAccountId({ publicKey, role = "user" }) {
-  const normalizedPublicKey = normalizeFlowchainPublicKey(publicKey);
-  return typedHash(TYPE_STRINGS.flowchainAccountIdV0, [
-    ["bytes32", flowchainPublicKeyHash(normalizedPublicKey)],
-    ["address", flowchainAddressFromPublicKey(normalizedPublicKey)],
-    ["bytes32", flowchainRoleRoot(role)]
+export function flowmemoryAccountId({ publicKey, role = "user" }) {
+  const normalizedPublicKey = normalizeFlowMemoryPublicKey(publicKey);
+  return typedHash(TYPE_STRINGS.flowmemoryAccountIdV0, [
+    ["bytes32", flowmemoryPublicKeyHash(normalizedPublicKey)],
+    ["address", flowmemoryAddressFromPublicKey(normalizedPublicKey)],
+    ["bytes32", flowmemoryRoleRoot(role)]
   ]);
 }
 
-export function flowchainSignerKeyId({ publicKey }) {
+export function flowmemorySignerKeyId({ publicKey }) {
   return canonicalJsonHash({
-    schema: "flowchain.signer_key.v0",
-    publicKeyEncoding: FLOWCHAIN_PUBLIC_KEY_ENCODING,
-    publicKey: normalizeFlowchainPublicKey(publicKey)
+    schema: "flowmemory.signer_key.v0",
+    publicKeyEncoding: FLOWMEMORY_PUBLIC_KEY_ENCODING,
+    publicKey: normalizeFlowMemoryPublicKey(publicKey)
   });
 }
 
-export function flowchainPublicAccountMetadata({ publicKey, role = "user", label, createdAtUnixMs, active = true }) {
-  const normalizedPublicKey = normalizeFlowchainPublicKey(publicKey);
-  const roleMetadata = flowchainRoleMetadata(role);
+export function flowmemoryPublicAccountMetadata({ publicKey, role = "user", label, createdAtUnixMs, active = true }) {
+  const normalizedPublicKey = normalizeFlowMemoryPublicKey(publicKey);
+  const roleMetadata = flowmemoryRoleMetadata(role);
   return {
-    schema: "flowchain.public_account_metadata.v0",
+    schema: "flowmemory.public_account_metadata.v0",
     label,
     role,
     roleCode: roleMetadata.roleCode,
     roleGated: roleMetadata.roleGated,
-    publicKeyEncoding: FLOWCHAIN_PUBLIC_KEY_ENCODING,
+    publicKeyEncoding: FLOWMEMORY_PUBLIC_KEY_ENCODING,
     publicKey: normalizedPublicKey,
-    publicKeyHash: flowchainPublicKeyHash(normalizedPublicKey),
-    address: flowchainAddressFromPublicKey(normalizedPublicKey),
-    accountId: flowchainAccountId({ publicKey: normalizedPublicKey, role }),
-    signerKeyId: flowchainSignerKeyId({ publicKey: normalizedPublicKey }),
+    publicKeyHash: flowmemoryPublicKeyHash(normalizedPublicKey),
+    address: flowmemoryAddressFromPublicKey(normalizedPublicKey),
+    accountId: flowmemoryAccountId({ publicKey: normalizedPublicKey, role }),
+    signerKeyId: flowmemorySignerKeyId({ publicKey: normalizedPublicKey }),
     createdAtUnixMs,
     active
   };
 }
 
-export function assertFlowchainPublicMetadataContainsNoSecrets(value) {
+export function assertFlowMemoryPublicMetadataContainsNoSecrets(value) {
   const serialized = JSON.stringify(value);
   if (
     /privateKey|private_key|seedPhrase|seed phrase|mnemonic|ciphertext|authTag|password|rpc[-_]?credential|rpc[-_]?url|api[-_]?key|webhook/i.test(serialized) ||
     /https:\/\/hooks\.slack\.com|https:\/\/discord\.com\/api\/webhooks/i.test(serialized)
   ) {
-    throw new Error("public FlowChain metadata contains secret-shaped material");
+    throw new Error("public FlowMemory metadata contains secret-shaped material");
   }
 }
 
-export function isFlowchainRole(role) {
-  return Boolean(FLOWCHAIN_ACCOUNT_ROLES[role]);
+export function isFlowMemoryRole(role) {
+  return Boolean(FLOWMEMORY_ACCOUNT_ROLES[role]);
 }

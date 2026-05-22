@@ -12,13 +12,13 @@ Agents may be assigned one of these roles. Each role should still read `AGENTS.m
 
 ## Recommended Worktrees
 
-- `E:\FlowMemory\flowmemory-contracts`: protocol contracts work
-- `E:\FlowMemory\flowmemory-indexer`: services, indexer, and verifier work
-- `E:\FlowMemory\flowmemory-dashboard`: apps, dashboard, explorer, and console work
-- `E:\FlowMemory\flowmemory-hardware`: hardware, FlowRouter, LoRa, and Meshtastic work
-- `E:\FlowMemory\flowmemory-research`: AI memory, neural geometry, reliability, and appchain/L1 research
-- `E:\FlowMemory\flowmemory-crypto`: receipts, attestations, roots, proofs, and commitment-format work
-- `E:\FlowMemory\flowmemory-review`: review, docs maintenance, templates, and repo hygiene
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`: protocol contracts work
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer`: services, indexer, and verifier work
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`: apps, dashboard, explorer, and console work
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware`: hardware, FlowRouter, LoRa, and Meshtastic work
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research`: AI memory, neural geometry, reliability, and dedicated-network research
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto`: receipts, attestations, roots, proofs, and commitment-format work
+- `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`: review, docs maintenance, templates, and repo hygiene
 
 ## Bootstrap Agent
 
@@ -31,7 +31,7 @@ Scope:
 
 Do not build product features.
 
-Default worktree: `E:\FlowMemory\flowmemory-review`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 ## Protocol Contracts Agent
 
@@ -45,7 +45,7 @@ Scope:
 
 Must document event and storage assumptions.
 
-Default worktree: `E:\FlowMemory\flowmemory-contracts`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`
 
 ## Services Agent
 
@@ -59,7 +59,7 @@ Scope:
 
 Must derive `txHash` and `logIndex` from receipts and logs, not from hook execution assumptions.
 
-Default worktree: `E:\FlowMemory\flowmemory-indexer`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer`
 
 ## Apps Agent
 
@@ -72,7 +72,7 @@ Scope:
 
 Must distinguish observed, verified, pending, and failed states in UI.
 
-Default worktree: `E:\FlowMemory\flowmemory-dashboard`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`
 
 ## Hardware Agent
 
@@ -86,7 +86,7 @@ Scope:
 
 Must treat radio links as low-bandwidth control signaling.
 
-Default worktree: `E:\FlowMemory\flowmemory-hardware`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware`
 
 ## Research Agent
 
@@ -96,11 +96,11 @@ Scope:
 - AI memory
 - Neural geometry
 - Reliability research
-- Appchain/L1 research
+- Dedicated-network research
 
 Must separate hypotheses, experiments, and accepted decisions.
 
-Default worktree: `E:\FlowMemory\flowmemory-research`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research`
 
 ## Crypto Agent
 
@@ -115,7 +115,7 @@ Scope:
 
 Must document threat assumptions and verification requirements.
 
-Default worktree: `E:\FlowMemory\flowmemory-crypto`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto`
 
 ## Infra Agent
 
@@ -128,7 +128,7 @@ Scope:
 
 Must avoid leaking secrets through scripts, logs, or CI output.
 
-Default worktree: `E:\FlowMemory\flowmemory-review`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 ## Security Agent
 
@@ -141,7 +141,7 @@ Scope:
 
 Must create actionable issues or PR comments for findings.
 
-Default worktree: `E:\FlowMemory\flowmemory-review`
+Default worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 ## Handoff Format
 

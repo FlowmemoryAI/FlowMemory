@@ -311,6 +311,6 @@ Docs, SDK, and dashboards must show which category each address belongs to.
 
 ## External model review lane
 
-DeepSeek, GPT, Codex, or other strong off-chain models can help design and review policies, generate test cases, compress rules, and attack the architecture. Their transcripts are not protocol state unless a signed digest, review result, or evidence commitment is deliberately admitted.
+External model reviewers and other off-chain analysis tools can help design and review policies, generate test cases, compress rules, and attack the architecture. Their transcripts are not protocol state unless a signed digest, review result, or evidence commitment is deliberately admitted.
 
 Use external models as compilers and auditors. The committed chain-side agent remains a deterministic bounded state machine.

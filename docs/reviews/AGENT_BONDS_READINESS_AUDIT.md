@@ -98,8 +98,8 @@ Status: operator evidence and control-plane runtime support added; full hosted p
 Evidence:
 
 - `infra/scripts/agent-bonds-readiness.mjs`
-- `devnet/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
-- `devnet/local/agent-bonds-readiness/goal-audit-report.json`
+- `local test runtime/local/agent-bonds-readiness/agent-bonds-readiness-report.json`
+- `local test runtime/local/agent-bonds-readiness/goal-audit-report.json`
 - `services/control-plane/src/methods.ts`
 - `services/control-plane/test/control-plane.test.ts`
 - `services/control-plane` runtime now exposes `agent_bond_task_*`, `agent_bond_readiness_get`, and `agent_bond_public_launch_status_get`

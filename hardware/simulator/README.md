@@ -79,7 +79,7 @@ python hardware/simulator/flowrouter_sim.py --validate-negative-report-file fixt
 - NFC Memory Cartridge metadata
 - Emergency/offline signal
 - Dashboard feed
-- FlowChain local-alpha operator signal projection
+- FlowMemory local-alpha operator signal projection
 
 The packets are JSON versions of compact, binary-inspired fields. They are not production protocol commitments and should remain small enough to reason about LoRa constraints.
 
@@ -95,6 +95,6 @@ The local-alpha projection is a `flowmemory.hardware_operator_signals.local_alph
 - `bridge_alert` -> `bridgeAlerts` and `alerts`
 - `nfc_memory_cartridge_metadata` -> `artifactCommitments` and `memoryCells`
 
-It also includes `workbenchRecords` grouped by `operatorMetadata`, `nodeHealth`, `peerHints`, `receipts`, `verifierReports`, `bridgeAlerts`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`. The companion `flowmemory.hardware_control_plane_handoff.local_alpha.v0` fixture carries the same state keys under `collections` plus an optional `flowchain:full-smoke` row that runs `python hardware/simulator/flowrouter_sim.py --smoke`. These projection objects are local-only and advisory until reconciled through normal FlowMemory indexer, receipt, verifier, or operator workflows.
+It also includes `workbenchRecords` grouped by `operatorMetadata`, `nodeHealth`, `peerHints`, `receipts`, `verifierReports`, `bridgeAlerts`, `artifacts`, `memoryCells`, `challenges`, `hardwareSignals`, and `provenance`. The companion `flowmemory.hardware_control_plane_handoff.local_alpha.v0` fixture carries the same state keys under `collections` plus an optional `flowmemory:full-smoke` row that runs `python hardware/simulator/flowrouter_sim.py --smoke`. These projection objects are local-only and advisory until reconciled through normal FlowMemory indexer, receipt, verifier, or operator workflows.
 
 Negative validation covers missing required IDs, malformed IDs, oversized control payloads, stale timestamps, duplicate operator signal IDs, secret-shaped payload strings, hardware-required handoff claims, and missing required handoff collections.

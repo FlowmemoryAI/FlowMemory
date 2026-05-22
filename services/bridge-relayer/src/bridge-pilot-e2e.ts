@@ -299,7 +299,7 @@ function buildExactValueReport(firstRun: BridgePipelineResult): Record<string, u
   assert.deepEqual(application.asset, credit.asset);
   assert.deepEqual(withdrawal.asset, credit.asset);
   assert.deepEqual(releaseEvidence.asset, credit.asset);
-  assert.equal(withdrawal.flowchainAccount, credit.flowchainRecipient);
+  assert.equal(withdrawal.flowmemoryAccount, credit.flowmemoryRecipient);
   assert.equal(releaseEvidence.releaseCall.recipient, withdrawal.baseRecipient);
 
   return {
@@ -314,7 +314,7 @@ function buildExactValueReport(firstRun: BridgePipelineResult): Record<string, u
       sourceToken: observation.deposit.token,
       destinationAssetId: credit.asset.destinationAssetId,
       decimals: credit.asset.decimals,
-      flowchainRecipient: credit.flowchainRecipient,
+      flowmemoryRecipient: credit.flowmemoryRecipient,
       baseRecipient: withdrawal.baseRecipient,
       txHash: observation.deposit.txHash,
       logIndex: observation.deposit.logIndex,
@@ -368,7 +368,7 @@ async function main(): Promise<void> {
   mkdirSync(options.outDir, { recursive: true });
 
   console.log(`Step 1 complete: resolved bridge pilot E2E mode ${options.mode}.`);
-  console.log("Next operator command: npm run flowchain:real-value-pilot:bridge");
+  console.log("Next operator command: npm run flowmemory:real-value-pilot:bridge");
 
   const statePath = resolve(options.outDir, "bridge-credit-application-state.json");
   const duplicateStatePath = resolve(options.outDir, "bridge-duplicate-credit-application-state.json");
@@ -472,15 +472,15 @@ async function main(): Promise<void> {
     exactValueConservation: exactValueReport,
     negativeCoverage,
     requiredEnvironmentVariables: [
-      "FLOWCHAIN_BASE8453_RPC_URL",
-      "FLOWCHAIN_BASE8453_LOCKBOX_ADDRESS",
-      "FLOWCHAIN_BASE8453_FROM_BLOCK",
-      "FLOWCHAIN_BASE8453_TO_BLOCK",
-      "FLOWCHAIN_BASE8453_CONFIRMATIONS",
-      "FLOWCHAIN_PILOT_MAX_DEPOSIT_WEI",
-      "FLOWCHAIN_PILOT_TOTAL_CAP_WEI",
-      "FLOWCHAIN_PILOT_MAX_USD",
-      "FLOWCHAIN_PILOT_OPERATOR_ACK",
+      "FLOWMEMORY_BASE8453_RPC_URL",
+      "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS",
+      "FLOWMEMORY_BASE8453_FROM_BLOCK",
+      "FLOWMEMORY_BASE8453_TO_BLOCK",
+      "FLOWMEMORY_BASE8453_CONFIRMATIONS",
+      "FLOWMEMORY_PILOT_MAX_DEPOSIT_WEI",
+      "FLOWMEMORY_PILOT_TOTAL_CAP_WEI",
+      "FLOWMEMORY_PILOT_MAX_USD",
+      "FLOWMEMORY_PILOT_OPERATOR_ACK",
     ],
     liveObserverCommand: "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/bridge-base-mainnet-pilot-observe.ps1 -OperatorAck -ApplyCredit -WithdrawalIntent",
     noSecrets: true,

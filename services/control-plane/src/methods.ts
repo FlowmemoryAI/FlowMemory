@@ -3,9 +3,9 @@ import { dirname, resolve } from "node:path";
 
 import { canonicalJson, findSecret, keccak256Hex, keccak256Utf8 } from "../../shared/src/index.ts";
 import { spawnCargoSync } from "./cargo.ts";
-import { bridgeSourceEventReplayKey, flowchainBridgeObservationId } from "../../../crypto/src/production-l1.js";
+import { bridgeSourceEventReplayKey, flowmemoryBridgeObservationId } from "../../../crypto/src/production-network.js";
 import { localTransactionReplayKey } from "../../../crypto/src/transactions.js";
-import { verifyFlowchainEnvelope } from "../../../crypto/src/runtime-validation.js";
+import { verifyFlowMemoryEnvelope } from "../../../crypto/src/runtime-validation.js";
 import { cryptoRejected, invalidParams, methodNotFound, objectNotFound, secretRejected } from "./errors.ts";
 import { loadControlPlaneState, repoRoot, resolveControlPlanePath } from "./fixture-state.ts";
 import { getAgentBondPassport, listAgentBondPassports, validateAgentBondPassport, computePassportCapacityView } from "../../flowmemory/src/agent-bond-passport.ts";
@@ -61,8 +61,8 @@ import type {
 } from "./types.ts";
 
 const ZERO_ROOT = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const FLOWCHAIN_LIVE_L1_CHAIN_ID = "31337";
-const FLOWCHAIN_LIVE_L1_NETWORK_PROFILE = "local-chain";
+const FLOWMEMORY_LIVE_L1_CHAIN_ID = "31337";
+const FLOWMEMORY_LIVE_L1_NETWORK_PROFILE = "local-chain";
 
 type MethodHandler = (params: JsonValue | undefined, context: ControlPlaneContext) => JsonValue;
 
@@ -263,19 +263,19 @@ function transitionByAnyId(state: LoadedControlPlaneState, key: string) {
   });
 }
 
-function devnetRootfields(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "rootfields");
+function localRuntimeRootfields(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "rootfields");
 }
 
-function devnetMap(state: LoadedControlPlaneState, key: string): Record<string, JsonValue> {
-  const controlPlaneObjects = asJsonObject(state.devnetControlPlaneHandoff?.objects);
+function localRuntimeMap(state: LoadedControlPlaneState, key: string): Record<string, JsonValue> {
+  const controlPlaneObjects = asJsonObject(state.localRuntimeControlPlaneHandoff?.objects);
   const fallbackObjects = asJsonObject(state.explorerFallback?.objects);
   const candidates = [
-    state.devnet?.[key],
+    state.localRuntime?.[key],
     controlPlaneObjects?.[key],
-    state.devnetControlPlaneHandoff?.[key],
-    state.devnetVerifierHandoff?.[key],
-    state.devnetIndexerHandoff?.[key],
+    state.localRuntimeControlPlaneHandoff?.[key],
+    state.localRuntimeVerifierHandoff?.[key],
+    state.localRuntimeIndexerHandoff?.[key],
     fallbackObjects?.[key],
     state.explorerFallback?.[key],
   ];
@@ -285,9 +285,9 @@ function devnetMap(state: LoadedControlPlaneState, key: string): Record<string, 
   return maps.find((value) => Object.keys(value).length > 0) ?? maps[0] ?? {};
 }
 
-function firstDevnetMap(state: LoadedControlPlaneState, keys: string[]): Record<string, JsonValue> {
+function firstLocalRuntimeMap(state: LoadedControlPlaneState, keys: string[]): Record<string, JsonValue> {
   for (const key of keys) {
-    const value = devnetMap(state, key);
+    const value = localRuntimeMap(state, key);
     if (Object.keys(value).length > 0) {
       return value;
     }
@@ -295,14 +295,14 @@ function firstDevnetMap(state: LoadedControlPlaneState, keys: string[]): Record<
   return {};
 }
 
-function devnetBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
-  const localRuntimeBlocks = asJsonArray(state.devnet?.blocks)
+function localRuntimeBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
+  const localRuntimeBlocks = asJsonArray(state.localRuntime?.blocks)
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null);
   const sources = [
     localRuntimeBlocks,
-    asJsonArray(state.devnetControlPlaneHandoff?.blocks),
-    asJsonArray(state.devnetIndexerHandoff?.blocks),
+    asJsonArray(state.localRuntimeControlPlaneHandoff?.blocks),
+    asJsonArray(state.localRuntimeIndexerHandoff?.blocks),
   ];
   const candidate = sources.find((blocks) =>
     blocks.some((entry) => {
@@ -316,12 +316,12 @@ function devnetBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function activeRuntimeBlocksArray(state: LoadedControlPlaneState): JsonObject[] {
-  const activeRuntimePath = state.sources.devnet?.path === state.paths.localDevnetPath
-    || state.sources.devnet?.path === state.paths.localDevnetLaunchPath;
+  const activeRuntimePath = state.sources.localRuntime?.path === state.paths.localRuntimePath
+    || state.sources.localRuntime?.path === state.paths.localRuntimeLaunchPath;
   if (!activeRuntimePath) {
     return [];
   }
-  return asJsonArray(state.devnet?.blocks)
+  return asJsonArray(state.localRuntime?.blocks)
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null);
 }
@@ -332,58 +332,58 @@ function txFixtureRows(state: LoadedControlPlaneState): JsonObject[] {
     .filter((entry): entry is JsonObject => entry !== null);
 }
 
-function devnetWorkReceipts(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "workReceipts");
+function localRuntimeWorkReceipts(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "workReceipts");
 }
 
-function devnetReports(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "verifierReports");
+function localRuntimeReports(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "verifierReports");
 }
 
-function devnetArtifacts(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "artifactCommitments");
+function localRuntimeArtifacts(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "artifactCommitments");
 }
 
-function devnetAgentAccounts(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "agentAccounts");
+function localRuntimeAgentAccounts(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "agentAccounts");
 }
 
-function devnetModels(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return firstDevnetMap(state, ["modelPassports", "models"]);
+function localRuntimeModels(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstLocalRuntimeMap(state, ["modelPassports", "models"]);
 }
 
-function devnetVerifierModules(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return firstDevnetMap(state, ["verifierModules", "modules"]);
+function localRuntimeVerifierModules(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstLocalRuntimeMap(state, ["verifierModules", "modules"]);
 }
 
-function devnetArtifactAvailability(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return firstDevnetMap(state, ["artifactAvailabilityProofs", "artifactAvailability"]);
+function localRuntimeArtifactAvailability(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstLocalRuntimeMap(state, ["artifactAvailabilityProofs", "artifactAvailability"]);
 }
 
-function devnetMemoryCells(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "memoryCells");
+function localRuntimeMemoryCells(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "memoryCells");
 }
 
-function devnetChallenges(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "challenges");
+function localRuntimeChallenges(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "challenges");
 }
 
-function devnetFinalityReceipts(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "finalityReceipts");
+function localRuntimeFinalityReceipts(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "finalityReceipts");
 }
 
-function devnetOperatorKeyReferences(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return firstDevnetMap(state, ["operatorKeyReferences", "walletPublicMetadata", "wallets"]);
+function localRuntimeOperatorKeyReferences(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstLocalRuntimeMap(state, ["operatorKeyReferences", "walletPublicMetadata", "wallets"]);
 }
 
-function devnetProductEntries(
+function localRuntimeProductEntries(
   state: LoadedControlPlaneState,
   keys: string[],
   idFields: string[],
 ): Array<{ id: string; object: JsonObject; sourceKey: string }> {
   const rows = new Map<string, { id: string; object: JsonObject; sourceKey: string }>();
   for (const sourceKey of keys) {
-    for (const [mapId, value] of Object.entries(devnetMap(state, sourceKey))) {
+    for (const [mapId, value] of Object.entries(localRuntimeMap(state, sourceKey))) {
       const object = asJsonObject(value) ?? {};
       const id = idFields
         .map((field) => stringValue(object[field]))
@@ -395,20 +395,20 @@ function devnetProductEntries(
   return [...rows.values()].sort((left, right) => left.id.localeCompare(right.id));
 }
 
-function devnetProductMapCount(state: LoadedControlPlaneState, keys: string[]): number {
-  return devnetProductEntries(state, keys, ["id"]).length;
+function localRuntimeProductMapCount(state: LoadedControlPlaneState, keys: string[]): number {
+  return localRuntimeProductEntries(state, keys, ["id"]).length;
 }
 
-function devnetLocalTestUnitBalances(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return firstDevnetMap(state, ["localTestUnitBalances", "localBalances"]);
+function localRuntimeLocalTestUnitBalances(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return firstLocalRuntimeMap(state, ["localTestUnitBalances", "localBalances"]);
 }
 
-function devnetBalanceTransfers(state: LoadedControlPlaneState): Record<string, JsonValue> {
-  return devnetMap(state, "balanceTransfers");
+function localRuntimeBalanceTransfers(state: LoadedControlPlaneState): Record<string, JsonValue> {
+  return localRuntimeMap(state, "balanceTransfers");
 }
 
 function productSource(sourceKey: string): string {
-  return `local-devnet:${sourceKey}`;
+  return `local-runtime:${sourceKey}`;
 }
 
 function rowSource(object: JsonObject, sourceKey: string): string {
@@ -417,14 +417,14 @@ function rowSource(object: JsonObject, sourceKey: string): string {
     : productSource(sourceKey);
 }
 
-function devnetPeers(state: LoadedControlPlaneState): JsonObject[] {
-  return asJsonArray(state.devnet?.peers)
+function localRuntimePeers(state: LoadedControlPlaneState): JsonObject[] {
+  return asJsonArray(state.localRuntime?.peers)
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null);
 }
 
 function runtimeSourcePath(state: LoadedControlPlaneState): string {
-  return state.sources.devnet?.path ?? state.paths.devnetPath;
+  return state.sources.localRuntime?.path ?? state.paths.localRuntimePath;
 }
 
 function readNdjson(path: string): JsonObject[] {
@@ -539,7 +539,7 @@ function bridgeRowIsBaseMainnet(row: JsonObject): boolean {
 
 function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
-  for (const [agentId, value] of Object.entries(devnetAgentAccounts(state))) {
+  for (const [agentId, value] of Object.entries(localRuntimeAgentAccounts(state))) {
     const agent = asJsonObject(value) ?? {};
     rows.push({
       schema: "flowmemory.control_plane.account.v0",
@@ -550,11 +550,11 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
       balance: "0",
       noValue: true,
       metadata: agent,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     });
   }
-  for (const [keyReferenceId, value] of Object.entries(devnetOperatorKeyReferences(state))) {
+  for (const [keyReferenceId, value] of Object.entries(localRuntimeOperatorKeyReferences(state))) {
     const keyReference = asJsonObject(value) ?? {};
     rows.push({
       schema: "flowmemory.control_plane.account.v0",
@@ -573,7 +573,7 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
         publicKeyHint: keyReference.publicKeyHint,
         secretMaterialBoundary: keyReference.secretMaterialBoundary,
       },
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     });
   }
@@ -603,7 +603,7 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
       localOnly: true,
     });
   }
-  for (const [balanceId, value] of Object.entries(devnetLocalTestUnitBalances(state))) {
+  for (const [balanceId, value] of Object.entries(localRuntimeLocalTestUnitBalances(state))) {
     const balance = asJsonObject(value) ?? {};
     const accountId = stringValue(balance.accountId) ?? balanceId;
     if (rows.some((row) => row.accountId === accountId || row.keyReferenceId === accountId)) {
@@ -617,7 +617,7 @@ function nodeAccountRows(state: LoadedControlPlaneState): JsonObject[] {
       balance: stringValue(balance.units) ?? stringValue(balance.amountUnits) ?? "0",
       noValue: true,
       metadata: balance,
-      source: "local-devnet:localTestUnitBalances",
+      source: "local-runtime:localTestUnitBalances",
       localOnly: true,
     });
   }
@@ -648,15 +648,15 @@ function walletMetadataRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function mempoolRows(state: LoadedControlPlaneState): JsonObject[] {
-  const pending = asJsonArray(state.devnet?.pendingTxs)
+  const pending = asJsonArray(state.localRuntime?.pendingTxs)
     .map((entry) => asJsonObject(entry))
     .filter((entry): entry is JsonObject => entry !== null)
     .map((tx) => ({
       schema: "flowmemory.control_plane.mempool_transaction.v0",
-      transactionId: stringValue(tx.txId) ?? stringValue(tx.transactionId) ?? stableId("flowmemory.control_plane.mempool.devnet.v0", tx),
+      transactionId: stringValue(tx.txId) ?? stringValue(tx.transactionId) ?? stableId("flowmemory.control_plane.mempool.localRuntime.v0", tx),
       status: "pending",
       transaction: tx,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
   }));
   const intake = txIntakeRows(state).map((entry) => ({
@@ -696,7 +696,7 @@ function bridgeDepositRows(state: LoadedControlPlaneState): JsonObject[] {
       token: deposit.token ?? null,
       amount: deposit.amount ?? "0",
       sender: deposit.sender ?? null,
-      flowchainRecipient: deposit.flowchainRecipient ?? null,
+      flowmemoryRecipient: deposit.flowmemoryRecipient ?? null,
       deposit,
       observation,
       source: "bridge-relayer",
@@ -707,7 +707,7 @@ function bridgeDepositRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows = new Map<string, JsonObject>();
-  for (const entry of devnetProductEntries(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"], ["creditId", "bridgeCreditId", "id", "depositId"])) {
+  for (const entry of localRuntimeProductEntries(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"], ["creditId", "bridgeCreditId", "id", "depositId"])) {
     const credit = entry.object;
     const source = asJsonObject(credit.source);
     const creditId = entry.id;
@@ -715,8 +715,8 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
       schema: "flowmemory.control_plane.bridge_credit.v0",
       creditId,
       depositId: stringValue(credit.depositId) ?? null,
-      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowchainRecipient) ?? null,
-      flowchainRecipient: stringValue(credit.flowchainRecipient) ?? stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? null,
+      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowmemoryRecipient) ?? null,
+      flowmemoryRecipient: stringValue(credit.flowmemoryRecipient) ?? stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? null,
       sourceChainId: source?.chainId ?? credit.sourceChainId ?? null,
       sourceContract: source?.contract ?? credit.sourceContract ?? null,
       txHash: stringValue(source?.txHash) ?? stringValue(credit.txHash) ?? stringValue(credit.baseTxHash) ?? null,
@@ -741,8 +741,8 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
       schema: "flowmemory.control_plane.bridge_credit.v0",
       creditId,
       depositId: stringValue(credit.depositId) ?? null,
-      accountId: stringValue(credit.accountId) ?? stringValue(credit.flowchainRecipient) ?? null,
-      flowchainRecipient: stringValue(credit.flowchainRecipient) ?? stringValue(credit.accountId) ?? null,
+      accountId: stringValue(credit.accountId) ?? stringValue(credit.flowmemoryRecipient) ?? null,
+      flowmemoryRecipient: stringValue(credit.flowmemoryRecipient) ?? stringValue(credit.accountId) ?? null,
       sourceChainId: source?.chainId ?? credit.sourceChainId ?? null,
       sourceContract: source?.contract ?? credit.sourceContract ?? null,
       txHash: stringValue(source?.txHash) ?? stringValue(credit.txHash) ?? stringValue(credit.baseTxHash) ?? null,
@@ -766,8 +766,8 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
       schema: "flowmemory.control_plane.bridge_credit.v0",
       creditId,
       depositId: stringValue(credit.depositId) ?? null,
-      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowchainRecipient) ?? null,
-      flowchainRecipient: stringValue(credit.flowchainRecipient) ?? stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? null,
+      accountId: stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? stringValue(credit.flowmemoryRecipient) ?? null,
+      flowmemoryRecipient: stringValue(credit.flowmemoryRecipient) ?? stringValue(credit.accountId) ?? stringValue(credit.recipient) ?? null,
       sourceChainId: source?.chainId ?? credit.sourceChainId ?? null,
       sourceContract: source?.contract ?? credit.sourceContract ?? null,
       txHash: stringValue(source?.txHash) ?? stringValue(credit.txHash) ?? stringValue(credit.baseTxHash) ?? null,
@@ -789,8 +789,8 @@ function bridgeCreditRows(state: LoadedControlPlaneState): JsonObject[] {
         schema: "flowmemory.control_plane.bridge_credit.v0",
         creditId,
         depositId: deposit.depositId,
-        accountId: deposit.flowchainRecipient,
-        flowchainRecipient: deposit.flowchainRecipient,
+        accountId: deposit.flowmemoryRecipient,
+        flowmemoryRecipient: deposit.flowmemoryRecipient,
         sourceChainId: deposit.sourceChainId,
         sourceContract: deposit.sourceContract,
         txHash: deposit.txHash,
@@ -813,7 +813,7 @@ function bridgeCreditMatch(row: JsonObject, key: string): boolean {
   return row.creditId === key
     || row.depositId === key
     || row.accountId === key
-    || row.flowchainRecipient === key
+    || row.flowmemoryRecipient === key
     || row.txHash === key
     || row.baseTxHash === key;
 }
@@ -841,7 +841,7 @@ function findBestBridgeCredit(rows: JsonObject[], key: string): JsonObject | und
 }
 
 function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
-  const native = firstDevnetMap(state, ["withdrawals", "bridgeWithdrawals"]);
+  const native = firstLocalRuntimeMap(state, ["withdrawals", "bridgeWithdrawals"]);
   const rows = Object.entries(native).map(([withdrawalId, value]) => {
     const withdrawal = asJsonObject(value) ?? {};
     return {
@@ -864,7 +864,7 @@ function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
       withdrawalIntentId: stringValue(intent.withdrawalIntentId) ?? null,
       creditId: stringValue(intent.creditId) ?? null,
       depositId: stringValue(intent.depositId) ?? null,
-      accountId: stringValue(intent.flowchainAccount) ?? stringValue(intent.accountId) ?? null,
+      accountId: stringValue(intent.flowmemoryAccount) ?? stringValue(intent.accountId) ?? null,
       amount: stringValue(intent.amount) ?? "0",
       token: intent.token ?? null,
       status: stringValue(intent.status) ?? "requested",
@@ -891,7 +891,7 @@ function withdrawalRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function tokenRows(state: LoadedControlPlaneState): JsonObject[] {
-  const rows = devnetProductEntries(
+  const rows = localRuntimeProductEntries(
     state,
     ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"],
     ["tokenId", "assetId", "symbol", "address", "id"],
@@ -917,7 +917,7 @@ function tokenRows(state: LoadedControlPlaneState): JsonObject[] {
     return rows;
   }
 
-  const localBalances = devnetLocalTestUnitBalances(state);
+  const localBalances = localRuntimeLocalTestUnitBalances(state);
   if (Object.keys(localBalances).length === 0) {
     return [];
   }
@@ -945,7 +945,7 @@ function tokenRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
-  const rows = devnetProductEntries(
+  const rows = localRuntimeProductEntries(
     state,
     ["tokenBalances", "localTokenBalances", "accountTokenBalances"],
     ["balanceId", "tokenBalanceId", "positionId", "id"],
@@ -971,7 +971,7 @@ function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
     return rows.sort((left, right) => String(left.balanceId).localeCompare(String(right.balanceId)));
   }
 
-  return Object.entries(devnetLocalTestUnitBalances(state)).map(([balanceId, value]) => {
+  return Object.entries(localRuntimeLocalTestUnitBalances(state)).map(([balanceId, value]) => {
     const balance = asJsonObject(value) ?? {};
     return {
       schema: "flowmemory.control_plane.token_balance.v0",
@@ -990,7 +990,7 @@ function tokenBalanceRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function tokenTransferRows(state: LoadedControlPlaneState): JsonObject[] {
-  return devnetProductEntries(
+  return localRuntimeProductEntries(
     state,
     ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"],
     ["transferId", "tokenTransferId", "txId", "transactionId", "id"],
@@ -1015,7 +1015,7 @@ function tokenTransferRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function poolRows(state: LoadedControlPlaneState): JsonObject[] {
-  return devnetProductEntries(
+  return localRuntimeProductEntries(
     state,
     ["pools", "dexPools", "liquidityPools", "ammPools"],
     ["poolId", "id", "address"],
@@ -1039,7 +1039,7 @@ function poolRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function lpPositionRows(state: LoadedControlPlaneState): JsonObject[] {
-  return devnetProductEntries(
+  return localRuntimeProductEntries(
     state,
     ["lpPositions", "liquidityPositions", "poolPositions"],
     ["positionId", "lpPositionId", "id"],
@@ -1061,7 +1061,7 @@ function lpPositionRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function swapRows(state: LoadedControlPlaneState): JsonObject[] {
-  return devnetProductEntries(
+  return localRuntimeProductEntries(
     state,
     ["swaps", "swapReceipts", "dexSwaps"],
     ["swapId", "receiptId", "txId", "transactionId", "id"],
@@ -1091,7 +1091,7 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
   const txFixtures = txFixtureRows(state);
   let fixtureIndex = 0;
 
-  for (const block of devnetBlocksArray(state)) {
+  for (const block of localRuntimeBlocksArray(state)) {
     const blockNumber = stringValue(block.blockNumber) ?? "0";
     const blockHash = stringValue(block.blockHash) ?? ZERO_ROOT;
     const receipts = asJsonArray(block.receipts)
@@ -1113,7 +1113,7 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
         type: stringValue(payload?.type) ?? "unknown",
         payload,
         receipt,
-        source: "local-devnet",
+        source: "local-runtime",
         localOnly: true,
       });
     });
@@ -1184,7 +1184,7 @@ function transactionRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function blockRows(state: LoadedControlPlaneState, includeTransactions = false): JsonObject[] {
   const txs = includeTransactions ? transactionRows(state) : [];
-  const rows = devnetBlocksArray(state).map((block) => {
+  const rows = localRuntimeBlocksArray(state).map((block) => {
     const blockNumber = stringValue(block.blockNumber) ?? "0";
     const blockHash = stringValue(block.blockHash) ?? ZERO_ROOT;
     return {
@@ -1198,9 +1198,9 @@ function blockRows(state: LoadedControlPlaneState, includeTransactions = false):
       receiptCount: asJsonArray(block.receipts).length,
       receipts: asJsonArray(block.receipts),
       transactions: includeTransactions
-        ? txs.filter((tx) => tx.source === "local-devnet" && tx.blockHash === blockHash && tx.blockNumber === blockNumber)
+        ? txs.filter((tx) => tx.source === "local-runtime" && tx.blockHash === blockHash && tx.blockNumber === blockNumber)
         : undefined,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     };
   });
@@ -1298,22 +1298,22 @@ function rootfieldRows(state: LoadedControlPlaneState): JsonObject[] {
       status: bundle.status,
       latestRoot: bundle.latestRoot,
       bundle,
-      devnetRootfield: null,
+      localRuntimeRootfield: null,
       source: "launch-core",
       localOnly: true,
     });
   }
-  for (const [rootfieldId, value] of Object.entries(devnetRootfields(state))) {
-    const devnetRootfield = asJsonObject(value) ?? {};
+  for (const [rootfieldId, value] of Object.entries(localRuntimeRootfields(state))) {
+    const localRuntimeRootfield = asJsonObject(value) ?? {};
     const existing = rows.get(rootfieldId);
     rows.set(rootfieldId, {
       schema: "flowmemory.control_plane.rootfield_row.v0",
       rootfieldId,
-      status: stringValue(devnetRootfield.active) === "false" ? "inactive" : stringValue(devnetRootfield.status) ?? existing?.status ?? "active",
-      latestRoot: stringValue(devnetRootfield.latestRoot) ?? stringValue(existing?.latestRoot) ?? ZERO_ROOT,
+      status: stringValue(localRuntimeRootfield.active) === "false" ? "inactive" : stringValue(localRuntimeRootfield.status) ?? existing?.status ?? "active",
+      latestRoot: stringValue(localRuntimeRootfield.latestRoot) ?? stringValue(existing?.latestRoot) ?? ZERO_ROOT,
       bundle: existing?.bundle ?? null,
-      devnetRootfield,
-      source: existing === undefined ? "local-devnet" : "launch-core+local-devnet",
+      localRuntimeRootfield,
+      source: existing === undefined ? "local-runtime" : "launch-core+local-runtime",
       localOnly: true,
     });
   }
@@ -1322,7 +1322,7 @@ function rootfieldRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function agentRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
-  for (const [agentId, value] of Object.entries(devnetAgentAccounts(state))) {
+  for (const [agentId, value] of Object.entries(localRuntimeAgentAccounts(state))) {
     const agent = asJsonObject(value) ?? {};
     rows.push({
       schema: "flowmemory.control_plane.agent_row.v0",
@@ -1331,7 +1331,7 @@ function agentRows(state: LoadedControlPlaneState): JsonObject[] {
       status: stringValue(agent.status) ?? "local",
       agentAccount: agent,
       agentMemoryView: null,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     });
   }
@@ -1411,7 +1411,7 @@ function baseAgentMemoryScoutRows(state: LoadedControlPlaneState): JsonObject[] 
 }
 
 function modelRows(state: LoadedControlPlaneState): JsonObject[] {
-  const nativeModels = Object.entries(devnetModels(state)).map(([modelId, value]) => {
+  const nativeModels = Object.entries(localRuntimeModels(state)).map(([modelId, value]) => {
     const model = asJsonObject(value) ?? {};
     return {
       schema: "flowmemory.control_plane.model.v0",
@@ -1419,7 +1419,7 @@ function modelRows(state: LoadedControlPlaneState): JsonObject[] {
       rootfieldId: stringValue(model.rootfieldId) ?? null,
       status: stringValue(model.status) ?? "local",
       modelPassport: model,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     };
   });
@@ -1439,9 +1439,9 @@ function modelRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function workReceiptRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
-  for (const [receiptId, value] of Object.entries(devnetWorkReceipts(state))) {
+  for (const [receiptId, value] of Object.entries(localRuntimeWorkReceipts(state))) {
     const receipt = asJsonObject(value) ?? {};
-    const linkedReport = Object.values(devnetReports(state))
+    const linkedReport = Object.values(localRuntimeReports(state))
       .map((entry) => asJsonObject(entry))
       .find((report) => report?.receiptId === receiptId) ?? null;
     rows.push({
@@ -1452,7 +1452,7 @@ function workReceiptRows(state: LoadedControlPlaneState): JsonObject[] {
       status: stringValue(linkedReport?.status) ?? "submitted",
       workReceipt: receipt,
       verifierReport: linkedReport,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     });
   }
@@ -1474,17 +1474,17 @@ function workReceiptRows(state: LoadedControlPlaneState): JsonObject[] {
 
 function artifactAvailabilityRows(state: LoadedControlPlaneState): JsonObject[] {
   const rows: JsonObject[] = [];
-  for (const [id, value] of Object.entries(devnetArtifactAvailability(state))) {
+  for (const [id, value] of Object.entries(localRuntimeArtifactAvailability(state))) {
     rows.push({
       schema: "flowmemory.control_plane.artifact_availability.v0",
       availabilityId: id,
       status: stringValue(asJsonObject(value)?.status) ?? "local",
       proof: asJsonObject(value) ?? {},
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     });
   }
-  for (const [artifactId, value] of Object.entries(devnetArtifacts(state))) {
+  for (const [artifactId, value] of Object.entries(localRuntimeArtifacts(state))) {
     const artifact = asJsonObject(value) ?? {};
     rows.push({
       schema: "flowmemory.control_plane.artifact_availability.v0",
@@ -1495,7 +1495,7 @@ function artifactAvailabilityRows(state: LoadedControlPlaneState): JsonObject[] 
       uri: stringValue(artifact.uriHint) ?? null,
       status: "committed_local",
       proof: artifact,
-      source: "local-devnet-artifact-commitment",
+      source: "local-runtime-artifact-commitment",
       localOnly: true,
     });
   }
@@ -1518,12 +1518,12 @@ function artifactAvailabilityRows(state: LoadedControlPlaneState): JsonObject[] 
 }
 
 function verifierModuleRows(state: LoadedControlPlaneState): JsonObject[] {
-  const nativeModules = Object.entries(devnetVerifierModules(state)).map(([moduleId, value]) => ({
+  const nativeModules = Object.entries(localRuntimeVerifierModules(state)).map(([moduleId, value]) => ({
     schema: "flowmemory.control_plane.verifier_module.v0",
     moduleId,
     verifierModule: asJsonObject(value) ?? {},
     status: stringValue(asJsonObject(value)?.status) ?? "local",
-    source: "local-devnet",
+    source: "local-runtime",
     localOnly: true,
   }));
   const projected = new Map<string, JsonObject>();
@@ -1542,7 +1542,7 @@ function verifierModuleRows(state: LoadedControlPlaneState): JsonObject[] {
       });
     }
   }
-  for (const report of Object.values(devnetReports(state)).map((entry) => asJsonObject(entry)).filter((entry): entry is JsonObject => entry !== null)) {
+  for (const report of Object.values(localRuntimeReports(state)).map((entry) => asJsonObject(entry)).filter((entry): entry is JsonObject => entry !== null)) {
     const verifierId = stringValue(report.verifierId);
     if (verifierId !== null && !projected.has(verifierId)) {
       projected.set(verifierId, {
@@ -1550,7 +1550,7 @@ function verifierModuleRows(state: LoadedControlPlaneState): JsonObject[] {
         moduleId: verifierId,
         verifierId,
         status: "available_fixture",
-        source: "local-devnet-report-projection",
+        source: "local-runtime-report-projection",
         localOnly: true,
       });
     }
@@ -1559,7 +1559,7 @@ function verifierModuleRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function memoryCellRows(state: LoadedControlPlaneState): JsonObject[] {
-  const nativeCells = Object.entries(devnetMemoryCells(state)).map(([memoryCellId, value]) => {
+  const nativeCells = Object.entries(localRuntimeMemoryCells(state)).map(([memoryCellId, value]) => {
     const cell = asJsonObject(value) ?? {};
     return {
       schema: "flowmemory.control_plane.memory_cell_row.v0",
@@ -1567,7 +1567,7 @@ function memoryCellRows(state: LoadedControlPlaneState): JsonObject[] {
       rootfieldId: stringValue(cell.rootfieldId) ?? null,
       status: stringValue(cell.status) ?? "local",
       memoryCell: cell,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     };
   });
@@ -1599,7 +1599,7 @@ function memoryCellRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function challengeRows(state: LoadedControlPlaneState): JsonObject[] {
-  return Object.entries(devnetChallenges(state)).map(([challengeId, value]) => {
+  return Object.entries(localRuntimeChallenges(state)).map(([challengeId, value]) => {
     const challenge = asJsonObject(value) ?? {};
     return {
       schema: "flowmemory.control_plane.challenge_row.v0",
@@ -1607,7 +1607,7 @@ function challengeRows(state: LoadedControlPlaneState): JsonObject[] {
       targetId: stringValue(challenge.targetId) ?? stringValue(challenge.receiptId) ?? null,
       status: stringValue(challenge.status) ?? "unknown",
       challenge,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     };
   }).sort((left, right) => String(left.challengeId).localeCompare(String(right.challengeId)));
@@ -1653,7 +1653,7 @@ function agentBondTaskRows(state: LoadedControlPlaneState): JsonObject[] {
 }
 
 function finalityRows(state: LoadedControlPlaneState): JsonObject[] {
-  const rows = Object.entries(devnetFinalityReceipts(state)).map(([finalityReceiptId, value]) => {
+  const rows = Object.entries(localRuntimeFinalityReceipts(state)).map(([finalityReceiptId, value]) => {
     const finality = asJsonObject(value) ?? {};
     const sourceStatus = stringValue(finality.finalityStatus) ?? stringValue(finality.status);
     return {
@@ -1663,7 +1663,7 @@ function finalityRows(state: LoadedControlPlaneState): JsonObject[] {
       status: finalityStatusFor(sourceStatus),
       sourceStatus,
       finalityReceipt: finality,
-      source: "local-devnet",
+      source: "local-runtime",
       localOnly: true,
     };
   });
@@ -1688,12 +1688,12 @@ function nodeStatus(_params: JsonValue | undefined, context: ControlPlaneContext
   return {
     schema: "flowmemory.control_plane.node_status.v0",
     nodeId: "flowmemory-local-control-plane",
-    status: state.devnet === null ? "degraded" : "ok",
+    status: state.localRuntime === null ? "degraded" : "ok",
     runtimeStateSource: runtimeSourcePath(state),
-    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
+    chainId: typeof state.localRuntime?.chainId === "string" ? state.localRuntime.chainId : "flowmemory-local-runtime-v0",
     latestBlockNumber: latest?.blockNumber ?? null,
     latestBlockHash: latest?.blockHash ?? null,
-    peerCount: devnetPeers(state).length,
+    peerCount: localRuntimePeers(state).length,
     mempoolSize: mempoolRows(state).length,
     noValue: true,
     localOnly: true,
@@ -1704,7 +1704,7 @@ function peerList(params: JsonValue | undefined, context: ControlPlaneContext): 
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "peer_list");
   const limit = pageLimit(objectParams);
-  const peers = devnetPeers(state);
+  const peers = localRuntimePeers(state);
   const rows = (peers.length > 0 ? peers : [{
     peerId: "local-single-node",
     address: "127.0.0.1",
@@ -1727,7 +1727,7 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
   const state = stateFor(context);
   const missing = Object.values(state.sources).filter((source) => source.status === "missing").map((source) => source.name);
   const degraded = Object.values(state.sources).filter((source) => source.status === "degraded").map((source) => source.name);
-  const criticalUnhealthy = ["launchCore", "indexer", "verifier", "artifacts", "devnet"]
+  const criticalUnhealthy = ["launchCore", "indexer", "verifier", "artifacts", "localRuntime"]
     .filter((name) => state.sources[name]?.status === "missing" || state.sources[name]?.status === "degraded");
   return {
     schema: "flowmemory.control_plane.health.v0",
@@ -1739,8 +1739,8 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
       indexer: state.sources.indexer.status,
       verifier: state.sources.verifier.status,
       artifacts: state.sources.artifacts.status,
-      devnet: state.sources.devnet.status,
-      devnetControlPlaneHandoff: state.sources.devnetControlPlaneHandoff.status,
+      localRuntime: state.sources.localRuntime.status,
+      localRuntimeControlPlaneHandoff: state.sources.localRuntimeControlPlaneHandoff.status,
       txFixtures: state.sources.txFixtures.status,
       bridgeObservation: state.sources.bridgeObservation.status,
       bridgeRuntimeHandoff: state.sources.bridgeRuntimeHandoff.status,
@@ -1772,11 +1772,11 @@ function health(_params: JsonValue | undefined, context: ControlPlaneContext): J
 }
 
 const PUBLIC_RPC_REQUIRED_ENV_NAMES = [
-  "FLOWCHAIN_RPC_PUBLIC_URL",
-  "FLOWCHAIN_RPC_ALLOWED_ORIGINS",
-  "FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE",
-  "FLOWCHAIN_RPC_TLS_TERMINATED",
-  "FLOWCHAIN_RPC_STATE_BACKUP_PATH",
+  "FLOWMEMORY_RPC_PUBLIC_URL",
+  "FLOWMEMORY_RPC_ALLOWED_ORIGINS",
+  "FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE",
+  "FLOWMEMORY_RPC_TLS_TERMINATED",
+  "FLOWMEMORY_RPC_STATE_BACKUP_PATH",
 ] as const;
 
 export const PUBLIC_RPC_METHOD_ALLOWLIST = new Set<ControlPlaneMethod>([
@@ -1953,16 +1953,16 @@ function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatu
   const degradedSources = Object.values(state.sources)
     .filter((source) => source.status === "degraded")
     .map((source) => source.name);
-  const runtimeLoaded = state.devnet !== null
-    && state.sources.devnet?.status !== "missing"
-    && state.sources.devnet?.status !== "degraded";
+  const runtimeLoaded = state.localRuntime !== null
+    && state.sources.localRuntime?.status !== "missing"
+    && state.sources.localRuntime?.status !== "degraded";
   const liveBridgeReadiness = bridgeLiveReadiness(undefined, { state }) as JsonObject;
   const missingProductionEnvNames = PUBLIC_RPC_REQUIRED_ENV_NAMES
     .filter((name) => typeof process.env[name] !== "string" || process.env[name]?.trim().length === 0);
-  const publicUrlRaw = process.env.FLOWCHAIN_RPC_PUBLIC_URL?.trim() ?? "";
-  const allowedOriginsRaw = process.env.FLOWCHAIN_RPC_ALLOWED_ORIGINS?.trim() ?? "";
-  const rateLimitRaw = process.env.FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE?.trim() ?? "";
-  const tlsTerminatedRaw = process.env.FLOWCHAIN_RPC_TLS_TERMINATED?.trim() ?? "";
+  const publicUrlRaw = process.env.FLOWMEMORY_RPC_PUBLIC_URL?.trim() ?? "";
+  const allowedOriginsRaw = process.env.FLOWMEMORY_RPC_ALLOWED_ORIGINS?.trim() ?? "";
+  const rateLimitRaw = process.env.FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE?.trim() ?? "";
+  const tlsTerminatedRaw = process.env.FLOWMEMORY_RPC_TLS_TERMINATED?.trim() ?? "";
   const invalidProductionEnvNames = new Set<string>();
   let publicMode = false;
 
@@ -1972,13 +1972,13 @@ function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatu
       const host = publicUrl.hostname.toLowerCase();
       publicMode = !["127.0.0.1", "localhost", "::1"].includes(host);
       if (!["http:", "https:"].includes(publicUrl.protocol)) {
-        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+        invalidProductionEnvNames.add("FLOWMEMORY_RPC_PUBLIC_URL");
       }
       if (publicMode && publicUrl.protocol !== "https:") {
-        invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+        invalidProductionEnvNames.add("FLOWMEMORY_RPC_PUBLIC_URL");
       }
     } catch {
-      invalidProductionEnvNames.add("FLOWCHAIN_RPC_PUBLIC_URL");
+      invalidProductionEnvNames.add("FLOWMEMORY_RPC_PUBLIC_URL");
     }
   }
 
@@ -1986,16 +1986,16 @@ function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatu
     ? allowedOriginsRaw.split(",").map((entry) => entry.trim()).filter((entry) => entry.length > 0)
     : [];
   if (allowedOriginsRaw.length > 0 && allowedOrigins.length === 0) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+    invalidProductionEnvNames.add("FLOWMEMORY_RPC_ALLOWED_ORIGINS");
   }
   if (publicMode && allowedOrigins.some((entry) => ["*", "null", "all", "ALL"].includes(entry))) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_ALLOWED_ORIGINS");
+    invalidProductionEnvNames.add("FLOWMEMORY_RPC_ALLOWED_ORIGINS");
   }
   if (rateLimitRaw.length > 0 && !/^[1-9][0-9]*$/.test(rateLimitRaw)) {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_RATE_LIMIT_PER_MINUTE");
+    invalidProductionEnvNames.add("FLOWMEMORY_RPC_RATE_LIMIT_PER_MINUTE");
   }
   if (tlsTerminatedRaw.length > 0 && tlsTerminatedRaw.toLowerCase() !== "true") {
-    invalidProductionEnvNames.add("FLOWCHAIN_RPC_TLS_TERMINATED");
+    invalidProductionEnvNames.add("FLOWMEMORY_RPC_TLS_TERMINATED");
   }
 
   const issues: JsonObject[] = [];
@@ -2003,7 +2003,7 @@ function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatu
     issues.push({
       reasonCode: "runtime_state_not_loaded",
       status: "blocked",
-      sourceStatus: state.sources.devnet?.status ?? "missing",
+      sourceStatus: state.sources.localRuntime?.status ?? "missing",
     });
   }
   if (degradedSources.length > 0) {
@@ -2020,7 +2020,7 @@ function rpcDeploymentStatus(state: LoadedControlPlaneState): RpcDeploymentStatu
       missingEnvNames: missingProductionEnvNames,
     });
   }
-  if (publicUrlRaw.length > 0 && !publicMode && !invalidProductionEnvNames.has("FLOWCHAIN_RPC_PUBLIC_URL")) {
+  if (publicUrlRaw.length > 0 && !publicMode && !invalidProductionEnvNames.has("FLOWMEMORY_RPC_PUBLIC_URL")) {
     issues.push({
       reasonCode: "public_rpc_url_is_local",
       status: "blocked",
@@ -2135,11 +2135,11 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
   ];
   const publicHttpMirrors = httpMirrors.filter((path) => path !== "/state");
   return {
-    schema: "flowchain.rpc.discovery.v0",
+    schema: "flowmemory.rpc.discovery.v0",
     protocol: "JSON-RPC 2.0",
     service: "flowmemory-control-plane-v0",
     rpcPath: "/rpc",
-    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
+    chainId: typeof state.localRuntime?.chainId === "string" ? state.localRuntime.chainId : "flowmemory-local-runtime-v0",
     methodCount: methods.length,
     publicReadyMethodCount: methods.filter((method) => method.productionReady === true).length,
     methods,
@@ -2148,13 +2148,13 @@ function rpcDiscover(params: JsonValue | undefined, context: ControlPlaneContext
     compatibility: {
       evmJsonRpcCompatible: false,
       solanaJsonRpcCompatible: false,
-      flowchainJsonRpcCompatible: true,
+      flowmemoryJsonRpcCompatible: true,
     },
     boundaries: [
-      "This endpoint describes the current FlowChain control-plane RPC surface.",
+      "This endpoint describes the current FlowMemory control-plane RPC surface.",
       "Discovery mirrors rpc_readiness deployment mode and public readiness flags.",
       "Public production RPC readiness must be proven by rpc_readiness and live-product gates before it is advertised.",
-      "The /state mirror and devnet_state method are local debugging surfaces and are not part of the owner public edge.",
+      "The /state mirror and localRuntime_state method are local debugging surfaces and are not part of the owner public edge.",
     ],
     deploymentMode: deployment.deploymentMode,
     publicMode: deployment.publicMode,
@@ -2171,7 +2171,7 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
   const methods = rpcMethodRows(deployment);
 
   return {
-    schema: "flowchain.rpc.readiness.v0",
+    schema: "flowmemory.rpc.readiness.v0",
     service: "flowmemory-control-plane-v0",
     rpcPath: "/rpc",
     status: deployment.status,
@@ -2213,24 +2213,24 @@ function rpcReadiness(params: JsonValue | undefined, context: ControlPlaneContex
 function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const latest = latestBlock(state);
-  const devnetBlocks = devnetBlocksArray(state);
-  const latestDevnetBlock = latestRuntimeBlock(state);
+  const localRuntimeBlocks = localRuntimeBlocksArray(state);
+  const latestLocalRuntimeBlock = latestRuntimeBlock(state);
   const activeRuntimeBlocks = activeRuntimeBlocksArray(state);
-  const nodeRunning = state.devnet !== null && state.sources.devnet?.status !== "missing";
-  const peerRows = devnetPeers(state);
+  const nodeRunning = state.localRuntime !== null && state.sources.localRuntime?.status !== "missing";
+  const peerRows = localRuntimePeers(state);
 
   return {
     schema: "flowmemory.control_plane.chain_status.v0",
-    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-alpha",
-    chainName: "FlowChain private/local devnet",
-    settlementContext: "local no-value devnet runtime over FlowPulse fixtures",
-    environment: "local-devnet",
+    chainId: typeof state.localRuntime?.chainId === "string" ? state.localRuntime.chainId : "flowmemory-local-alpha",
+    chainName: "FlowMemory private/local runtime",
+    settlementContext: "local no-value localRuntime runtime over FlowPulse fixtures",
+    environment: "local-runtime",
     source: "local-runtime-first",
     nodeRunning,
     currentBlock: latest.blockNumber,
     currentBlockHash: latest.blockHash,
-    blockHeight: latestDevnetBlock?.blockNumber ?? latest.blockNumber,
-    latestStateRoot: latestDevnetBlock?.stateRoot ?? stringValue(state.devnet?.stateRoot) ?? latest.blockHash,
+    blockHeight: latestLocalRuntimeBlock?.blockNumber ?? latest.blockNumber,
+    latestStateRoot: latestLocalRuntimeBlock?.stateRoot ?? stringValue(state.localRuntime?.stateRoot) ?? latest.blockHash,
     finalizedBlock: finalizedBlock(state),
     generatedAt: new Date().toISOString(),
     peerStatus: {
@@ -2240,17 +2240,17 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
     },
     validatorStatus: {
       available: false,
-      mode: "single-process-local-devnet",
+      mode: "single-process-local-runtime",
       validatorCount: 0,
       note: "No public validator set is exposed by the local control-plane.",
     },
     continuityStatus: {
-      restart: state.sources.devnet.status === "loaded" ? "runtime-state-loaded" : state.sources.devnet.status,
-      export: state.sources.devnetControlPlaneHandoff.status,
-      import: state.sources.devnetIndexerHandoff.status === "loaded" || state.sources.devnetVerifierHandoff.status === "loaded"
+      restart: state.sources.localRuntime.status === "loaded" ? "runtime-state-loaded" : state.sources.localRuntime.status,
+      export: state.sources.localRuntimeControlPlaneHandoff.status,
+      import: state.sources.localRuntimeIndexerHandoff.status === "loaded" || state.sources.localRuntimeVerifierHandoff.status === "loaded"
         ? "handoff-loaded"
         : "missing",
-      latestRootPreserved: latestDevnetBlock !== null,
+      latestRootPreserved: latestLocalRuntimeBlock !== null,
     },
     localOnly: true,
     counts: {
@@ -2288,7 +2288,7 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       withdrawals: withdrawalRows(state).length,
       agentBondTasks: agentBondTaskRows(state).length,
       pilotStatus: 1,
-      devnetBlocks: activeRuntimeBlocks.length > 0 ? activeRuntimeBlocks.length : devnetBlocks.length,
+      localRuntimeBlocks: activeRuntimeBlocks.length > 0 ? activeRuntimeBlocks.length : localRuntimeBlocks.length,
     },
     capabilities: [
       "health_reads",
@@ -2331,52 +2331,52 @@ function chainStatus(_params: JsonValue | undefined, context: ControlPlaneContex
       "base_agent_memory_runtime_reads",
       "public_agent_network_launch_reads",
       "public_swarm_network_reads",
-      "devnet_handoff_reads",
+      "localRuntime_handoff_reads",
       "no_secret_response_checks",
       "raw_json_reads",
       "explorer_search",
     ],
     limitations: [
       "No production RPC URLs, wallets, or hosted services are used.",
-      "No production L1, bridge, tokenomics, or verifier economics are implied.",
+      "No production network, bridge, tokenomics, or verifier economics are implied.",
       "Challenge and finality methods expose local V0 fixture state only.",
     ],
     dataSources: state.sources,
   };
 }
 
-function devnetState(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
+function localRuntimeState(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
-  const objectParams = asObjectParams(params, "devnet_state");
+  const objectParams = asObjectParams(params, "localRuntime_state");
   const includeBlocks = optionalBoolean(objectParams, "includeBlocks");
-  const blocks = devnetBlocksArray(state);
+  const blocks = localRuntimeBlocksArray(state);
   const runtimeBlocks = activeRuntimeBlocksArray(state);
   const latest = latestRuntimeBlock(state);
 
   return {
-    schema: "flowmemory.control_plane.devnet_state.v0",
-    available: state.devnet !== null,
-    chainId: typeof state.devnet?.chainId === "string" ? state.devnet.chainId : "flowmemory-local-devnet-v0",
-    genesisHash: typeof state.devnet?.genesisHash === "string" ? state.devnet.genesisHash : null,
+    schema: "flowmemory.control_plane.localRuntime_state.v0",
+    available: state.localRuntime !== null,
+    chainId: typeof state.localRuntime?.chainId === "string" ? state.localRuntime.chainId : "flowmemory-local-runtime-v0",
+    genesisHash: typeof state.localRuntime?.genesisHash === "string" ? state.localRuntime.genesisHash : null,
     latestBlockNumber: latest?.blockNumber ?? (blocks.length > 0 ? blocks[blocks.length - 1]?.blockNumber ?? null : null),
     latestBlockHash: latest?.blockHash ?? (blocks.length > 0 ? blocks[blocks.length - 1]?.blockHash ?? null : null),
-    stateRoot: latest?.stateRoot ?? (typeof state.devnetControlPlaneHandoff?.stateRoot === "string"
-      ? state.devnetControlPlaneHandoff.stateRoot
-      : typeof state.devnetIndexerHandoff?.stateRoot === "string"
-        ? state.devnetIndexerHandoff.stateRoot
-        : state.devnet?.parentHash ?? null),
-    rootfieldCount: Object.keys(devnetRootfields(state)).length,
-    workReceiptCount: Object.keys(devnetWorkReceipts(state)).length,
-    verifierReportCount: Object.keys(devnetReports(state)).length,
-    agentAccountCount: Object.keys(devnetAgentAccounts(state)).length,
+    stateRoot: latest?.stateRoot ?? (typeof state.localRuntimeControlPlaneHandoff?.stateRoot === "string"
+      ? state.localRuntimeControlPlaneHandoff.stateRoot
+      : typeof state.localRuntimeIndexerHandoff?.stateRoot === "string"
+        ? state.localRuntimeIndexerHandoff.stateRoot
+        : state.localRuntime?.parentHash ?? null),
+    rootfieldCount: Object.keys(localRuntimeRootfields(state)).length,
+    workReceiptCount: Object.keys(localRuntimeWorkReceipts(state)).length,
+    verifierReportCount: Object.keys(localRuntimeReports(state)).length,
+    agentAccountCount: Object.keys(localRuntimeAgentAccounts(state)).length,
     accountCount: nodeAccountRows(state).length,
     walletMetadataCount: walletMetadataRows(state).length,
-    modelCount: Object.keys(devnetModels(state)).length,
-    verifierModuleCount: Object.keys(devnetVerifierModules(state)).length,
-    artifactAvailabilityCount: Object.keys(devnetArtifactAvailability(state)).length,
-    memoryCellCount: Object.keys(devnetMemoryCells(state)).length,
-    challengeCount: Object.keys(devnetChallenges(state)).length,
-    finalityReceiptCount: Object.keys(devnetFinalityReceipts(state)).length,
+    modelCount: Object.keys(localRuntimeModels(state)).length,
+    verifierModuleCount: Object.keys(localRuntimeVerifierModules(state)).length,
+    artifactAvailabilityCount: Object.keys(localRuntimeArtifactAvailability(state)).length,
+    memoryCellCount: Object.keys(localRuntimeMemoryCells(state)).length,
+    challengeCount: Object.keys(localRuntimeChallenges(state)).length,
+    finalityReceiptCount: Object.keys(localRuntimeFinalityReceipts(state)).length,
     tokenCount: tokenRows(state).length,
     tokenBalanceCount: tokenBalanceRows(state).length,
     tokenTransferCount: tokenTransferRows(state).length,
@@ -2384,38 +2384,38 @@ function devnetState(params: JsonValue | undefined, context: ControlPlaneContext
     lpPositionCount: lpPositionRows(state).length,
     swapCount: swapRows(state).length,
     nativeProductMapCounts: {
-      tokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
-      tokenBalances: devnetProductMapCount(state, ["tokenBalances", "localTokenBalances", "accountTokenBalances"]),
-      tokenTransfers: devnetProductMapCount(state, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]),
-      pools: devnetProductMapCount(state, ["pools", "dexPools", "liquidityPools", "ammPools"]),
-      lpPositions: devnetProductMapCount(state, ["lpPositions", "liquidityPositions", "poolPositions"]),
-      swaps: devnetProductMapCount(state, ["swaps", "swapReceipts", "dexSwaps"]),
-      bridgeCredits: devnetProductMapCount(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"]),
+      tokens: localRuntimeProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
+      tokenBalances: localRuntimeProductMapCount(state, ["tokenBalances", "localTokenBalances", "accountTokenBalances"]),
+      tokenTransfers: localRuntimeProductMapCount(state, ["tokenTransfers", "tokenTransferEvents", "balanceTransfers", "transfers"]),
+      pools: localRuntimeProductMapCount(state, ["pools", "dexPools", "liquidityPools", "ammPools"]),
+      lpPositions: localRuntimeProductMapCount(state, ["lpPositions", "liquidityPositions", "poolPositions"]),
+      swaps: localRuntimeProductMapCount(state, ["swaps", "swapReceipts", "dexSwaps"]),
+      bridgeCredits: localRuntimeProductMapCount(state, ["bridgeCredits", "bridgeCreditReceipts", "runtimeBridgeCredits"]),
     },
     accounts: nodeAccountRows(state),
     walletMetadata: walletMetadataRows(state),
-    baseAnchorCount: state.devnet?.baseAnchors && typeof state.devnet.baseAnchors === "object" && !Array.isArray(state.devnet.baseAnchors)
-      ? Object.keys(state.devnet.baseAnchors).length
+    baseAnchorCount: state.localRuntime?.baseAnchors && typeof state.localRuntime.baseAnchors === "object" && !Array.isArray(state.localRuntime.baseAnchors)
+      ? Object.keys(state.localRuntime.baseAnchors).length
       : 0,
     runtimeBlockCount: runtimeBlocks.length,
     blocks: includeBlocks ? blocks : undefined,
-    source: state.sources.devnet,
-    indexerHandoff: state.devnetIndexerHandoff === null ? null : {
-      schema: state.devnetIndexerHandoff.schema,
-      stateRoot: state.devnetIndexerHandoff.stateRoot,
-      blockCount: Array.isArray(state.devnetIndexerHandoff.blocks) ? state.devnetIndexerHandoff.blocks.length : 0,
+    source: state.sources.localRuntime,
+    indexerHandoff: state.localRuntimeIndexerHandoff === null ? null : {
+      schema: state.localRuntimeIndexerHandoff.schema,
+      stateRoot: state.localRuntimeIndexerHandoff.stateRoot,
+      blockCount: Array.isArray(state.localRuntimeIndexerHandoff.blocks) ? state.localRuntimeIndexerHandoff.blocks.length : 0,
     },
-    verifierHandoff: state.devnetVerifierHandoff === null ? null : {
-      schema: state.devnetVerifierHandoff.schema,
-      stateRoot: state.devnetVerifierHandoff.stateRoot,
-      workReceiptCount: Object.keys(devnetWorkReceipts(state)).length,
-      verifierReportCount: Object.keys(devnetReports(state)).length,
+    verifierHandoff: state.localRuntimeVerifierHandoff === null ? null : {
+      schema: state.localRuntimeVerifierHandoff.schema,
+      stateRoot: state.localRuntimeVerifierHandoff.stateRoot,
+      workReceiptCount: Object.keys(localRuntimeWorkReceipts(state)).length,
+      verifierReportCount: Object.keys(localRuntimeReports(state)).length,
     },
-    controlPlaneHandoff: state.devnetControlPlaneHandoff === null ? null : {
-      schema: state.devnetControlPlaneHandoff.schema,
-      stateRoot: state.devnetControlPlaneHandoff.stateRoot,
-      blockCount: asJsonArray(state.devnetControlPlaneHandoff.blocks).length,
-      objectGroups: Object.keys(asJsonObject(state.devnetControlPlaneHandoff.objects) ?? {}).length,
+    controlPlaneHandoff: state.localRuntimeControlPlaneHandoff === null ? null : {
+      schema: state.localRuntimeControlPlaneHandoff.schema,
+      stateRoot: state.localRuntimeControlPlaneHandoff.stateRoot,
+      blockCount: asJsonArray(state.localRuntimeControlPlaneHandoff.blocks).length,
+      objectGroups: Object.keys(asJsonObject(state.localRuntimeControlPlaneHandoff.objects) ?? {}).length,
     },
     localOnly: true,
   };
@@ -2455,8 +2455,8 @@ function blockGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     block,
     provenance: {
       sources: [
-        block.source === "local-devnet" || block.source === "active-local-runtime"
-          ? provenanceSource("devnet", block.source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
+        block.source === "local-runtime" || block.source === "active-local-runtime"
+          ? provenanceSource("localRuntime", block.source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.block.v0")
           : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"),
       ],
     },
@@ -2502,8 +2502,8 @@ function transactionGet(params: JsonValue | undefined, context: ControlPlaneCont
     transaction,
     provenance: {
       sources: [
-        transaction.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.block.v0")
+        transaction.source === "local-runtime"
+          ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.block.v0")
           : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"),
       ],
     },
@@ -2561,9 +2561,9 @@ function signedEnvelopeForSubmit(params: JsonObject): { document: JsonObject; en
     throw invalidParams("transaction_submit requires signedTransaction or signedEnvelope");
   }
 
-  const walletEnvelope = signedEnvelope.schema === "flowchain.wallet_signed_envelope.v0"
+  const walletEnvelope = signedEnvelope.schema === "flowmemory.wallet_signed_envelope.v0"
     ? signedEnvelope
-    : asJsonObject(signedEnvelope.envelope)?.schema === "flowchain.wallet_signed_envelope.v0"
+    : asJsonObject(signedEnvelope.envelope)?.schema === "flowmemory.wallet_signed_envelope.v0"
       ? asJsonObject(signedEnvelope.envelope)
       : null;
   if (walletEnvelope !== null) {
@@ -2574,8 +2574,8 @@ function signedEnvelopeForSubmit(params: JsonObject): { document: JsonObject; en
     if (walletDocument === null || localEnvelope === null) {
       throw invalidParams("wallet signed envelope must include payload/tx and localEnvelope");
     }
-    if (localEnvelope.schema !== "flowchain.local_transaction_envelope.v0") {
-      throw invalidParams("wallet signed envelope localEnvelope must use flowchain.local_transaction_envelope.v0");
+    if (localEnvelope.schema !== "flowmemory.local_transaction_envelope.v0") {
+      throw invalidParams("wallet signed envelope localEnvelope must use flowmemory.local_transaction_envelope.v0");
     }
     return { document: walletDocument, envelope: localEnvelope };
   }
@@ -2585,13 +2585,13 @@ function signedEnvelopeForSubmit(params: JsonObject): { document: JsonObject; en
     ?? asJsonObject(signedEnvelope.transaction)
     ?? asJsonObject(signedEnvelope.payload);
   const envelope = asJsonObject(signedEnvelope.envelope)
-    ?? (signedEnvelope.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+    ?? (signedEnvelope.schema === "flowmemory.local_transaction_envelope.v0" ? signedEnvelope : null);
 
   if (document === null || envelope === null) {
     throw invalidParams("signed envelope must include document and envelope");
   }
-  if (envelope.schema !== "flowchain.local_transaction_envelope.v0") {
-    throw invalidParams("signed envelope must use flowchain.local_transaction_envelope.v0");
+  if (envelope.schema !== "flowmemory.local_transaction_envelope.v0") {
+    throw invalidParams("signed envelope must use flowmemory.local_transaction_envelope.v0");
   }
   return { document, envelope };
 }
@@ -2601,7 +2601,7 @@ function seenTransactionReplayKeys(state: LoadedControlPlaneState): Set<string> 
   for (const row of txIntakeRows(state)) {
     const signedEnvelope = asJsonObject(row.signedEnvelope);
     const envelope = asJsonObject(signedEnvelope?.envelope)
-      ?? (signedEnvelope?.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+      ?? (signedEnvelope?.schema === "flowmemory.local_transaction_envelope.v0" ? signedEnvelope : null);
     if (envelope !== null) {
       try {
         seen.add(localTransactionReplayKey(envelope));
@@ -2626,7 +2626,7 @@ function seenTransactionIds(state: LoadedControlPlaneState): Set<string> {
     }
     const signedEnvelope = asJsonObject(row.signedEnvelope);
     const envelope = asJsonObject(signedEnvelope?.envelope)
-      ?? (signedEnvelope?.schema === "flowchain.local_transaction_envelope.v0" ? signedEnvelope : null);
+      ?? (signedEnvelope?.schema === "flowmemory.local_transaction_envelope.v0" ? signedEnvelope : null);
     const envelopeTxId = stringValue(envelope?.transactionId);
     if (envelopeTxId !== undefined) {
       seen.add(envelopeTxId);
@@ -2693,12 +2693,12 @@ function submitEnvelopeToRuntime(
     tx,
   });
 
-  const statePath = resolveControlPlanePath(state.paths.localDevnetPath);
+  const statePath = resolveControlPlanePath(state.paths.localRuntimePath);
   const nodeDir = resolve(dirname(statePath), "node");
   const args = [
     "run",
     "--manifest-path",
-    "crates/flowmemory-devnet/Cargo.toml",
+    "crates/flowmemory-local-runtime/Cargo.toml",
     "--",
     "--state",
     statePath,
@@ -2765,12 +2765,12 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
   if (preflightFinding !== null) {
     throw secretRejected("transaction intake contained secret-shaped material", preflightFinding);
   }
-  const verification = verifyFlowchainEnvelope({
+  const verification = verifyFlowMemoryEnvelope({
     document: signedEnvelope.document,
     envelope: signedEnvelope.envelope,
     context: {
-      chainId: FLOWCHAIN_LIVE_L1_CHAIN_ID,
-      networkProfile: FLOWCHAIN_LIVE_L1_NETWORK_PROFILE,
+      chainId: FLOWMEMORY_LIVE_L1_CHAIN_ID,
+      networkProfile: FLOWMEMORY_LIVE_L1_NETWORK_PROFILE,
       expectedNonce: optionalString(objectParams, "expectedNonce") ?? signedEnvelope.envelope.nonce,
       requireCanonical: true,
       seenNonces: seenTransactionReplayKeys(state),
@@ -2778,7 +2778,7 @@ function transactionSubmit(params: JsonValue | undefined, context: ControlPlaneC
     },
   });
   if (verification.ok !== true) {
-    throw cryptoRejected("transaction_submit rejected by FlowChain crypto runtime verification", {
+    throw cryptoRejected("transaction_submit rejected by FlowMemory crypto runtime verification", {
       failureCodes: verification.failureCodes,
       transactionId: verification.transactionId,
       envelopeId: verification.envelopeId,
@@ -2916,7 +2916,7 @@ function tokenGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     schema: "flowmemory.control_plane.token_detail.v0",
     token,
     provenance: {
-      sources: [provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.token.v0")],
+      sources: [provenanceSource("localRuntime", "local-runtime/local/state.json", "flowmemory.local_runtime.token.v0")],
     },
     localOnly: true,
   };
@@ -3101,10 +3101,10 @@ function productFlowStatus(_params: JsonValue | undefined, context: ControlPlane
   const counts = {
     wallets: walletMetadataRows(state).length,
     accounts: nodeAccountRows(state).length,
-    localBalances: Object.keys(devnetLocalTestUnitBalances(state)).length,
-    balanceTransfers: Object.keys(devnetBalanceTransfers(state)).length,
+    localBalances: Object.keys(localRuntimeLocalTestUnitBalances(state)).length,
+    balanceTransfers: Object.keys(localRuntimeBalanceTransfers(state)).length,
     tokens: tokenRows(state).length,
-    nativeTokens: devnetProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
+    nativeTokens: localRuntimeProductMapCount(state, ["tokens", "tokenDefinitions", "tokenLaunches", "localTokens", "launchedTokens"]),
     tokenBalances: tokenBalanceRows(state).length,
     tokenTransfers: tokenTransferRows(state).length,
     pools: poolRows(state).length,
@@ -3198,9 +3198,9 @@ function rootfieldGet(params: JsonValue | undefined, context: ControlPlaneContex
   const objectParams = asObjectParams(params, "rootfield_get");
   const rootfieldId = requiredString(objectParams, ["rootfieldId"], "rootfield_get");
   const bundle = state.launchCore.rootfieldBundles.find((candidate) => candidate.rootfieldId === rootfieldId);
-  const devnetRootfield = devnetRootfields(state)[rootfieldId] ?? null;
+  const localRuntimeRootfield = localRuntimeRootfields(state)[rootfieldId] ?? null;
 
-  if (bundle === undefined && devnetRootfield === null) {
+  if (bundle === undefined && localRuntimeRootfield === null) {
     throw objectNotFound(`rootfield not found: ${rootfieldId}`, { rootfieldId });
   }
 
@@ -3208,13 +3208,13 @@ function rootfieldGet(params: JsonValue | undefined, context: ControlPlaneContex
     schema: "flowmemory.control_plane.rootfield.v0",
     rootfieldId,
     bundle: bundle ?? null,
-    devnetRootfield,
+    localRuntimeRootfield,
     memoryCellId: rootfieldId,
     agentViewId: state.launchCore.agentMemoryViews.find((view) => view.rootfieldId === rootfieldId)?.viewId ?? null,
     provenance: {
       sources: [
         bundle ? provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", bundle.schema) : null,
-        devnetRootfield ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.rootfield.v0") : null,
+        localRuntimeRootfield ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.rootfield.v0") : null,
       ].filter((entry): entry is JsonObject => entry !== null),
     },
     localOnly: true,
@@ -3266,7 +3266,7 @@ function artifactGet(params: JsonValue | undefined, context: ControlPlaneContext
     }
   }
 
-  for (const [id, value] of Object.entries(devnetArtifacts(state))) {
+  for (const [id, value] of Object.entries(localRuntimeArtifacts(state))) {
     const entry = value as JsonObject;
     if (artifactId === id || artifactId === entry.artifactId || commitment === entry.commitment || uri === entry.uriHint) {
       return {
@@ -3274,9 +3274,9 @@ function artifactGet(params: JsonValue | undefined, context: ControlPlaneContext
         artifactId: id,
         uri: entry.uriHint ?? null,
         artifact: entry,
-        resolverPolicyId: "flowmemory.local_devnet.artifact_commitment.v0",
+        resolverPolicyId: "flowmemory.local_runtime.artifact_commitment.v0",
         provenance: {
-          sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0")],
+          sources: [provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.artifact_commitment.v0")],
         },
         localOnly: true,
       };
@@ -3326,7 +3326,7 @@ function artifactAvailabilityGet(params: JsonValue | undefined, context: Control
         sources: [provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")],
       }
       : {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0")],
+        sources: [provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.artifact_commitment.v0")],
       },
     localOnly: true,
   };
@@ -3352,16 +3352,16 @@ function receiptGet(params: JsonValue | undefined, context: ControlPlaneContext)
     };
   }
 
-  const devnetReceipt = devnetWorkReceipts(state)[key];
-  if (devnetReceipt !== undefined) {
+  const localRuntimeReceipt = localRuntimeWorkReceipts(state)[key];
+  if (localRuntimeReceipt !== undefined) {
     return {
       schema: "flowmemory.control_plane.receipt.v0",
-      receipt: devnetReceipt,
+      receipt: localRuntimeReceipt,
       signal: null,
       transition: null,
       verifierReport: null,
       provenance: {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/verifier-handoff.json", "flowmemory.local_devnet.work_receipt.v0")],
+        sources: [provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/verifier-handoff.json", "flowmemory.local_runtime.work_receipt.v0")],
       },
       localOnly: true,
     };
@@ -3464,8 +3464,8 @@ function verifierModuleGet(params: JsonValue | undefined, context: ControlPlaneC
     verifierModule,
     provenance: {
       sources: [
-        verifierModule.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.verifier_module.v0")
+        verifierModule.source === "local-runtime"
+          ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.verifier_module.v0")
           : provenanceSource("verifier", "services/verifier/out/reports.json", "flowmemory.verifier.persistence.v0"),
       ],
     },
@@ -3489,14 +3489,14 @@ function verifierReportGet(params: JsonValue | undefined, context: ControlPlaneC
     };
   }
 
-  const devnetReport = devnetReports(state)[key];
-  if (devnetReport !== undefined) {
+  const localRuntimeReport = localRuntimeReports(state)[key];
+  if (localRuntimeReport !== undefined) {
     return {
       schema: "flowmemory.control_plane.verifier_report.v0",
-      report: devnetReport,
+      report: localRuntimeReport,
       memoryReceipt: null,
       provenance: {
-        sources: [provenanceSource("devnet", "fixtures/launch-core/generated/devnet/verifier-handoff.json", "flowmemory.local_devnet.verifier_report.v0")],
+        sources: [provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/verifier-handoff.json", "flowmemory.local_runtime.verifier_report.v0")],
       },
       localOnly: true,
     };
@@ -3530,7 +3530,7 @@ function memoryCellGet(params: JsonValue | undefined, context: ControlPlaneConte
   const objectParams = asObjectParams(params, "memory_cell_get");
   const key = requiredString(objectParams, ["memoryCellId", "rootfieldId"], "memory_cell_get");
   const rootfieldId = key.startsWith("memory:") ? key.slice("memory:".length) : key;
-  const devnetCellEntry = Object.entries(devnetMemoryCells(state)).find(([id, value]) => {
+  const localRuntimeCellEntry = Object.entries(localRuntimeMemoryCells(state)).find(([id, value]) => {
     const cell = value as JsonObject;
     return id === key || cell.memoryCellId === key || cell.rootfieldId === key || cell.rootfieldId === rootfieldId;
   });
@@ -3544,33 +3544,33 @@ function memoryCellGet(params: JsonValue | undefined, context: ControlPlaneConte
       || stringValue(taskScoutCell.rootfieldId) === rootfieldId
     );
 
-  if (bundle === undefined && agentView === null && devnetCellEntry === undefined && !matchesTaskScoutCell) {
+  if (bundle === undefined && agentView === null && localRuntimeCellEntry === undefined && !matchesTaskScoutCell) {
     throw objectNotFound(`memory cell not found: ${key}`, { id: key });
   }
 
-  const devnetCell = devnetCellEntry?.[1] as JsonObject | undefined;
+  const localRuntimeCell = localRuntimeCellEntry?.[1] as JsonObject | undefined;
   return {
     schema: "flowmemory.control_plane.memory_cell.v0",
-    memoryCellId: typeof devnetCell?.memoryCellId === "string"
-      ? devnetCell.memoryCellId
+    memoryCellId: typeof localRuntimeCell?.memoryCellId === "string"
+      ? localRuntimeCell.memoryCellId
       : stringValue(taskScoutCell?.memoryCellId) ?? rootfieldId,
-    rootfieldId: typeof devnetCell?.rootfieldId === "string"
-      ? devnetCell.rootfieldId
+    rootfieldId: typeof localRuntimeCell?.rootfieldId === "string"
+      ? localRuntimeCell.rootfieldId
       : stringValue(taskScoutCell?.rootfieldId) ?? rootfieldId,
-    status: typeof devnetCell?.status === "string"
-      ? devnetCell.status
+    status: typeof localRuntimeCell?.status === "string"
+      ? localRuntimeCell.status
       : stringValue(taskScoutCell?.status) ?? bundle?.status ?? agentView?.status ?? "observed",
-    latestRoot: typeof devnetCell?.currentRoot === "string"
-      ? devnetCell.currentRoot
+    latestRoot: typeof localRuntimeCell?.currentRoot === "string"
+      ? localRuntimeCell.currentRoot
       : stringValue(taskScoutCell?.newMemoryRoot) ?? bundle?.latestRoot ?? agentView?.latestRoot ?? ZERO_ROOT,
-    devnetMemoryCell: devnetCell ?? null,
+    localRuntimeMemoryCell: localRuntimeCell ?? null,
     taskScoutMemoryCell: matchesTaskScoutCell ? taskScoutCell : null,
     rootfieldBundle: bundle ?? null,
     agentMemoryView: agentView,
-    extensionPoint: devnetCell === undefined && !matchesTaskScoutCell
+    extensionPoint: localRuntimeCell === undefined && !matchesTaskScoutCell
       ? "Native MemoryCell handoff files are not emitted yet; this V0 object is projected from RootfieldBundle and AgentMemoryView fixtures."
-      : devnetCell !== undefined
-        ? "Loaded from local devnet memoryCells handoff."
+      : localRuntimeCell !== undefined
+        ? "Loaded from local runtime memoryCells handoff."
         : "Loaded from base agent memory task scout fixture.",
     provenance: provenanceForObject(state, rootfieldId),
     localOnly: true,
@@ -3895,7 +3895,7 @@ function agentGet(params: JsonValue | undefined, context: ControlPlaneContext): 
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "agent_get");
   const key = requiredString(objectParams, ["agentId", "viewId", "rootfieldId"], "agent_get");
-  const devnetAgentEntry = Object.entries(devnetAgentAccounts(state)).find(([id, value]) => {
+  const localRuntimeAgentEntry = Object.entries(localRuntimeAgentAccounts(state)).find(([id, value]) => {
     const agent = value as JsonObject;
     return id === key || agent.agentId === key || agent.memoryRoot === key;
   });
@@ -3912,17 +3912,17 @@ function agentGet(params: JsonValue | undefined, context: ControlPlaneContext): 
       || stringValue(taskScoutView?.viewId) === key
     );
 
-  if (view === undefined && devnetAgentEntry === undefined && !matchesTaskScout) {
+  if (view === undefined && localRuntimeAgentEntry === undefined && !matchesTaskScout) {
     throw objectNotFound(`agent memory view not found: ${key}`, { id: key });
   }
 
-  const devnetAgent = devnetAgentEntry?.[1] as JsonObject | undefined;
+  const localRuntimeAgent = localRuntimeAgentEntry?.[1] as JsonObject | undefined;
   return {
     schema: "flowmemory.control_plane.agent.v0",
-    agentId: typeof devnetAgent?.agentId === "string"
-      ? devnetAgent.agentId
+    agentId: typeof localRuntimeAgent?.agentId === "string"
+      ? localRuntimeAgent.agentId
       : stringValue(taskScoutAgent?.agentId) ?? view?.viewId ?? key,
-    agentAccount: devnetAgent ?? taskScoutAgent ?? null,
+    agentAccount: localRuntimeAgent ?? taskScoutAgent ?? null,
     agentMemoryView: matchesTaskScout ? taskScoutView : view ?? null,
     rootfieldBundle: matchesTaskScout
       ? state.launchCore.rootfieldBundles.find((bundle) => bundle.rootfieldId === stringValue(taskScoutAgent?.rootfieldId)) ?? null
@@ -3983,8 +3983,8 @@ function modelGet(params: JsonValue | undefined, context: ControlPlaneContext): 
     model,
     provenance: {
       sources: [
-        model.source === "local-devnet"
-          ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.model_passport.v0")
+        model.source === "local-runtime"
+          ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.model_passport.v0")
           : provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", "flowmemory.agent_memory_view.v0", "Projected model row; no ModelPassport fixture exists yet."),
       ],
     },
@@ -3996,7 +3996,7 @@ function challengeGet(params: JsonValue | undefined, context: ControlPlaneContex
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "challenge_get");
   const targetId = requiredString(objectParams, ["challengeId", "targetId", "receiptId", "reportId", "rootfieldId"], "challenge_get");
-  const challengeEntry = Object.entries(devnetChallenges(state)).find(([id, value]) => {
+  const challengeEntry = Object.entries(localRuntimeChallenges(state)).find(([id, value]) => {
     const challenge = value as JsonObject;
     return id === targetId || challenge.challengeId === targetId || challenge.receiptId === targetId;
   });
@@ -4229,7 +4229,7 @@ function finalityGet(params: JsonValue | undefined, context: ControlPlaneContext
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "finality_get");
   const key = requiredString(objectParams, ["objectId", "rootfieldId", "receiptId", "reportId", "transitionId"], "finality_get");
-  const finalityEntry = Object.entries(devnetFinalityReceipts(state)).find(([id, value]) => {
+  const finalityEntry = Object.entries(localRuntimeFinalityReceipts(state)).find(([id, value]) => {
     const finality = value as JsonObject;
     return id === key || finality.finalityReceiptId === key || finality.receiptId === key || finality.rootfieldId === key;
   });
@@ -4239,14 +4239,14 @@ function finalityGet(params: JsonValue | undefined, context: ControlPlaneContext
     return {
       schema: "flowmemory.control_plane.finality.v0",
       objectId: key,
-      objectType: "devnet_finality_receipt",
+      objectType: "localRuntime_finality_receipt",
       finalityReceipt: finality,
       status: finalityStatusFor(sourceStatus),
       sourceStatus,
       challengeWindow: null,
-      settlement: "local-devnet-fixture",
+      settlement: "local-runtime-fixture",
       limitations: [
-        "This is fixture/devnet finality only.",
+        "This is fixture/localRuntime finality only.",
         "No production consensus, bridge finality, verifier economics, or challenge market is implied.",
       ],
       localOnly: true,
@@ -4273,7 +4273,7 @@ function finalityGet(params: JsonValue | undefined, context: ControlPlaneContext
     challengeWindow: null,
     settlement: "local-fixture",
     limitations: [
-      "This is fixture/devnet finality only.",
+      "This is fixture/localRuntime finality only.",
       "No production consensus, bridge finality, verifier economics, or challenge market is implied.",
     ],
     localOnly: true,
@@ -4337,7 +4337,7 @@ function bridgeDepositCryptoInput(deposit: JsonObject): JsonObject {
     lockbox: stringValue(deposit.sourceContract),
     token: stringValue(deposit.token),
     depositor: stringValue(deposit.sender),
-    recipient: stringValue(deposit.flowchainRecipient),
+    recipient: stringValue(deposit.flowmemoryRecipient),
     amount: stringValue(deposit.amount),
     txHash: stringValue(deposit.txHash),
     logIndex: stringValue(deposit.logIndex),
@@ -4377,7 +4377,7 @@ function verifyBridgeObservationForRuntime(observation: JsonObject, state: Loade
   } else {
     try {
       expectedReplayKey = bridgeSourceEventReplayKey(bridgeSourceEventInput(deposit));
-      expectedObservationId = flowchainBridgeObservationId(bridgeDepositCryptoInput(deposit));
+      expectedObservationId = flowmemoryBridgeObservationId(bridgeDepositCryptoInput(deposit));
       if (stringValue(observation.replayKey) !== expectedReplayKey) {
         failureCodes.add("wrong-bridge-replay-key");
       }
@@ -4414,7 +4414,7 @@ function verifyBridgeObservationForRuntime(observation: JsonObject, state: Loade
   }
 
   if (failureCodes.size > 0) {
-    throw cryptoRejected("bridge_observation_submit rejected by FlowChain bridge crypto verification", {
+    throw cryptoRejected("bridge_observation_submit rejected by FlowMemory bridge crypto verification", {
       failureCodes: [...failureCodes],
       observationId: stringValue(observation.observationId),
       replayKey: stringValue(observation.replayKey),
@@ -4422,7 +4422,7 @@ function verifyBridgeObservationForRuntime(observation: JsonObject, state: Loade
   }
 
   return {
-    schema: "flowchain.bridge_observation_runtime_crypto.v0",
+    schema: "flowmemory.bridge_observation_runtime_crypto.v0",
     ok: true,
     observationId: expectedObservationId,
     replayKey: expectedReplayKey,
@@ -4509,7 +4509,7 @@ function bridgeCreditList(params: JsonValue | undefined, context: ControlPlaneCo
 function bridgeCreditGet(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "bridge_credit_get");
-  const key = requiredString(objectParams, ["creditId", "depositId", "accountId", "flowchainRecipient", "txHash", "baseTxHash"], "bridge_credit_get");
+  const key = requiredString(objectParams, ["creditId", "depositId", "accountId", "flowmemoryRecipient", "txHash", "baseTxHash"], "bridge_credit_get");
   const credit = findBestBridgeCredit(bridgeCreditRows(state), key);
   if (credit === undefined) {
     throw objectNotFound(`bridge credit not found: ${key}`, { id: key });
@@ -4524,7 +4524,7 @@ function bridgeCreditGet(params: JsonValue | undefined, context: ControlPlaneCon
 function bridgeCreditStatus(params: JsonValue | undefined, context: ControlPlaneContext): JsonValue {
   const state = stateFor(context);
   const objectParams = asObjectParams(params, "bridge_credit_status");
-  const key = requiredString(objectParams, ["txHash", "baseTxHash", "creditId", "depositId", "accountId", "flowchainRecipient", "walletAddress"], "bridge_credit_status");
+  const key = requiredString(objectParams, ["txHash", "baseTxHash", "creditId", "depositId", "accountId", "flowmemoryRecipient", "walletAddress"], "bridge_credit_status");
   const credit = findBestBridgeCredit(bridgeCreditRows(state), key);
   const deposit = bridgeDepositRows(state).find((row) => row.txHash === key
     || row.depositId === key
@@ -4536,8 +4536,8 @@ function bridgeCreditStatus(params: JsonValue | undefined, context: ControlPlane
     status: stringValue(credit?.status) ?? "not_found",
     credit: credit ?? null,
     deposit: deposit ?? null,
-    accountId: stringValue(credit?.accountId) ?? stringValue(deposit?.flowchainRecipient) ?? null,
-    flowchainRecipient: stringValue(credit?.flowchainRecipient) ?? stringValue(deposit?.flowchainRecipient) ?? null,
+    accountId: stringValue(credit?.accountId) ?? stringValue(deposit?.flowmemoryRecipient) ?? null,
+    flowmemoryRecipient: stringValue(credit?.flowmemoryRecipient) ?? stringValue(deposit?.flowmemoryRecipient) ?? null,
     amount: stringValue(credit?.amount) ?? stringValue(deposit?.amount) ?? "0",
     token: credit?.token ?? deposit?.token ?? null,
     sourceChainId: credit?.sourceChainId ?? deposit?.sourceChainId ?? null,
@@ -4565,8 +4565,8 @@ function bridgeStatus(params: JsonValue | undefined, context: ControlPlaneContex
     liveRuntimeHandoffLoaded: state.bridgeRuntimeHandoff !== null,
     productionReadyCredits: credits.filter((credit) => credit.productionReady === true).length,
     localOnlyCredits: credits.filter((credit) => credit.localOnly !== false).length,
-    publicProductionL1Ready: false,
-    note: "Status reflects local control-plane/runtime handoff evidence. Public L1 and Base release-broadcast readiness still require separate live gates.",
+    publicProductionNetworkReady: false,
+    note: "Status reflects local control-plane/runtime handoff evidence. Public network and Base release-broadcast readiness still require separate live gates.",
     latestCredits: credits.slice(0, 10),
     localOnly: true,
   };
@@ -4718,7 +4718,7 @@ function explorerSearch(params: JsonValue | undefined, context: ControlPlaneCont
 function provenanceForSearchObject(object: JsonObject): JsonObject {
   const source = stringValue(object.source) ?? stringValue(object.provenance) ?? "local-runtime-first";
   if (source.includes("fixture-fallback")) {
-    return provenanceSource("dashboard", "fixtures/dashboard/flowchain-l1-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic fallback row.");
+    return provenanceSource("dashboard", "fixtures/dashboard/flowmemory-network-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic fallback row.");
   }
   if (source.includes("bridge")) {
     return provenanceSource("bridge", "fixtures/bridge/local-runtime-bridge-handoff.json", "flowmemory.bridge_runtime_handoff.v0");
@@ -4726,7 +4726,7 @@ function provenanceForSearchObject(object: JsonObject): JsonObject {
   if (source.includes("flowpulse-indexer")) {
     return provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0");
   }
-  return provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.state.v0");
+  return provenanceSource("localRuntime", "local-runtime/local/state.json", "flowmemory.local_runtime.state.v0");
 }
 
 function findObject(state: LoadedControlPlaneState, key: string): { type: string; object: JsonObject } {
@@ -4814,33 +4814,33 @@ function findObject(state: LoadedControlPlaneState, key: string): { type: string
   if (swap !== undefined) {
     return { type: "swap", object: swap };
   }
-  const devnetReceipt = devnetWorkReceipts(state)[key];
-  if (devnetReceipt !== undefined) {
-    return { type: "devnet_work_receipt", object: devnetReceipt as JsonObject };
+  const localRuntimeReceipt = localRuntimeWorkReceipts(state)[key];
+  if (localRuntimeReceipt !== undefined) {
+    return { type: "localRuntime_work_receipt", object: localRuntimeReceipt as JsonObject };
   }
-  const devnetReport = devnetReports(state)[key];
-  if (devnetReport !== undefined) {
-    return { type: "devnet_verifier_report", object: devnetReport as JsonObject };
+  const localRuntimeReport = localRuntimeReports(state)[key];
+  if (localRuntimeReport !== undefined) {
+    return { type: "localRuntime_verifier_report", object: localRuntimeReport as JsonObject };
   }
-  const devnetRootfield = devnetRootfields(state)[key];
-  if (devnetRootfield !== undefined) {
-    return { type: "devnet_rootfield", object: devnetRootfield as JsonObject };
+  const localRuntimeRootfield = localRuntimeRootfields(state)[key];
+  if (localRuntimeRootfield !== undefined) {
+    return { type: "localRuntime_rootfield", object: localRuntimeRootfield as JsonObject };
   }
-  const devnetAgent = devnetAgentAccounts(state)[key];
-  if (devnetAgent !== undefined) {
-    return { type: "devnet_agent_account", object: devnetAgent as JsonObject };
+  const localRuntimeAgent = localRuntimeAgentAccounts(state)[key];
+  if (localRuntimeAgent !== undefined) {
+    return { type: "localRuntime_agent_account", object: localRuntimeAgent as JsonObject };
   }
-  const devnetMemoryCell = devnetMemoryCells(state)[key];
-  if (devnetMemoryCell !== undefined) {
-    return { type: "devnet_memory_cell", object: devnetMemoryCell as JsonObject };
+  const localRuntimeMemoryCell = localRuntimeMemoryCells(state)[key];
+  if (localRuntimeMemoryCell !== undefined) {
+    return { type: "localRuntime_memory_cell", object: localRuntimeMemoryCell as JsonObject };
   }
-  const devnetChallenge = devnetChallenges(state)[key];
-  if (devnetChallenge !== undefined) {
-    return { type: "devnet_challenge", object: devnetChallenge as JsonObject };
+  const localRuntimeChallenge = localRuntimeChallenges(state)[key];
+  if (localRuntimeChallenge !== undefined) {
+    return { type: "localRuntime_challenge", object: localRuntimeChallenge as JsonObject };
   }
-  const devnetFinality = devnetFinalityReceipts(state)[key];
-  if (devnetFinality !== undefined) {
-    return { type: "devnet_finality_receipt", object: devnetFinality as JsonObject };
+  const localRuntimeFinality = localRuntimeFinalityReceipts(state)[key];
+  if (localRuntimeFinality !== undefined) {
+    return { type: "localRuntime_finality_receipt", object: localRuntimeFinality as JsonObject };
   }
 
   throw objectNotFound(`object not found: ${key}`, { id: key });
@@ -4881,31 +4881,31 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
   }
   if (block !== undefined || transaction !== undefined) {
     const source = block?.source ?? transaction?.source;
-    sources.push(source === "local-devnet" || source === "active-local-runtime"
-      ? provenanceSource("devnet", source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0")
+    sources.push(source === "local-runtime" || source === "active-local-runtime"
+      ? provenanceSource("localRuntime", source === "active-local-runtime" ? runtimeSourcePath(state) : "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.state.v0")
       : provenanceSource("indexer", "services/indexer/out/indexer-state.json", "flowmemory.indexer.persistence.v0"));
   }
   if (model !== undefined) {
-    sources.push(model.source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.model_passport.v0")
+    sources.push(model.source === "local-runtime"
+      ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.model_passport.v0")
       : provenanceSource("flowmemory", "fixtures/launch-core/flowmemory-launch-v0.json", "flowmemory.agent_memory_view.v0", "Projected model row."));
   }
   if (verifierModule !== undefined) {
-    sources.push(verifierModule.source === "local-devnet"
-      ? provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.verifier_module.v0")
+    sources.push(verifierModule.source === "local-runtime"
+      ? provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.verifier_module.v0")
       : provenanceSource("verifier", "services/verifier/out/reports.json", "flowmemory.verifier.persistence.v0"));
   }
   if (artifactAvailability !== undefined) {
     sources.push(artifactAvailability.source === "verifier-fixture"
       ? provenanceSource("verifier", "services/verifier/fixtures/artifacts.json", "flowmemory.verifier.artifact_fixture.v0")
-      : provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.artifact_commitment.v0"));
+      : provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.artifact_commitment.v0"));
   }
   const productObject = token ?? tokenBalance ?? tokenTransfer ?? pool ?? lpPosition ?? swap;
   if (productObject !== undefined) {
     const source = stringValue(productObject.source) ?? "";
     sources.push(source.includes("fixture-fallback")
-      ? provenanceSource("dashboard", "fixtures/dashboard/flowchain-l1-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic product fallback row.")
-      : provenanceSource("devnet", "devnet/local/state.json", "flowmemory.local_devnet.product_objects.v0", "Product rows are read from devnet state or control-plane handoff maps."));
+      ? provenanceSource("dashboard", "fixtures/dashboard/flowmemory-network-explorer-fallback.json", "flowmemory.dashboard.explorer_fallback.v0", "Deterministic product fallback row.")
+      : provenanceSource("localRuntime", "local-runtime/local/state.json", "flowmemory.local_runtime.product_objects.v0", "Product rows are read from localRuntime state or control-plane handoff maps."));
   }
 
   links.receiptId = selectedReceipt?.receiptId;
@@ -4930,22 +4930,22 @@ function provenanceForObject(state: LoadedControlPlaneState, key: string): JsonO
     ?? (selectedReceipt?.evidenceRefs.map((entry) => entry.uri).filter((value): value is string => typeof value === "string") ?? []);
 
   if (sources.length === 0) {
-    const devnetTarget = devnetWorkReceipts(state)[key]
-      ?? devnetReports(state)[key]
-      ?? devnetRootfields(state)[key]
-      ?? devnetArtifacts(state)[key]
-      ?? devnetAgentAccounts(state)[key]
-      ?? devnetMemoryCells(state)[key]
-      ?? devnetChallenges(state)[key]
-      ?? devnetFinalityReceipts(state)[key]
+    const localRuntimeTarget = localRuntimeWorkReceipts(state)[key]
+      ?? localRuntimeReports(state)[key]
+      ?? localRuntimeRootfields(state)[key]
+      ?? localRuntimeArtifacts(state)[key]
+      ?? localRuntimeAgentAccounts(state)[key]
+      ?? localRuntimeMemoryCells(state)[key]
+      ?? localRuntimeChallenges(state)[key]
+      ?? localRuntimeFinalityReceipts(state)[key]
       ?? tokenRows(state).find((candidate) => candidate.tokenId === key || candidate.symbol === key)
       ?? tokenBalanceRows(state).find((candidate) => candidate.balanceId === key || candidate.accountId === key)
       ?? tokenTransferRows(state).find((candidate) => candidate.transferId === key || candidate.txId === key)
       ?? poolRows(state).find((candidate) => candidate.poolId === key)
       ?? lpPositionRows(state).find((candidate) => candidate.positionId === key || candidate.accountId === key)
       ?? swapRows(state).find((candidate) => candidate.swapId === key || candidate.txId === key);
-    if (devnetTarget !== undefined) {
-      sources.push(provenanceSource("devnet", "fixtures/launch-core/generated/devnet/state.json", "flowmemory.local_devnet.state.v0"));
+    if (localRuntimeTarget !== undefined) {
+      sources.push(provenanceSource("localRuntime", "fixtures/launch-core/generated/local-runtime/state.json", "flowmemory.local_runtime.state.v0"));
     }
   }
 
@@ -4999,10 +4999,10 @@ function rawJsonGet(params: JsonValue | undefined, context: ControlPlaneContext)
     indexer: state.indexer as unknown as JsonValue,
     verifier: state.verifier as unknown as JsonValue,
     artifacts: state.artifacts as unknown as JsonValue,
-    devnet: state.devnet,
-    devnetIndexerHandoff: state.devnetIndexerHandoff,
-    devnetVerifierHandoff: state.devnetVerifierHandoff,
-    devnetControlPlaneHandoff: state.devnetControlPlaneHandoff,
+    localRuntime: state.localRuntime,
+    localRuntimeIndexerHandoff: state.localRuntimeIndexerHandoff,
+    localRuntimeVerifierHandoff: state.localRuntimeVerifierHandoff,
+    localRuntimeControlPlaneHandoff: state.localRuntimeControlPlaneHandoff,
     explorerFallback: state.explorerFallback,
     txFixtures: state.txFixtures,
     txIntake: txIntakeRows(state) as unknown as JsonValue,
@@ -5327,7 +5327,7 @@ export const CONTROL_PLANE_METHODS: Record<ControlPlaneMethod, MethodHandler> = 
   pilot_lifecycle_record_list: pilotLifecycleRecordList,
   wallet_balance_list: walletBalanceList,
   wallet_transfer_history: walletTransferHistory,
-  devnet_state: devnetState,
+  localRuntime_state: localRuntimeState,
   block_get: blockGet,
   block_list: blockList,
   mempool_list: mempoolList,

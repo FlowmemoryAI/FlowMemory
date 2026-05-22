@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flowmemory.local/schemas/flowmemory/production-transaction-envelope.schema.json",
-  "title": "FlowChain Transaction Envelope V0",
+  "title": "FlowMemory Transaction Envelope V0",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -23,7 +23,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "flowchain.production_l1.transaction_envelope.v0",
+      "const": "flowmemory.production_l1.transaction_envelope.v0",
       "x-owner": "crypto"
     },
     "txId": {
@@ -32,7 +32,7 @@
       "x-owner": "crypto"
     },
     "protocolVersion": {
-      "const": "flowchain.private_local_l1.protocol.v0",
+      "const": "flowmemory.private_local_l1.protocol.v0",
       "x-owner": "protocol"
     },
     "chainId": {
@@ -43,9 +43,9 @@
     "networkProfile": {
       "type": "string",
       "enum": [
-        "flowchain-local-private",
-        "flowchain-local-multinode",
-        "flowchain-base8453-pilot"
+        "flowmemory-local-private",
+        "flowmemory-local-multinode",
+        "flowmemory-base8453-pilot"
       ],
       "x-owner": "runtime"
     },
@@ -254,9 +254,9 @@
     "networkProfile": {
       "type": "string",
       "enum": [
-        "flowchain-local-private",
-        "flowchain-local-multinode",
-        "flowchain-base8453-pilot"
+        "flowmemory-local-private",
+        "flowmemory-local-multinode",
+        "flowmemory-base8453-pilot"
       ]
     },
     "payloadType": {

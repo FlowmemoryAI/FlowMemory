@@ -1,0 +1,377 @@
+{
+  "schema": "flowmemory.dashboard.explorer_fallback.v0",
+  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "source": "fixture-fallback",
+  "provenance": {
+    "subsystem": "dashboard",
+    "origin": "fixture-fallback",
+    "path": "fixtures/dashboard/flowmemory-network-explorer-fallback.json",
+    "note": "Deterministic browser-safe fallback used only when live local runtime maps are missing."
+  },
+  "pilotReadiness": {
+    "schema": "flowmemory.dashboard.explorer_pilot_readiness.v0",
+    "state": "degraded",
+    "baseChainId": 8453,
+    "lockboxAddress": "0x1111111111111111111111111111111111111111",
+    "perDepositCapUsd": 25,
+    "totalPilotCapUsd": 25,
+    "pauseStatus": "unpaused",
+    "emergencyStatus": "standby",
+    "latestObservationBlockRange": {
+      "fromBlock": "45955500",
+      "toBlock": "45955540"
+    },
+    "confirmationDepth": 12,
+    "requiredEnvNames": [
+      "FLOWMEMORY_BASE8453_RPC_URL",
+      "FLOWMEMORY_BASE8453_LOCKBOX_ADDRESS"
+    ],
+    "broadPublicReadiness": false,
+    "productionReady": false,
+    "localOnly": true
+  },
+  "objects": {
+    "tokens": {
+      "token:flowmemory-pilot-ltu": {
+        "schema": "flowmemory.explorer.token.v0",
+        "tokenId": "token:flowmemory-pilot-ltu",
+        "symbol": "FCLT",
+        "name": "FlowMemory Local Test Credit",
+        "decimals": 6,
+        "totalSupply": "25000000",
+        "owner": "operator:local-demo",
+        "issuer": "operator:local-demo",
+        "launchTxId": "0x8f719c880f17b5d4fb6d9efd54ac276d0dd8050d11c2c7870c36a79b66bc49d7",
+        "status": "fixture_fallback_visible",
+        "provenance": "fixture-fallback",
+        "noValue": true,
+        "localOnly": true
+      }
+    },
+    "tokenBalances": {
+      "token-balance:pilot-recipient:fclt": {
+        "schema": "flowmemory.explorer.token_balance.v0",
+        "balanceId": "token-balance:pilot-recipient:fclt",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "tokenId": "token:flowmemory-pilot-ltu",
+        "amount": "20000000",
+        "status": "fixture_fallback_visible",
+        "updatedAtBlock": "2",
+        "provenance": "fixture-fallback",
+        "noValue": true,
+        "localOnly": true
+      }
+    },
+    "tokenTransfers": {
+      "token-transfer:pilot-credit-to-swap": {
+        "schema": "flowmemory.explorer.token_transfer.v0",
+        "transferId": "token-transfer:pilot-credit-to-swap",
+        "txId": "0x3ac0b196a212a0e77d0a0c4b60e2283d2994b09993971b95427996700f5b92aa",
+        "tokenId": "token:flowmemory-pilot-ltu",
+        "fromAccount": "bridge-credit:operator",
+        "toAccount": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "amount": "20000000",
+        "status": "fixture_fallback_visible",
+        "blockNumber": "2",
+        "provenance": "fixture-fallback",
+        "localOnly": true
+      }
+    },
+    "pools": {
+      "pool:fclt-local-unit": {
+        "schema": "flowmemory.explorer.dex_pool.v0",
+        "poolId": "pool:fclt-local-unit",
+        "token0": "local-test-unit",
+        "token1": "token:flowmemory-pilot-ltu",
+        "reserve0": "12500000",
+        "reserve1": "20000000",
+        "lpSupply": "5000000",
+        "status": "fixture_fallback_visible",
+        "createdTxId": "0xda9d2574a0d4bec158e13623499c6efe6dddb76f838c5f06c3e4dc8457b67d3b",
+        "provenance": "fixture-fallback",
+        "noValue": true,
+        "localOnly": true
+      }
+    },
+    "lpPositions": {
+      "lp:operator:fclt-local-unit": {
+        "schema": "flowmemory.explorer.lp_position.v0",
+        "positionId": "lp:operator:fclt-local-unit",
+        "accountId": "operator:local-demo",
+        "poolId": "pool:fclt-local-unit",
+        "liquidity": "5000000",
+        "amount0": "12500000",
+        "amount1": "20000000",
+        "status": "fixture_fallback_visible",
+        "updatedAtBlock": "2",
+        "provenance": "fixture-fallback",
+        "noValue": true,
+        "localOnly": true
+      }
+    },
+    "liquidityEvents": {
+      "liquidity:operator:add:fclt-local-unit": {
+        "schema": "flowmemory.explorer.liquidity_event.v0",
+        "liquidityEventId": "liquidity:operator:add:fclt-local-unit",
+        "txId": "0xda9d2574a0d4bec158e13623499c6efe6dddb76f838c5f06c3e4dc8457b67d3b",
+        "accountId": "operator:local-demo",
+        "poolId": "pool:fclt-local-unit",
+        "action": "add",
+        "amount0": "12500000",
+        "amount1": "20000000",
+        "status": "fixture_fallback_visible",
+        "provenance": "fixture-fallback",
+        "localOnly": true
+      }
+    },
+    "swaps": {
+      "swap:pilot:fclt-local-unit": {
+        "schema": "flowmemory.explorer.swap.v0",
+        "swapId": "swap:pilot:fclt-local-unit",
+        "txId": "0xa0729982b58cc701aba6af0bc29ca993190db4e8e1489af918dbe293c0c03bad",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "poolId": "pool:fclt-local-unit",
+        "tokenIn": "token:flowmemory-pilot-ltu",
+        "tokenOut": "local-test-unit",
+        "amountIn": "2500000",
+        "amountOut": "1512000",
+        "status": "fixture_fallback_visible",
+        "provenance": "fixture-fallback",
+        "noValue": true,
+        "localOnly": true
+      }
+    },
+    "withdrawals": {
+      "withdrawal:pilot:release-request": {
+        "schema": "flowmemory.explorer.withdrawal.v0",
+        "withdrawalId": "withdrawal:pilot:release-request",
+        "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+        "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "accountId": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "amount": "20000000",
+        "token": "token:flowmemory-pilot-ltu",
+        "status": "requested",
+        "provenance": "fixture-fallback",
+        "localOnly": true
+      }
+    }
+  },
+  "bridge": {
+    "observations": [
+      {
+        "schema": "flowmemory.bridge_deposit_observation.v0",
+        "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+        "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+        "observedAt": "2026-05-14T00:00:00.000Z",
+        "mode": "base-mainnet-canary",
+        "productionReady": false,
+        "localOnly": true,
+        "deposit": {
+          "schema": "flowmemory.bridge_deposit.v0",
+          "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+          "sourceChainId": 8453,
+          "sourceContract": "0x1111111111111111111111111111111111111111",
+          "lockboxAddress": "0x1111111111111111111111111111111111111111",
+          "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "logIndex": 0,
+          "blockNumber": "45955512",
+          "token": "0x3333333333333333333333333333333333333333",
+          "amount": "20000000",
+          "sender": "0x4444444444444444444444444444444444444444",
+          "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+          "nonce": "1",
+          "status": "observed"
+        },
+        "guardrails": {
+          "explicitChainId": true,
+          "explicitContract": true,
+          "explicitBlockRange": true,
+          "noSecrets": true,
+          "maxUsd": 20
+        }
+      },
+      {
+        "schema": "flowmemory.bridge_deposit_observation.v0",
+        "observationId": "0x1430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223d",
+        "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+        "observedAt": "2026-05-14T00:00:05.000Z",
+        "mode": "base-mainnet-canary",
+        "productionReady": false,
+        "localOnly": true,
+        "deposit": {
+          "schema": "flowmemory.bridge_deposit.v0",
+          "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+          "sourceChainId": 8453,
+          "sourceContract": "0x1111111111111111111111111111111111111111",
+          "lockboxAddress": "0x1111111111111111111111111111111111111111",
+          "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "logIndex": 0,
+          "blockNumber": "45955512",
+          "token": "0x3333333333333333333333333333333333333333",
+          "amount": "20000000",
+          "sender": "0x4444444444444444444444444444444444444444",
+          "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+          "nonce": "1",
+          "status": "duplicate_replay_rejected"
+        },
+        "guardrails": {
+          "explicitChainId": true,
+          "explicitContract": true,
+          "explicitBlockRange": true,
+          "noSecrets": true,
+          "maxUsd": 20
+        }
+      }
+    ],
+    "credits": [
+      {
+        "schema": "flowmemory.bridge_credit.v0",
+        "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+        "observationId": "0x0430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223c",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+        "source": {
+          "chainId": 8453,
+          "contract": "0x1111111111111111111111111111111111111111",
+          "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "logIndex": 0
+        },
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "status": "applied",
+        "appliedAt": "2026-05-14T00:00:01.000Z",
+        "localOnly": true,
+        "productionReady": false
+      },
+      {
+        "schema": "flowmemory.bridge_credit.v0",
+        "creditId": "0x9f3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a9",
+        "observationId": "0x1430f0f7818add19ccd9037dcf6e50d75c1fb0fac0441f9b042c473d1d2d223d",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "replayKey": "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09",
+        "source": {
+          "chainId": 8453,
+          "contract": "0x1111111111111111111111111111111111111111",
+          "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+          "logIndex": 0
+        },
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "flowmemoryRecipient": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "status": "rejected",
+        "rejectionReason": "duplicate_replay_key",
+        "localOnly": true,
+        "productionReady": false
+      }
+    ],
+    "withdrawalIntents": [
+      {
+        "schema": "flowmemory.bridge_withdrawal_intent.v0",
+        "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+        "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "sourceChainId": 8453,
+        "destinationChainId": 8453,
+        "token": "0x3333333333333333333333333333333333333333",
+        "amount": "20000000",
+        "flowmemoryAccount": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "baseRecipient": "0x4444444444444444444444444444444444444444",
+        "status": "requested",
+        "requestedAt": "2026-05-14T00:00:02.000Z",
+        "broadcast": false,
+        "releasePolicy": "operator_release_evidence_required",
+        "productionReady": false,
+        "localOnly": true
+      }
+    ],
+    "releaseEvidence": [
+      {
+        "schema": "flowmemory.bridge_release_evidence.v0",
+        "releaseEvidenceId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb278",
+        "withdrawalIntentId": "0xe6f0da66dc9659e427640f119b24a83b01ccb2f79c745d6d4c28570c5e5e1751",
+        "creditId": "0xff3efb8221533cfc836bffbcee10bdd2d7d4a5615efce9516574245a3b7d74a6",
+        "depositId": "0x7e3a7f7ab7dc9b07d762c1f2fce315cf0c08f1a7e854b4dbcb2359efcb9cb269",
+        "status": "recorded",
+        "releaseTxHash": "0x8888888888888888888888888888888888888888888888888888888888888888",
+        "recordedAt": "2026-05-14T00:00:03.000Z",
+        "operatorNote": "Fixture fallback proves the explorer renders release evidence without storing operator secrets.",
+        "localOnly": true,
+        "productionReady": false
+      }
+    ],
+    "replayProtection": {
+      "strategy": "source-chain-contract-tx-log-deposit",
+      "replayKeys": [
+        "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+      ],
+      "duplicateReplayKeys": [
+        "0x9c97eb0fa65cb3eec9274cb0c9e925351608e7abe6980fe2525820048bd81e09"
+      ]
+    }
+  },
+  "network": {
+    "node": {
+      "status": "degraded",
+      "syncStatus": "fixture-fallback",
+      "latestHeight": "2",
+      "finalizedHeight": "1",
+      "stateRoot": "0x3074ef2e5311d94e8f9a2660a6cc016c7b7f9a08c56ee07f9e841c1489726e68",
+      "peerCount": 1
+    },
+    "peers": {
+      "peer:local-single-node": {
+        "peerId": "peer:local-single-node",
+        "address": "127.0.0.1",
+        "status": "self",
+        "height": "2",
+        "provenance": "fixture-fallback"
+      }
+    }
+  },
+  "errors": {
+    "runtime-offline": {
+      "errorId": "runtime-offline",
+      "subsystem": "runtime",
+      "state": "degraded",
+      "summary": "Long-running runtime process is not required for fallback inspection.",
+      "recoveryCommand": "npm run flowmemory:start"
+    },
+    "api-offline": {
+      "errorId": "api-offline",
+      "subsystem": "control-plane",
+      "state": "degraded",
+      "summary": "Dashboard uses deterministic fallback when the local API is offline.",
+      "recoveryCommand": "npm run control-plane:serve"
+    },
+    "storage-unavailable": {
+      "errorId": "storage-unavailable",
+      "subsystem": "storage",
+      "state": "degraded",
+      "summary": "Local file-backed sources are used when durable runtime storage is absent.",
+      "recoveryCommand": "npm run flowmemory:export"
+    },
+    "bridge-relayer-offline": {
+      "errorId": "bridge-relayer-offline",
+      "subsystem": "bridge",
+      "state": "degraded",
+      "summary": "Bridge rows are fixture fallback until the relayer exports a fresh observation.",
+      "recoveryCommand": "npm run bridge:observe -- --mode base-mainnet-canary --acknowledge-real-funds --max-usd 25"
+    },
+    "wrong-chain-id": {
+      "errorId": "wrong-chain-id",
+      "subsystem": "bridge",
+      "state": "blocked",
+      "summary": "Pilot observation must be on Base chain ID 8453.",
+      "recoveryCommand": "npm run control-plane:smoke"
+    },
+    "duplicate-event-rejected": {
+      "errorId": "duplicate-event-rejected",
+      "subsystem": "bridge",
+      "state": "verified",
+      "summary": "Duplicate replay key is visible and rejected in the fallback evidence set.",
+      "recoveryCommand": "npm run flowmemory:real-value-pilot:e2e"
+    }
+  }
+}

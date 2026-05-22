@@ -6,7 +6,7 @@ This folder contains local-alpha hardware projections that can be consumed by da
 
 ## Fixtures
 
-- `flowrouter_local_alpha_seed42.json`: deterministic FlowRouter-to-FlowChain operator signal projection generated from `hardware/fixtures/flowrouter_sample_seed42.json`.
+- `flowrouter_local_alpha_seed42.json`: deterministic FlowRouter-to-FlowMemory operator signal projection generated from `hardware/fixtures/flowrouter_sample_seed42.json`.
 - `flowrouter_control_plane_handoff_seed42.json`: read-only optional hardware handoff shaped for local control-plane ingestion.
 - `flowrouter_negative_validation_seed42.json`: deterministic report proving malformed hardware/operator handoff cases are rejected.
 
