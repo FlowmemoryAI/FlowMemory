@@ -10,15 +10,14 @@ These are not hidden defects. They are the remaining work required before FlowMe
 
 Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/164
 
-Current state: scripts and contract stack exist, but no full public-agent network Base Sepolia broadcast/readback is committed for this release.
+Current state: public-agent deployment, smoke-broadcast, source-verification, and bounded event-readback tooling now exists. The configured public testnet deployer address is recorded in `fixtures/deployments/public-agent-network-base-sepolia-plan.json` and `docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md`, but no full public-agent network Base Sepolia broadcast/readback evidence is committed yet.
 
 Missing work:
 
-- fund and configure a dedicated testnet deployer locally;
-- broadcast the public-agent and swarm stack to Base Sepolia;
-- read back emitted launch, registry, fuel, bond, and swarm events with bounded block ranges;
-- commit non-secret deployment/readback evidence;
-- source-verify deployed contracts where supported.
+- fund the dedicated Base Sepolia deployer and set local env without committed secrets;
+- run dry-run, broadcast, and bounded readback for the public-agent and swarm stack;
+- commit non-secret deployment/readback evidence with transaction hashes, contract addresses, and event-group counts;
+- source-verify deployed contracts where supported and record submitted/verified/pending status per contract.
 
 ### 2. Keeper / runtime automation
 

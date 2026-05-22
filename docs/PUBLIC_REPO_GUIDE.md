@@ -14,7 +14,7 @@ The repository currently contains:
 - fixture-first indexer, verifier, Flow Memory, control-plane, SDK, and dashboard packages;
 - deterministic Rootflow and Flow Memory V0 fixtures;
 - signed Agent Bonds quote attestations, recourse-policy fixtures, and requester quote/create SDK helpers;
-- a public-agent launch and swarm stack with Foundry tests and a local e2e script;
+- a public-agent launch and swarm stack with Foundry tests, a local e2e script, and a Base Sepolia operator rehearsal plan/readback path;
 - a developing mobile operator surface, with an Android Capacitor shell committed today and iOS documented as a product track that still needs an Xcode project;
 - FlowRouter hardware/resilience research materials;
 - public docs that describe what exists, what works locally, and what must be verified before broader value-bearing claims are allowed.
@@ -83,6 +83,14 @@ npm run public:test:e2e
 npm run public:test:dashboard
 npm run public:test:cli
 ```
+
+For the Base Sepolia public-agent operator rehearsal, start with the public-safe plan:
+
+```powershell
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
+```
+
+Dry run, broadcast, and event readback are documented in `docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md` and require local operator credentials that must never be committed.
 
 The full public local pass is:
 

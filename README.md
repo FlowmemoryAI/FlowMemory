@@ -42,7 +42,7 @@ FlowMemory currently ships a local/test implementation of the main protocol surf
 | Repository | Public and launch-polished | `README.md`, `docs/PUBLIC_REPO_GUIDE.md` |
 | Public test lanes | Reproducible from a clean clone | `npm run public:test:all` |
 | Agent Bonds | Local/test accountability, recourse, and reputation flows | `docs/AGENT_BONDS_PHASE2_ARCHITECTURE.md` |
-| Public agent network | Local/test contracts and e2e path | `npm run public-agent-network:contracts`, `npm run public-agent-network:local-e2e` |
+| Public agent network | Local/test contracts, e2e path, and Base Sepolia operator plan/readback tooling | `npm run public-agent-network:contracts`, `npm run public-agent-network:local-e2e`, `npm run public-agent-network:base-sepolia:plan` |
 | Mobile operator layer | Android shell committed; iOS product track documented | `docs/MOBILE_APPS.md`, `apps/dashboard/WALLET_DISTRIBUTION.md` |
 | Production / real-value claims | Still intentionally gated | `docs/MARKETING_CLAIMS_GUARDRAILS.md`, `docs/PRODUCTION_READINESS_CHECKLIST.md` |
 
@@ -111,6 +111,14 @@ Run the local/test contract and e2e checks:
 npm run public-agent-network:contracts
 npm run public-agent-network:local-e2e
 ```
+
+Prepare the public-safe Base Sepolia operator plan:
+
+```powershell
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
+```
+
+Dry run, broadcast, and readback require local operator credentials and are documented in `docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md`.
 
 ## Mobile Apps: The Operator Layer
 

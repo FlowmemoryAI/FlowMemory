@@ -21,7 +21,8 @@ The current public-agent network stack includes:
 - public swarm preview, launch intent, replay, prototype projection methods, and direct create-call builders;
 - public SDK and CLI wrappers for discovery, public launch/swarm projections, and local CLI smoke;
 - dashboard public-network view backed by deterministic local data;
-- Foundry tests for public contracts and a local script that exercises agent launch plus swarm budget lifecycle.
+- Foundry tests for public contracts and a local script that exercises agent launch plus swarm budget lifecycle;
+- Base Sepolia public-agent deployment, source-verification, and bounded event-readback tooling with a configured public testnet deployer plan in `fixtures/deployments/public-agent-network-base-sepolia-plan.json`.
 
 ## Verification Commands
 
@@ -29,6 +30,7 @@ The current public-agent network stack includes:
 npm run public-agent-network:contracts
 npm run public-agent-network:local-e2e
 npm run public:test:quick
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
 npm test --prefix services/control-plane
 npm test --prefix services/agent-memory-sdk
 npm test --prefix apps/dashboard
@@ -44,6 +46,17 @@ npm run public-agent-network:local-e2e
 ```
 
 It runs `script/RunPublicAgentNetworkLocalE2E.s.sol:RunPublicAgentNetworkLocalE2E`, deploys the public-agent and swarm contracts in a local Foundry script simulation, signs a deterministic public launch intent, creates an agent, creates a swarm with that agent as a member, reserves and releases budget, and spends from a budget line.
+
+The Base Sepolia operator rehearsal path is:
+
+```powershell
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
+npm run public-agent-network:base-sepolia -- --json
+npm run public-agent-network:base-sepolia:broadcast -- --json
+npm run public-agent-network:base-sepolia:readback -- --rpc-url $env:BASE_SEPOLIA_RPC_URL --deployment-artifact fixtures/deployments/public-agent-network-base-sepolia.latest.json --from-block <deployBlock> --to-block <latestBlock>
+```
+
+The plan command is public-safe and committed. Dry run, broadcast, and readback require explicit local operator environment values and must not write RPC URLs, private keys, or explorer API keys.
 
 ## What This Is Not
 

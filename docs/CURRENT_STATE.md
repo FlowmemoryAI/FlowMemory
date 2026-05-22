@@ -16,7 +16,7 @@ A local/test Agent Bonds v1 accountability surface exists for objective off-chai
 
 On 2026-05-13 a small Base mainnet canary deployment was broadcast for V0 testing. It is documented in `docs/DEPLOYMENTS/2026-05-13-base-canary-v0.md`. A guarded Base mainnet canary reader now exists for those known canary addresses and small explicit block ranges. This is not a production launch and does not change the production/mainnet-readiness guardrails.
 
-On 2026-05-21 the repo gained a public-agent local/test stack: shared `BaseOnchainAgentMemory` runtime integration, public agent class/tool/profile/lineage/fuel/bond/receipt contracts, `AgentFactory`, swarm policy/registry/budget/factory contracts, deterministic public launch helpers, control-plane and SDK/CLI discovery/preview methods, direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)`, dashboard projection, Foundry tests, and a local Foundry e2e script. This is public for review and local experimentation only; it is not a production launch or audited runtime.
+On 2026-05-21 the repo gained a public-agent local/test stack: shared `BaseOnchainAgentMemory` runtime integration, public agent class/tool/profile/lineage/fuel/bond/receipt contracts, `AgentFactory`, swarm policy/registry/budget/factory contracts, deterministic public launch helpers, control-plane and SDK/CLI discovery/preview methods, direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)`, dashboard projection, Foundry tests, a local Foundry e2e script, and Base Sepolia public-agent deployment/readback tooling with a configured public testnet deployer plan. This is public for review and local/testnet experimentation only; it is not a production launch or audited runtime.
 
 The public-facing app story includes the mobile operator layer. The shared dashboard surface is packaged as browser/desktop and a committed Android Capacitor shell, while iOS remains an explicitly documented product track until an Xcode project and CI lane are added. Mobile is positioned as the always-available operator console for Agent Bonds, receipts, recourse, wallet/budget state, public-agent monitoring, and future alerting.
 
@@ -86,8 +86,8 @@ Public-agent stack:
 - Shared `BaseOnchainAgentMemory` runtime integration exists.
 - Public agent class/tool/profile/lineage/fuel/bond/receipt contracts and `AgentFactory` exist.
 - Swarm policy/registry/budget/factory contracts exist.
-- Deterministic public launch helpers, control-plane discovery/preview methods, SDK/CLI smoke lanes, direct calldata builders, dashboard projection, Foundry tests, and a local Foundry e2e script exist.
-- This is public for review and local experimentation only; it is not a production launch or audited runtime.
+- Deterministic public launch helpers, control-plane discovery/preview methods, SDK/CLI smoke lanes, direct calldata builders, dashboard projection, Foundry tests, a local Foundry e2e script, and Base Sepolia public-agent deploy/readback tooling exist.
+- This is public for review and local/testnet experimentation only; it is not a production launch or audited runtime.
 
 Mobile operator layer:
 

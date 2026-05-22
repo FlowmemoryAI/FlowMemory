@@ -1,0 +1,100 @@
+{
+  "schema": "flowmemory.public_agent_network.base_sepolia_plan.v1",
+  "generatedAt": "2026-05-21T00:00:00.000Z",
+  "mode": "plan-only",
+  "productionReady": false,
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": "84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "deployer": {
+    "address": "0x69F55917209C446bf9d31D2903e01966B75a8cDe",
+    "explorer": "https://sepolia.basescan.org/address/0x69F55917209C446bf9d31D2903e01966B75a8cDe",
+    "note": "Public testnet deployer address only. The private key must stay in local env and is never written."
+  },
+  "environment": {
+    "BASE_SEPOLIA_RPC_URL": "<missing>",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX": "<missing>",
+    "BASE_SEPOLIA_PUBLIC_AGENT_DEPLOYER_ADDRESS": "0x69F55917209C446bf9d31D2903e01966B75a8cDe",
+    "BASE_SEPOLIA_BASESCAN_API_KEY": "<missing>",
+    "BASESCAN_API_KEY": "<missing>",
+    "PUBLIC_AGENT_NETWORK_BASE_SEPOLIA_PLAN_OUT": "<default>",
+    "PUBLIC_AGENT_NETWORK_BASE_SEPOLIA_ARTIFACT_OUT": "<default>"
+  },
+  "requiredEnv": [
+    "BASE_SEPOLIA_RPC_URL",
+    "BASE_SEPOLIA_DEPLOYER_KEY_HEX",
+    "BASE_SEPOLIA_PUBLIC_AGENT_DEPLOYER_ADDRESS"
+  ],
+  "optionalEnv": [
+    "BASE_SEPOLIA_BASESCAN_API_KEY",
+    "BASESCAN_API_KEY"
+  ],
+  "deploys": [
+    "BaseOnchainAgentMemory",
+    "AgentClassRegistry",
+    "ToolRegistry",
+    "AgentProfileRegistry",
+    "AgentLaunchBondEscrow",
+    "AgentMemoryFuelVault",
+    "AgentLineageRegistry",
+    "AgentReceiptAnchor",
+    "AgentShellFactory",
+    "AgentFactory",
+    "SwarmPolicyRegistry",
+    "SwarmRegistry",
+    "SwarmBudgetVault",
+    "SwarmFactory",
+    "PublicNetworkBaseSepoliaToken"
+  ],
+  "forgeCommand": {
+    "program": "forge",
+    "args": [
+      "script",
+      "script/DeployPublicAgentNetworkBaseSepolia.s.sol:DeployPublicAgentNetworkBaseSepolia",
+      "--threads",
+      "1",
+      "--rpc-url",
+      "$BASE_SEPOLIA_RPC_URL",
+      "--chain-id",
+      "84532"
+    ],
+    "broadcast": false,
+    "note": "Dry run is default. Broadcast only after the testnet deployer is funded and operator approval is explicit."
+  },
+  "publicSmoke": {
+    "actions": [
+      "register public agent class and tool set",
+      "configure launch bond and memory fuel policies",
+      "launch one deployer-owned task-scout agent with a deployer EIP-712 signature",
+      "anchor one local/test receipt root",
+      "register one research swarm with wallet + agent members",
+      "exercise swarm budget deposit, line, reserve, release, and spend events"
+    ],
+    "valueAtRisk": "testnet token deployed by this script only"
+  },
+  "expectedFoundryBroadcastDir": "broadcast/DeployPublicAgentNetworkBaseSepolia.s.sol/84532",
+  "readback": {
+    "command": "npm run public-agent-network:base-sepolia:readback -- --rpc-url $BASE_SEPOLIA_RPC_URL --deployment-artifact fixtures/deployments/public-agent-network-base-sepolia.latest.json --from-block <deployBlock> --to-block <latestBlock>",
+    "requiredEventGroups": [
+      "registry",
+      "launch",
+      "fuel",
+      "bond",
+      "swarm"
+    ],
+    "defaultOut": "fixtures/deployments/public-agent-network-base-sepolia-readback.latest.json"
+  },
+  "verification": {
+    "apiKeyEnv": "BASE_SEPOLIA_BASESCAN_API_KEY or BASESCAN_API_KEY",
+    "note": "Use Foundry broadcast metadata for constructor args. Record submitted, verified, or pending per contract in the deployment evidence.",
+    "command": "forge verify-contract --watch --chain-id 84532 <address> <fully-qualified-contract> --etherscan-api-key $BASE_SEPOLIA_BASESCAN_API_KEY"
+  },
+  "boundaries": [
+    "Base Sepolia rehearsal only; not production or mainnet readiness.",
+    "No private keys, RPC URLs, or explorer API keys are written to artifacts.",
+    "The smoke agent, token, bond, fuel, receipt, and swarm records are local/test protocol evidence only.",
+    "Reader evidence must use bounded block ranges and explicit addresses."
+  ]
+}

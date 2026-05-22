@@ -140,6 +140,17 @@ npm run public-agent-network:local-e2e
 
 The e2e script deploys the local public-agent stack, signs a deterministic launch intent, creates an agent, creates a swarm with the agent as a member, creates a budget line, reserves and releases budget, and records a spend.
 
+Base Sepolia public-agent rehearsal tooling:
+
+```powershell
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
+npm run public-agent-network:base-sepolia -- --json
+npm run public-agent-network:base-sepolia:broadcast -- --json
+npm run public-agent-network:base-sepolia:readback -- --rpc-url $env:BASE_SEPOLIA_RPC_URL --deployment-artifact fixtures/deployments/public-agent-network-base-sepolia.latest.json --from-block <deployBlock> --to-block <latestBlock>
+```
+
+The committed plan lives at `fixtures/deployments/public-agent-network-base-sepolia-plan.json`; the operator runbook is `docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md`. Dry run, broadcast, and readback require explicit local environment values. The deploy script verifies that `BASE_SEPOLIA_DEPLOYER_KEY_HEX` derives `BASE_SEPOLIA_PUBLIC_AGENT_DEPLOYER_ADDRESS`, and the readback script fails unless bounded Base Sepolia logs include registry, launch, fuel, bond, and swarm event groups.
+
 The broader local/test gate remains:
 
 ```powershell

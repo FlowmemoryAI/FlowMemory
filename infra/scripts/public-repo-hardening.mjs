@@ -37,6 +37,10 @@ const requiredScripts = [
   "public:test:cli",
   "public-agent-network:contracts",
   "public-agent-network:local-e2e",
+  "public-agent-network:base-sepolia",
+  "public-agent-network:base-sepolia:plan",
+  "public-agent-network:base-sepolia:broadcast",
+  "public-agent-network:base-sepolia:readback",
 ];
 for (const scriptName of requiredScripts) {
   assert(typeof scripts[scriptName] === "string" && scripts[scriptName].length > 0, `missing package script: ${scriptName}`);
@@ -56,6 +60,11 @@ const requiredFiles = [
   ".github/ISSUE_TEMPLATE/public-tester-report.yml",
   "infra/scripts/public-tester-report.mjs",
   "infra/scripts/check-unsafe-claims.mjs",
+  "infra/scripts/run-public-agent-network-base-sepolia-deploy.mjs",
+  "infra/scripts/public-agent-network-base-sepolia-readback.mjs",
+  "script/DeployPublicAgentNetworkBaseSepolia.s.sol",
+  "fixtures/deployments/public-agent-network-base-sepolia-plan.json",
+  "docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md",
   "docs/MOBILE_APPS.md",
   "apps/dashboard/WALLET_DISTRIBUTION.md",
   "apps/dashboard/package.json",
@@ -102,6 +111,10 @@ const androidGradle = readText("apps/dashboard/android/app/build.gradle");
 const androidStrings = readText("apps/dashboard/android/app/src/main/res/values/strings.xml");
 const publicGaps = readText("docs/PUBLIC_RELEASE_GAPS.md");
 const reportScript = readText("infra/scripts/public-tester-report.mjs");
+const publicAgentBaseSepoliaDeployScript = readText("infra/scripts/run-public-agent-network-base-sepolia-deploy.mjs");
+const publicAgentBaseSepoliaReadbackScript = readText("infra/scripts/public-agent-network-base-sepolia-readback.mjs");
+const publicAgentBaseSepoliaPlan = readText("fixtures/deployments/public-agent-network-base-sepolia-plan.json");
+const publicAgentBaseSepoliaRunbook = readText("docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md");
 const gitignore = readText(".gitignore");
 
 const publicDocs = `${readme}\n${publicGuide}\n${testerGuide}`;
@@ -204,6 +217,15 @@ assert(includes(ci, "npm run public:test:all"), "CI must run public:test:all");
 assert(!includes(ci, `name: Local ${legacyLocalWord}`), "public CI must not expose the older local runtime job");
 assert(!includes(ci, `crates/flowmemory-${legacyLocalWord}/Cargo.toml`), "public CI must not expose the older local runtime crate path");
 assert(includes(publicGuide, "#174"), "PUBLIC_REPO_GUIDE must mention the mobile gap issue");
+assert(includes(publicGaps, "public-agent deployment, smoke-broadcast, source-verification, and bounded event-readback tooling now exists"), "PUBLIC_RELEASE_GAPS must record Base Sepolia public-agent tooling state");
+assert(includes(publicAgentBaseSepoliaPlan, "0x69F55917209C446bf9d31D2903e01966B75a8cDe"), "Base Sepolia public-agent plan must include the configured public deployer address");
+assert(includes(publicAgentBaseSepoliaPlan, "public_agent_network.base_sepolia_plan.v1"), "Base Sepolia public-agent plan must use the expected schema");
+assert(includes(publicAgentBaseSepoliaDeployScript, "BASE_SEPOLIA_PUBLIC_AGENT_DEPLOYER_ADDRESS"), "Base Sepolia deploy script must check the declared deployer address");
+assert(includes(publicAgentBaseSepoliaDeployScript, "<set:redacted>"), "Base Sepolia deploy script must redact secret env presence");
+assert(includes(publicAgentBaseSepoliaReadbackScript, "missingRequiredGroups"), "Base Sepolia readback script must enforce required event groups");
+assert(includes(publicAgentBaseSepoliaReadbackScript, "Base Sepolia readback only"), "Base Sepolia readback script must write testnet boundaries");
+assert(includes(publicAgentBaseSepoliaRunbook, "0x69F55917209C446bf9d31D2903e01966B75a8cDe"), "Base Sepolia runbook must include the configured public deployer address");
+assert(includes(publicAgentBaseSepoliaRunbook, "Never include private keys"), "Base Sepolia runbook must include secret-handling guidance");
 
 const requiredMobilePhrases = [
   "FlowMemory's mobile apps are the user-facing control surface",

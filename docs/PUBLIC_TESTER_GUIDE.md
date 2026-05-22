@@ -16,6 +16,8 @@ This guide is for people who want to try something real in the public repo and r
 | Public hardening gate | Public docs, scripts, issue-template, and CI wiring | Node.js + npm | `npm run public:hardening` |
 | Full public local pass | All public tester lanes plus hardening and claim guardrails | Node.js + npm + Foundry | `npm run public:test:all` |
 
+
+Authorized operators can also rehearse the Base Sepolia public-agent deployment plan and bounded readback path. That lane is not required for normal public testers because dry run, broadcast, and readback require local RPC and deployer credentials.
 If you only have Node.js, run the quick JS smoke first. If you also have Foundry, run the contract and e2e lanes.
 
 ## Setup
@@ -165,6 +167,17 @@ Useful feedback:
 - Did the commands return useful JSON?
 - Were field names understandable?
 - What should the CLI summarize for non-protocol users?
+
+
+## Authorized Operator Lane: Base Sepolia Public-Agent Rehearsal
+
+Public-safe plan command:
+
+```powershell
+npm run public-agent-network:base-sepolia:plan -- --deployer-address 0x69F55917209C446bf9d31D2903e01966B75a8cDe --json
+```
+
+Operator-only dry run, broadcast, and readback commands are documented in `docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md`. Reports from that lane should include only public addresses, transaction hashes, contract addresses, bounded block ranges, event counts, and source-verification statuses. Never include private keys, RPC URLs, explorer API keys, or `.env` content.
 
 ## What To Report
 If you want the repo to generate most of the report body, run:
