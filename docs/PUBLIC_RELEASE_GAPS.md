@@ -36,15 +36,14 @@ Missing work:
 
 Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/166
 
-Current state: the public helper layer exposes control-plane wrappers, FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes, and direct calldata builders now exist for `AgentFactory.launchAgent` and `SwarmFactory.createSwarm`. Direct transaction submission is not yet a complete SDK surface.
+Current state: the public helper layer exposes control-plane wrappers, deterministic roots, contract-aligned launch hashes, direct calldata builders, EIP-712 typed-data signing requests, EIP-1193 provider-backed submission helpers, transaction receipt polling, and public-agent/swarm receipt event decoding. The SDK does not accept raw private keys by default.
 
 Missing work:
 
-- signer-provider abstraction that does not accept raw secrets by default;
-- provider-backed submission for `AgentFactory.launchAgent`;
-- provider-backed submission for `SwarmFactory.createSwarm`;
-- receipt polling and event decoding;
-- test coverage against local Anvil broadcast logs.
+- local Anvil SDK e2e that prepares, signs through an external provider, submits `AgentFactory.launchAgent`, waits for the receipt, and checks decoded launch/fuel/bond events;
+- local Anvil SDK e2e that submits `SwarmFactory.createSwarm`, waits for the receipt, and checks decoded swarm/budget events;
+- negative local Anvil coverage for nonce replay and bad class/toolset through the direct SDK lane;
+- public evidence from those local Anvil broadcast logs.
 
 ### 4. Public-network dashboard live data
 

@@ -103,11 +103,11 @@ The open swarm-born-agent work is tracked in issue #168.
 
 Public-agent methods include class/tool discovery, launch preview, launch intent, prototype launch record, and discovery projection. Public-swarm methods include class discovery, launch preview, prototype swarm record, and replay projection.
 
-Current methods are local/control-plane projections. The public helper layer also includes direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)`, so a signer or wallet can prepare contract-ready transaction data without accepting raw secrets into the repo.
+Current methods are local/control-plane projections. The public helper layer also includes direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)`, EIP-712 typed-data request builders for owner signatures, EIP-1193 provider-backed submission helpers, receipt polling, and public-agent/swarm event decoding. These helpers are designed for wallet/provider integrations; they do not accept raw private keys by default.
 
 ### Public SDK and CLI
 
-The public SDK/CLI surface wraps public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, swarm replay, and direct local/test contract-call preparation. External users should exercise it through `npm run public:test:quick` and `npm run public:test:cli` rather than older internal command names.
+The public SDK/CLI surface wraps public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, swarm replay, and direct local/test contract-call preparation. External users should exercise it through `npm run public:test:quick` and `npm run public:test:cli` rather than older internal command names. Direct contract submission should use an external wallet or provider implementing `request({ method, params })`; raw deployer keys, RPC credentials, and wallet secrets stay outside the SDK and outside Git.
 
 ### Agent Memory SDK
 
