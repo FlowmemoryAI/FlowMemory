@@ -90,11 +90,15 @@ for (const phrase of bannedPublicEntrypoints) {
 }
 
 const requiredReadmePhrases = [
+  "actions/workflows/ci.yml/badge.svg",
+  "actions/workflows/wallet-release.yml/badge.svg",
+  "Public Guide](docs/PUBLIC_REPO_GUIDE.md)",
   "accountability layer for autonomous agents",
   "Proof-of-Useful-Memory",
   "Agent Bonds",
   "task-scoped, capital-backed recourse records",
   "npm run public:test:quick",
+  "npm run public:test:cli",
   "docs/PUBLIC_TESTER_GUIDE.md",
   "iOS and Android app track",
   "docs/MOBILE_APPS.md",
@@ -108,6 +112,7 @@ const requiredTesterPhrases = [
   "npm run public:test:contracts",
   "npm run public:test:e2e",
   "npm run public:test:dashboard",
+  "npm run public:test:cli",
   "npm run public:test:all",
   "npm run public:test:report",
   "Public Tester Report",
@@ -137,6 +142,7 @@ for (const scriptName of documentedScriptMatches) {
 assert(includes(ci, "Public repository readiness"), "CI missing Public repository readiness job");
 assert(includes(ci, "npm run public:hardening"), "CI must run public:hardening");
 assert(includes(ci, "npm run public:test:all"), "CI must run public:test:all");
+assert(includes(publicGuide, "#174"), "PUBLIC_REPO_GUIDE must mention the mobile gap issue");
 
 const requiredMobilePhrases = [
   "FlowMemory's mobile apps are the user-facing control surface",

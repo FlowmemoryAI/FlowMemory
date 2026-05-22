@@ -12,6 +12,7 @@ This guide is for people who want to try something real in the public repo and r
 | Public-agent contracts | Agent class/tool registries, launch factory, shell factory, swarms, budget vault | Foundry | `npm run public:test:contracts` |
 | Local public-agent e2e | Full local public-agent + swarm script path | Foundry | `npm run public:test:e2e` |
 | Dashboard/mobile workbench | React dashboard views, shared mobile UI surface, and production build | Node.js + npm | `npm run public:test:dashboard` |
+| CLI / control-plane smoke | Public-agent and public-swarm CLI calls against a live local control-plane server | Node.js + npm | `npm run public:test:cli` |
 | Public hardening gate | Public docs, scripts, issue-template, and CI wiring | Node.js + npm | `npm run public:hardening` |
 | Full public local pass | All public tester lanes plus hardening and claim guardrails | Node.js + npm + Foundry | `npm run public:test:all` |
 
@@ -146,6 +147,14 @@ Useful feedback:
 - Is the mobile/operator app purpose clear from the dashboard and docs?
 
 ## Lane 5: CLI / Control-Plane Trial
+
+Fast path:
+
+```powershell
+npm run public:test:cli
+```
+
+Manual path:
 
 Terminal A:
 

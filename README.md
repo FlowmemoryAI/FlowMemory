@@ -1,6 +1,15 @@
 # FlowMemory
 
+[![CI](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/ci.yml)
+[![Wallet release](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml/badge.svg)](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml)
+[![License](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-public%20local%2Ftest-2563eb.svg)](docs/PUBLIC_REPO_GUIDE.md)
+[![Mobile](https://img.shields.io/badge/mobile-Android%20committed%20%7C%20iOS%20planned-7c3aed.svg)](docs/MOBILE_APPS.md)
+[![Base](https://img.shields.io/badge/Base-native-0052FF.svg)](docs/PUBLIC_REPO_GUIDE.md)
+
 **FlowMemory is the accountability layer for autonomous agents.**
+
+[Public Guide](docs/PUBLIC_REPO_GUIDE.md) · [Tester Guide](docs/PUBLIC_TESTER_GUIDE.md) · [Mobile Apps](docs/MOBILE_APPS.md) · [Agent Bonds](docs/AGENT_BONDS_PHASE2_ARCHITECTURE.md) · [Public Release Gaps](docs/PUBLIC_RELEASE_GAPS.md)
 
 Agents are becoming economic actors: they take tasks, call tools, spend budgets, produce artifacts, and need a memory trail other systems can inspect. FlowMemory turns that work into replayable receipts, compact on-chain commitments, verifier reports, reputation state, and task-scoped recourse records.
 
@@ -25,6 +34,17 @@ FlowMemory currently ships a local/test implementation of the main protocol surf
 | **Indexer / Verifier / Control Plane** | Fixture-first services that reconstruct facts from logs, generate reports, expose local JSON-RPC methods, and power the dashboard/SDKs. |
 | **Dashboard and mobile apps** | Vite/React public workbench plus the developing iOS/Android operator surfaces for tasks, receipts, wallets, recourse, and agent monitoring. |
 | **FlowRouter research** | Hardware/resilience track for local connectivity, LoRa/Meshtastic sidecar signaling, and operator-facing hardware experiments. |
+
+## Public Launch Snapshot
+
+| Area | Current public status | Evidence |
+| --- | --- | --- |
+| Repository | Public and launch-polished | `README.md`, `docs/PUBLIC_REPO_GUIDE.md` |
+| Public test lanes | Reproducible from a clean clone | `npm run public:test:all` |
+| Agent Bonds | Local/test accountability, recourse, and reputation flows | `docs/AGENT_BONDS_PHASE2_ARCHITECTURE.md` |
+| Public agent network | Local/test contracts and e2e path | `npm run public-agent-network:contracts`, `npm run public-agent-network:local-e2e` |
+| Mobile operator layer | Android shell committed; iOS product track documented | `docs/MOBILE_APPS.md`, `apps/dashboard/WALLET_DISTRIBUTION.md` |
+| Production / real-value claims | Still intentionally gated | `docs/MARKETING_CLAIMS_GUARDRAILS.md`, `docs/PRODUCTION_READINESS_CHECKLIST.md` |
 
 ## Why It Matters
 
@@ -155,6 +175,7 @@ Run the core public checks if you also have Foundry and dashboard dependencies:
 npm run public:test:contracts
 npm run public:test:e2e
 npm run public:test:dashboard
+npm run public:test:cli
 ```
 
 Run every public tester lane plus the hardening and claim guards:

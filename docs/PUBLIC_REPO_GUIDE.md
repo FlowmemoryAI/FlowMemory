@@ -19,6 +19,16 @@ The repository currently contains:
 - FlowRouter hardware/resilience research materials;
 - public docs that describe what exists, what works locally, and what must be verified before broader value-bearing claims are allowed.
 
+## Public Release Snapshot
+
+| Area | Current public status | Evidence |
+| --- | --- | --- |
+| Public repo | Live and reader-oriented | `README.md`, `docs/PUBLIC_REPO_GUIDE.md` |
+| Public test lanes | Reproducible locally | `npm run public:test:all` |
+| Agent Bonds | Local/test and challengeable | `docs/AGENT_BONDS_PHASE2_ARCHITECTURE.md` |
+| Mobile apps | Android shell committed, iOS documented as planned | `docs/MOBILE_APPS.md` |
+| Production claims | Explicitly blocked until more evidence exists | `docs/PRODUCTION_READINESS_CHECKLIST.md` |
+
 ## How The Pieces Fit Together
 
 ```text
@@ -49,8 +59,8 @@ registered class + approved tool set
 | --- | --- |
 | Understand the repo boundary | `README.md`, `docs/CURRENT_STATE.md`, `docs/MARKETING_CLAIMS_GUARDRAILS.md` |
 | Understand the public-agent release | `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`, `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md` |
-| Test what works locally | `docs/PUBLIC_TESTER_GUIDE.md` |
-| See exactly what is still missing | `docs/PUBLIC_RELEASE_GAPS.md` and GitHub issues #164-#168 |
+| Test what works locally | `docs/PUBLIC_TESTER_GUIDE.md`, `npm run public:test:all` |
+| See exactly what is still missing | `docs/PUBLIC_RELEASE_GAPS.md` and GitHub issues #164-#168 plus #174 |
 | Understand Base on-chain agent memory | `docs/base-onchain-agent-memory/README.md` |
 | Understand Rootflow and Flow Memory V0 | `docs/ROOTFLOW_V0.md`, `docs/FLOW_MEMORY_V0.md`, `docs/V0_LAUNCH_ACCEPTANCE.md` |
 | Understand mobile apps | `docs/MOBILE_APPS.md`, `apps/dashboard/WALLET_DISTRIBUTION.md` |
@@ -71,6 +81,7 @@ Then add the lanes that match your local tools:
 npm run public:test:contracts
 npm run public:test:e2e
 npm run public:test:dashboard
+npm run public:test:cli
 ```
 
 The full public local pass is:
@@ -146,5 +157,6 @@ The repo publishes remaining gaps instead of hiding them:
 - #166 direct contract-backed public launch SDK
 - #167 live dashboard discovery, fuel, bond, and swarm budget views
 - #168 swarm-born agents and memory inheritance
+- #174 mobile operator apps and iOS shell
 
 A gap is closed only when code, docs, tests, and public-safe evidence are merged or linked through GitHub history.
