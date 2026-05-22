@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,6 +14,7 @@ const maybeMetaTest = process.env.FLOWMEMORY_SKIP_AGENT_BONDS_META === "1" ? tes
 
 
 function seedGreenReadinessReport(): void {
+  mkdirSync(dirname(READINESS_REPORT_PATH), { recursive: true });
   writeFileSync(READINESS_REPORT_PATH, JSON.stringify({ schema: "flowmemory.agent_bonds.readiness_report.v1", ok: true, steps: [] }, null, 2));
 }
 

@@ -106,7 +106,7 @@ function main() {
 
   const issues = [];
   requireExisting(approval.pilotConfigPath, "pilotConfigPath", issues);
-  requireExisting(approval.readinessReportPath, "readinessReportPath", issues);
+  const readinessReportExists = requireExisting(approval.readinessReportPath, "readinessReportPath", issues);
   requireExisting(approval.operatorBundlePath, "operatorBundlePath", issues);
 
   if (approval.externalReview.completed !== true) {
@@ -143,9 +143,11 @@ function main() {
     issues.push("launch approval networkName must match pilot config networkName");
   }
 
-  const readiness = readJson(resolve(root, approval.readinessReportPath));
-  if (readiness.ok !== true) {
-    issues.push("readiness report must be green");
+  if (readinessReportExists) {
+    const readiness = readJson(resolve(root, approval.readinessReportPath));
+    if (readiness.ok !== true) {
+      issues.push("readiness report must be green");
+    }
   }
 
   validateAttestation(ajv, approval.externalReview, approval.externalReview.reportPath, externalReviewSchema, "externalReview", issues);

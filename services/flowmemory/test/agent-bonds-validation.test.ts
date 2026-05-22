@@ -14,6 +14,7 @@ const maybeMetaTest = process.env.FLOWMEMORY_SKIP_AGENT_BONDS_META === "1" ? tes
 
 
 function seedGreenReadinessReport(): void {
+  mkdirSync(dirname(READINESS_REPORT_PATH), { recursive: true });
   writeFileSync(READINESS_REPORT_PATH, JSON.stringify({ schema: "flowmemory.agent_bonds.readiness_report.v1", ok: true, steps: [] }, null, 2));
 }
 
@@ -30,6 +31,7 @@ function runNodeScript(args: string[]): { status: number | null; stdout: string;
 }
 
 maybeMetaTest("public launch validator fails on unresolved external sign-offs", () => {
+  seedGreenReadinessReport();
   const result = runNodeScript([
     "infra/scripts/agent-bonds-public-launch-validate.mjs",
     "fixtures/agent-bonds/launch-approval.template.json",
