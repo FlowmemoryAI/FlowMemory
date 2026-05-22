@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_launch_watch_report.v0",
-    "generatedAt":  "2026-05-22T01:09:11.2143204Z",
+    "generatedAt":  "2026-05-22T01:19:27.5353341Z",
     "status":  "passed",
     "launchWatchStatus":  "blocked-owner-input",
     "laneCount":  7,
@@ -35,12 +35,11 @@
 
                                       ],
     "staleTruthGateIds":  [
-                              "ops-launch-watch"
+                              "ops-launch-watch",
+                              "live-cutover-rehearsal"
                           ],
     "failedTruthGateIds":  [
-                               "live-cutover-rehearsal",
-                               "live-chain-capability-matrix",
-                               "completion-audit"
+
                            ],
     "unexpectedStaleTruthGateIds":  [
 
@@ -49,7 +48,7 @@
 
                                      ],
     "truthTableStaleOnlyBecauseLaunchWatchIsRefreshing":  true,
-    "truthTableFailedOnlyBecauseLaunchWatchIsRefreshing":  true,
+    "truthTableFailedOnlyBecauseLaunchWatchIsRefreshing":  false,
     "repoBlockedCapabilities":  [
 
                                 ],
@@ -456,7 +455,7 @@
                                              "opsMetricsExport":  "passed",
                                              "monitoringBundle":  "passed",
                                              "noSecret":  "passed",
-                                             "truthTable":  "failed"
+                                             "truthTable":  "stale"
                                          },
                       "requiredReports":  [
                                               "opsSnapshot",
@@ -512,7 +511,7 @@
                       "reportStatuses":  {
                                              "liveCapabilityMatrix":  "passed",
                                              "completionAudit":  "blocked",
-                                             "liveCutover":  "failed",
+                                             "liveCutover":  "blocked",
                                              "publicDeploymentContract":  "blocked",
                                              "ownerGoLiveHandoff":  "passed",
                                              "ownerNeedsNow":  "passed"
