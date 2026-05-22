@@ -704,7 +704,7 @@ test("human wallet metadata and signed envelopes cover transfer, token, DEX, wit
     password,
     label: "wallet-a",
     signerRole: "agent",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    privateKey: deterministicTestPrivateKey(1),
     chainId,
     createdAtUnixMs: issuedAtUnixMs
   });
@@ -712,7 +712,7 @@ test("human wallet metadata and signed envelopes cover transfer, token, DEX, wit
     password,
     label: "wallet-b",
     signerRole: "agent",
-    privateKey: "0x0000000000000000000000000000000000000000000000000000000000000002",
+    privateKey: deterministicTestPrivateKey(2),
     chainId,
     createdAtUnixMs: issuedAtUnixMs
   });
@@ -842,7 +842,7 @@ test("human wallet metadata and signed envelopes cover transfer, token, DEX, wit
   }
 
   const secretMetadata = structuredClone(metadata);
-  secretMetadata.accounts[0].privateKey = "0x1111111111111111111111111111111111111111111111111111111111111111";
+  secretMetadata.accounts[0].privateKey = deterministicTestPrivateKey(17);
   const secretResult = validateLocalWalletPublicMetadata(secretMetadata, { expectedChainId: chainId });
   assert.equal(secretResult.valid, false);
   assert.ok(secretResult.errors.includes("secret-material"));

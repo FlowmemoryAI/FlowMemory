@@ -306,7 +306,7 @@ Use this structure in every PR:
 
 ```md
 ## Summary
-- TBD
+- Summarize the user-visible or maintainer-visible change.
 
 ## Scope
 - Issue:
@@ -321,5 +321,5 @@ Use this structure in every PR:
 - [ ] Area-specific tests/checks:
 
 ## Risks And Follow-Ups
-- TBD
+- Name remaining risks, assumptions, rollout notes, or follow-up issues. If there are none, write `None`.
 ```

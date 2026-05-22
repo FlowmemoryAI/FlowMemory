@@ -33,7 +33,7 @@
     "public-agent-network:base-sepolia:broadcast": "node infra/scripts/run-public-agent-network-base-sepolia-deploy.mjs --broadcast",
     "public-agent-network:base-sepolia:readback": "node infra/scripts/public-agent-network-base-sepolia-readback.mjs",
     "public:hardening": "node infra/scripts/public-repo-hardening.mjs",
-    "public:test:quick": "node --test --test-concurrency=1 services/flowmemory/test/public-agent-network.test.ts services/flowmemory-sdk/test/client.test.ts services/agent-memory-sdk/test/client.test.ts",
+    "public:test:quick": "node --test --test-concurrency=1 services/flowmemory/test/public-agent-network.test.ts services/flowmemory-sdk/test/client.test.ts services/flowmemory-sdk/test/public-contracts.test.ts services/agent-memory-sdk/test/client.test.ts",
     "public:test:contracts": "npm run public-agent-network:contracts",
     "public:test:e2e": "npm run public-agent-network:local-e2e",
     "public:test:dashboard": "npm test --prefix apps/dashboard && npm run build --prefix apps/dashboard",

@@ -2,11 +2,11 @@
 
 ## What Changed
 
-- TBD
+- Summarize the user-visible or maintainer-visible change.
 
 ## Why
 
-- TBD
+- Explain why this change is needed and what risk it reduces.
 
 ## Scope
 
@@ -34,4 +34,4 @@
 
 ## Risk And Follow-Ups
 
-- TBD
+- Name remaining risks, assumptions, rollout notes, or follow-up issues. If there are none, write `None`.
