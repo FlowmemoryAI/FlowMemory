@@ -63,7 +63,7 @@ function main() {
   steps.push(runStep("verify only external public-launch blockers remain", "npm", ["run", "flowmemory:agent-bonds:public-launch:blockers"]));
   steps.push(runStep("audit goal deliverables", "npm", ["run", "flowmemory:agent-bonds:goal-audit"]));
   writeReport(steps);
-  steps.push(runStep("test flowmemory services", "npm", ["test", "--prefix", "services/flowmemory"], { FLOWMEMORY_SKIP_AGENT_BONDS_META: "1" }));
+  steps.push(runStep("test flowmemory Agent Bonds services", "npm", ["run", "test:agent-bonds", "--prefix", "services/flowmemory"], { FLOWMEMORY_SKIP_AGENT_BONDS_META: "1" }));
   steps.push(runStep("test dashboard", "npm", ["test", "--prefix", "apps/dashboard"]));
   steps.push(runStep("check launch claims", "node", ["infra/scripts/check-unsafe-claims.mjs"]));
 
