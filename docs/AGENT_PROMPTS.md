@@ -58,7 +58,7 @@ Before finishing, name exactly which launch acceptance rows your work satisfies 
 
 ## Contracts Agent
 
-Worktree: `E:\FlowMemory\flowmemory-contracts`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`
 
 Allowed by default:
 
@@ -91,7 +91,7 @@ If this issue is part of Rootflow V0, keep contract state compact and emit enoug
 
 ## Indexer/Verifier Agent
 
-Worktree: `E:\FlowMemory\flowmemory-indexer`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer`
 
 Allowed by default:
 
@@ -123,7 +123,7 @@ If this issue is part of Rootflow V0 or Flow Memory V0, produce or consume deter
 
 ## Crypto Agent
 
-Worktree: `E:\FlowMemory\flowmemory-crypto`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto`
 
 Allowed by default:
 
@@ -154,7 +154,7 @@ If this issue is part of Rootflow V0 or Flow Memory V0, define canonical ids, ha
 
 ## Chain/Devnet Research Agent
 
-Worktree: `E:\FlowMemory\flowmemory-chain`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain`
 
 Allowed by default:
 
@@ -183,7 +183,7 @@ Keep this no-value and research-only. Do not design or deploy a production chain
 
 ## Dashboard Agent
 
-Worktree: `E:\FlowMemory\flowmemory-dashboard`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`
 
 Allowed by default:
 
@@ -212,7 +212,7 @@ Define operator and explorer data models before UI. Fixture-backed local display
 
 ## Hardware Agent
 
-Worktree: `E:\FlowMemory\flowmemory-hardware`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware`
 
 Allowed by default:
 
@@ -241,7 +241,7 @@ Treat FlowRouter as research hardware. Treat Meshtastic and LoRa as low-bandwidt
 
 ## Research Agent
 
-Worktree: `E:\FlowMemory\flowmemory-research`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research`
 
 Allowed by default:
 
@@ -270,7 +270,7 @@ Separate hypotheses, experiments, accepted decisions, and open questions. Keep h
 
 ## Review/HQ Agent
 
-Worktree: `E:\FlowMemory\flowmemory-review`
+Worktree: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 Allowed by default:
 

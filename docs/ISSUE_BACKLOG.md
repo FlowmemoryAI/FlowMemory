@@ -22,14 +22,14 @@ state; update this index after issue or milestone changes.
 
 ## Agent Worktrees
 
-- Contracts: `E:\FlowMemory\flowmemory-contracts`
-- Indexer/verifier: `E:\FlowMemory\flowmemory-indexer`
-- Crypto: `E:\FlowMemory\flowmemory-crypto`
-- Chain/devnet research: `E:\FlowMemory\flowmemory-chain`
-- Dashboard: `E:\FlowMemory\flowmemory-dashboard`
-- Hardware: `E:\FlowMemory\flowmemory-hardware`
-- Research: `E:\FlowMemory\flowmemory-research`
-- Review/HQ: `E:\FlowMemory\flowmemory-review`
+- Contracts: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`
+- Indexer/verifier: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer`
+- Crypto: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto`
+- Chain/devnet research: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain`
+- Dashboard: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`
+- Hardware: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware`
+- Research: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research`
+- Review/HQ: `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`
 
 ## FlowChain Private/Local Testnet Package
 

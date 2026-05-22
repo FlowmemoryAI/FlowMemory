@@ -8,7 +8,7 @@ Accepted for research and future implementation gating.
 
 ## Context
 
-FlowMemory has merged V0 launch-core contracts, crypto helpers, fixture-first services, a dashboard, a no-value local devnet prototype, and guarded Base canary evidence. The research packet also includes Noesis, Rootflow, Claude/RD, Octra, FlowMemory, and FlowChain ideas that could easily be over-scoped into a public L1, token, bridge, or proof-system project before the local object model is proven.
+FlowMemory has merged V0 launch-core contracts, crypto helpers, fixture-first services, a dashboard, a no-value local devnet prototype, and guarded Base canary evidence. The research packet also includes legacy AI-native state research, Rootflow, external RD, external local-chain reference, FlowMemory, and FlowChain ideas that could easily be over-scoped into a public L1, token, bridge, or proof-system project before the local object model is proven.
 
 The current Ralph loop needs builders to know what is allowed now and what is later.
 
@@ -32,7 +32,7 @@ The current research task does not authorize implementation outside `research/`,
 
 - Builders can target a local/private no-value package without importing public-network scope.
 - Public devnet and public L1/mainnet work remain blocked behind named evidence.
-- Octra-level control-plane lessons become local acceptance criteria, not a reason to chase bridge or encrypted-coprocessor scope.
+- external local-chain reference-level control-plane lessons become local acceptance criteria, not a reason to chase bridge or encrypted-coprocessor scope.
 - The master L1 question remains unresolved until local evidence proves native receipt/memory state is stronger than app-level logs on an existing chain.
 
 ## Scope Boundaries

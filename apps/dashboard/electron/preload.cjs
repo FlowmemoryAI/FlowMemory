@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("flowchainDesktop", {
-  app: "Flowchain Wallet",
+  app: "FlowMemory Operator",
   platform: process.platform,
   packaged: process.env.NODE_ENV !== "development",
   getLocalWallet: () => ipcRenderer.invoke("flowchain-wallet:get-local-wallet"),

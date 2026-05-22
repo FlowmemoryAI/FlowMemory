@@ -1,6 +1,6 @@
 # Dashboard MVP
 
-FlowMemory Dashboard V0 is a local React/Vite operator app under `apps/dashboard/`. It visualizes fixture data for the first app-facing explorer surface and acts as the local FlowChain workbench when the control-plane API is running. The workbench now has Product Testnet V1 surfaces for wallet public state, local balances, token launch records, token balances, DEX pools, liquidity, swaps, explorer records, bridge-test records, and capped owner-testing real-value pilot evidence. It does not introduce production wallet custody, production tokenomics, production DEX claims, broad public readiness, or production bridge claims.
+FlowMemory Dashboard V0 is a local React/Vite operator app under `apps/dashboard/`. It visualizes fixture data for the first app-facing explorer surface and acts as the local FlowMemory workbench when the control-plane API is running. The workbench now has Product Testnet V1 surfaces for wallet public state, local balances, token launch records, token balances, DEX pools, liquidity, swaps, explorer records, bridge-test records, and capped owner-testing real-value pilot evidence. It does not introduce production wallet custody, production tokenomics, production DEX claims, broad public readiness, or production bridge claims.
 
 ## Scope
 

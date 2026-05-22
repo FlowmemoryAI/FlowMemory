@@ -6,7 +6,7 @@ Status: research gate index. This package does not authorize product code, publi
 
 ## Purpose
 
-This directory turns the FlowMemory, Rootflow, Noesis/Flow Chain, Claude/RD, and Octra research into practical gates for the local/private FlowChain testnet direction.
+This directory turns the FlowMemory, Rootflow, legacy AI-native state research, external RD, and external local-chain reference research into practical gates for the local/private FlowChain testnet direction.
 
 The only near-term build target this pack supports is a no-value local/private testnet package that proves the FlowMemory object model on a second computer.
 

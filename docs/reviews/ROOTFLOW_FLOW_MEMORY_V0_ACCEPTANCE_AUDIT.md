@@ -116,15 +116,15 @@ Not part of local/test V0 completion:
 ## Next Three Issues
 
 1. `[launch-core/validation] Add runtime schema validation and fixture diff guardrails`
-   - Agent/worktree: Review/Integration Agent in `E:\FlowMemory\flowmemory-review`.
+   - Agent/worktree: Review/Integration Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review`.
    - Owns: schema validator choice, fixture validation command, CI diff policy.
 
 2. `[contracts/security] Add static-analysis setup and V0 contract hardening notes`
-   - Agent/worktree: Contracts Agent in `E:\FlowMemory\flowmemory-contracts`.
+   - Agent/worktree: Contracts Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts`.
    - Owns: Slither setup issue, owner/status boundary review, test gaps.
 
 3. `[dashboard/polish] Add deeper generated object inspection`
-   - Agent/worktree: Dashboard Agent in `E:\FlowMemory\flowmemory-dashboard`.
+   - Agent/worktree: Dashboard Agent in `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard`.
    - Owns: drilldown views, generated object inspection, no live API claims.
 
 ## Current Recommendation

@@ -10,7 +10,7 @@ source of truth for issues, pull requests, reviews, and final history.
 Run from the main checkout:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 git fetch --all --prune
 .\infra\scripts\status-report.ps1
 gh pr list --repo FlowmemoryAI/FlowMemory --state open
@@ -68,7 +68,7 @@ must stay inside the current local/private and guarded canary boundaries.
 Pre-demo gate:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 git fetch --all --prune
 git status --short --branch
 npm run flowchain:prereq

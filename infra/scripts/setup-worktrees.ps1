@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$expectedRepo = "E:\FlowMemory\flowmemory-main"
-$flowMemoryRoot = "E:\FlowMemory"
+$flowMemoryRoot = if ([string]::IsNullOrWhiteSpace($env:FLOWMEMORY_WORKTREE_ROOT)) { Join-Path $HOME "FlowMemory" } else { $env:FLOWMEMORY_WORKTREE_ROOT }
+$expectedRepo = Join-Path $flowMemoryRoot "flowmemory-main"
 
 function Resolve-CanonicalPath {
     param(

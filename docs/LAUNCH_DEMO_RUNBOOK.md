@@ -67,7 +67,7 @@ Safe language:
 Run from the repo root:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 git fetch --all --prune
 git status --short --branch
 npm install
@@ -127,7 +127,7 @@ Use two PowerShell windows.
 Window 1, optional but recommended:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm run control-plane:serve
 ```
 
@@ -140,7 +140,7 @@ http://127.0.0.1:8787
 Window 2:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm run workbench:dev
 ```
 
@@ -368,7 +368,7 @@ fixtures. That is an intended fallback path.
 To recover live local API mode, start another PowerShell window:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm run control-plane:serve
 ```
 
@@ -379,7 +379,7 @@ Refresh the browser. The banner should change to **Local API detected.**
 Run:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm install
 npm run launch:v0
 npm test --prefix services/control-plane

@@ -95,7 +95,7 @@ local control-plane API at `http://127.0.0.1:8787`.
 To switch to local API mode, run in a separate PowerShell window:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm run control-plane:serve
 ```
 
@@ -107,7 +107,7 @@ active.** to **Local API detected.**
 Run the smallest local recovery path:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 npm install
 npm run launch:v0
 npm test --prefix services/control-plane

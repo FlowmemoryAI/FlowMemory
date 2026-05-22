@@ -9,7 +9,7 @@ This directory defines the cryptographic vocabulary, runnable utilities, fixture
 Install dependencies from this directory:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto\crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 npm install
 ```
 
@@ -171,7 +171,7 @@ There is a fixture-first `services/shared/` package in this repository, but the 
 
 Indexer and verifier services must not hand-roll different hash formats. If a service cannot import this package, it should copy the type strings and vectors exactly and prove compatibility by passing the same fixture hashes.
 
-Nearby Noesis/FlowChain RD crates under `E:\FlowMemory\github-research-sources\noesis-l1\crates\` are research inputs only for this package. They should not replace these Keccak typed-hash vectors unless a compatibility adapter and matching cross-language vectors are accepted.
+Private RD crypto sources are research inputs only for this package. They should not replace these Keccak typed-hash vectors unless a compatibility adapter and matching cross-language vectors are accepted.
 
 ## Downstream Consumption
 

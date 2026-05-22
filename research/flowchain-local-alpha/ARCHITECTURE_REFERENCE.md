@@ -25,8 +25,8 @@ Every major claim in this reference uses one of these labels:
 | Source | Status | How it should influence Local Alpha |
 | --- | --- | --- |
 | FlowMemory built state | Implemented | Use the merged launch-core V0 stack, schemas, fixture-backed dashboard, local no-value devnet, crypto V0 helpers, and chain docs as the factual baseline. |
-| Octra comparison | Local-alpha target | Copy the discipline of a coherent local control plane, stable API, recoverable local state, source visibility, and explorer observability. Do not copy bridge, token, or encrypted-coprocessor ambition into Local Alpha. |
-| Noesis / Flow Chain research | Later research | Treat AI Work Receipts, ModelPassports, AgentAccounts, MemoryCells, verifier modules, Process-Witness, and cognitive proof primitives as candidate long-term native objects and proof families. |
+| external local-chain reference comparison | Local-alpha target | Copy the discipline of a coherent local control plane, stable API, recoverable local state, source visibility, and explorer observability. Do not copy bridge, token, or encrypted-coprocessor ambition into Local Alpha. |
+| legacy AI-native state research research | Later research | Treat AI Work Receipts, ModelPassports, AgentAccounts, MemoryCells, verifier modules, Process-Witness, and cognitive proof primitives as candidate long-term native objects and proof families. |
 | Claude crypto research | Later research | Treat SEAL/dependency proofs, Synthetic Non-Amplification, proof-carrying receipts, and private evidence as research directions that inform boundaries before they become protocol code. |
 | `chain/` docs | Implemented as research docs | Keep Base anchors, bridge security, hardware node roles, DA, and L1/appchain work gated. |
 
@@ -117,7 +117,7 @@ Only the local/private testnet gate may be used as near-term implementation guid
 | Go/no-go gates for future L1/appchain work | Local-alpha target | Validator set design, staking, sequencer operations, governance, fees, or token design. |
 | Crypto research map and private-state roadmap | Local-alpha target | ZK circuits, encrypted compute runtime, threshold crypto, or production proof systems. |
 
-## What FlowChain Should Be At Octra-Level
+## What FlowChain Should Be At external local-chain reference-Level
 
 | Competency | Status | FlowChain Local Alpha bar |
 | --- | --- | --- |

@@ -1,12 +1,12 @@
-# Octra Competency Bar For FlowChain Local Alpha
+# external local-chain reference Competency Bar For FlowChain Local Alpha
 
 Last updated: 2026-05-13
 
-Status: comparison-derived research reference. The Octra material is treated as a user-supplied design reference, not as an independently re-crawled live audit.
+Status: comparison-derived research reference. The external local-chain reference material is treated as a user-supplied design reference, not as an independently re-crawled live audit.
 
 ## Purpose
 
-The Octra comparison is useful because it highlights an alpha-stage chain pattern: ambitious cryptography becomes credible only when the local control plane is coherent. FlowChain Local Alpha should copy that discipline, not Octra's product category or bridge/encrypted-coprocessor ambition.
+The external local-chain reference comparison is useful because it highlights an alpha-stage chain pattern: ambitious cryptography becomes credible only when the local control plane is coherent. FlowChain Local Alpha should copy that discipline, not external local-chain reference's product category or bridge/encrypted-coprocessor ambition.
 
 ## Status Vocabulary
 
@@ -18,7 +18,7 @@ The Octra comparison is useful because it highlights an alpha-stage chain patter
 
 ## Competency Matrix
 
-| Octra signal | FlowChain interpretation | Status | Local Alpha evidence required |
+| external local-chain reference signal | FlowChain interpretation | Status | Local Alpha evidence required |
 | --- | --- | --- | --- |
 | Local encrypted wallet/vault | FlowMemory needs a local secret vault for agent keys, wallet keys, API keys, hardware keys, and private receipt workspaces. | Local-alpha target | Import, export, unlock, rotate, lock, corrupt-file recovery, and no plaintext secret persistence in logs or fixtures. |
 | Unified JSON-RPC/control API | FlowMemory needs one local API for receipt, memory, artifact, verifier, challenge, dependency, finality, and devnet resources. | Local-alpha target | Versioned schemas, idempotent commands, pagination, retry semantics, stable error shapes, and compatibility snapshots. |
@@ -33,7 +33,7 @@ The Octra comparison is useful because it highlights an alpha-stage chain patter
 
 ## Concrete Surface Bar
 
-This is the Octra-level comparison reduced to the surfaces FlowMemory actually needs. These are local/private testnet targets, not public chain claims.
+This is the external local-chain reference-level comparison reduced to the surfaces FlowMemory actually needs. These are local/private testnet targets, not public chain claims.
 
 The accepted control-plane boundary is recorded in `docs/DECISIONS/2026-05-13-flowchain-local-alpha-control-plane-boundary.md`.
 
@@ -207,7 +207,7 @@ Release non-claims:
 
 ## Competency Bar Summary
 
-FlowChain Local Alpha reaches the Octra-level bar when a local developer can:
+FlowChain Local Alpha reaches the external local-chain reference-level bar when a local developer can:
 
 1. **Local-alpha target**: unlock local secrets without leaking them to logs, fixtures, public receipts, or chain data.
 2. **Local-alpha target**: use one local API to create or inspect receipts, memory, artifacts, verifier reports, challenges, dependencies, and devnet state.

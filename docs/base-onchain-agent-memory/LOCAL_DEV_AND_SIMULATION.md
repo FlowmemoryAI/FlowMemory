@@ -160,7 +160,7 @@ Required safety gates:
 
 ## External model review workflow
 
-If using GPT, DeepSeek, or another model for architecture review:
+If using an external model for architecture review:
 
 1. Do not paste secrets.
 2. Give it this documentation package and ask for adversarial review.
@@ -172,8 +172,7 @@ If using GPT, DeepSeek, or another model for architecture review:
 Suggested environment variable names if a local script is later added:
 
 ```text
-DEEPSEEK_API_KEY
-OPENAI_API_KEY
+MODEL_REVIEW_API_KEY
 ```
 
 These variables must remain local and uncommitted.

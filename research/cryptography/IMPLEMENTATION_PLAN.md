@@ -42,7 +42,7 @@ Acceptance checks:
 - Local tests reproduce all vector hashes.
 - Bad vectors fail deterministically.
 - No production keys, secrets, RPC URLs, or private locators are committed.
-- The RD/research crypto boundary is explicit: nearby Noesis/FlowChain SHA-256 and proof-system scaffolds are research inputs, while FlowMemory `crypto/` remains the Keccak typed-hash package for Local Alpha.
+- The RD/research crypto boundary is explicit: nearby legacy AI-native state research SHA-256 and proof-system scaffolds are research inputs, while FlowMemory `crypto/` remains the Keccak typed-hash package for Local Alpha.
 - Deferred RD tracks are gated in `research/cryptography/FLOWCHAIN_RD_GATES.md`: Process-Witness, SEAL/dependency privacy, Synthetic Non-Amplification, advanced encrypted compute, GPU proofs, and audited production proof systems.
 
 ## Phase 2: Shared Contract Hash Library

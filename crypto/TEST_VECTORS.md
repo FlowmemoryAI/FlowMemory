@@ -59,7 +59,7 @@ An implementation should reproduce:
 Run the package test suite:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto\crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 npm test
 ```
 

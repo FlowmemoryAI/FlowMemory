@@ -60,7 +60,7 @@ jobs:
       - name: Upload desktop artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flowchain-wallet-desktop-${{ matrix.name }}
+          name: flowmemory-operator-desktop-${{ matrix.name }}
           path: ${{ matrix.artifact }}
           if-no-files-found: error
 
@@ -108,7 +108,7 @@ jobs:
         if: env.HAS_ANDROID_RELEASE_KEYSTORE == 'true'
         shell: bash
         run: |
-          echo "$FLOWCHAIN_ANDROID_KEYSTORE_BASE64" | base64 -d > flowchain-release.keystore
+          echo "$FLOWCHAIN_ANDROID_KEYSTORE_BASE64" | base64 -d > apps/dashboard/flowchain-release.keystore
         env:
           FLOWCHAIN_ANDROID_KEYSTORE_BASE64: ${{ secrets.FLOWCHAIN_ANDROID_KEYSTORE_BASE64 }}
 
@@ -125,7 +125,7 @@ jobs:
       - name: Upload Android APKs
         uses: actions/upload-artifact@v4
         with:
-          name: flowchain-wallet-android
+          name: flowmemory-operator-android
           path: |
             apps/dashboard/android/app/build/outputs/apk/debug/*.apk
             apps/dashboard/android/app/build/outputs/apk/release/*.apk
@@ -151,7 +151,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            --title "Flowchain Wallet $GITHUB_REF_NAME" \
-            --notes "Desktop and Android wallet builds generated from $GITHUB_SHA."
+            --title "FlowMemory Operator $GITHUB_REF_NAME" \
+            --notes "Desktop and Android operator app builds generated from $GITHUB_SHA."
           find release-artifacts -type f -print0 \
             | xargs -0 -I {} gh release upload "$GITHUB_REF_NAME" "{}" --clobber

@@ -1,4 +1,4 @@
-# FlowMemory Dashboard / FlowChain Workbench V0
+# FlowMemory Dashboard / FlowMemory Workbench V0
 
 Local operator/explorer app for inspecting FlowMemory V0 fixture output and the FlowChain private/local testnet workbench surface. It is intentionally local-first and does not claim value-bearing wallet support, token pricing, or hosted deployment.
 
@@ -32,7 +32,7 @@ npm test --prefix apps/dashboard
 npm run build --prefix apps/dashboard
 ```
 
-The first route is the FlowChain workbench. It tries the local control-plane API at:
+The first route is the FlowMemory workbench. It tries the local control-plane API at:
 
 ```text
 http://127.0.0.1:8787
@@ -154,7 +154,7 @@ fixtures/dashboard/generated/hardware-heartbeats.json
 
 ## Current Views
 
-- FlowChain workbench
+- FlowMemory workbench
 - Overview
 - Base canary review
 - Flow Memory / Rootflow

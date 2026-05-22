@@ -403,7 +403,7 @@ test("receipt-adjacent fields fail closed when changed", () => {
 
 test("computes FlowChain Local Alpha object ids and validates schema documents", () => {
   assert.equal(localAlphaObjects.schema, "flowmemory.crypto.local-alpha-object-fixtures.v0");
-  assert.match(localAlphaObjects.rdBoundary.researchCryptoCrate, /noesis-crypto$/);
+  assert.equal(localAlphaObjects.rdBoundary.researchCryptoCrate, "external-rd/crypto");
   assert.match(localAlphaObjects.rdBoundary.consumeAs, /Research vocabulary/);
   assert.match(localAlphaObjects.rdBoundary.operatorVaultBoundary, /no-value test keys/);
 

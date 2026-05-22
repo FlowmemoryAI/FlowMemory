@@ -58,7 +58,7 @@ function startBundledStaticServer() {
     server.listen(0, "127.0.0.1", () => {
       const address = server.address();
       if (typeof address !== "object" || address === null) {
-        reject(new Error("Flowchain Wallet static server did not bind to a local port."));
+        reject(new Error("FlowMemory Operator static server did not bind to a local port."));
         return;
       }
       resolve({ server, origin: `http://127.0.0.1:${address.port}` });
@@ -74,7 +74,7 @@ async function createWalletWindow() {
     height: 940,
     minWidth: 1120,
     minHeight: 720,
-    title: "Flowchain Wallet",
+    title: "FlowMemory Operator",
     backgroundColor: "#fff9ee",
     show: false,
     webPreferences: {
@@ -118,7 +118,7 @@ async function createWalletWindow() {
   return window;
 }
 
-app.setName("Flowchain Wallet");
+app.setName("FlowMemory Operator");
 
 app.whenReady().then(() => {
   ipcMain.handle("flowchain-wallet:get-local-wallet", () => publicDesktopWalletStatus(app.getPath("userData")));
@@ -126,7 +126,7 @@ app.whenReady().then(() => {
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
-      label: "Flowchain Wallet",
+      label: "FlowMemory Operator",
       submenu: [
         { role: "reload" },
         { role: "toggleDevTools" },

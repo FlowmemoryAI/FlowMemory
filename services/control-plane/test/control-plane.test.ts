@@ -178,7 +178,7 @@ test("returns standard unknown method errors", () => {
 test("validates malformed requests and bad params with stable codes", () => {
   const invalidRequest = dispatchJsonRpc({ jsonrpc: "2.0", id: 1 }) as RpcErrorResponse;
   const badLimit = dispatchJsonRpc({ jsonrpc: "2.0", id: 2, method: "receipt_list", params: { limit: 0 } }) as RpcErrorResponse;
-  const badRawSource = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "raw_json_get", params: { source: "E:/secrets" } }) as RpcErrorResponse;
+  const badRawSource = dispatchJsonRpc({ jsonrpc: "2.0", id: 3, method: "raw_json_get", params: { source: "notAllowedSource" } }) as RpcErrorResponse;
 
   assert.equal(invalidRequest.error.code, -32600);
   assert.equal(invalidRequest.error.data.reasonCode, "request.invalid");

@@ -165,7 +165,7 @@ describe("dashboard fixture", () => {
     expect(matches.map((match) => match.status)).toContain("failed");
   });
 
-  it("builds a FlowChain workbench from existing dashboard and devnet fixtures", () => {
+  it("builds a FlowMemory workbench from existing dashboard and devnet fixtures", () => {
     const workbench = buildWorkbenchSnapshot(data, {
       devnetState,
       devnetDashboardState,
@@ -541,7 +541,7 @@ describe("dashboard fixture", () => {
     });
     const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(ExplorerView, { data, workbench })));
 
-    expect(html).toContain("Flowchain explorer");
+    expect(html).toContain("FlowMemory explorer");
     expect(html).toContain("Create, fund, send, inspect");
     expect(html).toContain("Launch boundary");
     expect(html).toContain("Private chain live");

@@ -285,7 +285,7 @@ export function ExplorerView({ data, workbench }: { data: DashboardData; workben
     <div className="view-stack">
       <SectionHeader
         eyebrow="explorer"
-        title="Flowchain explorer"
+        title="FlowMemory explorer"
         detail="Search blocks, transactions, wallet records, faucet events, and bridge evidence from the running local chain and generated readiness fixtures."
         action={
           <div className="workbench-header-actions">

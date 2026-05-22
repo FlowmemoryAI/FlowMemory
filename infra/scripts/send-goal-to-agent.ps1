@@ -16,6 +16,8 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+$flowMemoryRoot = if ([string]::IsNullOrWhiteSpace($env:FLOWMEMORY_WORKTREE_ROOT)) { Join-Path $HOME "FlowMemory" } else { $env:FLOWMEMORY_WORKTREE_ROOT }
+
 Add-Type @"
 using System;
 using System.Text;
@@ -58,35 +60,35 @@ public class FlowMemoryWindowTools {
 $agents = @{
     contracts = @{
         TitlePattern = "flowmemory-contracts"
-        Worktree = "E:\FlowMemory\flowmemory-contracts"
+        Worktree = "$flowMemoryRoot\flowmemory-contracts"
     }
     indexer = @{
         TitlePattern = "flowmemory-indexer"
-        Worktree = "E:\FlowMemory\flowmemory-indexer"
+        Worktree = "$flowMemoryRoot\flowmemory-indexer"
     }
     crypto = @{
         TitlePattern = "flowmemory-crypto"
-        Worktree = "E:\FlowMemory\flowmemory-crypto"
+        Worktree = "$flowMemoryRoot\flowmemory-crypto"
     }
     chain = @{
         TitlePattern = "flowmemory-chain"
-        Worktree = "E:\FlowMemory\flowmemory-chain"
+        Worktree = "$flowMemoryRoot\flowmemory-chain"
     }
     dashboard = @{
         TitlePattern = "flowmemory-dashboard"
-        Worktree = "E:\FlowMemory\flowmemory-dashboard"
+        Worktree = "$flowMemoryRoot\flowmemory-dashboard"
     }
     hardware = @{
         TitlePattern = "flowmemory-hardware"
-        Worktree = "E:\FlowMemory\flowmemory-hardware"
+        Worktree = "$flowMemoryRoot\flowmemory-hardware"
     }
     research = @{
         TitlePattern = "flowmemory-research"
-        Worktree = "E:\FlowMemory\flowmemory-research"
+        Worktree = "$flowMemoryRoot\flowmemory-research"
     }
     review = @{
         TitlePattern = "flowmemory-review"
-        Worktree = "E:\FlowMemory\flowmemory-review"
+        Worktree = "$flowMemoryRoot\flowmemory-review"
     }
 }
 
@@ -143,7 +145,7 @@ if (-not $agents.ContainsKey($Agent)) {
 $agentConfig = $agents[$Agent]
 $window = Get-AgentWindow -Pattern $agentConfig.TitlePattern
 
-$dispatchRoot = "E:\FlowMemory\agent-dispatch"
+$dispatchRoot = "$flowMemoryRoot\agent-dispatch"
 New-Item -ItemType Directory -Force -Path $dispatchRoot | Out-Null
 
 $goalText = $Goal

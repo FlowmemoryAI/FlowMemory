@@ -14,7 +14,7 @@ if (-not (Test-Path -LiteralPath $dashboardModules)) {
 }
 
 if ($BuildOnly) {
-    Invoke-FlowChainCommand -Label "Build FlowChain workbench" -FilePath "npm" -ArgumentList @("run", "build", "--prefix", "apps/dashboard")
+    Invoke-FlowChainCommand -Label "Build FlowMemory workbench" -FilePath "npm" -ArgumentList @("run", "build", "--prefix", "apps/dashboard")
     Write-Host "Workbench build complete."
     return
 }
@@ -23,5 +23,5 @@ Write-Host "Starting the existing dashboard as the FlowChain local workbench."
 Write-Host "The Vite server will print the local URL, usually http://127.0.0.1:5173/."
 Write-Host "Press Ctrl+C in this PowerShell window to stop it."
 
-Invoke-FlowChainCommand -Label "Start FlowChain workbench" -FilePath "npm" -ArgumentList @("run", "dev", "--prefix", "apps/dashboard")
+Invoke-FlowChainCommand -Label "Start FlowMemory workbench" -FilePath "npm" -ArgumentList @("run", "dev", "--prefix", "apps/dashboard")
 

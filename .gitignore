@@ -18,3 +18,15 @@ crypto/node_modules/
 *.tgz
 # Prevent accidental nested clean-clone copies from local public quickstart testing.
 /FlowMemory/
+apps/dashboard/flowchain-release.keystore
+
+# Keep generated/internal launch artifacts out of the public repo.
+docs/agent-runs/**
+!docs/agent-runs/
+!docs/agent-runs/README.md
+docs/agent-goals/**
+!docs/agent-goals/
+!docs/agent-goals/README.md
+inbox/unsorted/**
+!inbox/unsorted/
+!inbox/unsorted/README.md

@@ -11,7 +11,7 @@ Private/local testnet checklist companion:
 Run:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 git fetch --all --prune
 .\infra\scripts\status-report.ps1
 gh pr list --repo FlowmemoryAI/FlowMemory --state open
@@ -98,7 +98,7 @@ Priority order:
 Use one terminal per agent:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-contracts
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts
 codex
 ```
 
@@ -173,6 +173,6 @@ Record:
 Suggested command:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\status-report.ps1
 ```

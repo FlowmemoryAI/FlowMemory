@@ -27,77 +27,77 @@ This is the first document to read after `AGENTS.md`.
 
 ## Multi-Agent Worktree Setup
 
-Use one Git worktree per Codex agent. Each worktree has its own branch and folder under `E:\FlowMemory`, so agents can work without sharing the same checkout.
+Use one Git worktree per Codex agent. Each worktree has its own branch and folder under `FLOWMEMORY_WORKTREE_ROOT`, so agents can work without sharing the same checkout.
 
 Start from the main checkout:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\setup-worktrees.ps1
 ```
 
 The setup script creates these worktrees if they do not already exist:
 
 ```text
-E:\FlowMemory\flowmemory-contracts   agent/contracts
-E:\FlowMemory\flowmemory-indexer     agent/indexer
-E:\FlowMemory\flowmemory-hardware    agent/hardware
-E:\FlowMemory\flowmemory-dashboard   agent/dashboard
-E:\FlowMemory\flowmemory-research    agent/research
-E:\FlowMemory\flowmemory-crypto      agent/crypto
-E:\FlowMemory\flowmemory-chain       agent/chain
-E:\FlowMemory\flowmemory-review      agent/review
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts   agent/contracts
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer     agent/indexer
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware    agent/hardware
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard   agent/dashboard
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-research    agent/research
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto      agent/crypto
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain       agent/chain
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-review      agent/review
 ```
 
 Run each Codex agent from its assigned worktree in a separate PowerShell window:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-contracts
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-indexer
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-hardware
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-dashboard
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-research
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-research
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-crypto
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-chain
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain
 codex
 ```
 
 ```powershell
-cd E:\FlowMemory\flowmemory-review
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-review
 codex
 ```
 
 ## Multi-Agent Safety Rules
 
-- Keep `E:\FlowMemory\flowmemory-main` as the main checkout and coordination point.
+- Keep `FLOWMEMORY_WORKTREE_ROOT\flowmemory-main` as the main checkout and coordination point.
 - Run each agent only inside its assigned worktree folder.
 - Check `git status --short --branch` before starting and before handing off work.
 - Avoid assigning two agents to edit the same files at the same time.
-- Use `git worktree list` from `E:\FlowMemory\flowmemory-main` to inspect all local worktrees.
+- Use `git worktree list` from `FLOWMEMORY_WORKTREE_ROOT\flowmemory-main` to inspect all local worktrees.
 - Long-running bucket agents should post or record short handoffs that name touched files, checks run, unresolved risks, and the next smallest safe task.
 - Review agents should avoid product implementation and should work in docs, templates, scripts, and issue/PR hygiene unless an issue explicitly assigns a narrower technical scope.
 

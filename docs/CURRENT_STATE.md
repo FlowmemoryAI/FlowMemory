@@ -29,7 +29,7 @@ roots. The FlowChain private/local testnet target must build on those surfaces;
 it is not approval for production mainnet, public validators, tokenomics,
 audited cryptography, or production bridge work.
 
-L1 research direction is now inventoried in `docs/L1_RESEARCH_INVENTORY.md`. Noesis / Flow Chain remains an external research corpus and longer-term AI-native state direction; it is not approved for production L1 implementation in this repo.
+L1 research direction is now inventoried in `docs/L1_RESEARCH_INVENTORY.md`. Legacy AI-native state research remains external reference material only; it is not approved for production L1 implementation in this repo.
 
 ## Implemented In The Merged Repo
 
@@ -42,7 +42,7 @@ Repository operating system:
 - `docs/DECISIONS/` for durable decision records.
 - GitHub issue and pull request templates.
 - Conservative repository hygiene CI.
-- `infra/scripts/setup-worktrees.ps1` for local multi-agent worktrees under `E:\FlowMemory`.
+- `infra/scripts/setup-worktrees.ps1` for local multi-agent worktrees under `FLOWMEMORY_WORKTREE_ROOT`.
 - Active work areas for `contracts/`, `services/`, `apps/`, `hardware/`, `research/`, `crypto/`, `infra/scripts/`, and `inbox/`.
 
 Contracts foundation:
@@ -137,8 +137,8 @@ Launch-core specifications:
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 - `docs/reviews/LAUNCH_CANDIDATE_SECURITY_BOUNDARY_REVIEW.md` records the current security boundary review for local/test V0 demos and guarded canary review.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
-- `docs/LAUNCH_CORE_AGENT_GOALS.md` provides copy-ready goals for the contracts, crypto, indexer/verifier, dashboard, and review worktrees.
-- `docs/L1_RESEARCH_INVENTORY.md` maps the external Noesis / Flow Chain, Rootflow, FlowCodec, and older AI-L1 research archives to FlowMemory V0 boundaries.
+- `docs/LAUNCH_CORE_AGENT_GOALS.md` records the public boundary for launch-core coordination; raw prompt packs stay out of the public repo.
+- `docs/L1_RESEARCH_INVENTORY.md` maps external research references to public-safe FlowMemory V0 promotion boundaries.
 
 FlowChain private/local testnet snapshot:
 
@@ -179,7 +179,7 @@ FlowChain private/local testnet snapshot:
 - Real Meshtastic or LoRa device integration.
 - Cryptographic proof systems, GPU proofs, verifier networks, or verifier economics.
 - Production appchain/L1 implementation, validator planning, sequencer planning, bridge deployment, or mainnet deployment.
-- Direct Noesis code import, production Flow Chain implementation, production validator network work, tokenomics, and mainnet work.
+- Direct legacy AI-native state research code import, production Flow Chain implementation, production validator network work, tokenomics, and mainnet work.
 
 ## Active GitHub Work Shape
 
@@ -214,7 +214,7 @@ Local worktrees may contain unmerged work. Unmerged files are not source of trut
 Use:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\status-report.ps1
 ```
 

@@ -20,13 +20,13 @@ No. Contract storage and logs are public. Private or heavy evidence should be re
 
 A hosted memory database can be faster and richer, but it requires trust in the operator. FlowMemory's wedge is public, compact, replayable state transitions: parent root, memory delta, action receipt, verifier status, and current view.
 
-## How is this different from Nookplot?
+## How is this different from broad coordination systems?
 
-Nookplot is broad coordination infrastructure: identity, reputation, social surfaces, marketplace, bounties, MCP, gateway, and hosted memory. FlowMemory should focus on the narrower memory/replay kernel: deterministic preview, chain-side memory roots, action receipts, verifier reports, and `AgentMemoryView`.
+Broad coordination systems cover identity, reputation, social surfaces, marketplace workflows, bounties, MCP gateways, and hosted memory. FlowMemory should focus on the narrower memory/replay kernel: deterministic preview, chain-side memory roots, action receipts, verifier reports, and `AgentMemoryView`.
 
-## Does FlowMemory compete with Nookplot?
+## Does FlowMemory compete with broad coordination systems?
 
-It can be independent and complementary. Nookplot-like systems need coordination breadth. FlowMemory should provide a sharper state spine that such agents could use if they need public memory continuity and replay.
+It can be independent and complementary. Coordination systems need breadth; FlowMemory should provide a sharper state spine those systems can use when they need public memory continuity and replay.
 
 ## Why Base first?
 
@@ -78,7 +78,7 @@ Full transcripts are expensive, public if on-chain, and usually not the best dec
 
 ## How do external models fit?
 
-GPT, DeepSeek, Codex, and similar systems can design policies, attack assumptions, generate tests, and compress behavior into deterministic rules. Their raw transcripts stay off-chain unless intentionally summarized and committed.
+External model reviewers and similar systems can design policies, attack assumptions, generate tests, and compress behavior into deterministic rules. Their raw transcripts stay off-chain unless intentionally summarized and committed.
 
 ## What is the definition of done for the first build?
 

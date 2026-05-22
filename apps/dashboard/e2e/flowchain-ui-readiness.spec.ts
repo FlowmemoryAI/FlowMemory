@@ -300,7 +300,7 @@ test.describe("FlowChain wallet, faucet, and explorer browser readiness", () => 
     await page.getByRole("link", { name: /Inspect tester activity/ }).click();
     await expect(page).toHaveURL(/\/explorer$/);
     await page.reload();
-    await expect(page.getByRole("heading", { name: "Flowchain explorer" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "FlowMemory explorer" })).toBeVisible();
     await expect(page.getByLabel("Tester settlement trace").getByText("Create, fund, send, inspect")).toBeVisible();
     await expect(page.getByText("Funding proofs", { exact: true })).toBeVisible();
     await expect(page.getByText("Wallet records", { exact: true })).toBeVisible();

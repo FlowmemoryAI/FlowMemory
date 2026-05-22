@@ -74,7 +74,7 @@ Dirty worktrees are expected in multi-agent work, but they must be explicit.
 Before assigning an agent:
 
 ```powershell
-cd E:\FlowMemory\flowmemory-main
+cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-main
 .\infra\scripts\status-report.ps1
 ```
 

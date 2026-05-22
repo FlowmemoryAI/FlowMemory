@@ -8,7 +8,7 @@ Accepted for research and implementation gating.
 
 ## Context
 
-The Octra comparison showed that an advanced chain feels credible only when its local developer and operator control plane is coherent. FlowMemory should absorb that lesson without copying Octra's bridge, token, encrypted-coprocessor, or public-network ambitions into Local Alpha.
+The external local-chain reference comparison showed that an advanced chain feels credible only when its local developer and operator control plane is coherent. FlowMemory should absorb that lesson without copying external local-chain reference's bridge, token, encrypted-coprocessor, or public-network ambitions into Local Alpha.
 
 FlowMemory already has launch-core fixtures, local verifier reports, a fixture-backed dashboard, a no-value local devnet prototype, and guarded canary evidence. The missing local-alpha surface is a unified way to inspect and operate receipts, memory lineage, artifacts, verifier reports, dependencies, challenges, finality, provenance, and releases.
 
@@ -32,7 +32,7 @@ This decision makes those surfaces Local Alpha requirements. It does not authori
 
 - **Choose an L1 framework first**: rejected because framework choice is premature until the local object model and control plane prove useful.
 - **Build only a chain CLI without workbench/API requirements**: rejected because receipts, memory lineage, dependencies, and challenge/finality state must be explainable to builders and reviewers.
-- **Copy Octra's bridge/encrypted-compute ambitions**: rejected because FlowMemory's near-term edge is proof-carrying memory and receipt provenance, not broad encrypted-chain parity.
+- **Copy external local-chain reference's bridge/encrypted-compute ambitions**: rejected because FlowMemory's near-term edge is proof-carrying memory and receipt provenance, not broad encrypted-chain parity.
 
 ## Consequences
 

@@ -189,4 +189,4 @@ Searches for `Claw` and `claw` in repository issues and code returned no matchin
 - Define key registry and verifier set root governance.
 - Define challenge evidence and response envelopes.
 - Produce a decision record before CursorRegistry or proof-carrying receipts are implemented.
-- Decide when, if ever, the nearby Noesis/FlowChain RD crypto crates should receive a Keccak compatibility adapter for these V0 object IDs.
+- Decide when, if ever, external RD crypto sources should receive a Keccak compatibility adapter for these V0 object IDs.

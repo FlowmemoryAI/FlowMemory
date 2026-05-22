@@ -50,7 +50,7 @@ Required evidence:
 | Requirement | Status | Pass condition |
 | --- | --- | --- |
 | Architecture reference | Local-alpha target | Local workbench, API, devnet, explorer, provenance, object model, releases, and later work are defined. |
-| Octra competency bar | Local-alpha target | Control-plane parity is translated into FlowMemory-specific acceptance criteria. |
+| external local-chain reference competency bar | Local-alpha target | Control-plane parity is translated into FlowMemory-specific acceptance criteria. |
 | L1 gates | Local-alpha target | Go/no-go gates exist before validator, public chain, token, bridge, or proof work. |
 | Crypto research map | Local-alpha target | Process-Witness, SEAL, Synthetic Non-Amplification, proof-carrying receipts, and R&D/library boundaries are mapped. |
 | Private state roadmap | Local-alpha target | Local vault, private references, dependency privacy, and encrypted compute sequence is explicit. |

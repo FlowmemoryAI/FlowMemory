@@ -52,7 +52,7 @@ These are the minimum gates before the research tracks below may enter implement
 
 ### Meaning
 
-**Later research**: Process-Witness is the Noesis/Flow Chain research family for certifying dimensions of AI cognition and behavior beyond "a computation matched a circuit." The review packet describes trajectory commitments, predicates over reasoning steps, concentration bounds, challenge sampling, sparse openings, composition rules, and proof/circuit paths.
+**Later research**: Process-Witness is the legacy AI-native state research research family for certifying dimensions of AI cognition and behavior beyond "a computation matched a circuit." The review packet describes trajectory commitments, predicates over reasoning steps, concentration bounds, challenge sampling, sparse openings, composition rules, and proof/circuit paths.
 
 ### Why It Matters
 

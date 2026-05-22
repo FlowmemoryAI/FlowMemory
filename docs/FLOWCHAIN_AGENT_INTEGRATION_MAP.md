@@ -18,14 +18,14 @@ or setup flow.
 
 | Agent | Worktree | Primary ownership | Must reuse | Must not touch |
 | --- | --- | --- | --- | --- |
-| HQ / Review | `E:\FlowMemory\flowmemory-review` | Docs, acceptance, backlog, process, setup clarity | Current source-of-truth docs and dispatch target | Product implementation folders |
-| Chain / Devnet | `E:\FlowMemory\flowmemory-chain` | `crates/flowmemory-devnet/`, devnet tests, devnet fixtures | Existing Rust devnet and launch-core fixture model | Contracts, apps, services internals, tokenomics |
-| Control Plane / Indexer | `E:\FlowMemory\flowmemory-indexer` | `services/`, control-plane API, fixture handoff | Existing indexer/verifier/generator outputs | Contracts, dashboard implementation, crypto internals |
-| Crypto / RD | `E:\FlowMemory\flowmemory-crypto` | `crypto/`, object IDs, schemas, vectors | Existing Keccak typed hash package | Services, apps, contracts, production proof systems |
-| Dashboard / Workbench | `E:\FlowMemory\flowmemory-dashboard` | `apps/dashboard/` | Existing dashboard app, fixtures, styling, data model | New dashboard app, services, crypto, contracts |
-| Hardware | `E:\FlowMemory\flowmemory-hardware` | `hardware/`, `fixtures/hardware/` | Existing FlowRouter simulator and POC docs | Chain runtime, services, dashboard implementation |
-| Contracts | `E:\FlowMemory\flowmemory-contracts` | `contracts/`, `tests/` | Existing FlowPulse and registry/event skeletons | Core private L1 runtime, tokenomics, bridge |
-| Research | `E:\FlowMemory\flowmemory-research` | `research/`, `docs/DECISIONS/` | Existing research gates and decisions | Implementation folders, public-chain claims |
+| HQ / Review | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-review` | Docs, acceptance, backlog, process, setup clarity | Current source-of-truth docs and dispatch target | Product implementation folders |
+| Chain / Devnet | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain` | `crates/flowmemory-devnet/`, devnet tests, devnet fixtures | Existing Rust devnet and launch-core fixture model | Contracts, apps, services internals, tokenomics |
+| Control Plane / Indexer | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer` | `services/`, control-plane API, fixture handoff | Existing indexer/verifier/generator outputs | Contracts, dashboard implementation, crypto internals |
+| Crypto / RD | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto` | `crypto/`, object IDs, schemas, vectors | Existing Keccak typed hash package | Services, apps, contracts, production proof systems |
+| Dashboard / Workbench | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard` | `apps/dashboard/` | Existing dashboard app, fixtures, styling, data model | New dashboard app, services, crypto, contracts |
+| Hardware | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware` | `hardware/`, `fixtures/hardware/` | Existing FlowRouter simulator and POC docs | Chain runtime, services, dashboard implementation |
+| Contracts | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts` | `contracts/`, `tests/` | Existing FlowPulse and registry/event skeletons | Core private L1 runtime, tokenomics, bridge |
+| Research | `FLOWMEMORY_WORKTREE_ROOT\flowmemory-research` | `research/`, `docs/DECISIONS/` | Existing research gates and decisions | Implementation folders, public-chain claims |
 
 ## Current Coordination Facts
 

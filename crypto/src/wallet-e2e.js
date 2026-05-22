@@ -1,3 +1,4 @@
+// All private keys in this file are deterministic test-only values. Never use them for production.
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";

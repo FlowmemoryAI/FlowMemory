@@ -21,7 +21,7 @@ This workstream is complete only when the local/test On-Chain Task Scout can be 
 | Local dev/simulation docs exist | `docs/base-onchain-agent-memory/LOCAL_DEV_AND_SIMULATION.md`. |
 | Examples exist | `docs/base-onchain-agent-memory/EXAMPLES.md`. |
 | Glossary and FAQ exist | `docs/base-onchain-agent-memory/GLOSSARY.md`, `docs/base-onchain-agent-memory/FAQ.md`. |
-| Copy-ready goal exists | `docs/base-onchain-agent-memory/BUILD_GOAL.md`. |
+| Public docs are sanitized | Raw goal prompts stay out of the public repository. |
 
 ## MVP 0 fixture acceptance
 

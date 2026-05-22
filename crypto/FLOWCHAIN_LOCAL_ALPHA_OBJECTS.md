@@ -10,30 +10,16 @@ alternate hash formats for these objects.
 ## RD Crypto Boundary
 
 The user noted that the RD library is for cryptography. I inspected this
-workspace and nearby `E:\FlowMemory` research paths.
+workspace and nearby `FLOWMEMORY_WORKTREE_ROOT` research paths.
 
 No RD-named cryptography library exists inside this worktree. The current
 authoritative FlowMemory crypto package is:
 
 ```text
-E:\FlowMemory\flowmemory-crypto\crypto
+FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto\crypto
 ```
 
-Nearby research/RD crypto sources do exist:
-
-```text
-E:\FlowMemory\github-research-sources\noesis-l1\crates\noesis-crypto
-E:\FlowMemory\github-research-sources\noesis-l1\crates\noesis-zk
-E:\FlowMemory\github-research-sources\noesis-l1\crates\flowchain-pw
-E:\FlowMemory\github-research-sources\FlowMemory-2026-05-11\projects\noesis-l1\crates\noesis-crypto
-```
-
-Those crates are useful RD references for object vocabulary, future proof
-interfaces, and Process-Witness research. They are not consumed directly by this
-package because the current `noesis-crypto` crate uses SHA-256 prototype object
-hashes, and `noesis-zk` explicitly marks production proof systems and
-commitment schemes as scaffolded. FlowChain Local Alpha IDs use the existing
-FlowMemory rule:
+Private research/RD crypto sources may inform vocabulary and future proof interfaces, but they are not committed to the public repository and are not consumed directly by this package. FlowChain Local Alpha IDs use the existing FlowMemory rule:
 
 ```text
 keccak256(abi.encode(TYPEHASH, field_1, field_2, ...))
