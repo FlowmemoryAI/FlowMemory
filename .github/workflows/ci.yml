@@ -221,6 +221,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Slither
+        run: python -m pip install slither-analyzer
+
       - name: Install services dependencies
         run: npm ci
 
