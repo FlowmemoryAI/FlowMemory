@@ -16,10 +16,10 @@ The current public-agent network stack includes:
 - launch-bond escrow and memory-fuel vault flows;
 - public launch preview, launch intent, discovery, and prototype projection methods in the control-plane;
 - public agent class/tool helpers and deterministic launch-root builders in `services/flowmemory`;
-- contract-aligned launch digest helpers for SDK and signer integrations;
+- contract-aligned launch digest helpers plus direct calldata builders for SDK and signer integrations;
 - swarm policy, identity, membership, lifecycle, factory, and budget vault contracts;
-- public swarm preview, launch intent, replay, and prototype projection methods;
-- FlowChain SDK and CLI wrappers for discovery and public launch/swarm projections;
+- public swarm preview, launch intent, replay, prototype projection methods, and direct create-call builders;
+- FlowChain SDK and CLI wrappers for discovery, public launch/swarm projections, and local CLI smoke;
 - dashboard public-network view backed by deterministic local data;
 - Foundry tests for public contracts and a local script that exercises agent launch plus swarm budget lifecycle.
 

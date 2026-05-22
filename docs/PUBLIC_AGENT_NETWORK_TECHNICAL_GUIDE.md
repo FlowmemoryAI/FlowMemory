@@ -103,11 +103,11 @@ The open swarm-born-agent work is tracked in issue #168.
 
 Public-agent methods include class/tool discovery, launch preview, launch intent, prototype launch record, and discovery projection. Public-swarm methods include class discovery, launch preview, prototype swarm record, and replay projection.
 
-Current methods are local/control-plane projections. Direct contract-backed submit/read SDK work is tracked in issue #166.
+Current methods are local/control-plane projections. The SDK now also includes direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)` under `services/flowchain-sdk/src/public-contracts.ts`, so a signer or wallet can prepare contract-ready transaction data without accepting raw secrets into the repo.
 
 ### FlowChain SDK and CLI
 
-`services/flowchain-sdk/src/client.ts` wraps the control-plane methods. `services/flowchain-sdk/src/cli.ts` exposes public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, and swarm replay.
+`services/flowchain-sdk/src/client.ts` wraps the control-plane methods. `services/flowchain-sdk/src/cli.ts` exposes public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, and swarm replay. `services/flowchain-sdk/src/public-contracts.ts` prepares direct local/test contract calls and returns normalized `{ to, data, value }` transaction payloads plus deterministic launch/swarm hashes.
 
 ### Agent Memory SDK
 

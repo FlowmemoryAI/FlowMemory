@@ -37,13 +37,13 @@ Missing work:
 
 Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/166
 
-Current state: FlowChain SDK exposes control-plane wrappers, and FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes. Direct transaction submission is not yet a complete SDK surface.
+Current state: FlowChain SDK exposes control-plane wrappers, FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes, and `services/flowchain-sdk/src/public-contracts.ts` now builds direct calldata for `AgentFactory.launchAgent` and `SwarmFactory.createSwarm`. Direct transaction submission is not yet a complete SDK surface.
 
 Missing work:
 
 - signer-provider abstraction that does not accept raw secrets by default;
-- calldata or provider-backed submission for `AgentFactory.launchAgent`;
-- calldata or provider-backed submission for `SwarmFactory.createSwarm`;
+- provider-backed submission for `AgentFactory.launchAgent`;
+- provider-backed submission for `SwarmFactory.createSwarm`;
 - receipt polling and event decoding;
 - test coverage against local Anvil broadcast logs.
 
