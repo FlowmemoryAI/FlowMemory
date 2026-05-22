@@ -1,9 +1,9 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("flowchainDesktop", {
-  app: "Flowchain Wallet",
+contextBridge.exposeInMainWorld("flowmemoryDesktop", {
+  app: "FlowMemory",
   platform: process.platform,
   packaged: process.env.NODE_ENV !== "development",
-  getLocalWallet: () => ipcRenderer.invoke("flowchain-wallet:get-local-wallet"),
-  createLocalWallet: (payload) => ipcRenderer.invoke("flowchain-wallet:create-local-wallet", payload),
+  getLocalWallet: () => ipcRenderer.invoke("flowmemory-app:get-local-wallet"),
+  createLocalWallet: (payload) => ipcRenderer.invoke("flowmemory-app:create-local-wallet", payload),
 });

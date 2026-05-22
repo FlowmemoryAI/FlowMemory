@@ -4,7 +4,8 @@ const http = require("node:http");
 const path = require("node:path");
 const { createLocalDesktopWallet, publicDesktopWalletStatus } = require("./wallet-store.cjs");
 
-const isDev = Boolean(process.env.FLOWCHAIN_WALLET_DESKTOP_DEV_URL);
+const desktopDevUrl = process.env.FLOWMEMORY_DESKTOP_DEV_URL;
+const isDev = Boolean(desktopDevUrl);
 let staticServer;
 
 const contentTypes = new Map([
@@ -58,7 +59,7 @@ function startBundledStaticServer() {
     server.listen(0, "127.0.0.1", () => {
       const address = server.address();
       if (typeof address !== "object" || address === null) {
-        reject(new Error("Flowchain Wallet static server did not bind to a local port."));
+        reject(new Error("FlowMemory static server did not bind to a local port."));
         return;
       }
       resolve({ server, origin: `http://127.0.0.1:${address.port}` });
@@ -74,7 +75,7 @@ async function createWalletWindow() {
     height: 940,
     minWidth: 1120,
     minHeight: 720,
-    title: "Flowchain Wallet",
+    title: "FlowMemory",
     backgroundColor: "#fff9ee",
     show: false,
     webPreferences: {
@@ -109,7 +110,7 @@ async function createWalletWindow() {
   });
 
   if (isDev) {
-    window.loadURL(`${process.env.FLOWCHAIN_WALLET_DESKTOP_DEV_URL.replace(/\/+$/, "")}/wallet`);
+    window.loadURL(`${desktopDevUrl.replace(/\/+$/, "")}/wallet`);
   } else {
     const { origin } = await startBundledStaticServer();
     window.loadURL(`${origin}/wallet`);
@@ -118,15 +119,15 @@ async function createWalletWindow() {
   return window;
 }
 
-app.setName("Flowchain Wallet");
+app.setName("FlowMemory");
 
 app.whenReady().then(() => {
-  ipcMain.handle("flowchain-wallet:get-local-wallet", () => publicDesktopWalletStatus(app.getPath("userData")));
-  ipcMain.handle("flowchain-wallet:create-local-wallet", (_event, payload) => createLocalDesktopWallet(app.getPath("userData"), payload));
+  ipcMain.handle("flowmemory-app:get-local-wallet", () => publicDesktopWalletStatus(app.getPath("userData")));
+  ipcMain.handle("flowmemory-app:create-local-wallet", (_event, payload) => createLocalDesktopWallet(app.getPath("userData"), payload));
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
-      label: "Flowchain Wallet",
+      label: "FlowMemory",
       submenu: [
         { role: "reload" },
         { role: "toggleDevTools" },

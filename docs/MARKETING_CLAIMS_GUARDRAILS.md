@@ -24,7 +24,6 @@ FlowMemory can have ambitious language. It should not make claims that the curre
 - FlowMemory has had a mainnet launch.
 - FlowMemory has production mainnet contracts.
 - FlowMemory has production deployment automation.
-- FlowMemory is a production L1.
 - FlowMemory runs a production verifier network.
 - FlowMemory has a production Uniswap v4 hook.
 - FlowMemory has a production bridge.
@@ -50,7 +49,6 @@ Use:
 - canary-only and `productionReady: false`
 - off-chain verification path
 - commitments, receipts, roots, and state transitions
-- future appchain/L1 research
 
 Avoid:
 

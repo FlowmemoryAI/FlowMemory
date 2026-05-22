@@ -1,26 +1,23 @@
 # Architecture
 
 FlowMemory is a layered system for commitment-oriented AI memory, verification,
-local operator tooling, and bounded hardware research. The merged repo now has
-the V0 launch-core, local deterministic devnet prototype, fixture
-indexer/verifier, dashboard, crypto helpers, hardware simulator, and HQ wrapper
-layer. Native private/local FlowChain object lifecycle, control-plane coverage,
-long-running node behavior, and full workbench coverage remain in flight until
-explicitly merged.
+operator tooling, and bounded hardware research. The public architecture centers
+on agent work becoming inspectable through compact commitments, receipts,
+verifier reports, Rootflow transitions, Agent Bonds, and operator apps.
 
 ## Layer Map
 
 1. Contracts foundation
-2. Integration harness and local fixtures
+2. Fixture and verification harness
 3. Rootflow and Flow Memory launch core
 4. Indexer/verifier
 5. Crypto schema layer
 6. Dashboard and operator apps
-7. Hardware and control signaling
-8. Research lab
-9. Devnet/appchain research
-10. HQ program operating system
-11. FlowChain private/local testnet packaging
+7. Public-agent network
+8. Agent Bonds accountability layer
+9. Hardware and control signaling
+10. Research lab
+11. HQ program operating system
 
 ## Contracts
 
@@ -28,8 +25,8 @@ Current implementation:
 
 - `contracts/FlowPulse.sol` defines the FlowPulse v0 event interface and pulse type constants.
 - `contracts/RootfieldRegistry.sol` registers Rootfield namespaces, accepts root commitments, and emits FlowPulse events.
+- Agent Bonds and public-agent contracts provide local/test accountability, launch, fuel, lineage, receipt, and swarm primitives.
 - `contracts/FLOWPULSE_SCHEMA.md` documents event semantics.
-- `tests/RootfieldRegistry.t.sol` provides initial Foundry tests.
 
 Responsibilities:
 
@@ -44,30 +41,29 @@ Boundaries:
 - `metadataURI` and `evidenceURI` are advisory log strings in the current skeleton.
 - Dynamic fees, tokenomics, production deployment, and production hooks are out of scope.
 
-## Integration Harness And Local Fixtures
+## Fixture And Verification Harness
 
 Purpose:
 
-- Connect contracts, fixture logs, parser expectations, verifier report shape, and local smoke tests.
-- Provide a runnable local V0 stack before live service or production deployment work.
+- Connect contracts, fixture logs, parser expectations, verifier report shape, and public smoke tests.
+- Provide a runnable local/test V0 stack before live service or production deployment work.
 
 Expected artifacts:
 
 - Foundry test output.
 - FlowPulse fixture logs.
-- Local devnet smoke-test notes.
 - Receipt fixture handoff documents.
 - Deterministic parser and verifier fixture expectations.
 
 Boundaries:
 
-- No mainnet deployment.
+- No production deployment.
 - No production RPC credentials.
-- No hosted services.
+- No hosted production services.
 
 ## Rootflow And Flow Memory
 
-Status: launch-critical V0 specification, with implementation expected across contracts, crypto, indexer/verifier, and dashboard PRs.
+Status: launch-critical V0 specification with merged local/test implementations across contracts, crypto, indexer/verifier, services, fixtures, and dashboard.
 
 Primary docs:
 
@@ -85,14 +81,14 @@ Responsibilities:
 
 Boundaries:
 
-- Rootflow is not a production L1.
+- Rootflow is a memory-state transition model, not a deployment environment.
 - Flow Memory is not unlimited on-chain storage.
-- V0 verification is local/testnet readiness, not a full trustless verifier network.
+- V0 verification is local/test readiness, not a full trustless verifier network.
 - Dashboard-readable state may be fixture-backed until services stabilize.
 
 ## Indexer And Verifier
 
-Status: specification and fixture work only.
+Status: fixture-first local/test package.
 
 Responsibilities:
 
@@ -113,12 +109,12 @@ Crypto foundation:
 Boundaries:
 
 - Indexers and verifiers derive receipt metadata after execution.
-- Service runtimes, persistence, APIs, and live RPC readers should follow fixture and schema decisions.
+- Service runtimes, persistence, APIs, and live readers should follow fixture and schema decisions.
 - Verifier economics, staking, slashing, and production networks are out of scope.
 
 ## Crypto
 
-Status: vocabulary and schema planning only.
+Status: V0 helpers, schemas, vectors, local wallet boundaries, and attestation primitives exist.
 
 Responsibilities:
 
@@ -133,21 +129,53 @@ Boundaries:
 - No verifier economics.
 - No production cryptographic infrastructure.
 
-## Dashboard
+## Dashboard And Operator Apps
 
-Status: data model planning only.
+Status: generated fixture-backed dashboard plus desktop and Android shells.
 
 Responsibilities:
 
-- Define app-facing entities for operator dashboard and protocol explorer.
 - Present observed, pending, finalized, verified, failed, unresolved, unsupported, and reorged states clearly.
-- Consume indexer/verifier outputs once local schemas stabilize.
+- Expose Agent Bonds, Flow Memory, public-agent, receipt, verifier, wallet/budget, and alert surfaces for operators.
+- Keep browser, desktop, and mobile operator surfaces aligned around the same public FlowMemory story.
 
 Boundaries:
 
-- No frontend scaffolding until the data model is accepted.
-- No production APIs.
-- No full dashboard implementation in the foundation-hardening phase.
+- No production APIs until explicitly scoped.
+- No production wallet custody claim.
+- iOS remains a product track until an Xcode project and CI lane are committed.
+
+## Public-Agent Network
+
+Status: local/test public-agent and swarm stack exists.
+
+Responsibilities:
+
+- Launch agents from supported classes and approved tool sets.
+- Track profile, lineage, memory fuel, launch bonds, receipt anchors, and swarm/budget state.
+- Provide deterministic preview, intent, replay, SDK/CLI, and dashboard projection surfaces.
+
+Boundaries:
+
+- Users do not upload arbitrary agent Solidity.
+- Heavy prompts, artifacts, model outputs, embeddings, and media remain off-chain.
+- Direct transaction submission still needs provider-backed SDK completion and readback evidence.
+
+## Agent Bonds
+
+Status: local/test accountability, recourse, and reputation primitives exist.
+
+Responsibilities:
+
+- Model objective task opening, acceptance, verification, settlement, challenge, slash, and capped recourse paths.
+- Keep quote attestations, evidence windows, verifier separation, credit scoring, and underwriter-pool constraints explicit.
+- Surface task-scoped risk and recourse state to dashboards and future mobile apps.
+
+Boundaries:
+
+- No insurance claim.
+- No guaranteed reimbursement claim.
+- No uncapped public value flow.
 
 ## Hardware
 
@@ -182,25 +210,6 @@ Boundaries:
 - No model training pipeline is implied by architecture docs.
 - Research notes do not authorize protocol implementation.
 
-## Devnet And Appchain Research
-
-Status: local no-value devnet prototype implemented; broader appchain/L1 work
-remains gated research.
-
-Responsibilities:
-
-- Define no-value local devnet criteria.
-- Define Base settlement anchor specs.
-- Research bridge/security review requirements.
-- Define appchain hardware-node implications.
-
-Boundaries:
-
-- No production L1 or appchain.
-- No tokenomics.
-- No validator or sequencer deployment.
-- No bridge deployment.
-
 ## HQ Program Operating System
 
 Responsibilities:
@@ -210,37 +219,15 @@ Responsibilities:
 - Maintain labels, milestones, review flow, and daily runbook.
 - Prevent agents from overlapping folders or expanding into gated work.
 
-## FlowChain Private/Local Testnet Packaging
-
-Status: Windows-first wrapper command layer implemented for merged surfaces.
-
-Responsibilities:
-
-- Provide one second-computer command path for prerequisites, init, bounded
-  start/stop, demo, smoke, export/import, and workbench dev mode.
-- Keep wrappers pointed at the existing Rust devnet, launch-core generator,
-  dashboard, hardware simulator, and guardrail scripts.
-- Record remaining subsystem blockers in `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
-  and `docs/ISSUE_BACKLOG.md`.
-
-Boundaries:
-
-- The wrapper layer does not create a second devnet, dashboard, crypto package,
-  verifier pipeline, object model, or setup path.
-- The current `flowchain:start` command is a bounded local CLI readiness path,
-  not a long-running node.
-- Production public-chain, token, bridge, and audited-cryptography claims remain
-  outside this milestone.
-
 ## Data Flow
 
-1. A local or future deployed contract action emits FlowPulse and updates compact on-chain state.
-2. The local harness or chain client produces receipts and logs.
+1. A local/test or future deployed contract action emits FlowPulse and updates compact on-chain state.
+2. The local harness or live reader produces receipts and logs.
 3. The indexer reads logs and receipts, then derives `txHash`, `logIndex`, block metadata, and observation identity.
 4. The indexer constructs MemorySignal and Rootflow transition candidates.
 5. The verifier consumes indexed observations and checks commitments against allowed off-chain evidence.
 6. Crypto schemas define receipt ids, report digests, attestations, commitments, transition ids, and domain separation.
-7. Dashboard models consume Rootfield, Rootflow, MemorySignal, MemoryReceipt, and AgentMemoryView states.
+7. Dashboard and app models consume Rootfield, Rootflow, MemorySignal, MemoryReceipt, AgentMemoryView, Agent Bonds, and public-agent states.
 8. Hardware sidecars may exchange compact control messages or receipt references, but not heavy data.
 9. Research artifacts stay off-chain and become protocol-relevant only through explicit commitments or accepted decision records.
 

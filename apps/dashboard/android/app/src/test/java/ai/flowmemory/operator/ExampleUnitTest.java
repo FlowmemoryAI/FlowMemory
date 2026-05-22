@@ -1,4 +1,4 @@
-package ai.flowmemory.flowchain.wallet;
+package ai.flowmemory.operator;
 
 import static org.junit.Assert.*;
 

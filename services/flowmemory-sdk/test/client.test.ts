@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { FlowChainClient, FlowChainRpcError } from "../src/client.ts";
-import { redactFlowChainText, redactJsonValue } from "../src/redact.ts";
+import { FlowMemoryClient, FlowMemoryRpcError } from "../src/client.ts";
+import { redactFlowMemoryText, redactJsonValue } from "../src/redact.ts";
 
 test("calls JSON-RPC with stable envelope shape", async () => {
   const calls: unknown[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     rpcUrl: "http://127.0.0.1:8787/rpc",
     fetchImpl: (async (_url, init) => {
       calls.push(JSON.parse(String(init?.body)));
@@ -18,15 +18,15 @@ test("calls JSON-RPC with stable envelope shape", async () => {
   assert.deepEqual(calls, [
     {
       jsonrpc: "2.0",
-      id: "flowchain-sdk:health",
+      id: "flowmemory-sdk:health",
       method: "health",
       params: {},
     },
   ]);
 });
 
-test("turns JSON-RPC errors into tagged FlowChain errors", async () => {
-  const client = new FlowChainClient({
+test("turns JSON-RPC errors into tagged FlowMemory errors", async () => {
+  const client = new FlowMemoryClient({
     fetchImpl: (async () => {
       return new Response(JSON.stringify({
         jsonrpc: "2.0",
@@ -36,7 +36,7 @@ test("turns JSON-RPC errors into tagged FlowChain errors", async () => {
     }) as typeof fetch,
   });
   await assert.rejects(() => client.call("missing"), (error) => {
-    assert.ok(error instanceof FlowChainRpcError);
+    assert.ok(error instanceof FlowMemoryRpcError);
     assert.equal(error.code, -32601);
     assert.equal(error.message, "method.not_found");
     return true;
@@ -45,7 +45,7 @@ test("turns JSON-RPC errors into tagged FlowChain errors", async () => {
 
 test("submits wallet send through control-plane HTTP path", async () => {
   const calls: { url: string; body: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     rpcUrl: "http://127.0.0.1:8787/rpc",
     fetchImpl: (async (url, init) => {
       calls.push({ url: String(url), body: JSON.parse(String(init?.body)) });
@@ -72,7 +72,7 @@ test("submits wallet send through control-plane HTTP path", async () => {
 
 test("wraps explorer, wallet, finality, and bridge read methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     fetchImpl: (async (_url, init) => {
       const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
       calls.push({ method: body.method, params: body.params });
@@ -112,7 +112,7 @@ test("wraps explorer, wallet, finality, and bridge read methods", async () => {
 
 test("wraps base agent memory control-plane methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     fetchImpl: (async (_url, init) => {
       const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
       calls.push({ method: body.method, params: body.params });
@@ -134,7 +134,7 @@ test("wraps base agent memory control-plane methods", async () => {
 
 test("wraps public agent network discovery and preview methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     fetchImpl: (async (_url, init) => {
       const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
       calls.push({ method: body.method, params: body.params });
@@ -159,7 +159,7 @@ test("wraps public agent network discovery and preview methods", async () => {
 
 test("wraps public agent launch intent, discovery, and swarm replay methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     fetchImpl: (async (_url, init) => {
       const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
       calls.push({ method: body.method, params: body.params });
@@ -182,7 +182,7 @@ test("wraps public agent launch intent, discovery, and swarm replay methods", as
 });
 test("wraps public swarm discovery and preview methods", async () => {
   const calls: { method: string; params: unknown }[] = [];
-  const client = new FlowChainClient({
+  const client = new FlowMemoryClient({
     fetchImpl: (async (_url, init) => {
       const body = JSON.parse(String(init?.body)) as { method: string; params: unknown };
       calls.push({ method: body.method, params: body.params });
@@ -200,7 +200,7 @@ test("wraps public swarm discovery and preview methods", async () => {
   ]);
 });
 test("redacts secret-shaped diagnostics", () => {
-  const text = redactFlowChainText("private_key=abc123 account=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+  const text = redactFlowMemoryText("private_key=abc123 account=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   assert.equal(text.includes("abc123"), false);
   assert.equal(text.includes("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), true);
 

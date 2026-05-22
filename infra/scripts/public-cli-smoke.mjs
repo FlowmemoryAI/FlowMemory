@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { startControlPlaneServer } from "../../services/control-plane/src/server.ts";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const CLI_PATH = resolve(REPO_ROOT, "services/flowchain-sdk/src/cli.ts");
+const CLI_PATH = resolve(REPO_ROOT, "services/flowmemory-sdk/src/cli.ts");
 
 const COMMANDS = [
   { name: "public-agent-classes", schema: "flowmemory.control_plane.public_agent_class_list.v1" },

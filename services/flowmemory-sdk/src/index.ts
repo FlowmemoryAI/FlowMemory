@@ -1,12 +1,12 @@
 export {
-  FlowChainClient,
-  FlowChainRpcError,
-  type FlowChainClientOptions,
+  FlowMemoryClient,
+  FlowMemoryRpcError,
+  type FlowMemoryClientOptions,
   type JsonRpcResponse,
   type JsonValue,
   type WalletSendRequest,
 } from "./client.ts";
-export { redactFlowChainText, redactJsonValue } from "./redact.ts";
+export { redactFlowMemoryText, redactJsonValue } from "./redact.ts";
 export {
   buildPublicAgentLaunchTransaction,
   buildPublicSwarmCreateTransaction,

@@ -4,7 +4,7 @@ This document is the shared context packet for FlowMemory agents and contributor
 
 ## Project Identity
 
-FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentralized hardware, and future appchain/L1 project.
+FlowMemory is a Base-native AI memory, neural-geometry, reliability, decentralized hardware, and operator-app infrastructure project.
 
 The long-term project shape combines:
 
@@ -14,7 +14,7 @@ The long-term project shape combines:
 - FlowRouter hardware for resilient local and decentralized connectivity experiments
 - Meshtastic and LoRa sidecar signaling for low-bandwidth coordination
 - Dashboards, explorers, and hardware consoles for operators and researchers
-- Future appchain/L1 research once the protocol surface is mature enough
+- Longer-horizon infrastructure research only after the public FlowMemory surfaces are mature enough
 
 ## Core Concepts
 
@@ -61,7 +61,7 @@ Meshtastic and LoRa are low-bandwidth control signaling paths. They are useful f
 - `services/`: indexer, verifier, worker, API, and background processing services
 - `apps/`: dashboard, explorer, and hardware console experiences
 - `hardware/`: FlowRouter, radio sidecars, firmware notes, enclosure models, and field test notes
-- `research/`: AI memory, neural geometry, reliability, and future appchain/L1 research
+- `research/`: AI memory, neural geometry, reliability, and applied infrastructure research
 - `crypto/`: receipts, attestations, roots, proofs, verification design, and threat analysis
 - `infra/scripts/`: CI, automation, local setup, and maintenance scripts
 - `docs/DECISIONS/`: accepted architectural decisions

@@ -2,7 +2,7 @@
 
 Status: public-reader guide for the current local/test repository release.
 
-FlowMemory is a Base-native agent memory and accountability protocol workbench. It is public so builders, reviewers, and operators can inspect the agent-memory, Agent Bonds, public-agent, service, SDK, and dashboard surfaces; reproduce the local flows; and see the exact gaps that remain. Separate chain-devnet research also exists in this repository, but it is not the public-reader starting point.
+FlowMemory is a Base-native agent memory and accountability protocol workbench. It is public so builders, reviewers, and operators can inspect the agent-memory, Agent Bonds, public-agent, service, SDK, dashboard, and mobile surfaces; reproduce the local flows; and see the exact gaps that remain.
 
 ## The Short Version
 
@@ -130,7 +130,6 @@ Some checks require local tools such as Foundry, Rust, dashboard dependencies, o
 | `services/verifier/` | Local/test verifier reports and status projection. |
 | `services/flowmemory/` | Launch-core generation, public-agent helpers, Agent Bonds helpers, and deterministic fixture builders. |
 | `services/control-plane/` | Local JSON-RPC style control-plane methods and smoke client. |
-| `services/flowchain-sdk/` | Client and CLI wrappers for the separate chain-devnet research track; not required for the main public quickstart. |
 | `services/agent-memory-sdk/` | Agent-memory client for fixture-backed and local control-plane flows. |
 | `apps/dashboard/` | Vite/React fixture-backed dashboard, desktop shell, Android Capacitor shell, and future shared mobile UI. |
 | `fixtures/` | Deterministic local/test outputs used by services and dashboard. |

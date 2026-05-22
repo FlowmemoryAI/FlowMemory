@@ -2,70 +2,56 @@
 
 This roadmap is the project-management view of FlowMemory. Use GitHub issues for execution and `docs/DECISIONS/` for durable decisions.
 
-No production L1, tokenomics, mainnet deployment, production Uniswap v4 hook
-deployment, hardware manufacturing, or production bridge work is approved by
-this roadmap; those areas remain later gated work.
+No tokenomics, production deployment, production Uniswap v4 hook deployment, hardware manufacturing, production bridge work, or unscoped dedicated network infrastructure is approved by this roadmap. Those areas remain separate from the public FlowMemory launch path unless an explicit issue and decision record scope them.
 
-## Immediate Major Milestone: FlowChain Private/Local Testnet Package
+## Immediate Major Milestone: Public FlowMemory Launch Hardening
 
-Goal: make a clean second computer able to run the FlowChain private/local L1
-testnet package for second-computer validation, building on the existing V0
-launch-core, local devnet, contracts spine, crypto package, fixture
-indexer/verifier, dashboard, hardware simulator, and research gates.
+Goal: make the public repository understandable, reproducible, professional, and aligned around the FlowMemory product story:
 
-The private/local package must preserve the launch-core V0 stack and add one
-obvious second-computer path for:
+- agent memory and Proof-of-Useful-Memory;
+- Agent Bonds accountability and task-scoped recourse records;
+- public-agent and swarm launch primitives;
+- Base-native compact commitments and event receipts;
+- dashboard, desktop, Android shell, and documented iOS product track;
+- public tester commands that run from a clean clone;
+- public-safe claim boundaries and gap tracking.
 
-- prerequisite checks and install commands;
-- local operator key generation or import guidance;
-- private/local genesis initialization;
-- single-node local runtime start;
-- local runtime stop/reset behavior;
-- deterministic block and state-root production;
-- native object transactions for agents, models, receipts, artifacts, verifier reports, memory cells, challenges, and finality;
-- local control-plane API queries;
-- local workbench inspection through the existing dashboard surface;
-- export/import or snapshot bundles;
-- a full deterministic smoke command.
+The public launch path must not expose unrelated infrastructure research as the user entrypoint. A reviewer should be able to clone the repo, read `README.md`, run the public tester lanes, and understand what FlowMemory can do without being redirected into separate network or token work.
 
-The required source-of-truth planning docs are:
+Required public-reader docs:
 
-- `docs/FLOWCHAIN_FULL_PRIVATE_TESTNET.md`
-- `docs/FLOWCHAIN_SECOND_COMPUTER_SETUP.md`
-- `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
-- `docs/FLOWCHAIN_AGENT_INTEGRATION_MAP.md`
+- `README.md`
+- `docs/PUBLIC_REPO_GUIDE.md`
+- `docs/PUBLIC_TESTER_GUIDE.md`
+- `docs/PUBLIC_AGENT_NETWORK_RELEASE.md`
+- `docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md`
+- `docs/MOBILE_APPS.md`
+- `docs/PUBLIC_RELEASE_GAPS.md`
+- `docs/MARKETING_CLAIMS_GUARDRAILS.md`
+- `docs/PRODUCTION_READINESS_CHECKLIST.md`
 
-Completion gate: the milestone is not accepted until `docs/FLOWCHAIN_TESTNET_ACCEPTANCE.md`
-marks the private/local package path implemented and records the exact commands,
-generated outputs, deterministic replay evidence, control-plane query evidence,
-workbench evidence, and `git diff --check` result. The HQ wrapper command layer
-now includes `npm run flowchain:full-smoke`, which is the acceptance gate for
-the current private/local package. Long-running multi-process node behavior,
-LAN peer mode, and production/keystore-backed custody behavior remain later
-local-runtime work.
+Completion gate: the milestone is not accepted until public docs, CI, dashboard build, public tester lanes, mobile distribution docs, and claim guardrails are green and do not surface unrelated chain, token, or network-infrastructure research in public launch paths.
 
 Non-goals:
 
 - No tokenomics.
-- No public validator onboarding.
-- No production mainnet or production L1 claim.
+- No production mainnet claim.
 - No production bridge.
 - No production hook deployment.
 - No hardware manufacturing.
 - No audited-cryptography claim.
 - No hosted production dashboard or production API.
+- No public iOS build claim until an Xcode project and CI lane exist.
 
-Rootflow V0 and Flow Memory V0 remain launch-critical baseline requirements.
-The private/local testnet milestone is not allowed to fork or duplicate those
-surfaces.
+Rootflow V0 and Flow Memory V0 remain launch-critical baseline requirements. The public launch milestone is not allowed to fork or duplicate those surfaces.
 
 ## Near-Term Phases
 
-### Phase 0: V0 Repo OS
+### Phase 0: Public Repo OS
 
 Status: active maintenance.
 
-- Keep source-of-truth docs accurate.
+- Keep source-of-truth docs accurate and public-reader safe.
 - Keep agent prompts, PR process, daily runbook, and issue backlog current.
 - Keep issue templates and PR templates enforcing scope boundaries.
 - Keep status scripts read-only and safe.
@@ -76,14 +62,13 @@ Status: active maintenance.
 Status: implemented as a local/test foundation; hardening still active.
 
 - Minimal Foundry config and contract tests exist.
-- `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, afterSwap hook candidate/planner, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, and scheduler skeletons exist.
-- `forge test` currently runs 70 passing tests.
+- `FlowPulse`, `RootfieldRegistry`, hook-adapter scaffold, afterSwap hook candidate/planner, artifact/cursor/worker/verifier/work registries, receipt verifier, work receipt registry, verifier report registry, Agent Bonds, public-agent, and swarm contracts exist.
 - FlowPulse v0 and Rootfield URI/log-data decisions are documented.
 - Static-analysis runner, deployment boundary, and access-control review docs exist.
 - Define status lifecycle, ownership/recovery, and namespace policy before expanding deployment scope.
 - Keep dynamic fees, tokenomics, production deployment, and production hooks out of scope.
 
-### Phase 2: V0 Local Stack
+### Phase 2: Flow Memory Local/Test Stack
 
 Status: implemented as fixture-first services plus generated launch-core state; production services still gated.
 
@@ -93,32 +78,40 @@ Status: implemented as fixture-first services plus generated launch-core state; 
 - Flow Memory schemas for MemorySignal, MemoryReceipt, RootfieldBundle, and AgentMemoryView exist under `schemas/flowmemory/`.
 - Generated MemorySignal and RootflowTransition fixtures expose contract-event linkage through `contractEvent` and `contractEventRef`.
 - Fixture-based parser and reorg-state tests exist in the indexer/verifier packages.
-- Deterministic persistence exists for fixture state, the constrained Base Sepolia reader checkpoint, and the guarded Base mainnet canary checkpoint.
-- A Base Sepolia reader path exists for explicit RPC URLs and explicit FlowPulse contract addresses; it rejects non-Base-Sepolia chain ids, refuses broad scans by default, persists atomic checkpoint output, and supports resume from `nextFromBlock`.
-- A guarded Base mainnet canary reader exists for explicit RPC URLs, explicit known canary addresses, and small explicit block ranges; it rejects non-Base-mainnet chain ids and marks output as canary-only.
-- A separate dashboard canary mode exists for committed Base canary reader output and deployment artifacts.
-- Source verification automation exists for the canary contract set, and all current Base canary addresses are verified on BaseScan. Future redeploys still require a local `BASESCAN_API_KEY` for submission.
-- Base Sepolia plan/dry-run/broadcast/read commands and a rehearsal runbook exist for the current V0 public testnet contract set.
-- A Base mainnet V0 canary deployment has been performed for testing only and is documented under `docs/DEPLOYMENTS/`.
+- Deterministic persistence exists for fixture state, constrained Base Sepolia reader checkpoints, and guarded Base canary checkpoints.
 - Runtime schema validation and generated fixture drift checks exist for launch-core outputs.
-- Local devnet smoke-test gates exist as a no-value Rust prototype, without mainnet or production deployment.
 
-### Phase 3: FlowChain Private/Local Testnet Package
+### Phase 3: Public Agent Network
 
-Status: active packaging and next-wave build coordination. The Windows-first
-root wrapper layer and full-smoke command exist for the current private/local
-object lifecycle; subsystem polish remains active behind the same surfaces.
+Status: local/test public-agent and swarm primitives are implemented; live evidence and UX hardening remain active.
 
-- Extend the existing Rust devnet into the single private/local runtime surface.
-- Extend the existing service packages into one local control-plane API.
-- Extend the existing crypto package with object IDs, envelopes, schemas, and vectors for private testnet objects.
-- Extend the existing dashboard into the local workbench/explorer.
-- Keep hardware signals optional and fixture-backed.
-- Keep contracts as optional settlement/event spine, not the core private runtime.
-- Keep Windows-first second-computer setup, scripts, command aliases, smoke tests, and troubleshooting current as subsystem commands land.
-- Keep all production mainnet, tokenomics, public validator, audited-cryptography, and bridge claims blocked.
+- Keep class/tool registries, AgentFactory, memory fuel, launch bond, profile, lineage, receipt-anchor, and swarm budget flows green.
+- Keep deterministic preview, intent, direct-call preparation, replay, and dashboard projection methods aligned.
+- Add provider-backed transaction submission only after SDK security boundaries are accepted.
+- Add live dashboard discovery, fuel, bond, and swarm-budget views when event-backed data exists.
+- Keep public-agent copy clear about local/test boundaries.
 
-### Phase 4: V0 Review/Audit
+### Phase 4: Agent Bonds Accountability
+
+Status: local/test Agent Bonds v1 and Phase 2 architecture surfaces exist.
+
+- Keep settlement, challenge, slash, verifier confirmation, evidence windows, and timelocked administration tests green.
+- Keep Passport / Envelope / Receipt primitives and quote attestations explicit.
+- Keep recourse-pool language task-scoped and bounded.
+- Keep dashboard and future mobile app surfaces focused on objective work accountability.
+- Do not claim insurance, guaranteed reimbursement, or broad public value flow.
+
+### Phase 5: Mobile Operator Apps
+
+Status: Android shell committed; iOS product track documented.
+
+- Keep `apps/dashboard/android` building from the shared dashboard surface.
+- Add Android debug APK tester evidence.
+- Add mobile-first Agent Bonds, receipts, recourse, wallet/budget, public-agent, and alert routes.
+- Add iOS Capacitor/Xcode project only when a reproducible macOS CI lane can build it.
+- Keep mobile signing secrets out of Git.
+
+### Phase 6: V0 Review/Audit
 
 Status: active.
 
@@ -131,28 +124,26 @@ Status: active.
 
 ## Mid-Term Phases
 
-### Phase 5: V0 Crypto Schema Layer
+### Phase 7: Crypto Schema Layer
 
 Status: implemented for crypto V0 primitives and local Flow Memory object schemas.
 
 - Receipt, attestation, commitment, root, and proof vocabulary exists in `crypto/` docs and helpers.
 - Domain separation and replay boundaries exist for the V0 helper package.
-- Canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, AgentMemoryView, and verifier reports exist in local V0 fixtures.
+- Canonical ids for MemorySignal, MemoryReceipt, RootflowTransition, RootfieldBundle, AgentMemoryView, Agent Bonds, and verifier reports exist in local/test fixtures.
 - Validate test vectors through verifier specs and keep cross-language checks passing.
 - Keep proof circuits, GPU proofs, verifier economics, and production crypto infrastructure out of scope.
 
-### Phase 6: V0 Dashboard Data Model And Display Path
+### Phase 8: Dashboard And Operator App Display
 
-Status: implemented as a generated fixture-backed local app.
+Status: implemented as a generated fixture-backed local app, desktop app, and Android shell.
 
 - App-facing entities exist in `apps/dashboard`.
 - Observed, pending, finalized, verified, failed, unresolved, unsupported, reorged, offline, and stale states are modeled for display.
-- Dashboard renders local fixture views for overview, Flow Memory / Rootflow, FlowPulse stream, Rootfields, work receipts, verifier reports, devnet blocks, hardware nodes, alerts, and raw JSON.
-- The Flow Memory / Rootflow view includes launch-demo summaries for contract event linkage, transition status counts, root bundle state, and agent memory warnings.
-- The dashboard fixture is generated from services, local devnet, and hardware POC outputs by `npm run launch:v0`.
-- Keep hosted production APIs and deployment out of scope until the local stack stabilizes.
+- Dashboard renders public launch views for overview, Flow Memory / Rootflow, FlowPulse stream, Agent Bonds, public agents, Rootfields, work receipts, verifier reports, hardware nodes, alerts, and raw JSON.
+- Keep hosted production APIs and deployment out of scope until the public stack stabilizes.
 
-### Phase 7: V0 Hardware POC
+### Phase 9: Hardware POC
 
 Status: bounded POC specs and simulator implemented; real hardware integration still future work.
 
@@ -161,48 +152,36 @@ Status: bounded POC specs and simulator implemented; real hardware integration s
 - Enclosure concepts, NFC memory cartridge concepts, light-pipe indicators, two-node demos, packet schemas, and simulator validation exist.
 - Keep manufacturing, firmware production, RF certification work, and field deployment out of scope.
 
-## Research Phases
-
-### Phase 8: V0 Research Lab
+### Phase 10: Research Lab
 
 Status: research-only.
 
 - Define AI memory artifact taxonomy.
-- Define no-value devnet/appchain research criteria.
-- Compare Base settlement anchors and local devnet smoke-test requirements.
-- Research bridge/security review requirements before any chain design.
-- Use `docs/L1_RESEARCH_INVENTORY.md` as the current source map for Noesis / Flow Chain, Rootflow, FlowCodec, and earlier AI-L1 research archives.
-- Extract concepts from Noesis into FlowMemory V0 schemas and decisions before importing code or expanding implementation scope.
-- Treat Noesis as a longer-term AI-native state research path while Rootflow V0 and Flow Memory V0 remain the launch-core priority.
+- Compare Base settlement anchors, receipt models, reliability patterns, and operator workflows.
+- Extract useful concepts into FlowMemory V0 schemas and decisions before importing code or expanding implementation scope.
+- Treat longer-horizon infrastructure work as separate from the public launch path.
 
-### Phase 9: Later Gated Work
+## Later Gated Work
 
 Status: blocked until explicit go/no-go decisions exist.
 
-- Production L1 or appchain.
 - Tokenomics or value-bearing systems.
 - Mainnet deployment.
 - Production Uniswap v4 hook deployment.
 - Verifier networks, staking, slashing, or incentives.
 - Hardware manufacturing or production decentralized internet claims.
+- Any dedicated network infrastructure not directly required by the public FlowMemory launch path.
 
 ## Merge Order Preference
 
-The initial merge sequence has completed for repo OS, contracts foundation, crypto foundation, indexer/verifier fixtures, dashboard V0, hardware POC, and local devnet prototype.
+The public launch merge preference is:
 
-Next merge preference:
-
-1. HQ private/local testnet acceptance and setup docs.
-2. Chain/devnet private testnet runtime extension.
-3. Crypto object identity, envelope, and vector extension for the same object set.
-4. Control-plane API over existing fixture/devnet outputs.
-5. Dashboard/workbench extension of the existing app.
-6. Optional hardware signal fixtures after API/object labels are stable.
-7. Contracts settlement-spine alignment without moving runtime into Solidity.
-8. Refresh packaging scripts and root command aliases whenever subsystem command semantics change.
-9. Canary ingestion and Base Sepolia follow-ups, still gated from production claims.
-10. Base Sepolia rehearsal execution against explicit testnet deployments.
-11. Actual source verification submission for Base canary contracts when `BASESCAN_API_KEY` is available.
-12. Static analysis follow-up findings triaged for any public testnet deployment.
-13. Operator ownership separation and multisig/recovery decision before further live deployments.
-14. Production-gated research only after V0 local acceptance stays green.
+1. Public repo launch polish and claim guardrails.
+2. Agent Bonds public boundary and readiness gates.
+3. Public-agent contract/helper/dashboard hardening.
+4. Mobile operator app docs, Android build lane, and iOS gap tracking.
+5. Dashboard public navigation and copy cleanup.
+6. Direct contract-backed SDK completion with provider security boundaries.
+7. Base Sepolia public-agent deployment/readback evidence when explicitly scoped.
+8. Static analysis follow-up findings triaged for any public testnet deployment.
+9. Operator ownership separation and multisig/recovery decision before further live deployments.

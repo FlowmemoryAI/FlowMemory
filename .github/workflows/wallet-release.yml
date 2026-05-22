@@ -1,4 +1,4 @@
-name: Wallet release
+name: FlowMemory app release
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   desktop:
-    name: Desktop wallet (${{ matrix.name }})
+    name: Desktop app (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -60,18 +60,18 @@ jobs:
       - name: Upload desktop artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flowchain-wallet-desktop-${{ matrix.name }}
+          name: flowmemory-desktop-${{ matrix.name }}
           path: ${{ matrix.artifact }}
           if-no-files-found: error
 
   android:
-    name: Android wallet APK
+    name: Android operator APK
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/dashboard
     env:
-      HAS_ANDROID_RELEASE_KEYSTORE: ${{ secrets.FLOWCHAIN_ANDROID_KEYSTORE_BASE64 != '' }}
+      HAS_ANDROID_RELEASE_KEYSTORE: ${{ secrets.FLOWMEMORY_ANDROID_KEYSTORE_BASE64 != '' }}
 
     steps:
       - name: Checkout
@@ -108,24 +108,24 @@ jobs:
         if: env.HAS_ANDROID_RELEASE_KEYSTORE == 'true'
         shell: bash
         run: |
-          echo "$FLOWCHAIN_ANDROID_KEYSTORE_BASE64" | base64 -d > flowchain-release.keystore
+          echo "$FLOWMEMORY_ANDROID_KEYSTORE_BASE64" | base64 -d > flowmemory-release.keystore
         env:
-          FLOWCHAIN_ANDROID_KEYSTORE_BASE64: ${{ secrets.FLOWCHAIN_ANDROID_KEYSTORE_BASE64 }}
+          FLOWMEMORY_ANDROID_KEYSTORE_BASE64: ${{ secrets.FLOWMEMORY_ANDROID_KEYSTORE_BASE64 }}
 
       - name: Build signed release APK
         if: env.HAS_ANDROID_RELEASE_KEYSTORE == 'true'
         run: ./gradlew assembleRelease
         working-directory: apps/dashboard/android
         env:
-          FLOWCHAIN_ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/apps/dashboard/flowchain-release.keystore
-          FLOWCHAIN_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.FLOWCHAIN_ANDROID_KEYSTORE_PASSWORD }}
-          FLOWCHAIN_ANDROID_KEY_ALIAS: ${{ secrets.FLOWCHAIN_ANDROID_KEY_ALIAS }}
-          FLOWCHAIN_ANDROID_KEY_PASSWORD: ${{ secrets.FLOWCHAIN_ANDROID_KEY_PASSWORD }}
+          FLOWMEMORY_ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/apps/dashboard/flowmemory-release.keystore
+          FLOWMEMORY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.FLOWMEMORY_ANDROID_KEYSTORE_PASSWORD }}
+          FLOWMEMORY_ANDROID_KEY_ALIAS: ${{ secrets.FLOWMEMORY_ANDROID_KEY_ALIAS }}
+          FLOWMEMORY_ANDROID_KEY_PASSWORD: ${{ secrets.FLOWMEMORY_ANDROID_KEY_PASSWORD }}
 
       - name: Upload Android APKs
         uses: actions/upload-artifact@v4
         with:
-          name: flowchain-wallet-android
+          name: flowmemory-android
           path: |
             apps/dashboard/android/app/build/outputs/apk/debug/*.apk
             apps/dashboard/android/app/build/outputs/apk/release/*.apk
@@ -151,7 +151,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            --title "Flowchain Wallet $GITHUB_REF_NAME" \
-            --notes "Desktop and Android wallet builds generated from $GITHUB_SHA."
+            --title "FlowMemory $GITHUB_REF_NAME" \
+            --notes "Desktop and Android FlowMemory app builds generated from $GITHUB_SHA."
           find release-artifacts -type f -print0 \
             | xargs -0 -I {} gh release upload "$GITHUB_REF_NAME" "{}" --clobber

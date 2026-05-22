@@ -4,7 +4,7 @@ const path = require("node:path");
 
 const VAULT_SCHEMA = "flowmemory.crypto.local-test-vault.v0";
 const VAULT_SECRETS_SCHEMA = "flowmemory.crypto.local-test-vault-secrets.v0";
-const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA = "flowchain.local_wallet_public_metadata.v0";
+const LOCAL_WALLET_PUBLIC_METADATA_SCHEMA = "flowmemory.local_wallet_public_metadata.v0";
 const LOCAL_WALLET_KEY_SCHEME = "secp256k1";
 const DEFAULT_LOCAL_WALLET_CHAIN_ID = "31337";
 const LOCAL_ALPHA_SIGNER_ROLES = Object.freeze({
@@ -35,8 +35,8 @@ function walletPaths(userDataPath) {
   const walletDir = path.join(userDataPath, "wallet");
   return {
     walletDir,
-    vaultPath: path.join(walletDir, "flowchain-wallet-vault.local.json"),
-    metadataPath: path.join(walletDir, "flowchain-wallet-public-metadata.json"),
+    vaultPath: path.join(walletDir, "flowmemory-wallet-vault.local.json"),
+    metadataPath: path.join(walletDir, "flowmemory-wallet-public-metadata.json"),
   };
 }
 
@@ -183,7 +183,7 @@ async function createVaultAccount({
   const effectivePrivateKey = privateKey ?? await randomPrivateKey();
   const publicKey = await publicKeyFromPrivateKey(effectivePrivateKey);
   const publicKeyHash = await keccakUtf8(publicKey);
-  const signerId = await keccakUtf8(`flowchain.local-alpha.signer:${publicKey}`);
+  const signerId = await keccakUtf8(`flowmemory.local-operator.signer:${publicKey}`);
   return {
     label,
     accountId: signerId,
@@ -191,7 +191,7 @@ async function createVaultAccount({
     signerRole,
     signerRoleCode: LOCAL_ALPHA_SIGNER_ROLES[signerRole],
     signerId,
-    signerKeyId: await keccakUtf8(`flowchain.local-alpha.signer-key:${publicKey}`),
+    signerKeyId: await keccakUtf8(`flowmemory.local-operator.signer-key:${publicKey}`),
     publicKey,
     publicKeyHash,
     keyScheme: LOCAL_WALLET_KEY_SCHEME,
@@ -283,9 +283,9 @@ function parseWalletCreatePayload(payload) {
 }
 
 function labelSlug(value) {
-  const label = typeof value === "string" && value.trim().length > 0 ? value.trim() : "flowchain-wallet";
+  const label = typeof value === "string" && value.trim().length > 0 ? value.trim() : "flowmemory-wallet";
   const slug = label.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
-  return slug.length > 0 ? slug.slice(0, 64) : "flowchain-wallet";
+  return slug.length > 0 ? slug.slice(0, 64) : "flowmemory-wallet";
 }
 
 function requirePassword(password) {

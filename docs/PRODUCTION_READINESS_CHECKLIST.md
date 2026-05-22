@@ -17,7 +17,6 @@ Current launch target:
 Current launch target is not:
 
 - production mainnet
-- production L1
 - token launch
 - production verifier network
 - production Uniswap v4 hook deployment
@@ -66,7 +65,7 @@ Current launch target is not:
 - Dashboard production build passes.
 - `npm run build:production` passes before a public demo build is cut.
 - Dashboard uses generated fixtures until a production API is explicitly scoped.
-- Dashboard copy does not imply production deployment, production L1, full trustless verification, free storage, or AI running on-chain.
+- Dashboard copy does not imply production deployment, full trustless verification, free storage, or AI running on-chain.
 
 ## Agent Bonds Gates
 

@@ -7,16 +7,11 @@ import type { DashboardData } from "./data/types";
 import { DEFAULT_CONTROL_PLANE_URL, buildWorkbenchSnapshot, fetchWorkbenchSnapshot, type WorkbenchSnapshot } from "./data/workbench";
 import { AlertsView } from "./views/AlertsView";
 import { AgentBondsView } from "./views/AgentBondsView";
-import { BridgePilotView } from "./views/BridgePilotView";
 import { CanaryDeploymentView } from "./views/CanaryDeploymentView";
-import { DevnetBlocksView } from "./views/DevnetBlocksView";
-import { ExternalTesterLaunchView } from "./views/ExternalTesterLaunchView";
-import { ExplorerView } from "./views/ExplorerView";
 import { FlowMemoryView } from "./views/FlowMemoryView";
 import { FlowPulseStreamView } from "./views/FlowPulseStreamView";
 import { BaseAgentMemoryView } from "./views/BaseAgentMemoryView";
 import { HardwareNodesView } from "./views/HardwareNodesView";
-import { OpsView } from "./views/OpsView";
 import { OverviewView } from "./views/OverviewView";
 import { RawJsonInspectorView } from "./views/RawJsonInspectorView";
 import { PublicAgentNetworkView } from "./views/PublicAgentNetworkView";
@@ -36,7 +31,7 @@ function LoadingState() {
         <div className="skeleton-line skeleton-short" />
         <p className="boot-hint">
           Loading dashboard fixtures and probing {DEFAULT_CONTROL_PLANE_URL}/health plus /state. If this stays offline,
-          start the local service with <code>npm run flowchain:start</code>.
+          start the local control-plane service before retrying.
         </p>
         <div className="boot-grid">
           <div />
@@ -124,13 +119,10 @@ export default function App() {
   return (
     <AppShell data={data} canaryData={canaryData} workbench={workbench}>
       <Routes>
-        <Route path="/" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
+        <Route path="/" element={<OverviewView data={data} />} />
+        <Route path="/workbench" element={<WorkbenchView data={data} workbench={workbench} onRefresh={() => setVersion((current) => current + 1)} />} />
         <Route path="/wallet" element={<WalletView workbench={workbench} />} />
-        <Route path="/tester" element={<ExternalTesterLaunchView workbench={workbench} />} />
-        <Route path="/bridge" element={<BridgePilotView workbench={workbench} />} />
         <Route path="/hooks" element={<UniswapHooksView data={canaryData} />} />
-        <Route path="/explorer" element={<ExplorerView data={data} workbench={workbench} />} />
-        <Route path="/ops" element={<OpsView workbench={workbench} />} />
         <Route path="/overview" element={<OverviewView data={data} />} />
         <Route path="/canary" element={<CanaryDeploymentView data={canaryData} />} />
         <Route path="/flowmemory" element={<FlowMemoryView data={data} />} />
@@ -141,10 +133,10 @@ export default function App() {
         <Route path="/rootfields" element={<RootfieldsView data={data} />} />
         <Route path="/work" element={<WorkReceiptsView data={data} />} />
         <Route path="/verifier" element={<VerifierReportsView data={data} />} />
-        <Route path="/devnet" element={<DevnetBlocksView data={data} />} />
         <Route path="/hardware" element={<HardwareNodesView data={data} />} />
         <Route path="/alerts" element={<AlertsView data={data} />} />
         <Route path="/raw" element={<RawJsonInspectorView data={data} workbench={workbench} />} />
+        <Route path="*" element={<OverviewView data={data} />} />
       </Routes>
     </AppShell>
   );

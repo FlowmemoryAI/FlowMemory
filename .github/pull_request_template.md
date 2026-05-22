@@ -29,7 +29,7 @@
 - [ ] I only edited files in my assigned scope.
 - [ ] I did not hardcode secrets.
 - [ ] I did not add production deployment automation unless explicitly scoped.
-- [ ] I did not add tokenomics or appchain/L1 implementation unless explicitly scoped.
+- [ ] I did not add tokenomics, new value mechanics, or unscoped network infrastructure unless explicitly scoped.
 - [ ] I did not add dynamic fees, production hook deployment, hardware manufacturing, GPU proofs, verifier economics, or full dashboard implementation unless explicitly scoped.
 
 ## Risk And Follow-Ups

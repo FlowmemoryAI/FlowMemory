@@ -26,7 +26,7 @@ These instructions apply to every agent, assistant, script, and human operating 
 - Use `docs/PR_PROCESS.md` for branch naming, draft PRs, merge order, dirty worktrees, and issue closing.
 - Use `docs/DAILY_HQ_RUNBOOK.md` for morning review, triage, monitoring, and handoff.
 - Use `infra/scripts/status-report.ps1` for read-only local worktree, PR, and issue status.
-- The immediate major milestone is the FlowChain private/local L1 testnet package for second-computer validation, with Rootflow V0 and Flow Memory V0 kept green as the baseline. Do not reinterpret that as approval for production deployment.
+- The immediate major milestone is public FlowMemory launch hardening: agent memory, Agent Bonds, public-agent surfaces, dashboard/mobile operator apps, and public-safe verification gates. Do not surface separate chain, token, or network-infrastructure research in public launch paths unless explicitly scoped.
 
 ## Engineering Rules
 

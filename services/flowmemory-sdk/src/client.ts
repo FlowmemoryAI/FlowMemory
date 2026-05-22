@@ -1,4 +1,4 @@
-import { redactFlowChainText } from "./redact.ts";
+import { redactFlowMemoryText } from "./redact.ts";
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
@@ -13,7 +13,7 @@ export interface JsonRpcResponse<T extends JsonValue = JsonValue> {
   };
 }
 
-export interface FlowChainClientOptions {
+export interface FlowMemoryClientOptions {
   rpcUrl?: string;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
@@ -28,25 +28,25 @@ export interface WalletSendRequest {
   createRecipient?: boolean;
 }
 
-export class FlowChainRpcError extends Error {
+export class FlowMemoryRpcError extends Error {
   readonly code: number;
   readonly data?: JsonValue;
 
   constructor(message: string, code: number, data?: JsonValue) {
-    super(redactFlowChainText(message));
-    this.name = "FlowChainRpcError";
+    super(redactFlowMemoryText(message));
+    this.name = "FlowMemoryRpcError";
     this.code = code;
     this.data = data;
   }
 }
 
-export class FlowChainClient {
+export class FlowMemoryClient {
   readonly rpcUrl: string;
   private readonly fetchImpl: typeof fetch;
   private readonly timeoutMs: number;
 
-  constructor(options: FlowChainClientOptions = {}) {
-    this.rpcUrl = options.rpcUrl ?? process.env.FLOWCHAIN_RPC_URL ?? "http://127.0.0.1:8787/rpc";
+  constructor(options: FlowMemoryClientOptions = {}) {
+    this.rpcUrl = options.rpcUrl ?? process.env.FLOWMEMORY_RPC_URL ?? "http://127.0.0.1:8787/rpc";
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.timeoutMs = options.timeoutMs ?? 10000;
   }
@@ -60,7 +60,7 @@ export class FlowChainClient {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           jsonrpc: "2.0",
-          id: `flowchain-sdk:${method}`,
+          id: `flowmemory-sdk:${method}`,
           method,
           params,
         }),
@@ -71,25 +71,25 @@ export class FlowChainClient {
       try {
         payload = JSON.parse(text) as JsonRpcResponse<T>;
       } catch {
-        throw new FlowChainRpcError(`FlowChain RPC returned non-JSON response: ${redactFlowChainText(text)}`, -32700);
+        throw new FlowMemoryRpcError(`FlowMemory RPC returned non-JSON response: ${redactFlowMemoryText(text)}`, -32700);
       }
       if (!response.ok) {
-        throw new FlowChainRpcError(`FlowChain RPC HTTP ${response.status}: ${redactFlowChainText(text)}`, response.status);
+        throw new FlowMemoryRpcError(`FlowMemory RPC HTTP ${response.status}: ${redactFlowMemoryText(text)}`, response.status);
       }
       if (payload.error !== undefined) {
-        throw new FlowChainRpcError(payload.error.message, payload.error.code, payload.error.data);
+        throw new FlowMemoryRpcError(payload.error.message, payload.error.code, payload.error.data);
       }
       if (payload.result === undefined) {
-        throw new FlowChainRpcError(`FlowChain RPC ${method} returned no result`, -32603);
+        throw new FlowMemoryRpcError(`FlowMemory RPC ${method} returned no result`, -32603);
       }
       return payload.result;
     } catch (error) {
-      if (error instanceof FlowChainRpcError) throw error;
+      if (error instanceof FlowMemoryRpcError) throw error;
       if (error instanceof Error && error.name === "AbortError") {
-        throw new FlowChainRpcError(`FlowChain RPC timed out after ${this.timeoutMs}ms`, -32001);
+        throw new FlowMemoryRpcError(`FlowMemory RPC timed out after ${this.timeoutMs}ms`, -32001);
       }
       const message = error instanceof Error ? error.message : String(error);
-      throw new FlowChainRpcError(`FlowChain RPC unreachable: ${message}`, -32000);
+      throw new FlowMemoryRpcError(`FlowMemory RPC unreachable: ${message}`, -32000);
     } finally {
       clearTimeout(timeout);
     }
@@ -114,19 +114,19 @@ export class FlowChainClient {
       try {
         body = JSON.parse(text) as JsonValue;
       } catch {
-        throw new FlowChainRpcError(`FlowChain control-plane returned non-JSON response: ${redactFlowChainText(text)}`, -32700);
+        throw new FlowMemoryRpcError(`FlowMemory control-plane returned non-JSON response: ${redactFlowMemoryText(text)}`, -32700);
       }
       if (!response.ok) {
-        throw new FlowChainRpcError(`FlowChain control-plane HTTP ${response.status}: ${redactFlowChainText(text)}`, response.status, body);
+        throw new FlowMemoryRpcError(`FlowMemory control-plane HTTP ${response.status}: ${redactFlowMemoryText(text)}`, response.status, body);
       }
       return body as T;
     } catch (error) {
-      if (error instanceof FlowChainRpcError) throw error;
+      if (error instanceof FlowMemoryRpcError) throw error;
       if (error instanceof Error && error.name === "AbortError") {
-        throw new FlowChainRpcError(`FlowChain control-plane timed out after ${this.timeoutMs}ms`, -32001);
+        throw new FlowMemoryRpcError(`FlowMemory control-plane timed out after ${this.timeoutMs}ms`, -32001);
       }
       const message = error instanceof Error ? error.message : String(error);
-      throw new FlowChainRpcError(`FlowChain control-plane unreachable: ${message}`, -32000);
+      throw new FlowMemoryRpcError(`FlowMemory control-plane unreachable: ${message}`, -32000);
     } finally {
       clearTimeout(timeout);
     }

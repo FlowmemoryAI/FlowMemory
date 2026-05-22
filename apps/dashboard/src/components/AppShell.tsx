@@ -2,24 +2,18 @@ import type { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Activity,
-  Bell,
   Binary,
   Braces,
   BrainCircuit,
   Boxes,
   ClipboardCheck,
-  ArrowRightLeft,
-  Compass,
   GitBranch,
   RadioReceiver,
   LayoutDashboard,
-  Monitor,
   Network,
   RadioTower,
-  ShieldAlert,
   ShieldCheck,
   ShieldPlus,
-  UserPlus,
   Wallet,
 } from "lucide-react";
 import type { DashboardData } from "../data/types";
@@ -34,35 +28,28 @@ interface AppShellProps {
 }
 
 const NAV_ITEMS = [
-  { to: "/", label: "Workbench", icon: Monitor },
-  { to: "/wallet", label: "Wallet", icon: Wallet },
-  { to: "/tester", label: "Tester launch", icon: UserPlus },
-  { to: "/bridge", label: "Bridge pilot", icon: ArrowRightLeft },
-  { to: "/hooks", label: "V4 hooks", icon: GitBranch },
-  { to: "/explorer", label: "Explorer", icon: Compass },
-  { to: "/ops", label: "Ops", icon: ShieldAlert },
-  { to: "/overview", label: "Overview", icon: LayoutDashboard },
-  { to: "/canary", label: "Base canary", icon: RadioReceiver },
+  { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/flowmemory", label: "Flow Memory", icon: BrainCircuit },
   { to: "/agent-bonds", label: "Agent Bonds", icon: ShieldPlus },
-  { to: "/flowpulse", label: "FlowPulse", icon: Activity },
-  { to: "/agents", label: "Base agents", icon: BrainCircuit },
   { to: "/public-network", label: "Public network", icon: Network },
+  { to: "/wallet", label: "Operator wallet", icon: Wallet },
+  { to: "/agents", label: "Base agents", icon: BrainCircuit },
+  { to: "/flowpulse", label: "FlowPulse", icon: Activity },
   { to: "/rootfields", label: "Rootfields", icon: Boxes },
   { to: "/work", label: "Work lanes", icon: ClipboardCheck },
   { to: "/verifier", label: "Verifier", icon: ShieldCheck },
-  { to: "/devnet", label: "Devnet", icon: Network },
+  { to: "/hooks", label: "V4 hooks", icon: GitBranch },
+  { to: "/canary", label: "Base canary", icon: RadioReceiver },
   { to: "/hardware", label: "Hardware", icon: RadioTower },
-  { to: "/alerts", label: "Alerts", icon: Bell },
+  { to: "/alerts", label: "Alerts", icon: Braces },
   { to: "/raw", label: "Raw JSON", icon: Braces },
 ];
 
 export function AppShell({ data, canaryData, workbench, children }: AppShellProps) {
   const location = useLocation();
-  const isBridgeRoute = location.pathname.startsWith("/bridge");
   const isWalletRoute = location.pathname.startsWith("/wallet");
   const isHooksRoute = location.pathname.startsWith("/hooks");
-  if (isBridgeRoute || isWalletRoute || isHooksRoute) {
+  if (isWalletRoute || isHooksRoute) {
     return <>{children}</>;
   }
 
@@ -88,7 +75,7 @@ export function AppShell({ data, canaryData, workbench, children }: AppShellProp
           </div>
           <div>
             <span className="brand-kicker">FlowMemory</span>
-            <strong>Workbench V0</strong>
+            <strong>Public V0</strong>
           </div>
         </div>
         <nav className="nav-list" aria-label="Dashboard views">

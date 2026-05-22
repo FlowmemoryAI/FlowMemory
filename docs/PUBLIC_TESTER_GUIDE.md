@@ -47,14 +47,13 @@ To generate a paste-ready local report for GitHub:
 npm run public:test:report
 ```
 
-By default this runs the quick JS smoke lane and writes public-safe JSON and Markdown files under `devnet/local/public-test-reports/`. That folder is intentionally ignored by Git.
+By default this runs the quick JS smoke lane and writes public-safe JSON and Markdown files under `reports/local/public-test-reports/`. That folder is intentionally ignored by Git.
 
 You can include more lanes:
 
 ```powershell
 npm run public:test:report -- --contracts --e2e
 npm run public:test:report -- --all
-```
 ```
 
 
@@ -127,7 +126,7 @@ npm run public:test:dashboard
 Then optionally start the dashboard:
 
 ```powershell
-npm run workbench:dev
+npm run dev --prefix apps/dashboard
 ```
 
 Open the local URL printed by Vite and review:
@@ -154,24 +153,13 @@ Fast path:
 npm run public:test:cli
 ```
 
-Manual path:
-
-Terminal A:
+Manual setup is not required for this lane; the command starts and stops its own local server:
 
 ```powershell
-npm run control-plane:serve
+npm run public:test:cli
 ```
 
-Terminal B:
-
-```powershell
-npm run public:devkit -- public-agent-classes --json
-npm run public:devkit -- public-agent-tools --json
-npm run public:devkit -- public-agent-launch --json
-npm run public:devkit -- public-agent-discover --json
-npm run public:devkit -- public-swarm --json
-npm run public:devkit -- public-swarm-replay --json
-```
+The smoke command starts a local control-plane server, runs the public-agent and public-swarm CLI checks against it, validates JSON schemas, and shuts the server down.
 
 Useful feedback:
 - Did the commands return useful JSON?
@@ -185,7 +173,7 @@ If you want the repo to generate most of the report body, run:
 npm run public:test:report
 ```
 
-Then copy the generated `.md` file from `devnet/local/public-test-reports/` into the issue.
+Then copy the generated `.md` file from `reports/local/public-test-reports/` into the issue.
 
 
 Open a GitHub issue using the **Public Tester Report** template and include:

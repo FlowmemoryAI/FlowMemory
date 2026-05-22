@@ -33,16 +33,16 @@ npm run mobile:android:sync --prefix apps/dashboard
 
 Building an APK requires Java and the Android SDK. On CI, `.github/workflows/wallet-release.yml` builds a debug APK automatically. For a signed release APK, add these repository secrets:
 
-- `FLOWCHAIN_ANDROID_KEYSTORE_BASE64`
-- `FLOWCHAIN_ANDROID_KEYSTORE_PASSWORD`
-- `FLOWCHAIN_ANDROID_KEY_ALIAS`
-- `FLOWCHAIN_ANDROID_KEY_PASSWORD`
+- `FLOWMEMORY_ANDROID_KEYSTORE_BASE64`
+- `FLOWMEMORY_ANDROID_KEYSTORE_PASSWORD`
+- `FLOWMEMORY_ANDROID_KEY_ALIAS`
+- `FLOWMEMORY_ANDROID_KEY_PASSWORD`
 
-The secret names still use the older internal wallet prefix for compatibility with the existing release workflow; they are signing inputs only and must never be committed.
+Signing inputs must be stored only as repository secrets and must never be committed.
 
 ## Public Downloads
 
-Run the `Wallet release` GitHub workflow manually for downloadable CI artifacts, or push a tag like:
+Run the `FlowMemory app release` GitHub workflow manually for downloadable CI artifacts, or push a tag like:
 
 ```powershell
 git tag wallet-v0.0.0

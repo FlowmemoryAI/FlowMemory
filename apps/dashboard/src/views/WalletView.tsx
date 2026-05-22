@@ -181,7 +181,7 @@ interface WalletViewProps {
   workbench: WorkbenchSnapshot;
 }
 
-type FlowchainDesktopBridge = {
+type FlowMemoryDesktopBridge = {
   app?: string;
   platform?: string;
   packaged?: boolean;
@@ -191,7 +191,7 @@ type FlowchainDesktopBridge = {
 
 declare global {
   interface Window {
-    flowchainDesktop?: FlowchainDesktopBridge;
+    flowmemoryDesktop?: FlowMemoryDesktopBridge;
   }
 }
 
@@ -364,7 +364,7 @@ export function WalletView({ workbench }: WalletViewProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [localActivity, setLocalActivity] = useState<LocalActivity[]>([]);
-  const desktopWalletAvailable = typeof window !== "undefined" && Boolean(window.flowchainDesktop?.createLocalWallet);
+  const desktopWalletAvailable = typeof window !== "undefined" && Boolean(window.flowmemoryDesktop?.createLocalWallet);
 
   const activeAccount = result?.account ?? status?.account ?? null;
   const activeAccountId = accountId(activeAccount);
@@ -413,7 +413,7 @@ export function WalletView({ workbench }: WalletViewProps) {
   }
 
   async function loadDesktopWalletFallback(apiMessage: string): Promise<boolean> {
-    const desktop = typeof window !== "undefined" ? window.flowchainDesktop : undefined;
+    const desktop = typeof window !== "undefined" ? window.flowmemoryDesktop : undefined;
     if (!desktop?.getLocalWallet) {
       return false;
     }
@@ -427,7 +427,7 @@ export function WalletView({ workbench }: WalletViewProps) {
       setTesterStatus(null);
       setMessage(
         desktopStatus.exists
-          ? "Wallet loaded locally. Flowchain API is unavailable, so balances and activity cannot sync yet."
+          ? "Wallet loaded locally. FlowMemory API is unavailable, so balances and activity cannot sync yet."
           : `${apiMessage}. Create encrypted wallet will still work locally in this desktop app.`,
       );
       return true;
@@ -507,7 +507,7 @@ export function WalletView({ workbench }: WalletViewProps) {
         chainId: "31337",
         replace,
       };
-      const desktop = typeof window !== "undefined" ? window.flowchainDesktop : undefined;
+      const desktop = typeof window !== "undefined" ? window.flowmemoryDesktop : undefined;
       if (desktop?.createLocalWallet) {
         const payload = await desktop.createLocalWallet(walletRequest);
         setResult(payload);
@@ -556,7 +556,7 @@ export function WalletView({ workbench }: WalletViewProps) {
           fromAccountId: primaryWalletAddress,
           toAccountId: sendTo.trim(),
           amountEth: sendAmount.trim(),
-          memo: "flowchain-wallet-ui-send",
+          memo: "flowmemory-wallet-ui-send",
         }),
       });
       setWalletApiUrl(url);
@@ -574,7 +574,7 @@ export function WalletView({ workbench }: WalletViewProps) {
       setSendTo("");
       setSendAmount("");
       setActivePanel("activity");
-      setMessage(payload.applied ? "Send applied on Flowchain runtime." : "Send queued for Flowchain runtime.");
+      setMessage(payload.applied ? "Send applied on FlowMemory runtime." : "Send queued for FlowMemory runtime.");
       await loadStatus();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "wallet send failed");
@@ -643,7 +643,7 @@ export function WalletView({ workbench }: WalletViewProps) {
         body: JSON.stringify({
           accountId,
           amountUnits: testerFundAmountUnits.trim(),
-          reason: `flowchain-wallet-ui-tester-faucet-${Date.now()}`,
+          reason: `flowmemory-wallet-ui-tester-faucet-${Date.now()}`,
         }),
       });
       setWalletApiUrl(url);
@@ -693,7 +693,7 @@ export function WalletView({ workbench }: WalletViewProps) {
           fromAccountId,
           toAccountId: testerTo.trim(),
           amountUnits: testerAmountUnits.trim(),
-          memo: "flowchain-tester-wallet-ui-send",
+          memo: "flowmemory-tester-wallet-ui-send",
         }),
       });
       setWalletApiUrl(url);
@@ -730,7 +730,7 @@ export function WalletView({ workbench }: WalletViewProps) {
         id: `swap:${Date.now()}`,
         type: "Swap quoted",
         asset: "ETH to FLOW",
-        route: "Flowchain local quote",
+        route: "FlowMemory local quote",
         amount: `${swapAmount} ETH`,
         status: "Quote ready",
       },
@@ -747,7 +747,7 @@ export function WalletView({ workbench }: WalletViewProps) {
         return {
           key: balance.balanceId ?? `${balance.walletAddress}:${balance.asset}`,
           name: formatAssetAddress(balance.asset),
-          description: balance.source === "bridge-credit" ? "Base bridged Ether" : "Flowchain asset",
+          description: balance.source === "bridge-credit" ? "Base bridged Ether" : "FlowMemory asset",
           balance: formatEth(eth),
           value: ethUsdRate ? formatUsd(eth * ethUsdRate) : "USD quote unavailable",
           change: balance.status === "credited" ? "+ credited" : statusLabel(balance.status),
@@ -772,7 +772,7 @@ export function WalletView({ workbench }: WalletViewProps) {
       id: credit.creditId ?? `${credit.txHash}:${credit.amount}`,
       type: credit.status === "applied" ? "Bridge credit" : "Bridge pending",
       asset: formatAssetAddress(credit.token),
-      route: credit.txHash ? shortId(credit.txHash, 8, 6) : "Flowchain",
+      route: credit.txHash ? shortId(credit.txHash, 8, 6) : "FlowMemory",
       amount: `${formatEth(weiToEth(credit.amount))}`,
       status: statusLabel(credit.status),
     })),
@@ -789,9 +789,9 @@ export function WalletView({ workbench }: WalletViewProps) {
   return (
     <div className="wallet-app-shell">
       <aside className="wallet-app-sidebar" aria-label="Wallet navigation">
-        <Link className="wallet-brand" to="/wallet" aria-label="Flowchain wallet home">
+        <Link className="wallet-brand" to="/wallet" aria-label="FlowMemory wallet home">
           <FlowMark />
-          <strong>Flowchain</strong>
+          <strong>FlowMemory</strong>
         </Link>
 
         <nav className="wallet-side-nav">
@@ -811,9 +811,9 @@ export function WalletView({ workbench }: WalletViewProps) {
             <UserPlus size={19} aria-hidden="true" />
             Tester
           </button>
-          <Link to="/bridge">
+          <Link to="/overview">
             <Network size={19} aria-hidden="true" />
-            Bridge
+            Overview
           </Link>
           <button className={activePanel === "swap" ? "active" : ""} type="button" onClick={() => setActivePanel("swap")}>
             <ArrowRightLeft size={19} aria-hidden="true" />
@@ -843,7 +843,7 @@ export function WalletView({ workbench }: WalletViewProps) {
         <header className="wallet-app-topbar">
           <button className="wallet-network-switch" type="button" onClick={() => setMessage(`Wallet API: ${walletApiUrl}`)}>
             <span><FlowMark /></span>
-            Flowchain
+            FlowMemory
             <ChevronDown size={16} aria-hidden="true" />
           </button>
 
@@ -932,10 +932,10 @@ export function WalletView({ workbench }: WalletViewProps) {
             <strong>Swap</strong>
             <small>Swap assets</small>
           </button>
-          <Link to="/bridge">
+          <Link to="/overview">
             <span><Network size={22} aria-hidden="true" /></span>
-            <strong>Bridge</strong>
-            <small>Bridge to Flowchain</small>
+            <strong>Overview</strong>
+            <small>Operator network summary</small>
           </Link>
           <button type="button" onClick={() => setActivePanel("tester")}>
             <span><UserPlus size={22} aria-hidden="true" /></span>
@@ -1034,7 +1034,7 @@ export function WalletView({ workbench }: WalletViewProps) {
 
         <section className="wallet-side-card">
           <div className="wallet-side-title">
-            <h2>Flowchain network</h2>
+            <h2>FlowMemory network</h2>
             <b>{networkBadge}</b>
           </div>
           <dl className="wallet-network-facts">
@@ -1086,11 +1086,11 @@ export function WalletView({ workbench }: WalletViewProps) {
         <section className="wallet-side-card wallet-bridge-card">
           <div>
             <Network size={24} aria-hidden="true" />
-            <h2>Bridge to Flowchain</h2>
-            <p>Move assets between chains</p>
+            <h2>Bridge</h2>
+            <p>Move assets between configured networks</p>
           </div>
-          <Link to="/bridge">
-            Open bridge
+          <Link to="/overview">
+            View overview
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </section>
@@ -1139,7 +1139,7 @@ export function WalletView({ workbench }: WalletViewProps) {
           {activePanel === "send" ? (
             <div className="wallet-panel-form">
               <label>
-                <span>Recipient Flowchain account</span>
+                <span>Recipient account</span>
                 <input value={sendTo} onChange={(event) => setSendTo(event.target.value)} placeholder="0x..." />
               </label>
               <label>

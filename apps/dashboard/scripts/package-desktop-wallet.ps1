@@ -2,10 +2,10 @@ $ErrorActionPreference = "Stop"
 
 $releaseDir = Resolve-Path (Join-Path $PSScriptRoot "..\release")
 $unpackedDir = Join-Path $releaseDir "win-unpacked"
-$exePath = Join-Path $unpackedDir "Flowchain Wallet.exe"
+$exePath = Join-Path $unpackedDir "FlowMemory.exe"
 $packageJsonPath = Resolve-Path (Join-Path $PSScriptRoot "..\package.json")
 $packageJson = Get-Content -LiteralPath $packageJsonPath -Raw | ConvertFrom-Json
-$zipPath = Join-Path $releaseDir "Flowchain-Wallet-$($packageJson.version)-win-x64.zip"
+$zipPath = Join-Path $releaseDir "FlowMemory-$($packageJson.version)-win-x64.zip"
 
 if (-not (Test-Path -LiteralPath $exePath)) {
   throw "Desktop wallet executable was not found at $exePath"
@@ -17,4 +17,4 @@ if (Test-Path -LiteralPath $zipPath) {
 
 Compress-Archive -Path (Join-Path $unpackedDir "*") -DestinationPath $zipPath -Force
 
-Write-Host "Created desktop wallet package: $zipPath"
+Write-Host "Created FlowMemory desktop package: $zipPath"

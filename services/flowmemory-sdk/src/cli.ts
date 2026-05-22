@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
 
-import { FlowChainClient, FlowChainRpcError, type JsonValue } from "./client.ts";
+import { FlowMemoryClient, FlowMemoryRpcError, type JsonValue } from "./client.ts";
 import { redactJsonValue } from "./redact.ts";
 
 interface CliOptions {
@@ -83,7 +83,7 @@ const COMMANDS = new Set([
 function parseArgs(argv: string[]): CliOptions {
   const args = [...argv];
   const command = args.shift() ?? "help";
-  let rpcUrl = process.env.FLOWCHAIN_RPC_URL ?? "http://127.0.0.1:8787/rpc";
+  let rpcUrl = process.env.FLOWMEMORY_RPC_URL ?? "http://127.0.0.1:8787/rpc";
   let json = false;
   let limit = 10;
   let seconds = 20;
@@ -147,10 +147,10 @@ function parseArgs(argv: string[]): CliOptions {
 }
 
 function printHelp() {
-  console.log(`FlowChain devkit
+  console.log(`FlowMemory public CLI
 
 Usage:
-  npm run flowchain:devkit -- <command> [--rpc <url>] [--json]
+  npm run public:test:cli -- <command> [--rpc <url>] [--json]
 
 Commands:
   discover          Print RPC discovery
@@ -285,7 +285,7 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function watchHeight(client: FlowChainClient, seconds: number): Promise<JsonValue> {
+async function watchHeight(client: FlowMemoryClient, seconds: number): Promise<JsonValue> {
   const first = await client.chainStatus();
   const firstHeight = heightFromStatus(first);
   const deadline = Date.now() + seconds * 1000;
@@ -298,7 +298,7 @@ async function watchHeight(client: FlowChainClient, seconds: number): Promise<Js
     if (firstHeight !== null && latestHeight !== null && latestHeight > firstHeight) break;
   }
   return {
-    schema: "flowchain.sdk.watch_height.v0",
+    schema: "flowmemory.sdk.watch_height.v0",
     status: firstHeight !== null && latestHeight !== null && latestHeight > firstHeight ? "passed" : "failed",
     firstHeight: firstHeight?.toString() ?? null,
     latestHeight: latestHeight?.toString() ?? null,
@@ -312,7 +312,7 @@ async function run(argv = process.argv.slice(2)) {
     printHelp();
     return;
   }
-  const client = new FlowChainClient({ rpcUrl: options.rpcUrl });
+  const client = new FlowMemoryClient({ rpcUrl: options.rpcUrl });
   const params = { limit: options.limit } as JsonValue;
   const result = await (async () => {
     switch (options.command) {
@@ -456,13 +456,13 @@ async function run(argv = process.argv.slice(2)) {
           fromAccountId: options.fromAccountId,
           toAccountId: options.toAccountId,
           amountUnits: options.amountUnits,
-          memo: options.memo ?? "flowchain-devkit-wallet-send",
+          memo: options.memo ?? "flowmemory-cli-wallet-send",
           applyBlock: true,
           createRecipient: true,
         });
       case "diagnostics":
         return {
-          schema: "flowchain.sdk.diagnostics.v0",
+          schema: "flowmemory.sdk.diagnostics.v0",
           rpcUrl: options.rpcUrl.replace(/^(https?:\/\/)([^/@]+@)?/i, "$1"),
           discover: await client.rpcDiscover(),
           readiness: await client.rpcReadiness(),
@@ -476,9 +476,9 @@ async function run(argv = process.argv.slice(2)) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   run().catch((error) => {
-    if (error instanceof FlowChainRpcError) {
+    if (error instanceof FlowMemoryRpcError) {
       printResult({
-        schema: "flowchain.sdk.error.v0",
+        schema: "flowmemory.sdk.error.v0",
         status: "failed",
         code: error.code,
         message: error.message,
@@ -486,7 +486,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       }, true);
     } else {
       printResult({
-        schema: "flowchain.sdk.error.v0",
+        schema: "flowmemory.sdk.error.v0",
         status: "failed",
         message: error instanceof Error ? error.message : String(error),
       }, true);

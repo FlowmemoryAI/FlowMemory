@@ -37,7 +37,7 @@ Missing work:
 
 Tracking issue: https://github.com/FlowmemoryAI/FlowMemory/issues/166
 
-Current state: FlowChain SDK exposes control-plane wrappers, FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes, and `services/flowchain-sdk/src/public-contracts.ts` now builds direct calldata for `AgentFactory.launchAgent` and `SwarmFactory.createSwarm`. Direct transaction submission is not yet a complete SDK surface.
+Current state: the public helper layer exposes control-plane wrappers, FlowMemory helpers produce deterministic roots plus contract-aligned launch hashes, and direct calldata builders now exist for `AgentFactory.launchAgent` and `SwarmFactory.createSwarm`. Direct transaction submission is not yet a complete SDK surface.
 
 Missing work:
 

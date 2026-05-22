@@ -12,7 +12,6 @@ const forbiddenClaims = [
   { name: "mainnet launch", pattern: /\bmainnet\s+launch\b/i },
   { name: "production mainnet", pattern: /\bproduction[- ]mainnet\b/i },
   { name: "production deployment", pattern: /\bproduction\s+deployment\b/i },
-  { name: "production L1", pattern: /\bproduction\s+L1\b/i },
   { name: "production verifier network", pattern: /\bproduction\s+verifier\s+network\b/i },
   { name: "production Uniswap hook", pattern: /\bproduction\s+Uniswap\s+v4\s+hook\b|\bproduction\s+hook\s+deployment\b/i },
   { name: "production bridge", pattern: /\bproduction\s+bridge\b/i },

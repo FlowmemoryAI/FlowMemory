@@ -44,7 +44,7 @@ function usage() {
 Usage:
   node infra/scripts/public-tester-report.mjs [--quick] [--contracts] [--e2e] [--dashboard] [--cli] [--all] [--strict] [--out <path>]
 
-Defaults to --quick. Writes a public-safe JSON report and markdown issue body under devnet/local/public-test-reports/.
+Defaults to --quick. Writes a public-safe JSON report and markdown issue body under reports/local/public-test-reports/.
 `;
 }
 
@@ -179,7 +179,7 @@ ${results}
 ${failures.length > 0 ? `### First Useful Failure Output\n\n${failures}\n\n` : ""}### Safety
 
 - [x] I did not include private keys, seed phrases, RPC credentials, API keys, webhook URLs, wallet secrets, or private user data.
-- [x] I understand this is local/test public infrastructure, not a production/mainnet readiness claim.
+- [x] I understand this is local/test public infrastructure, not a production readiness claim.
 `;
 }
 
@@ -187,7 +187,7 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const timestamp = new Date().toISOString();
   const safeTimestamp = timestamp.replace(/[:.]/g, "-");
-  const outputBase = resolve(args.out ?? `devnet/local/public-test-reports/public-tester-report-${safeTimestamp}`);
+  const outputBase = resolve(args.out ?? `reports/local/public-test-reports/public-tester-report-${safeTimestamp}`);
   const selected = args.lanes.map((lane) => LANES[lane]);
 
   const repoCommit = runCommand("git", ["rev-parse", "HEAD"]);

@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
-def flowchainReleaseKeystore = System.getenv("FLOWCHAIN_ANDROID_KEYSTORE_FILE")
-def flowchainReleaseStorePassword = System.getenv("FLOWCHAIN_ANDROID_KEYSTORE_PASSWORD")
-def flowchainReleaseKeyAlias = System.getenv("FLOWCHAIN_ANDROID_KEY_ALIAS")
-def flowchainReleaseKeyPassword = System.getenv("FLOWCHAIN_ANDROID_KEY_PASSWORD")
-def hasFlowchainReleaseSigning = flowchainReleaseKeystore
-        && flowchainReleaseStorePassword
-        && flowchainReleaseKeyAlias
-        && flowchainReleaseKeyPassword
+def flowmemoryReleaseKeystore = System.getenv("FLOWMEMORY_ANDROID_KEYSTORE_FILE")
+def flowmemoryReleaseStorePassword = System.getenv("FLOWMEMORY_ANDROID_KEYSTORE_PASSWORD")
+def flowmemoryReleaseKeyAlias = System.getenv("FLOWMEMORY_ANDROID_KEY_ALIAS")
+def flowmemoryReleaseKeyPassword = System.getenv("FLOWMEMORY_ANDROID_KEY_PASSWORD")
+def hasFlowmemoryReleaseSigning = flowmemoryReleaseKeystore
+        && flowmemoryReleaseStorePassword
+        && flowmemoryReleaseKeyAlias
+        && flowmemoryReleaseKeyPassword
 
 android {
-    namespace = "ai.flowmemory.flowchain.wallet"
+    namespace = "ai.flowmemory.operator"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "ai.flowmemory.flowchain.wallet"
+        applicationId "ai.flowmemory.operator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -27,18 +27,18 @@ android {
     }
     signingConfigs {
         release {
-            if (hasFlowchainReleaseSigning) {
-                storeFile file(flowchainReleaseKeystore)
-                storePassword flowchainReleaseStorePassword
-                keyAlias flowchainReleaseKeyAlias
-                keyPassword flowchainReleaseKeyPassword
+            if (hasFlowmemoryReleaseSigning) {
+                storeFile file(flowmemoryReleaseKeystore)
+                storePassword flowmemoryReleaseStorePassword
+                keyAlias flowmemoryReleaseKeyAlias
+                keyPassword flowmemoryReleaseKeyPassword
             }
         }
     }
     buildTypes {
         release {
             minifyEnabled false
-            if (hasFlowchainReleaseSigning) {
+            if (hasFlowmemoryReleaseSigning) {
                 signingConfig signingConfigs.release
             }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

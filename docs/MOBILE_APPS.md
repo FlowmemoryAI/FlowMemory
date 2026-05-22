@@ -44,7 +44,7 @@ Building an APK also requires Java and the Android SDK:
 npm run mobile:android:debug --prefix apps/dashboard
 ```
 
-CI can build Android artifacts through the `Wallet release` workflow.
+CI can build Android artifacts through the `FlowMemory app release` workflow.
 
 ## iOS Build Path
 
@@ -90,7 +90,7 @@ Not allowed yet:
 
 ## Next Mobile Hardening Steps
 
-- Rename remaining internal wallet labels from the older chain-devnet language to FlowMemory app language where it does not break package identifiers.
+- Rename remaining internal wallet labels to FlowMemory app language where it does not break package identifiers.
 - Add iOS Capacitor project and macOS CI only when the app shell can be built reproducibly.
 - Add mobile-specific dashboard routes for Agent Bonds, public-agent status, receipts, and operator alerts.
 - Add mobile tester lanes for Android debug APK and, later, iOS simulator.

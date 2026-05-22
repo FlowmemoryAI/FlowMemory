@@ -10,7 +10,7 @@ The near-term goal is to keep a clean multi-agent workspace where protocol, serv
 
 ## Long-Term Direction
 
-FlowMemory may evolve toward a dedicated appchain or L1 if the protocol, memory, reliability, and hardware research justify that path. Appchain/L1 work is research until the architecture and threat model are mature.
+FlowMemory may evolve toward additional dedicated infrastructure if the protocol, memory, reliability, and hardware research justify that path. That work stays separate from public launch positioning until the architecture and threat model are mature.
 
 ## Principles
 
@@ -27,7 +27,7 @@ FlowMemory may evolve toward a dedicated appchain or L1 if the protocol, memory,
 - No product dashboard.
 - No hardware firmware.
 - No token mechanics.
-- No appchain/L1 implementation.
+- No unscoped dedicated infrastructure implementation.
 - No production deployment automation.
 - No claims that data exists on-chain unless the design explicitly stores or commits it there.
 

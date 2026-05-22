@@ -1,7 +1,7 @@
 # FlowMemory
 
 [![CI](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/ci.yml)
-[![Wallet release](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml/badge.svg)](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml)
+[![App release](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml/badge.svg)](https://github.com/FlowmemoryAI/FlowMemory/actions/workflows/wallet-release.yml)
 [![License](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-public%20local%2Ftest-2563eb.svg)](docs/PUBLIC_REPO_GUIDE.md)
 [![Mobile](https://img.shields.io/badge/mobile-Android%20committed%20%7C%20iOS%20planned-7c3aed.svg)](docs/MOBILE_APPS.md)
@@ -199,7 +199,7 @@ node infra/scripts/check-unsafe-claims.mjs
 git diff --check
 ```
 
-The old Windows installer path has been removed from the public quickstart; it was for a separate chain-devnet track and is not needed to understand or test FlowMemory.
+The old Windows installer path has been removed from the public quickstart because it is not needed to understand or test FlowMemory.
 
 If you want to help test, start with `docs/PUBLIC_TESTER_GUIDE.md` and open a **Public Tester Report** issue with your exact commands and environment.
 
@@ -246,7 +246,6 @@ Do not claim:
 - permanent artifact availability
 - finished tokenomics
 - deployed public verifier network
-- deployed public appchain
 - completed hardware product
 - finished iOS app or App Store / Play Store availability
 

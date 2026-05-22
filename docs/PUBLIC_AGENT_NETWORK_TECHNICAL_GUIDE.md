@@ -103,11 +103,11 @@ The open swarm-born-agent work is tracked in issue #168.
 
 Public-agent methods include class/tool discovery, launch preview, launch intent, prototype launch record, and discovery projection. Public-swarm methods include class discovery, launch preview, prototype swarm record, and replay projection.
 
-Current methods are local/control-plane projections. The SDK now also includes direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)` under `services/flowchain-sdk/src/public-contracts.ts`, so a signer or wallet can prepare contract-ready transaction data without accepting raw secrets into the repo.
+Current methods are local/control-plane projections. The public helper layer also includes direct calldata builders for `AgentFactory.launchAgent(...)` and `SwarmFactory.createSwarm(...)`, so a signer or wallet can prepare contract-ready transaction data without accepting raw secrets into the repo.
 
-### FlowChain SDK and CLI
+### Public SDK and CLI
 
-`services/flowchain-sdk/src/client.ts` wraps the control-plane methods. `services/flowchain-sdk/src/cli.ts` exposes public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, and swarm replay. `services/flowchain-sdk/src/public-contracts.ts` prepares direct local/test contract calls and returns normalized `{ to, data, value }` transaction payloads plus deterministic launch/swarm hashes.
+The public SDK/CLI surface wraps public-agent and swarm commands for class/tool discovery, launch preview, launch intent, launch projection, agent discovery, swarm projection, swarm replay, and direct local/test contract-call preparation. External users should exercise it through `npm run public:test:quick` and `npm run public:test:cli` rather than older internal command names.
 
 ### Agent Memory SDK
 
@@ -143,7 +143,7 @@ The e2e script deploys the local public-agent stack, signs a deterministic launc
 The broader local/test gate remains:
 
 ```powershell
-npm run launch:candidate
+npm run public:test:all
 ```
 
 ## 8. Security Model

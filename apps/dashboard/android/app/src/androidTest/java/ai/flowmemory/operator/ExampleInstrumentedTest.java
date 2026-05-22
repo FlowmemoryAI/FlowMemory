@@ -1,4 +1,4 @@
-package ai.flowmemory.flowchain.wallet;
+package ai.flowmemory.operator;
 
 import static org.junit.Assert.*;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("ai.flowmemory.flowchain.wallet", appContext.getPackageName());
+        assertEquals("ai.flowmemory.operator", appContext.getPackageName());
     }
 }

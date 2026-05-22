@@ -19,7 +19,7 @@ The current public-agent network stack includes:
 - contract-aligned launch digest helpers plus direct calldata builders for SDK and signer integrations;
 - swarm policy, identity, membership, lifecycle, factory, and budget vault contracts;
 - public swarm preview, launch intent, replay, prototype projection methods, and direct create-call builders;
-- FlowChain SDK and CLI wrappers for discovery, public launch/swarm projections, and local CLI smoke;
+- public SDK and CLI wrappers for discovery, public launch/swarm projections, and local CLI smoke;
 - dashboard public-network view backed by deterministic local data;
 - Foundry tests for public contracts and a local script that exercises agent launch plus swarm budget lifecycle.
 
@@ -28,9 +28,8 @@ The current public-agent network stack includes:
 ```powershell
 npm run public-agent-network:contracts
 npm run public-agent-network:local-e2e
-npm test --prefix services/flowmemory
+npm run public:test:quick
 npm test --prefix services/control-plane
-npm test --prefix services/flowchain-sdk
 npm test --prefix services/agent-memory-sdk
 npm test --prefix apps/dashboard
 npm run build --prefix apps/dashboard

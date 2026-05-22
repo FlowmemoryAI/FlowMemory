@@ -7,7 +7,7 @@ const SECRET_PATTERNS: RegExp[] = [
   /\bhttps?:\/\/[^\s"'<>]*?(?:apikey|api_key|token|secret|key)=[^\s"'<>]+/gi,
 ];
 
-export function redactFlowChainText(value: unknown): string {
+export function redactFlowMemoryText(value: unknown): string {
   let text = typeof value === "string" ? value : inspect(value, { depth: 8, breakLength: 120 });
   for (const pattern of SECRET_PATTERNS) {
     text = text.replace(pattern, (match) => {
@@ -21,7 +21,7 @@ export function redactFlowChainText(value: unknown): string {
 }
 
 export function redactJsonValue(value: JsonValue): JsonValue {
-  if (typeof value === "string") return redactFlowChainText(value);
+  if (typeof value === "string") return redactFlowMemoryText(value);
   if (Array.isArray(value)) return value.map((entry) => redactJsonValue(entry));
   if (value !== null && typeof value === "object") {
     const redacted: Record<string, JsonValue> = {};
