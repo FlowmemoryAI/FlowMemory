@@ -24,9 +24,9 @@ This is the first document to read after `AGENTS.md`.
 - If the task touches architecture, security assumptions, public schemas, or cross-agent workflow, update docs in the same pull request.
 - If local files disagree with GitHub issue or pull request state, stop and reconcile the difference before editing.
 
-## Multi-Agent Worktree Setup
+## Worktree Setup
 
-Use one Git worktree per Codex agent. Each worktree has its own branch and folder under `FLOWMEMORY_WORKTREE_ROOT`, so agents can work without sharing the same checkout.
+Use one Git worktree per active contributor lane. Each worktree has its own branch and folder under `FLOWMEMORY_WORKTREE_ROOT`, so people and automation can work without sharing the same checkout.
 
 Start from the main checkout:
 
@@ -48,57 +48,21 @@ FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain       agent/chain
 FLOWMEMORY_WORKTREE_ROOT\flowmemory-review      agent/review
 ```
 
-Run each Codex agent from its assigned worktree in a separate PowerShell window:
+Open a separate terminal for each active lane, move into the assigned worktree, and use the tooling named by the issue or local operator:
 
 ```powershell
 cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts
-codex
 ```
 
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-indexer
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-hardware
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-dashboard
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-research
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-crypto
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-chain
-codex
-```
-
-```powershell
-cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-review
-codex
-```
-
-## Multi-Agent Safety Rules
+## Worktree Safety Rules
 
 - Keep `FLOWMEMORY_WORKTREE_ROOT\flowmemory-main` as the main checkout and coordination point.
-- Run each agent only inside its assigned worktree folder.
+- Run work only inside its assigned worktree folder.
 - Check `git status --short --branch` before starting and before handing off work.
-- Avoid assigning two agents to edit the same files at the same time.
+- Avoid assigning two contributors to edit the same files at the same time.
 - Use `git worktree list` from `FLOWMEMORY_WORKTREE_ROOT\flowmemory-main` to inspect all local worktrees.
-- Long-running bucket agents should post or record short handoffs that name touched files, checks run, unresolved risks, and the next smallest safe task.
-- Review agents should avoid product implementation and should work in docs, templates, scripts, and issue/PR hygiene unless an issue explicitly assigns a narrower technical scope.
+- Long-running lanes should record short handoffs that name touched files, checks run, unresolved risks, and the next smallest safe task.
+- Review lanes should avoid product implementation and should work in docs, templates, scripts, and issue/PR hygiene unless an issue explicitly assigns a narrower technical scope.
 
 ## During Work
 

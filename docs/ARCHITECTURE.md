@@ -215,9 +215,9 @@ Boundaries:
 Responsibilities:
 
 - Keep `docs/CURRENT_STATE.md`, `docs/ROADMAP.md`, this architecture doc, and `docs/ISSUE_BACKLOG.md` current.
-- Keep agent prompts and PR process enforceable.
+- Keep worktree assignments and PR process enforceable.
 - Maintain labels, milestones, review flow, and daily runbook.
-- Prevent agents from overlapping folders or expanding into gated work.
+- Prevent overlapping worktree lanes from editing the same folders or expanding into gated work.
 
 ## Data Flow
 

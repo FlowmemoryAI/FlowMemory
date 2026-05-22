@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "../../..");
 const destinationDir = resolve(repoRoot, "apps/dashboard/public/data");
-const liveInfraReportDir = resolve(repoRoot, "docs/agent-runs/live-product-infra-rpc");
+const liveInfraReportDir = resolve(repoRoot, "reports/local/live-product-infra-rpc");
 const fixtureCopies = [
   {
     label: "dashboard fixture",

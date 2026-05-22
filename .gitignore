@@ -22,13 +22,7 @@ crypto/node_modules/
 /FlowMemory/
 apps/dashboard/flowmemory-release.keystore
 
-# Keep generated/internal launch artifacts out of the public repo.
-docs/agent-runs/**
-!docs/agent-runs/
-!docs/agent-runs/README.md
-docs/agent-goals/**
-!docs/agent-goals/
-!docs/agent-goals/README.md
+# Keep generated/internal local artifacts out of the public repo.
 inbox/unsorted/**
 !inbox/unsorted/
 !inbox/unsorted/README.md

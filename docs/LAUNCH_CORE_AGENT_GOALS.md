@@ -1,6 +1,6 @@
-# Launch-Core Agent Goals
+# Launch-Core Coordination Goals
 
-Detailed launch-core prompt packs are kept out of the public repository.
+Detailed local work briefs stay out of the public repository.
 
 Use the maintained GitHub issues, pull requests, and public acceptance docs as the coordination surface:
 
@@ -9,4 +9,4 @@ Use the maintained GitHub issues, pull requests, and public acceptance docs as t
 - `docs/PUBLIC_RELEASE_GAPS.md`
 - `docs/ISSUE_BACKLOG.md`
 
-Public launch work should be described as reviewed issues and PRs, not as raw prompts or local worktree instructions.
+Public launch work should be described as reviewed issues, pull requests, and acceptance evidence.

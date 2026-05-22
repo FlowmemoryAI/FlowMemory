@@ -1,6 +1,6 @@
 # Daily HQ Runbook
 
-This runbook is for the FlowMemory HQ operator. It keeps many Codex agents moving without overlapping folders or expanding into premature product work.
+This runbook is for the FlowMemory HQ operator. It keeps parallel worktree lanes moving without overlapping folders or expanding into premature product work.
 
 ## Morning Review
 
@@ -32,8 +32,8 @@ Morning:
 
 - Confirm GitHub open PRs and issues still match `docs/CURRENT_STATE.md` and `docs/ISSUE_BACKLOG.md`.
 - Confirm `README.md`, `docs/PUBLIC_REPO_GUIDE.md`, `docs/PUBLIC_TESTER_GUIDE.md`, `docs/MOBILE_APPS.md`, and `docs/PUBLIC_RELEASE_GAPS.md` agree on product scope.
-- Check all sibling worktrees for dirty changes before assigning agents.
-- Verify no two active agents are editing the same folder family or source-of-truth doc without coordination.
+- Check all sibling worktrees for dirty changes before assigning work.
+- Verify no two active lanes are editing the same folder family or source-of-truth doc without coordination.
 - Run or queue `npm run public:hardening` and `npm run public:test:all` before any public-launch merge.
 - Confirm the next assigned work extends the existing contracts, services, dashboard, mobile, hardware, crypto, or research surface instead of adding a replacement system.
 - Keep public tokenomics, public validator, value-bearing bridge, audited-cryptography, production hook, hosted production API, and production hardware claims blocked unless a later issue explicitly scopes them.
@@ -69,20 +69,19 @@ Priority order:
 9. Hardware POC specs.
 10. Research gates.
 
-## Starting Agents
+## Starting Worktree Lanes
 
-Use one terminal per agent:
+Use one terminal per lane:
 
 ```powershell
 cd FLOWMEMORY_WORKTREE_ROOT\flowmemory-contracts
-codex
 ```
 
-Give the agent the prompt from `docs/AGENT_PROMPTS.md` plus the assigned issue number.
+Give the contributor or automation lane the assignment from `docs/WORKTREE_ASSIGNMENTS.md` plus the assigned issue number.
 
 For Rootflow V0 and Flow Memory V0 launch-core work, use `docs/LAUNCH_CORE_AGENT_GOALS.md`.
 
-Do not start two agents on the same folder family unless the changed files are clearly disjoint.
+Do not start two lanes on the same folder family unless the changed files are clearly disjoint.
 
 ## Monitoring PRs
 

@@ -153,7 +153,7 @@ function writeMarkdownReport(report: DevPackReport, outputPath: string) {
 async function main() {
   const root = repoRoot();
   const rpcUrl = process.env.FLOWMEMORY_RPC_URL ?? "http://127.0.0.1:8787/rpc";
-  const runDir = resolve(root, "docs", "agent-runs", "live-product-dev-pack");
+  const runDir = resolve(root, "reports", "local", "live-product-dev-pack");
   const sdkDocsDir = resolve(root, "docs", "sdk");
   mkdirSync(runDir, { recursive: true });
   mkdirSync(sdkDocsDir, { recursive: true });

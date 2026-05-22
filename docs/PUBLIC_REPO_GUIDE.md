@@ -110,7 +110,7 @@ Check the public docs/scripts/CI wiring without running every lane:
 npm run public:hardening
 ```
 
-See `docs/PUBLIC_TESTER_GUIDE.md` for expected results, CLI/control-plane commands, dashboard review prompts, and the tester-report template.
+See `docs/PUBLIC_TESTER_GUIDE.md` for expected results, CLI/control-plane commands, dashboard review questions, and the tester-report template.
 
 ## Verification Commands
 

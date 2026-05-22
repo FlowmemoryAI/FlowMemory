@@ -3183,7 +3183,7 @@ function buildProvenanceRecords(
       status: liveReadinessReport ? "verified" : "unresolved",
       facts: [
         { label: "schema", value: isRecord(liveReadinessReport) ? text(liveReadinessReport.schema) : "missing" },
-        { label: "source", value: "docs/agent-runs/live-product-infra-rpc" },
+        { label: "source", value: "reports/local/live-product-infra-rpc" },
       ],
       raw: liveReadinessReport,
     }),

@@ -112,7 +112,7 @@ Launch-core specifications:
 - `docs/reviews/ROOTFLOW_FLOW_MEMORY_V0_ACCEPTANCE_AUDIT.md` tracks evidence and missing work for the active launch-core goal.
 - `docs/reviews/LAUNCH_CANDIDATE_SECURITY_BOUNDARY_REVIEW.md` records the current security boundary review for local/test V0 demos and guarded canary review.
 - `docs/reviews/OPEN_PR_MERGE_READINESS.md` is now historical merge-readiness evidence for PRs that have merged.
-- `docs/LAUNCH_CORE_AGENT_GOALS.md` records the public boundary for launch-core coordination; raw prompt packs stay out of the public repo.
+- `docs/LAUNCH_CORE_AGENT_GOALS.md` records the public boundary for launch-core coordination; detailed local work briefs stay out of the public repo.
 
 ## Conceptual Or Not Implemented Yet
 

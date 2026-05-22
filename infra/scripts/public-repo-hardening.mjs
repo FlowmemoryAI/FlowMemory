@@ -58,6 +58,7 @@ const requiredFiles = [
   "docs/PUBLIC_AGENT_NETWORK_TECHNICAL_GUIDE.md",
   "docs/PUBLIC_RELEASE_GAPS.md",
   ".github/ISSUE_TEMPLATE/public-tester-report.yml",
+  "docs/WORKTREE_ASSIGNMENTS.md",
   "infra/scripts/public-tester-report.mjs",
   "infra/scripts/check-unsafe-claims.mjs",
   "infra/scripts/run-public-agent-network-base-sepolia-deploy.mjs",
@@ -88,6 +89,11 @@ const forbiddenPublicFiles = [
   "docs/" + legacyBrand + "_SECOND_COMPUTER_SETUP.md",
   "docs/" + legacyBrand + "_TESTNET_ACCEPTANCE.md",
   "docs/L" + "1_RESEARCH_INVENTORY.md",
+  "docs/" + ["AGENT", "_", "PROMPTS.md"].join(""),
+  "docs/" + ["agent", "-runs", "/README.md"].join(""),
+  "docs/" + ["agent", "-goals", "/README.md"].join(""),
+  "inbox/" + ["clau", "de-code", "/.gitkeep"].join(""),
+  "inbox/" + ["old", "-prompts", "/.gitkeep"].join(""),
 ];
 for (const path of forbiddenPublicFiles) {
   assert(!existsSync(resolve(root, path)), `non-public launch artifact must not remain in the public repo: ${path}`);
@@ -116,6 +122,13 @@ const publicAgentBaseSepoliaReadbackScript = readText("infra/scripts/public-agen
 const publicAgentBaseSepoliaPlan = readText("fixtures/deployments/public-agent-network-base-sepolia-plan.json");
 const publicAgentBaseSepoliaRunbook = readText("docs/DEPLOYMENTS/BASE_SEPOLIA_PUBLIC_AGENT_NETWORK.md");
 const gitignore = readText(".gitignore");
+const contributorInstructions = readText("AGENTS.md");
+const startHere = readText("docs/START_HERE.md");
+const dailyRunbook = readText("docs/DAILY_HQ_RUNBOOK.md");
+const worktreeAssignments = readText("docs/WORKTREE_ASSIGNMENTS.md");
+const launchCoreGoals = readText("docs/LAUNCH_CORE_AGENT_GOALS.md");
+const setupWorktreesScript = readText("infra/scripts/setup-worktrees.ps1");
+const sendGoalScript = readText("infra/scripts/send-goal-to-agent.ps1");
 
 const publicDocs = `${readme}\n${publicGuide}\n${testerGuide}`;
 const publicSurfaceDocs = [
@@ -127,6 +140,18 @@ const publicSurfaceDocs = [
   ["docs/PUBLIC_RELEASE_GAPS.md", publicGaps],
   ["docs/MOBILE_APPS.md", mobileDocs],
   ["apps/dashboard/WALLET_DISTRIBUTION.md", walletDistribution],
+];
+const publicProfessionalSurfaceDocs = [
+  ...publicSurfaceDocs,
+  ["AGENTS.md", contributorInstructions],
+  ["docs/START_HERE.md", startHere],
+  ["docs/DAILY_HQ_RUNBOOK.md", dailyRunbook],
+  ["docs/WORKTREE_ASSIGNMENTS.md", worktreeAssignments],
+  ["docs/LAUNCH_CORE_AGENT_GOALS.md", launchCoreGoals],
+  [".github/workflows/ci.yml", ci],
+  [".gitignore", gitignore],
+  ["infra/scripts/setup-worktrees.ps1", setupWorktreesScript],
+  ["infra/scripts/send-goal-to-agent.ps1", sendGoalScript],
 ];
 const bannedPublicEntrypoints = [
   `INSTALL_${legacyBrand}_WINDOWS.ps1`,
@@ -157,6 +182,27 @@ for (const [path, text] of publicSurfaceDocs) {
     assert(!includes(text, phrase), `${path} must not surface non-public infrastructure term: ${phrase}`);
   }
 }
+
+const toolOriginTerms = [
+  ["Co", "dex"].join(""),
+  ["co", "dex"].join(""),
+  ["Clau", "de"].join(""),
+  ["clau", "de"].join(""),
+  ["vi", "be"].join(""),
+  ["AGENT", "_", "PROMPTS"].join(""),
+  ["agent", "-runs"].join(""),
+  ["agent", "-goals"].join(""),
+  ["old", "-prompts"].join(""),
+  ["clau", "de-code"].join(""),
+  ["raw", " prompt"].join(""),
+  ["prompt", " pack"].join(""),
+];
+for (const [path, text] of publicProfessionalSurfaceDocs) {
+  for (const phrase of toolOriginTerms) {
+    assert(!includes(text, phrase), `${path} must not expose internal tool-origin language: ${phrase}`);
+  }
+}
+
 
 const requiredReadmePhrases = [
   "actions/workflows/ci.yml/badge.svg",

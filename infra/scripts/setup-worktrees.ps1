@@ -97,11 +97,5 @@ foreach ($worktree in $worktrees) {
 }
 
 Write-Host ""
-Write-Host "How to run Codex in each worktree:"
-Write-Host "Open a separate PowerShell window for each agent, then run one cd command followed by codex."
-Write-Host ""
-foreach ($worktree in $worktrees) {
-    Write-Host "cd $($worktree.Path)"
-    Write-Host "codex"
-    Write-Host ""
-}
+Write-Host "Next steps:"
+Write-Host "Open a separate PowerShell window for each active lane, then run the matching cd command and the tooling named by the issue."

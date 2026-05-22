@@ -65,8 +65,8 @@ Meshtastic and LoRa are low-bandwidth control signaling paths. They are useful f
 - `crypto/`: receipts, attestations, roots, proofs, verification design, and threat analysis
 - `infra/scripts/`: CI, automation, local setup, and maintenance scripts
 - `docs/DECISIONS/`: accepted architectural decisions
-- `inbox/`: temporary intake area for imported prompts, raw notes, and unsorted context
+- `inbox/`: temporary intake area for private notes, raw research, and unsorted context
 
 ## Collaboration Defaults
 
-Agents should assume the repo is used by multiple agents at once. Keep changes small, avoid unrelated edits, write down decisions, and finish each task with a PR-ready summary.
+Contributors should assume the repo may have multiple active worktrees at once. Keep changes small, avoid unrelated edits, write down decisions, and finish each task with a PR-ready summary.

@@ -1,6 +1,6 @@
-# FlowMemory Agent Instructions
+# FlowMemory Contributor Instructions
 
-These instructions apply to every agent, assistant, script, and human operating in this repository.
+These instructions apply to every contributor, operator, script, and automation lane working in this repository.
 
 ## Source Of Truth
 
@@ -22,7 +22,7 @@ These instructions apply to every agent, assistant, script, and human operating 
 ## HQ Program Management
 
 - Use `docs/ISSUE_BACKLOG.md` to understand issue dependencies and milestone placement.
-- Use `docs/AGENT_PROMPTS.md` when launching or briefing a worktree agent.
+- Use `docs/WORKTREE_ASSIGNMENTS.md` when assigning or briefing worktree lanes.
 - Use `docs/PR_PROCESS.md` for branch naming, draft PRs, merge order, dirty worktrees, and issue closing.
 - Use `docs/DAILY_HQ_RUNBOOK.md` for morning review, triage, monitoring, and handoff.
 - Use `infra/scripts/status-report.ps1` for read-only local worktree, PR, and issue status.

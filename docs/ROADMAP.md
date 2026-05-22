@@ -52,7 +52,7 @@ Rootflow V0 and Flow Memory V0 remain launch-critical baseline requirements. The
 Status: active maintenance.
 
 - Keep source-of-truth docs accurate and public-reader safe.
-- Keep agent prompts, PR process, daily runbook, and issue backlog current.
+- Keep worktree assignments, PR process, daily runbook, and issue backlog current.
 - Keep issue templates and PR templates enforcing scope boundaries.
 - Keep status scripts read-only and safe.
 - Keep labels and milestones aligned with agent ownership.

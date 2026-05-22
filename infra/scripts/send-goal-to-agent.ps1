@@ -115,7 +115,7 @@ function Get-AgentWindow {
 
 function Get-VisibleAgentWindows {
     [FlowMemoryWindowTools]::GetVisibleWindows() |
-        Where-Object { $_.Item2 -match "FlowMemory|flowmemory|Codex|codex|PowerShell" } |
+        Where-Object { $_.Item2 -match "FlowMemory|flowmemory|PowerShell|Windows Terminal" } |
         Sort-Object { $_.Item2 } |
         ForEach-Object {
             [pscustomobject]@{
@@ -155,7 +155,7 @@ if (-not [string]::IsNullOrWhiteSpace($GoalFile)) {
 
 $goalPath = Join-Path $dispatchRoot "$Agent-goal.md"
 $payload = @"
-# FlowMemory $Agent Agent Goal
+# FlowMemory $Agent Worktree Goal
 
 Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz")
 Worktree: $($agentConfig.Worktree)
@@ -171,7 +171,7 @@ $oneLineGoal = "/goal Read the goal file at $goalPath and execute it from your c
 Write-Host "Agent: $Agent"
 Write-Host "Window: $($window.Item2)"
 Write-Host "Goal file: $goalPath"
-Write-Host "Prompt:"
+Write-Host "Dispatch message:"
 Write-Host $oneLineGoal
 
 if ($DryRun) {
