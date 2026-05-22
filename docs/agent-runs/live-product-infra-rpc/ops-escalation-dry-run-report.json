@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_escalation_dry_run_report.v0",
-    "generatedAt":  "2026-05-21T10:56:28.2106051Z",
+    "generatedAt":  "2026-05-22T00:45:36.7768084Z",
     "status":  "passed",
     "currentAlertState":  "blocked",
     "opsSnapshotStatus":  "blocked",
@@ -74,11 +74,15 @@
 
                              ],
     "opsRefresh":  {
-                       "performed":  false,
+                       "performed":  true,
                        "exitCode":  0,
-                       "outputLineCount":  0,
+                       "outputLineCount":  5,
                        "outputRedacted":  [
-
+                                              "FlowChain ops alert rules status: passed",
+                                              "Current alert state: blocked",
+                                              "Rules: 44",
+                                              "Report: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\ops-alert-rules-report.json",
+                                              "Markdown: E:\\FlowMemory\\flowmemory-live-infra-rpc\\docs\\agent-runs\\live-product-infra-rpc\\OPS_ALERT_RULES.md"
                                           ]
                    },
     "dryRunEvents":  [

@@ -357,6 +357,19 @@ $definitions = @(
         ownerHostCommand = $false
     },
     [ordered]@{
+        id = "ops-launch-watch"
+        kind = "package-script"
+        script = "flowchain:ops:launch-watch"
+        phase = "release"
+        purpose = "Tie post-deploy service, public RPC, backup, bridge, tester UI, observability, and governance lanes to fresh evidence before final truth classification."
+        expectedReportPath = "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json"
+        riskClass = "release-gate"
+        requiredEnvNames = @()
+        requiredTokens = @("launchWatchStatus", "blocked-owner-input", "failedChecks")
+        mutatesHost = $false
+        ownerHostCommand = $false
+    },
+    [ordered]@{
         id = "owner-host-linux-rollback"
         kind = "owner-host-command"
         command = "bash <FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh rollback"
@@ -453,6 +466,7 @@ $checks = [ordered]@{
         "owner-host-windows-apply",
         "synthetic-canary",
         "cutover-rehearsal",
+        "ops-launch-watch",
         "owner-host-linux-rollback",
         "owner-host-windows-rollback"
     ) | Where-Object { $_ -notin @($rows | ForEach-Object { $_.id }) } | Measure-Object | ForEach-Object { $_.Count -eq 0 }
@@ -466,6 +480,7 @@ $checks = [ordered]@{
         -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesWalletTesterE2e" -Default $false) -eq $true) `
         -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesSyntheticCanary" -Default $false) -eq $true) `
         -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesCutoverRehearsal" -Default $false) -eq $true) `
+        -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesOpsLaunchWatch" -Default $false) -eq $true) `
         -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesTruthTable" -Default $false) -eq $true) `
         -and ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "commandPlanIncludesNoSecretScan" -Default $false) -eq $true)
     deploymentAutomationOwnerHostApplyCovered = ((Get-MatrixProp -Object $deploymentAutomationChecks -Name "renderedOwnerHostApplyScriptHasPlanApplyRollback" -Default $false) -eq $true) `

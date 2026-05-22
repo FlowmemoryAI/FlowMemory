@@ -211,6 +211,124 @@ function Join-FlowChainProcessArguments {
     }) -join " "
 }
 
+function Get-FlowChainActiveProcessSnapshot {
+    $processIds = @{}
+    $processPaths = @()
+
+    foreach ($process in [System.Diagnostics.Process]::GetProcesses()) {
+        try {
+            try {
+                $processIds[[int] $process.Id] = $true
+            }
+            catch {
+            }
+
+            if ($process.ProcessName -like "flowmemory-devnet*") {
+                try {
+                    $path = $process.MainModule.FileName
+                    if (-not [string]::IsNullOrWhiteSpace($path)) {
+                        $processPaths += [System.IO.Path]::GetFullPath($path)
+                    }
+                }
+                catch {
+                }
+            }
+        }
+        finally {
+            $process.Dispose()
+        }
+    }
+
+    return [pscustomobject]@{
+        ids = $processIds
+        paths = $processPaths
+    }
+}
+
+function Test-FlowChainDirectoryHasActiveProcess {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $DirectoryPath,
+
+        [Parameter(Mandatory = $true)]
+        [object] $ProcessSnapshot
+    )
+
+    $fullDirectoryPath = [System.IO.Path]::GetFullPath($DirectoryPath)
+    if (-not $fullDirectoryPath.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+        $fullDirectoryPath = $fullDirectoryPath + [System.IO.Path]::DirectorySeparatorChar
+    }
+
+    foreach ($path in @($ProcessSnapshot.paths)) {
+        if ($path.StartsWith($fullDirectoryPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+
+    $leaf = Split-Path -Leaf $DirectoryPath
+    if ($leaf -match '-(?<pid>\d+)$') {
+        $pidValue = 0
+        if ([int]::TryParse($Matches.pid, [ref] $pidValue) -and $ProcessSnapshot.ids.ContainsKey($pidValue)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Remove-FlowChainStaleGeneratedDirectories {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Root,
+
+        [Parameter(Mandatory = $true)]
+        [object] $ProcessSnapshot,
+
+        [int] $RetentionHours = 6,
+
+        [int] $MaxDirectories = 96
+    )
+
+    if (-not (Test-Path -LiteralPath $Root)) {
+        return
+    }
+
+    $cutoff = (Get-Date).AddHours(-1 * [Math]::Max(1, $RetentionHours))
+    $candidates = @()
+
+    foreach ($directory in @(Get-ChildItem -LiteralPath $Root -Directory -ErrorAction SilentlyContinue)) {
+        if ($directory.Name -notmatch '-\d+$') {
+            continue
+        }
+
+        if (Test-FlowChainDirectoryHasActiveProcess -DirectoryPath $directory.FullName -ProcessSnapshot $ProcessSnapshot) {
+            continue
+        }
+
+        $candidates += [pscustomobject]@{
+            directory = $directory
+            expired = $directory.LastWriteTime -lt $cutoff
+        }
+    }
+
+    $toRemove = @($candidates | Where-Object { $_.expired })
+    $retained = @($candidates | Where-Object { -not $_.expired } | Sort-Object { $_.directory.LastWriteTime } -Descending)
+    if ($MaxDirectories -gt 0 -and $retained.Count -gt $MaxDirectories) {
+        $toRemove += @($retained | Select-Object -Skip $MaxDirectories)
+    }
+
+    $seen = @{}
+    foreach ($entry in $toRemove) {
+        $fullPath = [System.IO.Path]::GetFullPath($entry.directory.FullName)
+        if ($seen.ContainsKey($fullPath)) {
+            continue
+        }
+
+        $seen[$fullPath] = $true
+        Remove-Item -LiteralPath $fullPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Set-FlowChainCargoTargetDir {
     param(
         [Parameter(Mandatory = $true)]
@@ -226,8 +344,34 @@ function Set-FlowChainCargoTargetDir {
 
     # Keep Cargo outputs away from the default crate target so a running local
     # node cannot lock flowmemory-devnet.exe and break setup on Windows.
-    $targetDir = Join-Path $RepoRoot "devnet/local/cargo-target/$safePurpose-$PID"
-    $tempDir = Join-Path $RepoRoot "devnet/local/tmp/$safePurpose-$PID"
+    $targetRoot = Join-Path $RepoRoot "devnet/local/cargo-target"
+    $tempRoot = Join-Path $RepoRoot "devnet/local/tmp"
+    $targetDir = Join-Path $targetRoot $safePurpose
+    $tempDir = Join-Path $tempRoot "$safePurpose-$PID"
+
+    if ([Environment]::GetEnvironmentVariable("FLOWCHAIN_GENERATED_DIR_PRUNE_DISABLED", "Process") -ne "1") {
+        $retentionHours = 6
+        $maxDirectories = 96
+        $retentionHoursText = [Environment]::GetEnvironmentVariable("FLOWCHAIN_GENERATED_DIR_RETENTION_HOURS", "Process")
+        $maxDirectoriesText = [Environment]::GetEnvironmentVariable("FLOWCHAIN_GENERATED_DIR_MAX_DIRECTORIES", "Process")
+        if (-not [string]::IsNullOrWhiteSpace($retentionHoursText)) {
+            $parsedRetentionHours = 0
+            if ([int]::TryParse($retentionHoursText, [ref] $parsedRetentionHours)) {
+                $retentionHours = $parsedRetentionHours
+            }
+        }
+        if (-not [string]::IsNullOrWhiteSpace($maxDirectoriesText)) {
+            $parsedMaxDirectories = 0
+            if ([int]::TryParse($maxDirectoriesText, [ref] $parsedMaxDirectories)) {
+                $maxDirectories = $parsedMaxDirectories
+            }
+        }
+
+        $processSnapshot = Get-FlowChainActiveProcessSnapshot
+        Remove-FlowChainStaleGeneratedDirectories -Root $targetRoot -ProcessSnapshot $processSnapshot -RetentionHours $retentionHours -MaxDirectories $maxDirectories
+        Remove-FlowChainStaleGeneratedDirectories -Root $tempRoot -ProcessSnapshot $processSnapshot -RetentionHours $retentionHours -MaxDirectories ($maxDirectories * 2)
+    }
+
     $env:CARGO_TARGET_DIR = $targetDir
     New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
     New-Item -ItemType Directory -Force -Path $tempDir | Out-Null

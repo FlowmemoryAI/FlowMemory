@@ -1,12 +1,12 @@
 ﻿# HELP flowchain_latest_height Latest FlowChain block height from ops snapshot.
 # TYPE flowchain_latest_height gauge
-flowchain_latest_height 114051
+flowchain_latest_height 114432
 # HELP flowchain_finalized_height Finalized FlowChain block height from ops snapshot.
 # TYPE flowchain_finalized_height gauge
-flowchain_finalized_height 114051
+flowchain_finalized_height 114432
 # HELP flowchain_state_file_age_seconds Age of the live state file in seconds.
 # TYPE flowchain_state_file_age_seconds gauge
-flowchain_state_file_age_seconds 11
+flowchain_state_file_age_seconds 5
 # HELP flowchain_monitor_samples_total Service monitor samples recorded in the current ops snapshot.
 # TYPE flowchain_monitor_samples_total gauge
 flowchain_monitor_samples_total 2
@@ -27,7 +27,7 @@ flowchain_transaction_intake_accepted_rows_total 187
 flowchain_transaction_intake_invalid_rows 0
 # HELP flowchain_transaction_intake_file_age_seconds Age of the signed transaction intake file in seconds, or zero when absent.
 # TYPE flowchain_transaction_intake_file_age_seconds gauge
-flowchain_transaction_intake_file_age_seconds 71833.069
+flowchain_transaction_intake_file_age_seconds 99378.912
 # HELP flowchain_runtime_submit_fixtures_total Runtime-submit fixture files produced by signed envelope forwarding.
 # TYPE flowchain_runtime_submit_fixtures_total gauge
 flowchain_runtime_submit_fixtures_total 4
@@ -147,7 +147,7 @@ flowchain_public_rpc_deployment_automation_ready 1
 flowchain_public_rpc_command_matrix_ready 1
 # HELP flowchain_public_rpc_command_matrix_commands_total Public RPC command matrix command count.
 # TYPE flowchain_public_rpc_command_matrix_commands_total gauge
-flowchain_public_rpc_command_matrix_commands_total 21
+flowchain_public_rpc_command_matrix_commands_total 22
 # HELP flowchain_public_rpc_command_matrix_owner_host_commands Public RPC command matrix owner-host command count.
 # TYPE flowchain_public_rpc_command_matrix_owner_host_commands gauge
 flowchain_public_rpc_command_matrix_owner_host_commands 6
@@ -471,7 +471,7 @@ flowchain_bridge_direct_observe_staged_cursor_not_written 1
 flowchain_bridge_runtime_credit_ready 1
 # HELP flowchain_bridge_runtime_credit_latency_seconds Seconds from bridge handoff queue to spendable L1 credit in runtime validation.
 # TYPE flowchain_bridge_runtime_credit_latency_seconds gauge
-flowchain_bridge_runtime_credit_latency_seconds 0.693
+flowchain_bridge_runtime_credit_latency_seconds 0.662
 # HELP flowchain_bridge_runtime_transfer_latency_seconds Seconds from credited wallet transfer queue to spendable transfer in runtime validation.
 # TYPE flowchain_bridge_runtime_transfer_latency_seconds gauge
 flowchain_bridge_runtime_transfer_latency_seconds 0.641
@@ -582,13 +582,13 @@ flowchain_real_value_pilot_aggregate_missing_proofs 0
 flowchain_real_value_pilot_aggregate_owner_go_no_go 1
 # HELP flowchain_bridge_relayer_loop_healthy One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.
 # TYPE flowchain_bridge_relayer_loop_healthy gauge
-flowchain_bridge_relayer_loop_healthy 0
+flowchain_bridge_relayer_loop_healthy 1
 # HELP flowchain_bridge_relayer_loop_validation_ready One when bridge relayer loop start/status/stop validation is passed.
 # TYPE flowchain_bridge_relayer_loop_validation_ready gauge
-flowchain_bridge_relayer_loop_validation_ready 1
+flowchain_bridge_relayer_loop_validation_ready 0
 # HELP flowchain_bridge_relayer_loop_failed_checks Failed checks in bridge relayer loop validation.
 # TYPE flowchain_bridge_relayer_loop_failed_checks gauge
-flowchain_bridge_relayer_loop_failed_checks 0
+flowchain_bridge_relayer_loop_failed_checks 4
 # HELP flowchain_bridge_relayer_loop_secret_findings Secret marker findings in bridge relayer loop validation.
 # TYPE flowchain_bridge_relayer_loop_secret_findings gauge
 flowchain_bridge_relayer_loop_secret_findings 0
@@ -600,7 +600,7 @@ flowchain_bridge_relayer_loop_poll_seconds 5
 flowchain_bridge_relayer_loop_settle_seconds 5
 # HELP flowchain_bridge_relayer_loop_report_fresh One when bridge relayer loop validation observed a fresh relayer report.
 # TYPE flowchain_bridge_relayer_loop_report_fresh gauge
-flowchain_bridge_relayer_loop_report_fresh 1
+flowchain_bridge_relayer_loop_report_fresh 0
 # HELP flowchain_bridge_relayer_loop_blocked_only_owner_inputs One when bridge relayer loop validation is blocked only by owner inputs.
 # TYPE flowchain_bridge_relayer_loop_blocked_only_owner_inputs gauge
 flowchain_bridge_relayer_loop_blocked_only_owner_inputs 1
@@ -900,10 +900,10 @@ flowchain_owner_go_live_launch_sequence_ready 1
 flowchain_owner_go_live_launch_sequence_steps 10
 # HELP flowchain_owner_go_live_launch_sequence_commands Ordered owner go-live launch sequence command count.
 # TYPE flowchain_owner_go_live_launch_sequence_commands gauge
-flowchain_owner_go_live_launch_sequence_commands 44
+flowchain_owner_go_live_launch_sequence_commands 45
 # HELP flowchain_owner_go_live_launch_evidence_reports Expected evidence report path count in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_evidence_reports gauge
-flowchain_owner_go_live_launch_evidence_reports 45
+flowchain_owner_go_live_launch_evidence_reports 46
 # HELP flowchain_owner_go_live_launch_invalid_evidence_reports Invalid or out-of-scope expected evidence report paths in the owner go-live launch sequence.
 # TYPE flowchain_owner_go_live_launch_invalid_evidence_reports gauge
 flowchain_owner_go_live_launch_invalid_evidence_reports 0
@@ -984,10 +984,10 @@ flowchain_live_cutover_missing_owner_inputs 14
 flowchain_no_secret_ready 1
 # HELP flowchain_truth_gates_total Total production truth table gates.
 # TYPE flowchain_truth_gates_total gauge
-flowchain_truth_gates_total 72
+flowchain_truth_gates_total 73
 # HELP flowchain_truth_gates_passed Passed production truth table gates.
 # TYPE flowchain_truth_gates_passed gauge
-flowchain_truth_gates_passed 55
+flowchain_truth_gates_passed 56
 # HELP flowchain_truth_gates_owner_blocked Owner-input blocked production truth table gates.
 # TYPE flowchain_truth_gates_owner_blocked gauge
 flowchain_truth_gates_owner_blocked 17

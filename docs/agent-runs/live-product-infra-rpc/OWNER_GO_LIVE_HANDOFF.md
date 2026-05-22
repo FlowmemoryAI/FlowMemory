@@ -1,6 +1,6 @@
 # FlowChain Owner Go-Live Handoff
 
-Generated: 2026-05-21T06:00:32.9112705Z
+Generated: 2026-05-22T00:51:37.5625875Z
 Status: passed
 Release ready: False
 
@@ -54,7 +54,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 | Prove backup and restore | passed | True | npm run flowchain:backup:check -- -AllowBlocked<br>npm run flowchain:backup:restore:validate<br>npm run flowchain:backup:owner-path:dry-run | docs/agent-runs/live-product-infra-rpc/backup-readiness-report.json<br>docs/agent-runs/live-product-infra-rpc/backup-restore-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/backup-owner-path-dry-run-report.json |
 | Harden bridge relayer pilot | passed | True | npm run flowchain:bridge:live:check -- -AllowBlocked<br>npm run flowchain:bridge:infra:check -- -AllowBlocked<br>npm run flowchain:bridge:command-matrix<br>npm run flowchain:bridge:relayer:guardrail:validate<br>npm run flowchain:bridge:relayer:loop:validate<br>npm run flowchain:bridge:relayer:once -- -AllowBlocked<br>npm run flowchain:bridge:reconciliation | docs/agent-runs/live-product-infra-rpc/bridge-live-readiness-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-infra-readiness-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-command-matrix-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-relayer-guardrail-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-relayer-loop-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-relayer-once-report.json<br>docs/agent-runs/live-product-infra-rpc/bridge-reconciliation-report.json |
 | Validate external tester launch | passed | True | npm run flowchain:tester:token:setup<br>npm run flowchain:tester:gateway:e2e<br>npm run flowchain:wallet:live-tester:e2e<br>npm run flowchain:external-tester:packet -- -AllowBlocked<br>npm run flowchain:external-tester:packet:validate<br>npm run flowchain:external-tester:client:validate<br>npm run flowchain:tester:evidence:validate | docs/agent-runs/live-product-infra-rpc/tester-write-token-setup-report.json<br>docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json<br>docs/agent-runs/live-product-infra-rpc/live-service-tester-network-e2e-report.json<br>docs/agent-runs/live-product-infra-rpc/external-tester-packet-report.json<br>docs/agent-runs/live-product-infra-rpc/external-tester-packet-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/external-tester-client-validation-report.json<br>docs/agent-runs/live-product-infra-rpc/external-tester-evidence-validation-report.json |
-| Run release gates | passed | True | npm run flowchain:public-deployment:contract -- -AllowBlocked<br>npm run flowchain:live:cutover:rehearsal -- -AllowBlocked<br>npm run flowchain:completion:audit -- -AllowBlocked<br>npm run flowchain:truth-table -- -AllowBlocked<br>npm run flowchain:no-secret:scan | docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json<br>docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json<br>docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json<br>docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json<br>docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json |
+| Run release gates | passed | True | npm run flowchain:public-deployment:contract -- -AllowBlocked<br>npm run flowchain:live:cutover:rehearsal -- -AllowBlocked<br>npm run flowchain:completion:audit -- -AllowBlocked<br>npm run flowchain:no-secret:scan<br>npm run flowchain:ops:launch-watch -- -NoRefresh<br>npm run flowchain:truth-table -- -AllowBlocked | docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json<br>docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json<br>docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json<br>docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json<br>docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json<br>docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json |
 
 ## Rollback Commands
 
@@ -70,7 +70,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 
 ## Package Script Coverage
 
-- Launch sequence package scripts: 36
+- Launch sequence package scripts: 37
 - Missing launch sequence package scripts: 0
 - Rollback package scripts: 7
 - Missing rollback package scripts: 0
@@ -130,6 +130,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 - npm run flowchain:public-rpc:edge-template
 - npm run flowchain:public-rpc:deployment-bundle
 - npm run flowchain:public-rpc:deployment:automation
+- npm run flowchain:public-rpc:command-matrix
 - npm run flowchain:operator:package
 - npm run flowchain:operator:package:verify
 - npm run flowchain:public-rpc:validate
@@ -158,6 +159,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 - npm run flowchain:ops:alerts:install:systemd:validate
 - npm run flowchain:ops:alerts:install:validate
 - npm run flowchain:ops:metrics:export
+- npm run flowchain:ops:launch-watch
 - npm run flowchain:ops:metrics:install:systemd:validate
 - npm run flowchain:ops:metrics:install:validate
 - npm run flowchain:ops:escalation:dry-run
@@ -169,6 +171,7 @@ These names can tune bridge scanning, but they are not required go-live blockers
 - npm run flowchain:external-tester:client:validate
 - npm run flowchain:tester:evidence:validate
 - npm run flowchain:public-deployment:contract
+- npm run flowchain:live:capabilities
 - npm run flowchain:architecture:audit
 - npm run flowchain:live-product:e2e
 - npm run flowchain:public-deployment:contract -- -AllowBlocked

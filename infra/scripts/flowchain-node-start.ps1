@@ -123,6 +123,10 @@ $binaryPath = Join-Path (Join-Path $env:CARGO_TARGET_DIR "debug") $binaryName
 if (-not (Test-Path -LiteralPath $binaryPath)) {
     throw "Built FlowChain node binary was not found at $binaryPath."
 }
+$runtimeBinDir = Join-Path $env:TEMP "flowchain-node-bin"
+New-Item -ItemType Directory -Force -Path $runtimeBinDir | Out-Null
+$runtimeBinaryPath = Join-Path $runtimeBinDir $binaryName
+Copy-Item -LiteralPath $binaryPath -Destination $runtimeBinaryPath -Force
 
 $arguments = @(
     "--state",
@@ -144,7 +148,7 @@ if (Test-Path -LiteralPath $stopPath) {
     Remove-Item -LiteralPath $stopPath -Force
 }
 
-$process = Start-Process -FilePath $binaryPath `
+$process = Start-Process -FilePath $runtimeBinaryPath `
     -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $arguments) `
     -WorkingDirectory $repoRoot `
     -PassThru `
@@ -190,6 +194,8 @@ $report = [ordered]@{
     blockMs = $BlockMs
     maxBlocks = $MaxBlocks
     waited = [bool] $Wait
+    buildBinaryPath = $binaryPath
+    runtimeBinaryPath = $runtimeBinaryPath
     stdoutLog = $stdoutPath
     stderrLog = $stderrPath
     pidPath = $pidPath

@@ -1,6 +1,6 @@
 ﻿# FlowChain Public RPC Deployment Automation
 
-Generated: 2026-05-21T12:55:28.3476019Z
+Generated: 2026-05-22T00:51:29.1848704Z
 Status: passed
 Action: Validate
 
@@ -22,6 +22,7 @@ This validator proves the owner-host public RPC deployment path can render concr
 - commandPlanIncludesWalletTesterE2e: True
 - commandPlanIncludesSyntheticCanary: True
 - commandPlanIncludesCutoverRehearsal: True
+- commandPlanIncludesOpsLaunchWatch: True
 - commandPlanIncludesTruthTable: True
 - commandPlanIncludesNoSecretScan: True
 - ownerPathsOutsideRepo: True
@@ -148,19 +149,20 @@ This validator proves the owner-host public RPC deployment path can render concr
 - npm run flowchain:wallet:live-tester:e2e
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
-- npm run flowchain:truth-table -- -AllowBlocked
 - npm run flowchain:no-secret:scan
+- npm run flowchain:ops:launch-watch -- -NoRefresh
+- npm run flowchain:truth-table -- -AllowBlocked
 
 ## Rendered Artifact Manifest
 
-- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=03449e5914c06d74123482c6846deee56ffa43dae947ba1f27d99c89190cef9b
-- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=ec6ff9bcad8e9be287fd08be57763b86c1d8287b19856a9b1662950a1e3802e2
-- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=edbebbe9e3e421e8ff0c852db00d5e9bd0a35dfa279e9e276b2b4a89db971059
-- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=7399fdee7ff3865be56342e6e361411c2585bd2e2c3e297f09706358f2443b70
-- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=bcc10d075c939b3fac137c18198154bb43b8c8a81defb5ae59773a1240d7d9b7
-- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=48aed769773b4608697fc4d9faf0c3ca1f0afdd21257156fa138b8b3d58038c8
-- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=b44f9754c6d757a54559638ab16a11514e356c9eeb034c34689878caf2fef3f1
-- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=d74d93a6bdf0289752099b53760d1845541b51d71f7dccdcda8dcc083b0d9460
+- nginx-flowchain-rpc.conf: role=public-rpc-nginx-edge, target=/etc/nginx/conf.d/flowchain-rpc.conf, sha256=efc2eff89b0afd0e251a793eda36478fe01b1a2432bd63c355801933368921f8
+- flowchain-live.service: role=block-producer-systemd-unit, target=/etc/systemd/system/flowchain-live.service, sha256=cf0442192086124f5e300979ff189a0034884400806ae77ed6822f0fc56fa903
+- flowchain-supervisor.service: role=autorecovery-supervisor-systemd-unit, target=/etc/systemd/system/flowchain-supervisor.service, sha256=580915ec544937dc90d79f74045b1b685a93e5018c05f13ed745ad9e6a32bbb8
+- nginx-preflight.sh: role=linux-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.sh, sha256=dad0928742f7411d8d7be7b2b02e2e930d00f985804766b7738a12ed1d348798
+- nginx-preflight.ps1: role=windows-public-rpc-preflight, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/nginx-preflight.ps1, sha256=0b4c8d76feb51d335c4cffcacd40e0f476dedf3c4b1f469629e3f884965a6540
+- public-rpc-render-report.json: role=render-evidence, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/public-rpc-render-report.json, sha256=28576a56a6df0fb182c95098886894e8f87327a2ae1631b15e4caa37f1344be8
+- owner-host-apply.sh: role=owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.sh, sha256=9a534c23301cb5f22253c9440d5dd52a163a4748cf63c2c987b9af8e3f2efa91
+- owner-host-apply.ps1: role=windows-owner-host-apply-script, target=<FLOWCHAIN_DEPLOY_RENDER_DIR>/owner-host-apply.ps1, sha256=634106d0885d966eca56696cd6c68622d992ba847e704ae6a92209722b4e9bce
 
 ## Owner Host Apply Phases
 

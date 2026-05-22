@@ -270,8 +270,10 @@ function Test-ProcessAlive {
 }
 
 function Start-UnboundedNodeDirect {
-    $nodeCargoTargetDir = Join-Path $repoRoot "devnet/local/cargo-target/live-l1-node-$PID"
+    $nodeCargoTargetDir = Join-Path $repoRoot "devnet/local/cargo-target/live-l1-node"
+    $nodeRuntimeBinDir = Join-Path $repoRoot "devnet/local/tmp/live-l1-node-$PID/bin"
     New-Item -ItemType Directory -Force -Path $nodeCargoTargetDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $nodeRuntimeBinDir | Out-Null
 
     $previousCargoTargetDir = [Environment]::GetEnvironmentVariable("CARGO_TARGET_DIR", "Process")
     $env:CARGO_TARGET_DIR = $nodeCargoTargetDir
@@ -302,6 +304,8 @@ function Start-UnboundedNodeDirect {
         Add-Issue -Kind "code" -Code "node-binary-missing" -Owner "runtime" -Reason "The built FlowChain node binary was not found after cargo build."
         return ""
     }
+    $runtimeBinaryPath = Join-Path $nodeRuntimeBinDir $binaryName
+    Copy-Item -LiteralPath $binaryPath -Destination $runtimeBinaryPath -Force
 
     $nodeLogsDir = Join-Path $nodeFullDir "logs"
     New-Item -ItemType Directory -Force -Path $nodeLogsDir | Out-Null
@@ -323,7 +327,7 @@ function Start-UnboundedNodeDirect {
     )
 
     try {
-        $process = Start-Process -FilePath $binaryPath `
+        $process = Start-Process -FilePath $runtimeBinaryPath `
             -ArgumentList (Join-FlowChainProcessArguments -ArgumentList $arguments) `
             -WorkingDirectory $repoRoot `
             -PassThru `
@@ -350,6 +354,8 @@ function Start-UnboundedNodeDirect {
         blockMs = 1000
         maxBlocks = 0
         waited = $false
+        buildBinaryPath = $binaryPath
+        runtimeBinaryPath = $runtimeBinaryPath
         stdoutLog = $stdoutPath
         stderrLog = $stderrPath
         pidPath = $pidPath

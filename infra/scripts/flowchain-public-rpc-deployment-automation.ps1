@@ -311,7 +311,7 @@ function New-OwnerHostApplyScript {
             '  echo "2. verify systemd unit files"',
             '  echo "3. install FlowChain systemd services"',
             '  echo "4. back up and publish nginx RPC edge config"',
-            '  echo "5. run public RPC, tester gateway, cutover, truth-table, and no-secret proof commands"',
+            '  echo "5. run public RPC, tester gateway, cutover, no-secret, ops launch-watch, and truth-table proof commands"',
             '  echo "6. use rollback mode if nginx/systemd install needs to be reverted"',
             '}',
             '',
@@ -336,8 +336,9 @@ function New-OwnerHostApplyScript {
             '  npm run flowchain:tester:gateway:e2e',
             '  npm run flowchain:wallet:live-tester:e2e',
             '  npm run flowchain:live:cutover:rehearsal -- -AllowBlocked',
-            '  npm run flowchain:truth-table -- -AllowBlocked',
             '  npm run flowchain:no-secret:scan',
+            '  npm run flowchain:ops:launch-watch -- -NoRefresh',
+            '  npm run flowchain:truth-table -- -AllowBlocked',
             '}',
             '',
             'rollback() {',
@@ -461,7 +462,7 @@ function New-OwnerHostApplyPowerShellScript {
             '    Write-Host "1. verify rendered artifact hashes"',
             '    Write-Host "2. install or update the Windows autorecovery scheduled task"',
             '    Write-Host "3. back up and publish nginx RPC edge config"',
-            '    Write-Host "4. run Windows nginx preflight, public RPC, tester gateway, cutover, truth-table, and no-secret proof commands"',
+            '    Write-Host "4. run Windows nginx preflight, public RPC, tester gateway, cutover, no-secret, ops launch-watch, and truth-table proof commands"',
             '    Write-Host "5. use rollback mode if nginx or the scheduled task needs to be reverted"',
             '}',
             '',
@@ -485,8 +486,9 @@ function New-OwnerHostApplyPowerShellScript {
             '    Invoke-Npm -Arguments @("run", "flowchain:tester:gateway:e2e")',
             '    Invoke-Npm -Arguments @("run", "flowchain:wallet:live-tester:e2e")',
             '    Invoke-Npm -Arguments @("run", "flowchain:live:cutover:rehearsal", "--", "-AllowBlocked")',
-            '    Invoke-Npm -Arguments @("run", "flowchain:truth-table", "--", "-AllowBlocked")',
             '    Invoke-Npm -Arguments @("run", "flowchain:no-secret:scan")',
+            '    Invoke-Npm -Arguments @("run", "flowchain:ops:launch-watch", "--", "-NoRefresh")',
+            '    Invoke-Npm -Arguments @("run", "flowchain:truth-table", "--", "-AllowBlocked")',
             '}',
             '',
             'function Rollback {',
@@ -534,8 +536,9 @@ function New-OwnerHostApplyPlan {
         "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
         "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
         "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
-        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
-        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+        "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json",
+        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     )
     $systemdInstallCommand = "npm run flowchain:service:install:systemd -- -Action Install -RenderDir <FLOWCHAIN_DEPLOY_RENDER_DIR>"
     $systemdStatusCommand = "npm run flowchain:service:install:systemd -- -Action Status"
@@ -642,8 +645,9 @@ function New-OwnerHostApplyPlan {
                     "npm run flowchain:wallet:live-tester:e2e",
                     "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                     "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-                    "npm run flowchain:truth-table -- -AllowBlocked",
-                    "npm run flowchain:no-secret:scan"
+                    "npm run flowchain:no-secret:scan",
+                    "npm run flowchain:ops:launch-watch -- -NoRefresh",
+                    "npm run flowchain:truth-table -- -AllowBlocked"
                 )
                 expectedReportPaths = @($expectedReportPaths)
             },
@@ -713,8 +717,9 @@ function Test-OwnerHostApplyPlan {
         "docs/agent-runs/live-product-infra-rpc/public-tester-gateway-e2e-report.json",
         "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
         "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
-        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
-        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+        "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+        "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json",
+        "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
     )
     $mutatingPhaseIds = @($phases | Where-Object { $_.mutatesHost -eq $true } | ForEach-Object { "$($_.id)" })
     $readOnlyProofPhase = @($phases | Where-Object { "$($_.id)" -eq "post-deploy-proof" -and $_.mutatesHost -eq $false }).Count -eq 1
@@ -897,8 +902,8 @@ function Test-RenderedDeployment {
         renderedOwnerHostApplyPowerShellParses = (Test-Path -LiteralPath $renderedOwnerHostApplyPowerShellPath) -and $ownerHostApplyPowerShellParseErrors.Count -eq 0
         renderedOwnerHostApplyScriptVerifiesHashes = $renderedAllText.Contains('sha256sum -c -') -and $renderedAllText.Contains("verify_file 'nginx-flowchain-rpc.conf'") -and $renderedAllText.Contains("verify_file 'flowchain-live.service'") -and $renderedAllText.Contains("verify_file 'public-rpc-render-report.json'")
         renderedOwnerHostApplyPowerShellVerifiesHashes = $renderedAllText.Contains('Get-FileHash -LiteralPath $path -Algorithm SHA256') -and $renderedAllText.Contains("Verify-File -Name 'nginx-flowchain-rpc.conf'") -and $renderedAllText.Contains("Verify-File -Name 'public-rpc-render-report.json'")
-        renderedOwnerHostApplyScriptRunsPostDeployProof = $renderedAllText.Contains('flowchain:public-rpc:synthetic-canary') -and $renderedAllText.Contains('flowchain:live:cutover:rehearsal') -and $renderedAllText.Contains('flowchain:truth-table') -and $renderedAllText.Contains('flowchain:no-secret:scan')
-        renderedOwnerHostApplyPowerShellRunsPostDeployProof = $renderedAllText.Contains('flowchain:public-rpc:synthetic-canary') -and $renderedAllText.Contains('flowchain:live:cutover:rehearsal') -and $renderedAllText.Contains('flowchain:truth-table') -and $renderedAllText.Contains('flowchain:no-secret:scan')
+        renderedOwnerHostApplyScriptRunsPostDeployProof = $renderedAllText.Contains('flowchain:public-rpc:synthetic-canary') -and $renderedAllText.Contains('flowchain:live:cutover:rehearsal') -and $renderedAllText.Contains('flowchain:ops:launch-watch') -and $renderedAllText.Contains('flowchain:truth-table') -and $renderedAllText.Contains('flowchain:no-secret:scan')
+        renderedOwnerHostApplyPowerShellRunsPostDeployProof = $renderedAllText.Contains('flowchain:public-rpc:synthetic-canary') -and $renderedAllText.Contains('flowchain:live:cutover:rehearsal') -and $renderedAllText.Contains('flowchain:ops:launch-watch') -and $renderedAllText.Contains('flowchain:truth-table') -and $renderedAllText.Contains('flowchain:no-secret:scan')
         renderedReportWritten = Test-Path -LiteralPath $renderedReportPath
         renderedReportPassed = $null -ne $renderReport -and [string](Get-DeployProp -Object $renderReport -Name "status" -Default "missing") -eq "passed"
         renderedReportAllowedOriginCountPresent = $null -ne $renderReport -and [int](Get-DeployProp -Object $renderReport -Name "allowedOriginCount" -Default 0) -ge 1
@@ -1042,8 +1047,9 @@ function New-CommandPlan {
         "npm run flowchain:wallet:live-tester:e2e",
         "npm run flowchain:public-deployment:contract -- -AllowBlocked",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-        "npm run flowchain:truth-table -- -AllowBlocked",
-        "npm run flowchain:no-secret:scan"
+        "npm run flowchain:no-secret:scan",
+        "npm run flowchain:ops:launch-watch -- -NoRefresh",
+        "npm run flowchain:truth-table -- -AllowBlocked"
     )
 }
 
@@ -1160,6 +1166,7 @@ $checks.commandPlanIncludesTesterGatewayE2e = @($commandPlan) -contains "npm run
 $checks.commandPlanIncludesWalletTesterE2e = @($commandPlan) -contains "npm run flowchain:wallet:live-tester:e2e"
 $checks.commandPlanIncludesSyntheticCanary = @($commandPlan) -contains "npm run flowchain:public-rpc:synthetic-canary -- -AllowBlocked"
 $checks.commandPlanIncludesCutoverRehearsal = @($commandPlan) -contains "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked"
+$checks.commandPlanIncludesOpsLaunchWatch = @($commandPlan) -contains "npm run flowchain:ops:launch-watch -- -NoRefresh"
 $checks.commandPlanIncludesTruthTable = @($commandPlan) -contains "npm run flowchain:truth-table -- -AllowBlocked"
 $checks.commandPlanIncludesNoSecretScan = @($commandPlan) -contains "npm run flowchain:no-secret:scan"
 $checks.ownerPathsOutsideRepo = $ownerPathsOutsideRepo

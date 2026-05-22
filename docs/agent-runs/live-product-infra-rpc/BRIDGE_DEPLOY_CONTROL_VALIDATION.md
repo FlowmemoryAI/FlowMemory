@@ -1,6 +1,6 @@
 ﻿# FlowChain Bridge Deploy And Control Validation
 
-Generated: 2026-05-20T20:37:09.7537192Z
+Generated: 2026-05-22T00:53:37.6568595Z
 Status: passed
 
 This validation proves Base 8453 lockbox deploy/control commands fail closed without owner env, require explicit pilot and broadcast acknowledgements, and keep deploy, pause, resume, and emergency-stop paths no-broadcast unless the owner intentionally executes them.

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_launch_watch_report.v0",
-    "generatedAt":  "2026-05-21T17:24:08.6418295Z",
+    "generatedAt":  "2026-05-22T01:09:11.2143204Z",
     "status":  "passed",
     "launchWatchStatus":  "blocked-owner-input",
     "laneCount":  7,
@@ -37,7 +37,23 @@
     "staleTruthGateIds":  [
                               "ops-launch-watch"
                           ],
+    "failedTruthGateIds":  [
+                               "live-cutover-rehearsal",
+                               "live-chain-capability-matrix",
+                               "completion-audit"
+                           ],
+    "unexpectedStaleTruthGateIds":  [
+
+                                    ],
+    "unexpectedFailedTruthGateIds":  [
+
+                                     ],
     "truthTableStaleOnlyBecauseLaunchWatchIsRefreshing":  true,
+    "truthTableFailedOnlyBecauseLaunchWatchIsRefreshing":  true,
+    "repoBlockedCapabilities":  [
+
+                                ],
+    "capabilityMatrixRepoBlockedOnlyBecauseLaunchWatchIsRefreshing":  false,
     "activeAlertRuleIds":  [
                                "public-rpc-not-shareable",
                                "backup-not-ready",
@@ -440,7 +456,7 @@
                                              "opsMetricsExport":  "passed",
                                              "monitoringBundle":  "passed",
                                              "noSecret":  "passed",
-                                             "truthTable":  "stale"
+                                             "truthTable":  "failed"
                                          },
                       "requiredReports":  [
                                               "opsSnapshot",
@@ -496,7 +512,7 @@
                       "reportStatuses":  {
                                              "liveCapabilityMatrix":  "passed",
                                              "completionAudit":  "blocked",
-                                             "liveCutover":  "blocked",
+                                             "liveCutover":  "failed",
                                              "publicDeploymentContract":  "blocked",
                                              "ownerGoLiveHandoff":  "passed",
                                              "ownerNeedsNow":  "passed"

@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_rpc_deployment_automation_report.v1",
-    "generatedAt":  "2026-05-21T12:55:28.3476019Z",
+    "generatedAt":  "2026-05-22T00:51:29.1848704Z",
     "status":  "passed",
     "action":  "Validate",
     "flowChainRpcIsRepoOwned":  true,
@@ -21,6 +21,7 @@
                    "commandPlanIncludesWalletTesterE2e":  true,
                    "commandPlanIncludesSyntheticCanary":  true,
                    "commandPlanIncludesCutoverRehearsal":  true,
+                   "commandPlanIncludesOpsLaunchWatch":  true,
                    "commandPlanIncludesTruthTable":  true,
                    "commandPlanIncludesNoSecretScan":  true,
                    "ownerPathsOutsideRepo":  true,
@@ -126,7 +127,7 @@
                      "performed":  true,
                      "exitCode":  0,
                      "outputRedacted":  [
-                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-73184-abc68fb7c5a744b0a32845cb96c6531a\\rendered\\public-rpc-render-report.json"
+                                            "FlowChain public RPC bundle rendered. Report: C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-16556-9b2dac7e33c4419db2161d400ea26012\\rendered\\public-rpc-render-report.json"
                                         ],
                      "failedChecks":  [
 
@@ -144,8 +145,8 @@
                                          "rollbackDrillBroadcastsFalse":  true
                                      },
                           "artifacts":  [
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-73184-abc68fb7c5a744b0a32845cb96c6531a\\rendered\\previous-nginx-flowchain-rpc.conf",
-                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-73184-abc68fb7c5a744b0a32845cb96c6531a\\rendered\\rollback-drill-current-before.conf"
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-16556-9b2dac7e33c4419db2161d400ea26012\\rendered\\previous-nginx-flowchain-rpc.conf",
+                                            "C:\\Users\\ntrap\\AppData\\Local\\Temp\\flowchain-public-rpc-deployment-automation-16556-9b2dac7e33c4419db2161d400ea26012\\rendered\\rollback-drill-current-before.conf"
                                         ]
                       },
     "renderedFileNames":  [
@@ -169,7 +170,7 @@
                                          "rollbackCommand":  "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e /etc/nginx/conf.d/flowchain-rpc.conf",
                                          "exists":  true,
                                          "sizeBytes":  4101,
-                                         "sha256":  "03449e5914c06d74123482c6846deee56ffa43dae947ba1f27d99c89190cef9b"
+                                         "sha256":  "efc2eff89b0afd0e251a793eda36478fe01b1a2432bd63c355801933368921f8"
                                      },
                                      {
                                          "fileName":  "flowchain-live.service",
@@ -182,7 +183,7 @@
                                          "rollbackCommand":  "systemctl stop flowchain-live.service",
                                          "exists":  true,
                                          "sizeBytes":  1492,
-                                         "sha256":  "ec6ff9bcad8e9be287fd08be57763b86c1d8287b19856a9b1662950a1e3802e2"
+                                         "sha256":  "cf0442192086124f5e300979ff189a0034884400806ae77ed6822f0fc56fa903"
                                      },
                                      {
                                          "fileName":  "flowchain-supervisor.service",
@@ -195,7 +196,7 @@
                                          "rollbackCommand":  "systemctl stop flowchain-supervisor.service",
                                          "exists":  true,
                                          "sizeBytes":  1354,
-                                         "sha256":  "edbebbe9e3e421e8ff0c852db00d5e9bd0a35dfa279e9e276b2b4a89db971059"
+                                         "sha256":  "580915ec544937dc90d79f74045b1b685a93e5018c05f13ed745ad9e6a32bbb8"
                                      },
                                      {
                                          "fileName":  "nginx-preflight.sh",
@@ -208,7 +209,7 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  4403,
-                                         "sha256":  "7399fdee7ff3865be56342e6e361411c2585bd2e2c3e297f09706358f2443b70"
+                                         "sha256":  "dad0928742f7411d8d7be7b2b02e2e930d00f985804766b7738a12ed1d348798"
                                      },
                                      {
                                          "fileName":  "nginx-preflight.ps1",
@@ -221,7 +222,7 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  7001,
-                                         "sha256":  "bcc10d075c939b3fac137c18198154bb43b8c8a81defb5ae59773a1240d7d9b7"
+                                         "sha256":  "0b4c8d76feb51d335c4cffcacd40e0f476dedf3c4b1f469629e3f884965a6540"
                                      },
                                      {
                                          "fileName":  "public-rpc-render-report.json",
@@ -234,7 +235,7 @@
                                          "rollbackCommand":  "",
                                          "exists":  true,
                                          "sizeBytes":  1228,
-                                         "sha256":  "48aed769773b4608697fc4d9faf0c3ca1f0afdd21257156fa138b8b3d58038c8"
+                                         "sha256":  "28576a56a6df0fb182c95098886894e8f87327a2ae1631b15e4caa37f1344be8"
                                      },
                                      {
                                          "fileName":  "owner-host-apply.sh",
@@ -246,8 +247,8 @@
                                          "verifyCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
                                          "rollbackCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
                                          "exists":  true,
-                                         "sizeBytes":  3393,
-                                         "sha256":  "b44f9754c6d757a54559638ab16a11514e356c9eeb034c34689878caf2fef3f1"
+                                         "sizeBytes":  3463,
+                                         "sha256":  "9a534c23301cb5f22253c9440d5dd52a163a4748cf63c2c987b9af8e3f2efa91"
                                      },
                                      {
                                          "fileName":  "owner-host-apply.ps1",
@@ -259,8 +260,8 @@
                                          "verifyCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Plan",
                                          "rollbackCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Rollback",
                                          "exists":  true,
-                                         "sizeBytes":  6321,
-                                         "sha256":  "d74d93a6bdf0289752099b53760d1845541b51d71f7dccdcda8dcc083b0d9460"
+                                         "sizeBytes":  6425,
+                                         "sha256":  "634106d0885d966eca56696cd6c68622d992ba847e704ae6a92209722b4e9bce"
                                      }
                                  ],
     "renderedReportPath":  "",
@@ -320,7 +321,7 @@
                                                             "rollbackCommand":  "cp \u003cPREVIOUS_FLOWCHAIN_RPC_NGINX_CONF\u003e /etc/nginx/conf.d/flowchain-rpc.conf",
                                                             "exists":  true,
                                                             "sizeBytes":  4101,
-                                                            "sha256":  "03449e5914c06d74123482c6846deee56ffa43dae947ba1f27d99c89190cef9b"
+                                                            "sha256":  "efc2eff89b0afd0e251a793eda36478fe01b1a2432bd63c355801933368921f8"
                                                         },
                                                         {
                                                             "fileName":  "flowchain-live.service",
@@ -333,7 +334,7 @@
                                                             "rollbackCommand":  "systemctl stop flowchain-live.service",
                                                             "exists":  true,
                                                             "sizeBytes":  1492,
-                                                            "sha256":  "ec6ff9bcad8e9be287fd08be57763b86c1d8287b19856a9b1662950a1e3802e2"
+                                                            "sha256":  "cf0442192086124f5e300979ff189a0034884400806ae77ed6822f0fc56fa903"
                                                         },
                                                         {
                                                             "fileName":  "flowchain-supervisor.service",
@@ -346,7 +347,7 @@
                                                             "rollbackCommand":  "systemctl stop flowchain-supervisor.service",
                                                             "exists":  true,
                                                             "sizeBytes":  1354,
-                                                            "sha256":  "edbebbe9e3e421e8ff0c852db00d5e9bd0a35dfa279e9e276b2b4a89db971059"
+                                                            "sha256":  "580915ec544937dc90d79f74045b1b685a93e5018c05f13ed745ad9e6a32bbb8"
                                                         },
                                                         {
                                                             "fileName":  "nginx-preflight.sh",
@@ -359,7 +360,7 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  4403,
-                                                            "sha256":  "7399fdee7ff3865be56342e6e361411c2585bd2e2c3e297f09706358f2443b70"
+                                                            "sha256":  "dad0928742f7411d8d7be7b2b02e2e930d00f985804766b7738a12ed1d348798"
                                                         },
                                                         {
                                                             "fileName":  "nginx-preflight.ps1",
@@ -372,7 +373,7 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  7001,
-                                                            "sha256":  "bcc10d075c939b3fac137c18198154bb43b8c8a81defb5ae59773a1240d7d9b7"
+                                                            "sha256":  "0b4c8d76feb51d335c4cffcacd40e0f476dedf3c4b1f469629e3f884965a6540"
                                                         },
                                                         {
                                                             "fileName":  "public-rpc-render-report.json",
@@ -385,7 +386,7 @@
                                                             "rollbackCommand":  "",
                                                             "exists":  true,
                                                             "sizeBytes":  1228,
-                                                            "sha256":  "48aed769773b4608697fc4d9faf0c3ca1f0afdd21257156fa138b8b3d58038c8"
+                                                            "sha256":  "28576a56a6df0fb182c95098886894e8f87327a2ae1631b15e4caa37f1344be8"
                                                         },
                                                         {
                                                             "fileName":  "owner-host-apply.sh",
@@ -397,8 +398,8 @@
                                                             "verifyCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh plan",
                                                             "rollbackCommand":  "bash \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.sh rollback",
                                                             "exists":  true,
-                                                            "sizeBytes":  3393,
-                                                            "sha256":  "b44f9754c6d757a54559638ab16a11514e356c9eeb034c34689878caf2fef3f1"
+                                                            "sizeBytes":  3463,
+                                                            "sha256":  "9a534c23301cb5f22253c9440d5dd52a163a4748cf63c2c987b9af8e3f2efa91"
                                                         },
                                                         {
                                                             "fileName":  "owner-host-apply.ps1",
@@ -410,8 +411,8 @@
                                                             "verifyCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Plan",
                                                             "rollbackCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File \u003cFLOWCHAIN_DEPLOY_RENDER_DIR\u003e/owner-host-apply.ps1 -Action Rollback",
                                                             "exists":  true,
-                                                            "sizeBytes":  6321,
-                                                            "sha256":  "d74d93a6bdf0289752099b53760d1845541b51d71f7dccdcda8dcc083b0d9460"
+                                                            "sizeBytes":  6425,
+                                                            "sha256":  "634106d0885d966eca56696cd6c68622d992ba847e704ae6a92209722b4e9bce"
                                                         }
                                                     ],
                                "installPhases":  [
@@ -495,8 +496,9 @@
                                                                           "npm run flowchain:wallet:live-tester:e2e",
                                                                           "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                                                                           "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-                                                                          "npm run flowchain:truth-table -- -AllowBlocked",
-                                                                          "npm run flowchain:no-secret:scan"
+                                                                          "npm run flowchain:no-secret:scan",
+                                                                          "npm run flowchain:ops:launch-watch -- -NoRefresh",
+                                                                          "npm run flowchain:truth-table -- -AllowBlocked"
                                                                       ],
                                                          "expectedReportPaths":  [
                                                                                      "docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json",
@@ -509,8 +511,9 @@
                                                                                      "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
                                                                                      "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
                                                                                      "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
-                                                                                     "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
-                                                                                     "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+                                                                                     "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+                                                                                     "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json",
+                                                                                     "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
                                                                                  ]
                                                      },
                                                      {
@@ -547,8 +550,9 @@
                                                            "docs/agent-runs/live-product-infra-rpc/live-service-wallet-e2e-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
                                                            "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
-                                                           "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
-                                                           "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+                                                           "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json",
+                                                           "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
                                                        ],
                                "rollbackCommands":  [
                                                         "npm run flowchain:ops:snapshot -- -AllowBlocked",
@@ -610,8 +614,9 @@
                      "npm run flowchain:wallet:live-tester:e2e",
                      "npm run flowchain:public-deployment:contract -- -AllowBlocked",
                      "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-                     "npm run flowchain:truth-table -- -AllowBlocked",
-                     "npm run flowchain:no-secret:scan"
+                     "npm run flowchain:no-secret:scan",
+                     "npm run flowchain:ops:launch-watch -- -NoRefresh",
+                     "npm run flowchain:truth-table -- -AllowBlocked"
                  ],
     "valuesPrinted":  false,
     "envValuesPrinted":  false,

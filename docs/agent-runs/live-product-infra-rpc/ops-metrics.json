@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.ops_metrics.v0",
-    "generatedAt":  "2026-05-21T17:05:53.8643361Z",
+    "generatedAt":  "2026-05-22T00:44:52.2442190Z",
     "sourceReports":  {
                           "opsSnapshotStatus":  "blocked",
                           "opsAlertRulesStatus":  "passed",
@@ -16,7 +16,7 @@
                           "backupOwnerPathDryRunStatus":  "passed",
                           "bridgeCommandMatrixStatus":  "passed",
                           "bridgeNoSecretAuditStatus":  "passed",
-                          "bridgeRelayerLoopValidationStatus":  "passed",
+                          "bridgeRelayerLoopValidationStatus":  "failed",
                           "bridgeReconciliationStatus":  "passed",
                           "bridgeReleaseEvidenceValidationStatus":  "passed",
                           "externalTesterStatus":  "blocked",
@@ -39,19 +39,19 @@
                         "name":  "flowchain_latest_height",
                         "type":  "gauge",
                         "help":  "Latest FlowChain block height from ops snapshot.",
-                        "value":  114051
+                        "value":  114432
                     },
                     {
                         "name":  "flowchain_finalized_height",
                         "type":  "gauge",
                         "help":  "Finalized FlowChain block height from ops snapshot.",
-                        "value":  114051
+                        "value":  114432
                     },
                     {
                         "name":  "flowchain_state_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the live state file in seconds.",
-                        "value":  11
+                        "value":  5
                     },
                     {
                         "name":  "flowchain_monitor_samples_total",
@@ -93,7 +93,7 @@
                         "name":  "flowchain_transaction_intake_file_age_seconds",
                         "type":  "gauge",
                         "help":  "Age of the signed transaction intake file in seconds, or zero when absent.",
-                        "value":  71833.069
+                        "value":  99378.912
                     },
                     {
                         "name":  "flowchain_runtime_submit_fixtures_total",
@@ -333,7 +333,7 @@
                         "name":  "flowchain_public_rpc_command_matrix_commands_total",
                         "type":  "gauge",
                         "help":  "Public RPC command matrix command count.",
-                        "value":  21
+                        "value":  22
                     },
                     {
                         "name":  "flowchain_public_rpc_command_matrix_owner_host_commands",
@@ -981,7 +981,7 @@
                         "name":  "flowchain_bridge_runtime_credit_latency_seconds",
                         "type":  "gauge",
                         "help":  "Seconds from bridge handoff queue to spendable L1 credit in runtime validation.",
-                        "value":  0.693
+                        "value":  0.662
                     },
                     {
                         "name":  "flowchain_bridge_runtime_transfer_latency_seconds",
@@ -1203,19 +1203,19 @@
                         "name":  "flowchain_bridge_relayer_loop_healthy",
                         "type":  "gauge",
                         "help":  "One when a running bridge relayer loop has fresh healthy no-secret/no-broadcast evidence.",
-                        "value":  0
+                        "value":  1
                     },
                     {
                         "name":  "flowchain_bridge_relayer_loop_validation_ready",
                         "type":  "gauge",
                         "help":  "One when bridge relayer loop start/status/stop validation is passed.",
-                        "value":  1
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_bridge_relayer_loop_failed_checks",
                         "type":  "gauge",
                         "help":  "Failed checks in bridge relayer loop validation.",
-                        "value":  0
+                        "value":  4
                     },
                     {
                         "name":  "flowchain_bridge_relayer_loop_secret_findings",
@@ -1239,7 +1239,7 @@
                         "name":  "flowchain_bridge_relayer_loop_report_fresh",
                         "type":  "gauge",
                         "help":  "One when bridge relayer loop validation observed a fresh relayer report.",
-                        "value":  1
+                        "value":  0
                     },
                     {
                         "name":  "flowchain_bridge_relayer_loop_blocked_only_owner_inputs",
@@ -1839,13 +1839,13 @@
                         "name":  "flowchain_owner_go_live_launch_sequence_commands",
                         "type":  "gauge",
                         "help":  "Ordered owner go-live launch sequence command count.",
-                        "value":  44
+                        "value":  45
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_evidence_reports",
                         "type":  "gauge",
                         "help":  "Expected evidence report path count in the owner go-live launch sequence.",
-                        "value":  45
+                        "value":  46
                     },
                     {
                         "name":  "flowchain_owner_go_live_launch_invalid_evidence_reports",
@@ -2007,13 +2007,13 @@
                         "name":  "flowchain_truth_gates_total",
                         "type":  "gauge",
                         "help":  "Total production truth table gates.",
-                        "value":  72
+                        "value":  73
                     },
                     {
                         "name":  "flowchain_truth_gates_passed",
                         "type":  "gauge",
                         "help":  "Passed production truth table gates.",
-                        "value":  55
+                        "value":  56
                     },
                     {
                         "name":  "flowchain_truth_gates_owner_blocked",

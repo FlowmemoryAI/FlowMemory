@@ -25,8 +25,9 @@ Run these on the owner host after DNS, TLS, allowed origins, rate limit, and bac
 - npm run flowchain:public-deployment:contract -- -AllowBlocked
 - npm run flowchain:external-tester:packet -- -AllowBlocked
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
-- npm run flowchain:truth-table -- -AllowBlocked
 - npm run flowchain:no-secret:scan
+- npm run flowchain:ops:launch-watch -- -NoRefresh
+- npm run flowchain:truth-table -- -AllowBlocked
 
 ## Owner-Host Preflight Checks
 

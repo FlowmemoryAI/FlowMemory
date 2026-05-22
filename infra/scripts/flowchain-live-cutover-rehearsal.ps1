@@ -326,6 +326,12 @@ try {
         -ExpectedReportPath $paths.liveCapabilityMatrix))
 
     [void] $steps.Add((Invoke-CutoverStep `
+        -Name "No-secret scan" `
+        -Command "npm run flowchain:no-secret:scan" `
+        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1")) `
+        -ExpectedReportPath $paths.noSecret))
+
+    [void] $steps.Add((Invoke-CutoverStep `
         -Name "Ops launch watch" `
         -Command "npm run flowchain:ops:launch-watch -- -NoRefresh" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-ops-launch-watch.ps1"), "-NoRefresh") `
@@ -336,12 +342,6 @@ try {
         -Command "npm run flowchain:truth-table -- -AllowBlocked" `
         -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-production-truth-table.ps1"), "-AllowBlocked") `
         -ExpectedReportPath $paths.truthTable))
-
-    [void] $steps.Add((Invoke-CutoverStep `
-        -Name "No-secret scan" `
-        -Command "npm run flowchain:no-secret:scan" `
-        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "flowchain-no-secret-scan.ps1")) `
-        -ExpectedReportPath $paths.noSecret))
 }
 finally {
     [Environment]::SetEnvironmentVariable("FLOWCHAIN_OWNER_ENV_FILE", $previousOwnerEnvFile, "Process")
@@ -521,6 +521,7 @@ $report = [ordered]@{
         "npm run flowchain:external-tester:packet:validate",
         "npm run flowchain:external-tester:client:validate",
         "npm run flowchain:live:capabilities",
+        "npm run flowchain:no-secret:scan",
         "npm run flowchain:ops:launch-watch",
         "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
         "npm run flowchain:truth-table -- -AllowBlocked"
@@ -540,7 +541,7 @@ $markdownLines.Add("")
 $markdownLines.Add("Generated: $($report.generatedAt)")
 $markdownLines.Add("Status: $status")
 $markdownLines.Add("")
-$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, ops launch watch, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.")
+$markdownLines.Add("This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, no-secret scan, ops launch watch, and truth table gates through one redacted rehearsal. It records env names and statuses only.")
 $markdownLines.Add("")
 $markdownLines.Add("Owner env file: ``$ownerEnvRelativePath``")
 $markdownLines.Add("Owner env file git-ignored: $($ownerEnvGitIgnore.ignored)")

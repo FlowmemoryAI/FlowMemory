@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_report.v0",
-    "generatedAt":  "2026-05-21T13:55:11.2672143Z",
+    "generatedAt":  "2026-05-22T00:48:52.5061047Z",
     "status":  "passed",
     "once":  true,
     "dryRun":  false,
@@ -30,7 +30,7 @@
                     },
     "iterations":  [
                        {
-                           "sampledAt":  "2026-05-21T13:53:13.5456356Z",
+                           "sampledAt":  "2026-05-22T00:48:24.0661405Z",
                            "restartReasons":  [
                                                   "bridge-relayer-loop-not-running"
                                               ],
@@ -41,34 +41,34 @@
                                           "reportStatus":  "passed",
                                           "nodeStatus":  "running",
                                           "controlPlaneStatus":  "running",
-                                          "latestHeight":  "15669",
-                                          "finalizedHeight":  "15669",
-                                          "stateFileLastWriteAgeSeconds":  2,
+                                          "latestHeight":  "15918",
+                                          "finalizedHeight":  "15918",
+                                          "stateFileLastWriteAgeSeconds":  0,
                                           "liveProfile":  true,
                                           "maxBlocks":  0,
                                           "bridgeRelayerLoopStatus":  "stopped",
-                                          "bridgeRelayerLoopPid":  18424,
+                                          "bridgeRelayerLoopPid":  82244,
                                           "bridgeRelayerLoopCommandLineMatched":  false,
                                           "bridgeRelayerLoopReportStatus":  "blocked",
                                           "bridgeRelayerLoopReportHealthy":  true
                                       },
                            "restart":  {
                                            "exitCode":  0,
-                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521085320604-77960-49c9d7fc.stdout.log",
-                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521085320604-77960-49c9d7fc.stderr.log"
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521194829897-61852-8231e12b.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521194829897-61852-8231e12b.stderr.log"
                                        },
                            "after":  {
                                          "exitCode":  0,
                                          "reportStatus":  "passed",
                                          "nodeStatus":  "running",
                                          "controlPlaneStatus":  "running",
-                                         "latestHeight":  "15682",
-                                         "finalizedHeight":  "15682",
-                                         "stateFileLastWriteAgeSeconds":  2,
+                                         "latestHeight":  "15928",
+                                         "finalizedHeight":  "15928",
+                                         "stateFileLastWriteAgeSeconds":  1,
                                          "liveProfile":  true,
                                          "maxBlocks":  0,
                                          "bridgeRelayerLoopStatus":  "running",
-                                         "bridgeRelayerLoopPid":  38816,
+                                         "bridgeRelayerLoopPid":  55584,
                                          "bridgeRelayerLoopCommandLineMatched":  true,
                                          "bridgeRelayerLoopReportStatus":  "blocked",
                                          "bridgeRelayerLoopReportHealthy":  true

@@ -1,9 +1,9 @@
 # FlowChain Live Cutover Rehearsal
 
-Generated: 2026-05-21T17:22:48.6972133Z
+Generated: 2026-05-22T01:09:16.8652210Z
 Status: blocked
 
-This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, ops launch watch, truth table, and no-secret gates through one redacted rehearsal. It records env names and statuses only.
+This command runs the owner-env, public deployment, local tester wallet network, tester write-token setup, tester packet, packet validation, external tester client validation, completion audit, capability matrix, no-secret scan, ops launch watch, and truth table gates through one redacted rehearsal. It records env names and statuses only.
 
 Owner env file: `devnet/local/owner-inputs/flowchain-owner.local.env`
 Owner env file git-ignored: True
@@ -43,9 +43,9 @@ Truth table self-reference stale accepted: True
 | External tester client validation | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\external-tester-client-validation-report.json` |
 | Completion audit | blocked | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\flowchain-completion-audit-report.json` |
 | Live chain capability matrix | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\live-chain-capability-matrix-report.json` |
+| No-secret scan | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json` |
 | Ops launch watch | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\ops-launch-watch-report.json` |
 | Production truth table | stale | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\production-truth-table-report.json` |
-| No-secret scan | passed | `E:\FlowMemory\flowmemory-live-infra-rpc\docs\agent-runs\live-product-infra-rpc\no-secret-scan-report.json` |
 
 ## Truth Table Stale Items
 
@@ -77,6 +77,7 @@ Truth table self-reference stale accepted: True
 - npm run flowchain:external-tester:packet:validate
 - npm run flowchain:external-tester:client:validate
 - npm run flowchain:live:capabilities
+- npm run flowchain:no-secret:scan
 - npm run flowchain:ops:launch-watch
 - npm run flowchain:live:cutover:rehearsal -- -AllowBlocked
 - npm run flowchain:truth-table -- -AllowBlocked

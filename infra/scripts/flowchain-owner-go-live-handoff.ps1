@@ -421,15 +421,17 @@ $launchSequence = @(
             "npm run flowchain:public-deployment:contract -- -AllowBlocked",
             "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
             "npm run flowchain:completion:audit -- -AllowBlocked",
-            "npm run flowchain:truth-table -- -AllowBlocked",
-            "npm run flowchain:no-secret:scan"
+            "npm run flowchain:no-secret:scan",
+            "npm run flowchain:ops:launch-watch -- -NoRefresh",
+            "npm run flowchain:truth-table -- -AllowBlocked"
         )
         expectedReportPaths = @(
             "docs/agent-runs/live-product-infra-rpc/public-deployment-contract-report.json",
             "docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json",
             "docs/agent-runs/live-product-infra-rpc/flowchain-completion-audit-report.json",
-            "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json",
-            "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json"
+            "docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json",
+            "docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json",
+            "docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json"
         )
     }
 )
@@ -523,6 +525,7 @@ $checks = [ordered]@{
     launchSequenceCoversBridgeRelayer = $launchSequenceCommandText.Contains("flowchain:bridge:relayer:once")
     launchSequenceCoversTesterPacket = $launchSequenceCommandText.Contains("flowchain:external-tester:packet")
     launchSequenceCoversCutoverAudit = $launchSequenceCommandText.Contains("flowchain:live:cutover:rehearsal") -and $launchSequenceCommandText.Contains("flowchain:completion:audit")
+    launchSequenceCoversOpsLaunchWatch = $launchSequenceCommandText.Contains("flowchain:ops:launch-watch")
     launchSequenceCoversTruthAndNoSecret = $launchSequenceCommandText.Contains("flowchain:truth-table") -and $launchSequenceCommandText.Contains("flowchain:no-secret:scan")
     launchSequenceCommandsAvoidInlineEnvAssignment = @($launchSequenceCommands | Where-Object { "$_" -match '(^|\s)(\$env:)?[A-Z][A-Z0-9_]+\s*=' }).Count -eq 0
     launchSequenceCommandsAvoidUrls = @($launchSequenceCommands | Where-Object { "$_" -match 'https?://' }).Count -eq 0

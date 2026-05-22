@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.public_deployment_contract_report.v0",
-    "generatedAt":  "2026-05-21T17:14:54.2614427Z",
+    "generatedAt":  "2026-05-22T01:05:43.9095174Z",
     "status":  "blocked",
     "deploymentReady":  false,
     "packetShareable":  false,
@@ -113,9 +113,9 @@
                   },
                   {
                       "id":  "public-rpc-deployment-automation",
-                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy proof commands, and rollback drill phases without host mutation or owner-value leakage.",
+                      "requirement":  "Public RPC deployment automation renders concrete owner-host Nginx, systemd, shell preflight, Windows preflight, tester write unauthenticated rejection probe, wallet/tester cutover proof commands, disallowed-origin and blocked-private-path probes, Linux and Windows owner-host plan/apply/rollback scripts, artifact hash verification, post-deploy ops launch-watch proof commands, and rollback drill phases without host mutation or owner-value leakage.",
                       "status":  "passed",
-                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, timeoutGuardrails=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
+                      "evidence":  "automationStatus=passed, action=Validate, renderCommand=True, noPlaceholders=True, timeoutGuardrails=True, testerUnauthProbe=True, methodRejectionProbes=True, walletTesterE2e=True, cutoverRehearsal=True, opsLaunchWatch=True, disallowedOriginProbe=True, blockedStateProbe=True, privateWalletCreateBlocked=True, authForwardingScoped=True, rollbackDrill=True, renderSummary=True, renderSnapshot=True, applyScript=True, applyScriptHashes=True, applyScriptPostDeploy=True, windowsApplyScript=True, windowsApplyScriptParses=True, windowsApplyScriptHashes=True, windowsApplyScriptPostDeploy=True, applyPlan=True, ownerApplyScriptInPlan=True, windowsOwnerApplyScriptInPlan=True, artifactHashes=True, hostMutationFalse=True",
                       "commands":  [
                                        "npm run flowchain:public-rpc:deployment:automation"
                                    ],
@@ -127,7 +127,7 @@
                       "id":  "private-service-origin",
                       "requirement":  "The public deployment origin service is running privately in live profile before any owner TLS edge is considered shareable.",
                       "status":  "passed",
-                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=114104, finalizedHeight=114104",
+                      "evidence":  "serviceStatus=passed, privateBind=True, latestHeight=114589, finalizedHeight=114589",
                       "commands":  [
                                        "npm run flowchain:service:status"
                                    ],
@@ -470,7 +470,7 @@
                       "id":  "base8453-bridge-runtime-credit-proof",
                       "requirement":  "The deployment has a local production-shaped proof that a Base 8453 bridge handoff becomes spendable on L1 within the settlement target, can be spent by the credited wallet, rejects replay, and survives restart/export/import without live broadcasts.",
                       "status":  "passed",
-                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.693, transferSeconds=0.641",
+                      "evidence":  "runtimeCredit=passed, failedChecks=0, missingRuntimeChecks=0, falseRuntimeChecks=0, latencyGate=passed, queueToSpendableSeconds=0.662, transferSeconds=0.641",
                       "commands":  [
                                        "npm run flowchain:bridge:runtime-credit:validate"
                                    ],

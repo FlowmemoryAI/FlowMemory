@@ -1,17 +1,17 @@
 ﻿# FlowChain Public RPC Command Matrix
 
-Generated: 2026-05-21T06:00:23.2217487Z
+Generated: 2026-05-22T00:51:37.2193442Z
 Status: passed
 
 This matrix maps public RPC launch commands to phase, owner-host mutation risk, owner input names, and expected evidence paths. It prints names only, not owner values.
 
 ## Summary
 
-- Commands: 21
+- Commands: 22
 - Phases: edge-apply, owner-host-plan, post-deploy-proof, preflight, release, render, rollback, service-install, tester-proof
 - Owner-host commands: 6
 - Mutating owner-host commands: 4
-- Committed evidence paths: 21
+- Committed evidence paths: 22
 - Failed checks: 0
 
 ## Checks
@@ -66,6 +66,7 @@ This matrix maps public RPC launch commands to phase, owner-host mutation risk, 
 | release | `flowchain:live:cutover:rehearsal` | release-gate | False | docs/agent-runs/live-product-infra-rpc/live-cutover-rehearsal-report.json |
 | release | `flowchain:truth-table` | release-gate | False | docs/agent-runs/live-product-infra-rpc/production-truth-table-report.json |
 | release | `flowchain:no-secret:scan` | release-gate | False | docs/agent-runs/live-product-infra-rpc/no-secret-scan-report.json |
+| release | `flowchain:ops:launch-watch` | release-gate | False | docs/agent-runs/live-product-infra-rpc/ops-launch-watch-report.json |
 | rollback | `owner-host-linux-rollback` | owner-host-mutating-rollback | True | docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json |
 | rollback | `owner-host-windows-rollback` | owner-host-mutating-rollback | True | docs/agent-runs/live-product-infra-rpc/public-rpc-deployment-automation-report.json |
 

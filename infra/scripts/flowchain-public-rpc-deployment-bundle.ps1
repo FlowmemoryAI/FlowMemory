@@ -448,8 +448,9 @@ $requiredCommands = @(
     "npm run flowchain:public-deployment:contract -- -AllowBlocked",
     "npm run flowchain:external-tester:packet -- -AllowBlocked",
     "npm run flowchain:live:cutover:rehearsal -- -AllowBlocked",
-    "npm run flowchain:truth-table -- -AllowBlocked",
-    "npm run flowchain:no-secret:scan"
+    "npm run flowchain:no-secret:scan",
+    "npm run flowchain:ops:launch-watch -- -NoRefresh",
+    "npm run flowchain:truth-table -- -AllowBlocked"
 )
 
 $ownerPreflightCommands = @(

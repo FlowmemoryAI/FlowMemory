@@ -1,6 +1,6 @@
 {
     "schema":  "flowchain.service_supervisor_report.v0",
-    "generatedAt":  "2026-05-21T13:47:51.6315594Z",
+    "generatedAt":  "2026-05-22T00:47:12.6088761Z",
     "status":  "passed",
     "once":  true,
     "dryRun":  false,
@@ -30,7 +30,7 @@
                     },
     "iterations":  [
                        {
-                           "sampledAt":  "2026-05-21T13:45:44.3292574Z",
+                           "sampledAt":  "2026-05-22T00:46:49.7360988Z",
                            "restartReasons":  [
                                                   "service-status-not-passed",
                                                   "control-plane-not-running"
@@ -42,37 +42,37 @@
                                           "reportStatus":  "failed",
                                           "nodeStatus":  "running",
                                           "controlPlaneStatus":  "stopped",
-                                          "latestHeight":  "15604",
-                                          "finalizedHeight":  "15604",
-                                          "stateFileLastWriteAgeSeconds":  2,
+                                          "latestHeight":  "15878",
+                                          "finalizedHeight":  "15878",
+                                          "stateFileLastWriteAgeSeconds":  0,
                                           "liveProfile":  true,
                                           "maxBlocks":  0,
                                           "bridgeRelayerLoopStatus":  "stopped",
                                           "bridgeRelayerLoopPid":  0,
                                           "bridgeRelayerLoopCommandLineMatched":  false,
                                           "bridgeRelayerLoopReportStatus":  "blocked",
-                                          "bridgeRelayerLoopReportHealthy":  false
+                                          "bridgeRelayerLoopReportHealthy":  true
                                       },
                            "restart":  {
                                            "exitCode":  0,
-                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521084554090-48200-4b5fed44.stdout.log",
-                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521084554090-48200-4b5fed44.stderr.log"
+                                           "stdoutPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521194654698-76768-2917ff35.stdout.log",
+                                           "stderrPath":  "E:\\FlowMemory\\flowmemory-live-infra-rpc\\devnet\\local\\tmp\\service-supervisor\\20260521194654698-76768-2917ff35.stderr.log"
                                        },
                            "after":  {
                                          "exitCode":  0,
                                          "reportStatus":  "passed",
                                          "nodeStatus":  "running",
                                          "controlPlaneStatus":  "running",
-                                         "latestHeight":  "15614",
-                                         "finalizedHeight":  "15614",
-                                         "stateFileLastWriteAgeSeconds":  2,
+                                         "latestHeight":  "15886",
+                                         "finalizedHeight":  "15886",
+                                         "stateFileLastWriteAgeSeconds":  1,
                                          "liveProfile":  true,
                                          "maxBlocks":  0,
                                          "bridgeRelayerLoopStatus":  "stopped",
                                          "bridgeRelayerLoopPid":  0,
                                          "bridgeRelayerLoopCommandLineMatched":  false,
                                          "bridgeRelayerLoopReportStatus":  "blocked",
-                                         "bridgeRelayerLoopReportHealthy":  false
+                                         "bridgeRelayerLoopReportHealthy":  true
                                      }
                        }
                    ],
